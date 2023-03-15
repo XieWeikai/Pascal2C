@@ -636,7 +636,7 @@ User Subroutines
 2. 定义语句
 
 ```pascal
-var A_variable, B_variable ... : variable_type;
+  var A_variable, B_variable ... : variable_type;
 ```
 
 `Pascal`语言的变量定义语句，它与C语言的最大区别在于定义变量标识符的后置，这同样可能需要在AST中进行标记。
@@ -644,7 +644,7 @@ var A_variable, B_variable ... : variable_type;
 3. 常量语句
 
 ```pascal
-const identifier = constant_value;
+  const identifier = constant_value;
 ```
 
 `Pascal`中的常量定义语句并不显式的声明常量的类型，这需要语义分析阶段进行类型分析工作。
@@ -652,7 +652,7 @@ const identifier = constant_value;
 4. 数组类型
 
 ```pascal
-type array-identifier = array[index-type] of element-type;
+  type array-identifier = array[index-type] of element-type;
 ```
 
 `Pascal`中的数组类型与C语言有较大区别，他的索引值拥有一个独立的类型，它可以是除实数以外的任何标量数据类型。值得一提的是可以是负数和`Pascal`独特的区间类型`Period(Subrange)`。因此初步考虑，在处理数组类型时，可能需要语义分析阶段额外标记区间类型的开始值和数组长度,便于处理C语言数组指针的偏移。E.g.:
@@ -692,6 +692,7 @@ type array-identifier = array[index-type] of element-type;
 ```
 
 `Pascal`中的函数与过程相类似，其中定义的变量为局部变量。另外`Pascal`中局部变量和全局变量的优先级关系和作用域关系一致，可以直接进行翻译。
+对于过程的嵌套定义仍需要注意，由于C语言不允许在函数内定义函数，而过程是允许的。因此需要对符号表做出一定的更改，如增加前缀等方式。
 
 6. 基本类型
 
@@ -709,25 +710,27 @@ type array-identifier = array[index-type] of element-type;
 7. 参数列表与引用传参
 
 ```pascal
-procedure min3(x, y, z: integer; var m: integer); 
-{ Finds the minimum of the 3 values }
+  procedure min3(x, y, z: integer; var m: integer); 
+  { Finds the minimum of the 3 values }
 
-begin
-   if x < y then
-      m := x
-   else
-      m := y;
+  begin
+    if x < y then
+        m := x
+    else
+        m := y;
 
-   if z < m then
-      m := z;
-end; { end of procedure findMin }  
+    if z < m then
+        m := z;
+  end; { end of procedure findMin }  
 
 ```
 
 在上述过程的例子中，展示了`Pascal`使用复制传参和引用传参的方式。显然，该过程原型可以翻译成如下的C语言代码：
 
 ```c
-void min3(int x , int y , int z , int &m);
+void min3(int x , int y , int z , int *m);
+/*...*/
+min3(_x , _y , _z , &_m); // Call
 ```
 
 这可能需要依赖语法分析阶段在处理参数列表语法时，分析并区分出复制传参的符号列表和引用传参的符号列表。
@@ -741,7 +744,7 @@ void min3(int x , int y , int z , int &m);
 对于for循环的翻译比较固定，它可以使用下面的C形式进行代换：
 
 ```c
-	for(type variable-name = initial_value ; variable-name <=final_value ; i++)
+	for(type variable-name = initial_value ; variable-name <= final_value ; i++)
 	for(type variable-name = initial_value ; variable-name >= final_value ; i--)
 ```
 
