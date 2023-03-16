@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "../lexer/token.h"
+#include "lexer/token.h"
 
 namespace pascal2c {
 namespace semantic {
@@ -16,6 +16,9 @@ class ASTNode {
     ASTNode(){};
     virtual ~ASTNode() = default;
 };
+
+// ASTRoot is an alias of ASTNode, represents root node of the AST.
+typedef ASTNode ASTRoot;
 
 class Block;
 class Program : public ASTNode {

@@ -4,8 +4,8 @@
 #include <memory>
 #include <vector>
 
-#include "../lexer/lexer.h"
-#include "../semantic/ast.h"
+#include "code_generation/ast_interface.h"
+#include "lexer/lexer.h"
 
 namespace pascal2c {
 namespace parser {

@@ -2,10 +2,10 @@
 
 #include <gtest/gtest.h>
 
-#include "../src/code_generation/code_generation.h"
-#include "../src/lexer/lexer.h"
-#include "../src/parser/parser.h"
-#include "../src/semantic/ast.h"
+#include "code_generation/ast_interface.h"
+#include "code_generation/code_generator.h"
+#include "lexer/lexer.h"
+#include "parser/parser.h"
 
 TEST(CodeGenerationVanillaTest, ConvertASTToC) {
     using string = ::std::string;
@@ -51,10 +51,10 @@ TEST(CodeGenerationVanillaTest, ConvertASTToC) {
 
     pascal2c::lexer::Lexer lexer(source_code);
     pascal2c::parser::Parser parser(&lexer);
-    auto ast = parser.Run();
+    auto ast_program = parser.Program();
 
     pascal2c::code_generation::CodeGenerator code_generator(&parser);
-    code_generator.Visit(ast);
+    code_generator.Visit(ast_program);
     string c_code = code_generator.GetCCode();
 
     ASSERT_EQ(expected_c_code, c_code);

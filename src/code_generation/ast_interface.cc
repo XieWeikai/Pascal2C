@@ -1,4 +1,4 @@
-#include "ast.h"
+#include "ast_interface.h"
 
 namespace pascal2c {
 namespace semantic {

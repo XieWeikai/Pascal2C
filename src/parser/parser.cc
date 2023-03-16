@@ -1,7 +1,9 @@
-#include "parser.h"
 #include <algorithm>
 #include <memory>
 #include <vector>
+
+#include "parser.h"
+
 namespace pascal2c {
 namespace parser {
 using TokenTYpe = lexer::TokenType;
