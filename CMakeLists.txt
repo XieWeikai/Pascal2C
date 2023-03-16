@@ -28,7 +28,7 @@ add_executable(Pascal2CTests ${TEST_SOURCES})
 
 # Link our project library with GoogleTest and GoogleMock
 target_link_libraries(
-    Pascal2C
+    Pascal2CTests
     gtest_main
     gmock_main
     )
