@@ -34,7 +34,7 @@ int Lexer::Integer() {
     return std::stoi(result);
 }
 
-semantic::Token Lexer::GetNextToken() {
+const semantic::Token Lexer::GetNextToken() {
     while (current_char_ != kEol) {
         // Skip whitespace
         if (std::isspace(current_char_)) {
@@ -54,6 +54,7 @@ semantic::Token Lexer::GetNextToken() {
         }
 
         // Implement other cases for the supported tokens
+        // TODO: Implement read Program, Block, Compound, etc.
 
         // Parse error
         Error();

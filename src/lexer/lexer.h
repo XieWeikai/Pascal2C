@@ -12,7 +12,7 @@ class Lexer {
   public:
     explicit Lexer(const string &source_code)
         : source_code_(source_code), pos_(0), current_char_(source_code_[0]) {}
-    semantic::Token GetNextToken();
+    const lexer::Token GetNextToken();
 
   private:
     string source_code_;

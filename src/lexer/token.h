@@ -6,15 +6,38 @@
 namespace pascal2c {
 namespace lexer {
 using string = std::string;
-enum TokenType { INTEGER, PLUS, MINUS, MUL, DIV, LPAREN, RPAREN, EOF_ };
+enum TokenType {
+    BEGIN,
+    END,
+    INTEGER,
+    PLUS,
+    MINUS,
+    MUL,
+    DIV,
+    LPAREN,
+    RPAREN,
+    PROGRAM,
+    BLOCK,
+    IDENTIFIER,
+    DECLARATION,
+    TYPE,
+    COMPOUND,
+    ASSIGN,
+    VAR,
+    SEMICOLON, // ; End of line
+    COLON,     // : Identifier separator
+    COMMA,     // ,
+    DOT,       // . End of Program
+    EOF_
+};
 
-class Type;
 class Token {
   public:
     Token(TokenType type, const string &value) : type_(type), value_(value){};
     Token(const string &value) : value_(value){};
     Token(const Token &token) : value_(token.value_), type_(token.type_){};
     const string GetValue() const { return value_; }
+    const TokenType getType() const { return type_; }
 
   private:
     string value_;
