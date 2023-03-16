@@ -8,8 +8,14 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQURIED True)
 
 # Include source files in src/ directory
-file(GLOB SOURCES "src/*.cc" "src/*.h")
+file(GLOB SOURCES CONFIGURE_DEPENDS
+    "src/ast/*.cc" "src/ast/*.h"
+    "src/code_generation/*.cc" "src/code_generation/*.h"
+    "src/parser/*.cc" "src/parser/*.h"
+    "src/lexer/*.cc" "src/lexer/*.h")
 add_executable(Pascal2C ${SOURCES})
+
+include_directories("src/")
 
 # Download and install GoogleTest
 include(FetchContent)
@@ -23,8 +29,8 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 # Define test binary file
-file(GLOB TEST_SOURCES "test/*.cc")
-add_executable(Pascal2CTests ${TEST_SOURCES})
+file(GLOB TEST_SOURCES "test/code_generation/*.cc")
+add_executable(Pascal2CTests ${TEST_SOURCES} ${SOURCES})
 
 # Link our project library with GoogleTest and GoogleMock
 target_link_libraries(
@@ -36,3 +42,9 @@ target_link_libraries(
 # Include GoogleTest into CTest
 include(GoogleTest)
 gtest_discover_tests(Pascal2CTests)
+
+if(NOT DEFINED $ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
+    message("** ENV(CMAKE_EXPORT_COMPILE_COMMANDS) not defined")
+    message("** defined ENV(CMAKE_EXPORT_COMPILE_COMMANDS) for you!")
+    set($ENV{CMAKE_EXPORT_COMPILE_COMMANDS} true)
+endif()

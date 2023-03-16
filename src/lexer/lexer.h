@@ -2,7 +2,7 @@
 #define PASCAL2C_SRC_LEXER_LEXER_H_
 #include <string>
 
-#include "semantic/ast.h"
+#include "code_generation/ast_interface.h"
 #include "token.h"
 
 namespace pascal2c {

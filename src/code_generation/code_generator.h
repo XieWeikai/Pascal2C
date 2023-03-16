@@ -2,7 +2,6 @@
 #define PASCAL2C_SRC_CODE_GENERATION_CODE_GENERATION_H_
 #include <string>
 
-// Need to modify after compile_commands.json generated from cmake
 #include "ast_interface.h"
 #include "parser/parser.h"
 
