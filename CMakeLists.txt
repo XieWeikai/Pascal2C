@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Define project name and version
-project(Pascal2C VERSION 1.0-snapshot)
+project(Pascal2C VERSION 1.0)
 
 # Specify C++ version to 17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQURIED True)
 
 # Include source files in src/ directory
-file(GLOB SOURCES "src/**/*.cc" "src/**/*.h")
-add_executable(Pascal2C ${SOURCE})
+file(GLOB SOURCES "src/*.cc" "src/*.h")
+add_executable(Pascal2C ${SOURCES})
 
 # Download and install GoogleTest
 include(FetchContent)
