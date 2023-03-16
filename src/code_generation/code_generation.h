@@ -8,7 +8,7 @@
 
 namespace pascal2c {
 namespace code_generation {
-using AST = ::pascal2c::semantic::AST;
+using AST = ::pascal2c::semantic::ASTNode;
 using string = ::std::string;
 class CodeGenerator {
   public:
