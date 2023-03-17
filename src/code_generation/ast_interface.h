@@ -26,7 +26,7 @@ class Program : public ASTNode {
     Program(const string &name, const std::shared_ptr<Block> &block)
         : name_(name), block_(block){};
     string getName() const { return name_; }
-    std::shared_ptr<Block> getBlock() const { return block_; }
+    const std::shared_ptr<Block> &GetBlock() const { return block_; }
 
   private:
     string name_;
@@ -38,6 +38,12 @@ class Block : public ASTNode {
   public:
     Block(const vector<std::shared_ptr<ASTNode>> &declarations,
           const std::shared_ptr<Compound> &compound_statement);
+    const vector<std::shared_ptr<ASTNode>> &GetDeclarations() const {
+        return declarations_;
+    }
+    const std::shared_ptr<Compound> &GetCompoundStatement() const {
+        return compound_statement_;
+    }
 
   private:
     vector<std::shared_ptr<ASTNode>> &declarations_;
@@ -51,6 +57,8 @@ class VarDecl : public ASTNode {
     VarDecl(const std::shared_ptr<Var> &var_node,
             const std::shared_ptr<Type> &type_node)
         : var_node_(var_node), type_node_(type_node){};
+    const std::shared_ptr<Var> &GetVarNode() const { return var_node_; }
+    const std::shared_ptr<Type> &GetTypeNode() const { return type_node_; }
 
   private:
     std::shared_ptr<Var> var_node_;
@@ -61,6 +69,7 @@ class Type : public ASTNode {
   public:
     Type(const std::shared_ptr<lexer::Token> token)
         : token_(token), type_(token->getType()){};
+    const lexer::TokenType GetType() const { return type_; }
 
   private:
     std::shared_ptr<lexer::Token> token_;
@@ -93,6 +102,7 @@ class Var : public ASTNode {
   public:
     Var(const std::shared_ptr<lexer::Token> &token)
         : token_(token), value_(token->GetValue()){};
+    const string GetValue() const { return value_; }
 
   private:
     std::shared_ptr<lexer::Token> token_;
