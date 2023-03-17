@@ -1,5 +1,5 @@
 tok_list = [
-    'ID', 'INTEGER', 'REAL', 'ERROR'
+    'ID', 'INTEGER', 'REAL', 'STRING', 'ERROR',
     # KEYWORDS
     'AND', 'ARRAY', 'BEGIN', 'CASE', 'CONST', 'DIV', 'DO', 'DOWNTO', 'ELSE', 'END', 'FILE', 'FOR', 'FUNCTION', 'GOTO', 'IF', 'IN', 'LABEL', 'MOD', 'NIL', 'NOT', 'OF', 'OR', 'PACKED', 'PROCEDURE', 'PROGRAM', 'RECORD', 'REPEAT', 'SET', 'THEN', 'TO', 'TYPE', 'UNTIL', 'VAR', 'WHILE', 'WITH',
     # OPERATORS
@@ -8,20 +8,26 @@ tok_list = [
 
 PREFIX = 'TOK_'
 START = 257
-FILE = 'token.h'
+FILE = 'lexer.h'
 OTHER_CONTENT = '''#pragma once
 
 #include <stdint.h>
 
-union {
+#define MAX_STR_LEN 256
+#define MAX_INT_LEN 32
+
+union YYSTYPE {
     uint32_t intval;
     double realval;
-} yyval;
+    char strval[MAX_STR_LEN];
+};
 
+int yylex();
 int yylineno;
 int yycolno;
 int yyerrno;
-char **YYERRMSG;
+extern char* YYERRMSG[];
+extern union YYSTYPE yylval;
 '''
 
 with open(FILE, 'w') as f:
