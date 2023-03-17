@@ -16,7 +16,7 @@ OTHER_CONTENT = '''#pragma once
 #include <stdio.h>
 
 #define MAX_STR_LEN 256
-#define MAX_INT_LEN 10
+#define MAX_INT_LEN 32
 
 union YYSTYPE {
     uint32_t intval;
@@ -34,9 +34,6 @@ extern char* YYERRMSG[];
 extern char* yytext;
 extern FILE *yyin;
 extern union YYSTYPE yylval;
-
-inline void SetInput(FILE *fp){yyin = fp;}
-
 '''
 
 with open(FILE, 'w') as f:

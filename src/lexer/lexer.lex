@@ -1,8 +1,6 @@
 %{
 #include "lexer.h"
 #include <string.h>
-#include <ctype.h>
-#include <limits.h>
 
 #define ERR_NO_ERROR 0
 #define ERR_ILLEGAL_INPUT 1
@@ -25,16 +23,8 @@ char* YYERRMSG[] = {
 union YYSTYPE yylval;
 
 int cmt_level = 0;
-int str_start_col = 0;
 
-#define YY_USER_ACTION {                            \
-    if (YYSTATE == INITIAL) {                       \
-        char* p = yytext;                           \
-        for (; *p; ++p) *p = tolower(*p);           \
-    }                                               \
-    yycolno = yycolno_next; yycolno_next += yyleng; \
-}
-
+#define YY_USER_ACTION {yycolno = yycolno_next; yycolno_next += yyleng;}
 
 %}
 
@@ -61,16 +51,16 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 <COMMENT>"}"           {--cmt_level; if (cmt_level == 0) BEGIN(INITIAL);}
 <COMMENT>.            
 
-"'"                {str_start_col = yycolno; BEGIN(STRING); yylval.strval[0] = '\0';}
-<STRING>\n         {yycolno = str_start_col; yycolno_next = 1; yyerrno = ERR_UNTERMINATED_STRING; BEGIN(INITIAL); return TOK_ERROR;}
+"'"                {BEGIN(STRING); yylval.strval[0] = '\0';}
+<STRING>\n         {yycolno_next = 1; yyerrno = ERR_UNTERMINATED_STRING; BEGIN(INITIAL); return TOK_ERROR;}
 <STRING><<EOF>>    {yyerrno = ERR_UNTERMINATED_STRING; BEGIN(INITIAL); return TOK_ERROR;}
-<STRING>[^\\']     {yycolno = str_start_col; strcat(yylval.strval, yytext);}
-<STRING>\\n        {yycolno = str_start_col; strcat(yylval.strval, "\n");}
-<STRING>\\t        {yycolno = str_start_col; strcat(yylval.strval, "\t");}
-<STRING>\\r        {yycolno = str_start_col; strcat(yylval.strval, "\r");}
-<STRING>\\'        {yycolno = str_start_col; strcat(yylval.strval, "'");}
-<STRING>\\.        {yycolno = str_start_col; strcat(yylval.strval, yytext);}
-<STRING>"'"        {yycolno = str_start_col; BEGIN(INITIAL); return TOK_STRING;}
+<STRING>[^\\']     {strcat(yylval.strval, yytext);}
+<STRING>\\n        {strcat(yylval.strval, "\n");}
+<STRING>\\t        {strcat(yylval.strval, "\t");}
+<STRING>\\r        {strcat(yylval.strval, "\r");}
+<STRING>\\'        {strcat(yylval.strval, "'");}
+<STRING>\\.        {strcat(yylval.strval, yytext);}
+<STRING>"'"        {BEGIN(INITIAL); return TOK_STRING;}
 
 and                {return TOK_AND;}
 array              {return TOK_ARRAY;}
@@ -108,26 +98,13 @@ var                {return TOK_VAR;}
 while              {return TOK_WHILE;}
 with               {return TOK_WITH;}
 
-integer            {return TOK_INTEGER_TYPE;}
-real               {return TOK_REAL_TYPE;}
-boolean            {return TOK_BOOLEAN_TYPE;}
-char               {return TOK_CHAR_TYPE;}
-string             {return TOK_STRING_TYPE;}
-true               {return TOK_TRUE;}
-false              {return TOK_FALSE;}
-
 {identifier}         {return TOK_ID;}
 {unsigned_integer}   {
     if (strlen(yytext) > MAX_INT_LEN) {
         yyerrno = ERR_INTEGER_TOO_LARGE;
         return TOK_ERROR;
     }
-    unsigned long int n = strtoul(yytext, NULL, 10);
-    if (n > INT_MAX) {
-        yyerrno = ERR_INTEGER_TOO_LARGE;
-        return TOK_ERROR;
-    }
-    yylval.intval = n;
+    yylval.intval = strtoul(yytext, NULL, 10);
     return TOK_INTEGER;
 }
 {real}               {
