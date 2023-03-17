@@ -25,6 +25,8 @@ class Program : public ASTNode {
   public:
     Program(const string &name, const std::shared_ptr<Block> &block)
         : name_(name), block_(block){};
+    string getName() const { return name_; }
+    std::shared_ptr<Block> getBlock() const { return block_; }
 
   private:
     string name_;
@@ -118,11 +120,12 @@ class Expr : public ASTNode {
 class Num : public ASTNode {
   public:
     Num(std::shared_ptr<lexer::Token> &token)
-        : token_(token), value_(token->GetValue()) {}
+        : token_(token), value_(std::stoi(token->GetValue())) {}
+    int getValue() const { return (value_); }
 
   private:
     std::shared_ptr<lexer::Token> token_;
-    string value_;
+    int value_;
 };
 
 class BinOp : public ASTNode {
@@ -130,26 +133,30 @@ class BinOp : public ASTNode {
     explicit BinOp(std::shared_ptr<Var> &left,
                    std::shared_ptr<lexer::Token> &token,
                    std::shared_ptr<Expr> &right)
-        : left_(left), token_(token), right_(right) {}
+        : left_(left), oper_(token), right_(right) {}
 
     explicit BinOp(std::shared_ptr<Var> &left,
                    std::shared_ptr<lexer::Token> &token,
                    std::shared_ptr<Var> &right)
-        : left_(left), token_(token), right_(right) {}
+        : left_(left), oper_(token), right_(right) {}
 
     explicit BinOp(std::shared_ptr<Expr> &left,
                    std::shared_ptr<lexer::Token> &token,
                    std::shared_ptr<Var> &right)
-        : left_(left), token_(token), right_(right) {}
+        : left_(left), oper_(token), right_(right) {}
 
     explicit BinOp(std::shared_ptr<Expr> &left,
                    std::shared_ptr<lexer::Token> &token,
                    std::shared_ptr<Expr> &right)
-        : left_(left), token_(token), right_(right) {}
+        : left_(left), oper_(token), right_(right) {}
+
+    const std::shared_ptr<ASTNode> &getLeft() { return left_; }
+    const std::shared_ptr<lexer::Token> &getOper() { return oper_; }
+    const std::shared_ptr<ASTNode> &getRight() { return right_; }
 
   private:
     std::shared_ptr<ASTNode> left_;
-    std::shared_ptr<lexer::Token> token_;
+    std::shared_ptr<lexer::Token> oper_;
     std::shared_ptr<ASTNode> right_;
 };
 
