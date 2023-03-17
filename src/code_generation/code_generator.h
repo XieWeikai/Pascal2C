@@ -27,7 +27,7 @@ class CodeGenerator {
     int VisitNum(const std::shared_ptr<semantic::Num> &node);
     void VisitProgram(const std::shared_ptr<semantic::Program> &node);
     void VisitBlock(const std::shared_ptr<semantic::Block> &node);
-    int VisitVarDecl(const std::shared_ptr<semantic::VarDecl> &node);
+    void VisitVarDecl(const std::shared_ptr<semantic::VarDecl> &node);
     int VisitCompound(const std::shared_ptr<semantic::Compound> &node);
     int VisitAssign(const std::shared_ptr<semantic::Assign> &node);
     int VisitVar(const std::shared_ptr<semantic::Var> &node);

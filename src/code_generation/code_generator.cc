@@ -27,8 +27,25 @@ void CodeGenerator::VisitProgram(
     const std::shared_ptr<semantic::Program> &node) {
     ostream_ << "Program: " << node->getName();
     indent_level_++;
-    Visit(node->getBlock());
+    Visit(node->GetBlock());
     indent_level_--;
+}
+
+void CodeGenerator::VisitBlock(const std::shared_ptr<semantic::Block> &node) {
+    ostream_ << string(indent_level_, ' ') << " Block";
+    indent_level_++;
+    for (auto decl : node->GetDeclarations()) {
+        Visit(decl);
+    }
+    Visit(node->GetCompoundStatement());
+    indent_level_--;
+}
+
+void CodeGenerator::VisitVarDecl(
+    const std::shared_ptr<semantic::VarDecl> &node) {
+    ostream_ << string(indent_level_, ' ')
+             << "VarDecl: " << node->GetVarNode()->GetValue() << ": "
+             << node->GetTypeNode()->GetType();
 }
 
 int CodeGenerator::VisitBinOp(const std::shared_ptr<semantic::BinOp> &node) {
