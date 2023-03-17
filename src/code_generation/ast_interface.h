@@ -81,6 +81,9 @@ class Compound : public ASTNode {
     Compound(){};
     explicit Compound(const std::vector<std::shared_ptr<ASTNode>> &children);
     void AddChild(std::shared_ptr<ASTNode> node);
+    const vector<std::shared_ptr<ASTNode>> &GetChildren() const {
+        return children_;
+    }
 
   private:
     vector<std::shared_ptr<ASTNode>> children_;
@@ -91,6 +94,8 @@ class Assign : public ASTNode {
     Assign(const std::shared_ptr<ASTNode> &left, const lexer::Token &token,
            const std::shared_ptr<ASTNode> &right)
         : left_(left), token_(token), right_(right){};
+    const std::shared_ptr<ASTNode> &GetLeft() const { return left_; }
+    const std::shared_ptr<ASTNode> &GetRight() const { return right_; }
 
   private:
     std::shared_ptr<ASTNode> left_;
