@@ -7,6 +7,15 @@ project(Pascal2C VERSION 1.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQURIED True)
 
+# use flex
+#find_package(FLEX)
+#FLEX_TARGET(LEXER src/lexer/lexer.lex ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc)
+#add_custom_command(
+#        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/lexer.h
+#        COMMAND  python src/lexer/token_generator.py > ${CMAKE_CURRENT_BINARY_DIR}/lexer.h
+#)
+#include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 # Include source files in src/ directory
 file(GLOB SOURCES CONFIGURE_DEPENDS
     "src/ast/*.cc" "src/ast/*.h"
@@ -48,3 +57,36 @@ if(NOT DEFINED $ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
     message("** defined ENV(CMAKE_EXPORT_COMPILE_COMMANDS) for you!")
     set($ENV{CMAKE_EXPORT_COMPILE_COMMANDS} true)
 endif()
+
+
+
+aux_source_directory(src/ast AST)
+aux_source_directory(test/ast AST_TEST)
+aux_source_directory(src/parser PARSER)
+aux_source_directory(test/parser PARSER_TEST)
+add_executable(
+        parser_test
+        ${PARSER_TEST}
+        ${PARSER}
+        ${AST}
+        src/lexer/lex.yy.c
+)
+add_executable(
+        ast_test
+        ${AST_TEST}
+        ${AST}
+)
+
+target_link_libraries(
+        ast_test
+        gtest_main
+        gmock_main
+)
+
+target_link_libraries(
+        parser_test
+        gtest_main
+        gmock_main
+)
+
+gtest_discover_tests(ast_test)

@@ -26,8 +26,12 @@ int yylex();
 int yylineno;
 int yycolno;
 int yyerrno;
+extern FILE *yyin;
 extern char* YYERRMSG[];
 extern union YYSTYPE yylval;
+
+inline void SetInput(FILE *fp){yyin = fp;}
+
 '''
 
 with open(FILE, 'w') as f:

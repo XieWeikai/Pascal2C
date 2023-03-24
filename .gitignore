@@ -34,3 +34,6 @@
 build/**/*
 .cache/clangd/index
 compile_commands.json
+
+**/cmake-build-**/
+**/.idea/

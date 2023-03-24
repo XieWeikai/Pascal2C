@@ -1,0 +1,125 @@
+//
+// Created by 谢卫凯 on 2023/3/20.
+//
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <string>
+
+#include "expr.h"
+
+extern "C" {
+    #include "lexer/lexer.h"
+}
+
+namespace pascal2c{
+
+    static int Op(int token){
+        static bool inited = false;
+        static int op[302] = {};
+        if(!inited){
+            for(int i = 0;i < 302;i ++)
+                op[i] = i;
+            op['+'] = '+';
+            op['-'] = '-';
+            op['*'] = '*';
+            op['/'] = '/';
+            op[TOK_NEQOP] = 'N';
+            op[TOK_LEOP]  = 'L';
+            op[TOK_GEOP]  = 'G';
+            op[TOK_OR]    = 'o';
+            op[TOK_AND]   = 'a';
+            op[TOK_MOD]   = 'm';
+            op[TOK_DIV]   = 'd';
+            op[TOK_NOT]   = 'n';
+            inited = true;
+        }
+        return op[token];
+    }
+
+    namespace ast {
+        static void IndentOutput(std::stringstream &str_s, int level) {
+            while (level-- > 0)
+                str_s << "    ";
+        }
+    }
+
+    void ast::CallValue::AddParam(std::shared_ptr<Expression> expr) {
+        params_.push_back(std::move(expr));
+    }
+
+    void ast::Variable::AddExpr(std::shared_ptr<Expression> expr) {
+        expr_list_.push_back(std::move(expr));
+    }
+
+    std::string ast::CallValue::ToString(int level) const {
+        std::stringstream str_s;
+        IndentOutput(str_s, level);
+        str_s << "function:" << func_name_;
+
+        for (int i = 0; i < params_.size(); i++) {
+            str_s << "\n";
+            IndentOutput(str_s, level);
+            str_s << "expr " << i + 1 << ":\n" << params_[i]->ToString(level + 1);
+        }
+        return str_s.str();
+    }
+
+    std::string ast::Variable::ToString(int level) const {
+        std::stringstream str_s;
+        IndentOutput(str_s, level);
+        str_s << "variable:" << id_;
+
+        for (int i = 0; i < expr_list_.size(); i++) {
+            str_s << "\n";
+            IndentOutput(str_s, level);
+            str_s << "index " << i + 1 << ":\n" << expr_list_[i]->ToString(level + 1);
+        }
+        return str_s.str();
+    }
+
+    std::string ast::IntegerValue::ToString(int level) const {
+        std::stringstream str_s;
+        IndentOutput(str_s, level);
+        str_s << value_;
+        return str_s.str();
+    }
+
+    std::string ast::RealValue::ToString(int level) const {
+        std::stringstream str_s;
+        IndentOutput(str_s, level);
+        str_s << std::fixed << std::setprecision(4) << value_ << std::defaultfloat;
+        return str_s.str();
+    }
+
+    std::string ast::CharValue::ToString(int level) const {
+        char ch = (char) ch_;
+        std::stringstream str_s;
+        IndentOutput(str_s, level);
+        str_s << '\'' << ch << '\'';
+        return str_s.str();
+    }
+
+    std::string ast::BinaryExpr::ToString(int level) const {
+        std::stringstream str_s;
+        IndentOutput(str_s, level);
+        str_s << "binary_op:" << '\'' << (char) Op(op_) << '\'' << "\n";
+        IndentOutput(str_s, level);
+        str_s << "lhs :\n";
+        str_s << lhs_->ToString(level + 1) << "\n";
+        IndentOutput(str_s, level);
+        str_s << "rhs :\n";
+        str_s << rhs_->ToString(level + 1);
+        return str_s.str();
+    }
+
+    std::string ast::UnaryExpr::ToString(int level) const {
+        std::stringstream str_s;
+        IndentOutput(str_s, level);
+        str_s << "unary_op:" << '\'' << (char) Op(op_) << '\'' << "\n";
+        IndentOutput(str_s, level);
+        str_s << "expr :\n" << factor_->ToString(level + 1);
+        return str_s.str();
+    }
+
+}
