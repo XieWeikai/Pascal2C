@@ -23,9 +23,9 @@ union YYSTYPE {
 };
 
 int yylex();
-int yylineno;
-int yycolno;
-int yyerrno;
+extern int yylineno;
+extern int yycolno;
+extern int yyerrno;
 extern char* YYERRMSG[];
 extern char* yytext;
 extern union YYSTYPE yylval;
