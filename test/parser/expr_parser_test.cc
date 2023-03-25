@@ -64,12 +64,37 @@ expr :
     4)",
     R"(unary_op:'-'
 expr :
-    4.1234)"
+    4.1234)",
+    "variable:abcd",
+    R"(function:add
+expr 1:
+    3
+expr 2:
+    4)",
+    R"(variable:count
+index 1:
+    binary_op:'+'
+    lhs :
+        variable:i
+    rhs :
+        1
+index 2:
+    binary_op:'+'
+    lhs :
+        variable:b
+    rhs :
+        2)",
+        "function:say"
         };
+        std::shared_ptr<ast::Expression> expr;
         while(par.token_ != 0){
-            auto expr = par.ParsePrimary();
-            std::cout << expr->ToString(0) << std::endl;
-            // EXPECT_EQ(expr->ToString(0),res[idx++]);
+            try {
+                expr = par.ParsePrimary();
+            }catch (SyntaxErr &e){
+                EXPECT_EQ(std::string(e.what()),"1:69: parse expression error: no expected token");
+                break;
+            }
+            EXPECT_EQ(expr->ToString(0),res[idx++]);
         }
     }
 
@@ -84,12 +109,120 @@ expr :
         Parser par(input);
         int idx = 0;
         std::string res[] = {
+            "binary_op:'+'\n"
+            "lhs :\n"
+            "    binary_op:'+'\n"
+            "    lhs :\n"
+            "        binary_op:'+'\n"
+            "        lhs :\n"
+            "            1\n"
+            "        rhs :\n"
+            "            2\n"
+            "    rhs :\n"
+            "        3\n"
+            "rhs :\n"
+            "    4",
 
+            "binary_op:'+'\n"
+            "lhs :\n"
+            "    1\n"
+            "rhs :\n"
+            "    binary_op:'*'\n"
+            "    lhs :\n"
+            "        2\n"
+            "    rhs :\n"
+            "        3",
+
+            "binary_op:'*'\n"
+            "lhs :\n"
+            "    binary_op:'+'\n"
+            "    lhs :\n"
+            "        1\n"
+            "    rhs :\n"
+            "        2\n"
+            "rhs :\n"
+            "    3",
+
+            "binary_op:'*'\n"
+            "lhs :\n"
+            "    unary_op:'-'\n"
+            "    expr :\n"
+            "        binary_op:'+'\n"
+            "        lhs :\n"
+            "            1\n"
+            "        rhs :\n"
+            "            2\n"
+            "rhs :\n"
+            "    3",
+
+            "binary_op:'o'\n"
+            "lhs :\n"
+            "    binary_op:'a'\n"
+            "    lhs :\n"
+            "        binary_op:'L'\n"
+            "        lhs :\n"
+            "            binary_op:'*'\n"
+            "            lhs :\n"
+            "                unary_op:'-'\n"
+            "                expr :\n"
+            "                    binary_op:'+'\n"
+            "                    lhs :\n"
+            "                        1\n"
+            "                    rhs :\n"
+            "                        2\n"
+            "            rhs :\n"
+            "                3\n"
+            "        rhs :\n"
+            "            5\n"
+            "    rhs :\n"
+            "        binary_op:'>'\n"
+            "        lhs :\n"
+            "            3\n"
+            "        rhs :\n"
+            "            4\n"
+            "rhs :\n"
+            "    binary_op:'<'\n"
+            "    lhs :\n"
+            "        4\n"
+            "    rhs :\n"
+            "        3",
+
+            "binary_op:'o'\n"
+            "lhs :\n"
+            "    binary_op:'L'\n"
+            "    lhs :\n"
+            "        binary_op:'*'\n"
+            "        lhs :\n"
+            "            unary_op:'-'\n"
+            "            expr :\n"
+            "                binary_op:'+'\n"
+            "                lhs :\n"
+            "                    1\n"
+            "                rhs :\n"
+            "                    2\n"
+            "        rhs :\n"
+            "            3\n"
+            "    rhs :\n"
+            "        5\n"
+            "rhs :\n"
+            "    binary_op:'a'\n"
+            "    lhs :\n"
+            "        binary_op:'>'\n"
+            "        lhs :\n"
+            "            3\n"
+            "        rhs :\n"
+            "            4\n"
+            "    rhs :\n"
+            "        binary_op:'<'\n"
+            "        lhs :\n"
+            "            4\n"
+            "        rhs :\n"
+            "            3"
         };
         while(par.token_ != 0){
             auto expr = par.ParseExpr();
-            std::cout << expr->ToString(0) << "\n" << std::endl;
-
+//            std::cout << expr->ToString(0) << "\n" << std::endl;
+            EXPECT_EQ(expr->ToString(0),res[idx++]);
             if(par.token_ == TOK_ERROR)
                 par.NextToken();
         }

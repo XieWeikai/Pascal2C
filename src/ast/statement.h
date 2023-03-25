@@ -20,8 +20,8 @@ namespace pascal2c::ast {
         COMPOUND_STATEMENT = 3,
         IF_STATEMENT = 4,
         FOR_STATEMENT = 5,
-        READ_STATEMENT = 6,
-        WRITE_STATEMENT = 7,
+//        READ_STATEMENT = 6,
+//        WRITE_STATEMENT = 7,
     };
 
     // base type of statement
@@ -50,6 +50,7 @@ namespace pascal2c::ast {
     // name_ is procedure name or function name
     // expr_list_ is the arguments of procedure or function
     // expr_list_ can be empty
+    // write and read are treated as CallStatement as built-in function
     class CallStatement : public Statement {
     public:
         CallStatement(std::string name, vector<std::shared_ptr<Expression> > expr_list) :
@@ -76,6 +77,8 @@ namespace pascal2c::ast {
         explicit CompoundStatement(vector<std::shared_ptr<Statement> > statements) : statements_(std::move(statements)) {}
 
         inline StatementType GetType() const override { return COMPOUND_STATEMENT; }
+
+        std::string ToString(int level) const override;
     private:
         vector<std::shared_ptr<Statement> > statements_;
     };
@@ -91,6 +94,8 @@ namespace pascal2c::ast {
                     : condition_(std::move(cond)),then_(std::move(then)),else_(std::move(else_part)) {}
 
         inline StatementType GetType() const override { return IF_STATEMENT; }
+
+        std::string ToString(int level) const override;
     private:
         std::shared_ptr<Expression> condition_;
         std::shared_ptr<Statement>  then_;
@@ -105,6 +110,8 @@ namespace pascal2c::ast {
                      : from_(std::move(from)),to_(std::move(to)),statement_(std::move(statement)) {}
 
         inline StatementType GetType() const override { return FOR_STATEMENT; }
+
+        std::string ToString(int level) const override;
     private:
         std::string id_;
         std::shared_ptr<Expression> from_;

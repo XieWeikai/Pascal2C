@@ -47,6 +47,9 @@ namespace pascal2c::parser {
         return std::move(expr);
     }
 
+    // a := 3 * (4 + 6  ;
+    // if ....
+
     std::shared_ptr<ast::Expression> Parser::ParsePrefix(){
         int op = token_;
         int prec = unary_prec[op];

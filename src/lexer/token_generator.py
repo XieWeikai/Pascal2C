@@ -22,11 +22,12 @@ union YYSTYPE {
     char strval[MAX_STR_LEN];
 };
 
-int yylex();
-int yylineno;
-int yycolno;
-int yyerrno;
+int yylex(void);
+extern int yylineno;
+extern int yycolno;
+extern int yyerrno;
 extern FILE *yyin;
+extern char *yytext;
 extern char* YYERRMSG[];
 extern union YYSTYPE yylval;
 
