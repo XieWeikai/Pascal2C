@@ -34,3 +34,5 @@
 build/**/*
 .cache/clangd/index
 compile_commands.json
+
+lexer.h
