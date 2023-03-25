@@ -1,31 +1,22 @@
 #include <stdio.h>
-
 #include "lexer.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
     int token;
     while ((token = yylex()) != 0) {
-        printf("%s(%d) at line %d, column %d.", TokenToString(token), token,
-               yylineno, yycolno);
-        switch (token) {
-            case TOK_ID:
-                printf(" Value: %s\n", yytext);
-                break;
-            case TOK_INTEGER:
-                printf(" Value: %d\n", yylval.intval);
-                break;
-            case TOK_REAL:
-                printf(" Value: %f\n", yylval.realval);
-                break;
-            case TOK_STRING:
-                printf(" Value: %s\n", yylval.strval);
-                break;
-            case TOK_ERROR:
-                printf(" Value: %s\n", YYERRMSG[yyerrno]);
-                break;
-            default:
-                printf("\n");
-                break;
+        printf("Token: %d (%s) at line %d, column %d\n", token, yytext, yylineno, yycolno);
+        if (token == TOK_STRING) {
+            printf("String value: %s\n", yylval.strval);
+        }
+        if (token == TOK_INTEGER) {
+            printf("Integer value: %d\n", yylval.intval);
+        }
+        if (token == TOK_REAL) {
+            printf("Real value: %f\n", yylval.realval);
+        }
+        if (token == TOK_ERROR) {
+            printf("!!!(%s)", YYERRMSG[yyerrno]);
         }
     }
     return 0;
