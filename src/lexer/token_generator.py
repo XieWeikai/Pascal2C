@@ -27,6 +27,7 @@ int yylineno;
 int yycolno;
 int yyerrno;
 extern char* YYERRMSG[];
+extern char* yytext;
 extern union YYSTYPE yylval;
 '''
 
