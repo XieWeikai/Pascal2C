@@ -19,7 +19,7 @@ namespace pascal2c::ast
     struct ConstDeclaration
     {
         string id;
-        shared_ptr<Expression> const_value;
+        shared_ptr<Expression> const_value; // IntegerValue | RealValue | UnaryExpr | CharValue
     };
 
     struct VarDeclaration
