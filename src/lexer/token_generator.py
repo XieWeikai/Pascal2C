@@ -23,11 +23,12 @@ union YYSTYPE {
 };
 
 int yylex();
-int yylineno;
-int yycolno;
-int yyerrno;
-extern FILE *yyin;
+extern int yylineno;
+extern int yycolno;
+extern int yyerrno;
 extern char* YYERRMSG[];
+extern char* yytext;
+extern FILE *yyin;
 extern union YYSTYPE yylval;
 
 inline void SetInput(FILE *fp){yyin = fp;}

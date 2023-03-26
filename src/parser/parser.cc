@@ -33,6 +33,7 @@ namespace pascal2c::parser {
         next_line_ = yylineno;
         next_column_ = yycolno;
         next_text_ = yytext;
+
         NextToken();
     }
 
@@ -42,6 +43,7 @@ namespace pascal2c::parser {
         line_ = next_line_;
         column_ = next_column_;
         text_ = next_text_;
+        lexer_errno_ = yyerrno;
 
         next_token_ = yylex();
         next_tok_value_ = yylval;
@@ -51,8 +53,8 @@ namespace pascal2c::parser {
         return token_;
     }
 
-    std::string Parser::GetLexerErrMsg(int err) {
-        return {YYERRMSG[yyerrno]};
+    std::string Parser::GetLexerErrMsg() {
+        return {YYERRMSG[lexer_errno_]};
     }
 
     void Parser::Match(int token) {

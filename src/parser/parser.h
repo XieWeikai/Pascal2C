@@ -37,6 +37,7 @@ namespace pascal2c::parser {
         FRIEND_TEST(ExprParserTest,TestParseExpr);
 
         int token_,next_token_;
+        int lexer_errno_;
         YYSTYPE tok_value_,next_tok_value_;
         int line_,next_line_;                        // line number of token in the input file
         int column_,next_column_;                      // column number of token in the input file
@@ -50,7 +51,7 @@ namespace pascal2c::parser {
 
         void Match(int token);
 
-        std::string GetLexerErrMsg(int err);
+        std::string GetLexerErrMsg();
 
         std::shared_ptr<ast::Expression> ParseExpr();
 
@@ -75,6 +76,8 @@ namespace pascal2c::parser {
         std::shared_ptr<ast::Statement> ParseForStatement();
 
         std::shared_ptr<ast::Statement> ParseCompoundStatement();
+
+        std::shared_ptr<ast::Statement> ParseAssignAndCallStatement();
     };
 }
 
