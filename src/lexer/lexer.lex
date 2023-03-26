@@ -98,6 +98,14 @@ var                {return TOK_VAR;}
 while              {return TOK_WHILE;}
 with               {return TOK_WITH;}
 
+integer            {return TOK_INTEGER;}
+real               {return TOK_REAL;}
+boolean            {return TOK_BOOLEAN;}
+char               {return TOK_CHAR;}
+string             {return TOK_STRING;}
+true               {return TOK_TRUE;}
+false              {return TOK_FALSE;}
+
 {identifier}         {return TOK_ID;}
 {unsigned_integer}   {
     if (strlen(yytext) > MAX_INT_LEN) {
