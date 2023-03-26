@@ -174,6 +174,165 @@ expr 2:
     EXPECT_EQ(call2->ToString(0),res2);
 }
 
+TEST(TestToString,TestCompoundStatement) {
+    auto var = std::make_shared<ast::Variable>("i");
+    auto expr = std::make_shared<ast::BinaryExpr>(
+            '+', std::make_shared<ast::Variable>("i"), std::make_shared<ast::IntegerValue>(1));
+    std::shared_ptr<ast::Statement> assign = std::make_shared<ast::AssignStatement>(var,expr);
+
+    std::vector<std::shared_ptr<ast::Expression> > expr_list;
+    expr_list.push_back(std::move(std::make_shared<ast::Variable>("a")));
+    expr_list.push_back(std::move(std::make_shared<ast::Variable>("b")));
+    std::string name = "add";
+    auto call = std::make_shared<ast::CallStatement>(name,expr_list);
+
+    std::vector<std::shared_ptr<ast::Statement> > statements = {assign,call};
+
+    auto compound = std::make_shared<ast::CompoundStatement>(statements);
+    auto res =
+            "CompoundStatement :2\n"
+            "statement :1\n"
+            "    AssignStatement :\n"
+            "    Variable:\n"
+            "        variable:i\n"
+            "    Expr :\n"
+            "        binary_op:'+'\n"
+            "        lhs :\n"
+            "            variable:i\n"
+            "        rhs :\n"
+            "            1\n"
+            "statement :2\n"
+            "    CallStatement :\n"
+            "    name:add\n"
+            "    expr 1:\n"
+            "        variable:a\n"
+            "    expr 2:\n"
+            "        variable:b";
+    EXPECT_EQ(compound->ToString(0),res);
+}
+
+TEST(TestToString,TestIfStatement) {
+    auto expr = std::make_shared<ast::BinaryExpr>('<', std::make_shared<ast::IntegerValue>(3),
+                                                  std::make_shared<ast::IntegerValue>(4));
+    auto var = std::make_shared<ast::Variable>("i");
+    auto cond = std::make_shared<ast::BinaryExpr>(
+            '+', std::make_shared<ast::Variable>("i"), std::make_shared<ast::IntegerValue>(1));
+    std::shared_ptr<ast::Statement> assign = std::make_shared<ast::AssignStatement>(var,expr);
+
+    std::vector<std::shared_ptr<ast::Expression> > expr_list;
+    expr_list.push_back(std::move(std::make_shared<ast::Variable>("a")));
+    expr_list.push_back(std::move(std::make_shared<ast::Variable>("b")));
+    std::string name = "add";
+    auto call = std::make_shared<ast::CallStatement>(name,expr_list);
+
+    std::vector<std::shared_ptr<ast::Statement> > statements = {assign,call};
+
+    auto compound = std::make_shared<ast::CompoundStatement>(statements);
+
+    auto if_statement = std::make_shared<ast::IfStatement>(cond,compound, nullptr);
+    auto call2 = std::make_shared<ast::CallStatement>("sayhello");
+    auto res =
+            "IfStatement :\n"
+            "if_part:\n"
+            "    CompoundStatement :2\n"
+            "    statement :1\n"
+            "        AssignStatement :\n"
+            "        Variable:\n"
+            "            variable:i\n"
+            "        Expr :\n"
+            "            binary_op:'<'\n"
+            "            lhs :\n"
+            "                3\n"
+            "            rhs :\n"
+            "                4\n"
+            "    statement :2\n"
+            "        CallStatement :\n"
+            "        name:add\n"
+            "        expr 1:\n"
+            "            variable:a\n"
+            "        expr 2:\n"
+            "            variable:b";
+    EXPECT_EQ(if_statement->ToString(0),res);
+
+    if_statement = std::make_shared<ast::IfStatement>(cond,compound,call2);
+    res =
+            "IfStatement :\n"
+            "if_part:\n"
+            "    CompoundStatement :2\n"
+            "    statement :1\n"
+            "        AssignStatement :\n"
+            "        Variable:\n"
+            "            variable:i\n"
+            "        Expr :\n"
+            "            binary_op:'<'\n"
+            "            lhs :\n"
+            "                3\n"
+            "            rhs :\n"
+            "                4\n"
+            "    statement :2\n"
+            "        CallStatement :\n"
+            "        name:add\n"
+            "        expr 1:\n"
+            "            variable:a\n"
+            "        expr 2:\n"
+            "            variable:b\n"
+            "else_part:\n"
+            "    CallStatement :\n"
+            "    name:sayhello";
+    EXPECT_EQ(if_statement->ToString(0),res);
+}
+
+TEST(TestToString,TestForStatement) {
+    std::string id = "i";
+    auto from = std::make_shared<ast::IntegerValue>(1);
+    auto to = std::make_shared<ast::IntegerValue>(10);
+
+    auto expr = std::make_shared<ast::BinaryExpr>('<', std::make_shared<ast::IntegerValue>(3),
+                                                  std::make_shared<ast::IntegerValue>(4));
+    auto var = std::make_shared<ast::Variable>("i");
+    auto cond = std::make_shared<ast::BinaryExpr>(
+            '+', std::make_shared<ast::Variable>("i"), std::make_shared<ast::IntegerValue>(1));
+    std::shared_ptr<ast::Statement> assign = std::make_shared<ast::AssignStatement>(var,expr);
+
+    std::vector<std::shared_ptr<ast::Expression> > expr_list;
+    expr_list.push_back(std::move(std::make_shared<ast::Variable>("a")));
+    expr_list.push_back(std::move(std::make_shared<ast::Variable>("b")));
+    std::string name = "add";
+    auto call = std::make_shared<ast::CallStatement>(name,expr_list);
+
+    std::vector<std::shared_ptr<ast::Statement> > statements = {assign,call};
+
+    auto compound = std::make_shared<ast::CompoundStatement>(statements);
+
+    auto for_statement = std::make_shared<ast::ForStatement>(from,to,compound);
+    auto res =
+            "ForStatement:\n"
+            "from:\n"
+            "    1\n"
+            "to:\n"
+            "    10\n"
+            "do:\n"
+            "    CompoundStatement :2\n"
+            "    statement :1\n"
+            "        AssignStatement :\n"
+            "        Variable:\n"
+            "            variable:i\n"
+            "        Expr :\n"
+            "            binary_op:'<'\n"
+            "            lhs :\n"
+            "                3\n"
+            "            rhs :\n"
+            "                4\n"
+            "    statement :2\n"
+            "        CallStatement :\n"
+            "        name:add\n"
+            "        expr 1:\n"
+            "            variable:a\n"
+            "        expr 2:\n"
+            "            variable:b";
+    EXPECT_EQ(for_statement->ToString(0),res);
+}
+
 TEST(TestGetType,TestInteger){
     std::shared_ptr<ast::Expression> ep(new ast::IntegerValue(4));
     EXPECT_EQ(ep->GetType(),ast::INT);
