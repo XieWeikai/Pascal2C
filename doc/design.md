@@ -33,7 +33,7 @@
   | 获取程序头 | const shared_ptr\<ProgramHead> &program_head() const | 无   | 程序头 | 无   |
 
 
-#### 数据结构定义
+#### 数据结构定义（为类定义里的函数（除了get和set这类简单函数）和数据成员加上注释，直接复制过来）
 
 ##### class Program
   AST 树根节点，存有指向 `ProgramHead`、`ProgramBody`的指针
@@ -42,9 +42,15 @@
         class Program
         {
         public:
+            // param:
+            //     program_head is the shared pointer of ProgramHead
+            //     program_body is the shared pointer of ProgramBody
             Program(shared_ptr<ProgramHead> program_head, shared_ptr<ProgramBody> program_body)
                 : program_head_(std::move(program_head)), program_body_(std::move(program_body)) {}
 
+            // for test use
+            // param:
+            //     level is the level of indentation that should be applied to the returned string
             const string ToString(const int &level) const;
 
         private:
@@ -72,25 +78,24 @@
 
 
 
-#### 算法描述
+#### 算法描述（还不完善）
 
-| 系统事件名称                             | 用例           | 参数说明                              |
-| ---------------------------------------- | -------------- | ------------------------------------- |
-| SyntaxAnalysis(tokens)                   | 语法分析       | 1. tokens:vector\<Token>              |
-| ParseProgramHead(tokens, pos)            | 分析程序头     | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseProgramBody(tokens, pos)()          | 分析程序主体   | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseConstDeclarations(tokens, pos)      | 分析常量声明   | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseVarDeclarations(tokens, pos)        | 分析变量声明   | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseSubprogramDeclarations(tokens, pos) | 分析子程序     | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseSubprogramHead(tokens, pos)         | 分析子程序头   | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseSubprogramBody(tokens, pos)         | 分析子程序主体 | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseCompoundStatements(tokens, pos)     | 分析复合语句   | 1. tokens:vector\<Token>; 2. pos:int; |
+| 系统事件名称                  | 用例           |
+| ----------------------------- | -------------- |
+| ParseProgram()                | 语法分析       |
+| ParseProgramHead()            | 分析程序头     |
+| ParseProgramBody()            | 分析程序主体   |
+| ParseConstDeclarations()      | 分析常量声明   |
+| ParseVarDeclarations()        | 分析变量声明   |
+| ParseSubprogramDeclarations() | 分析子程序     |
+| ParseSubprogramHead()         | 分析子程序头   |
+| ParseSubprogramBody()         | 分析子程序主体 |
+| ParseCompoundStatements()     | 分析复合语句   |
 
 ![语法分析流程图](assets/parser_flowchart.jpg)
 
 
 
-#### 算法描述
 
 ---
 
