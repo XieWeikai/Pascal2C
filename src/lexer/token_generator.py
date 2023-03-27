@@ -13,6 +13,7 @@ FILE = 'lexer.h'
 OTHER_CONTENT = '''#pragma once
 
 #include <stdint.h>
+#include <stdio.h>
 
 #define MAX_STR_LEN 256
 #define MAX_INT_LEN 32
@@ -24,6 +25,7 @@ union YYSTYPE {
 };
 
 int yylex();
+char* TokenToString(int token);
 extern int yylineno;
 extern int yycolno;
 extern int yyerrno;

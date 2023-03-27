@@ -1,5 +1,5 @@
-lexer: main.c lex.yy.c lexer.h
-	gcc -o lexer main.c lex.yy.c
+lexer: main.c utils.c lex.yy.c lexer.h
+	gcc -o lexer main.c utils.c lex.yy.c
 lex.yy.c: lexer.lex
 	flex lexer.lex
 lexer.h: token_generator.py
