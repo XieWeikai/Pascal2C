@@ -98,11 +98,11 @@ var                {return TOK_VAR;}
 while              {return TOK_WHILE;}
 with               {return TOK_WITH;}
 
-integer            {return TOK_INTEGER;}
-real               {return TOK_REAL;}
-boolean            {return TOK_BOOLEAN;}
-char               {return TOK_CHAR;}
-string             {return TOK_STRING;}
+integer            {return TOK_INTEGER_TYPE;}
+real               {return TOK_REAL_TYPE;}
+boolean            {return TOK_BOOLEAN_TYPE;}
+char               {return TOK_CHAR_TYPE;}
+string             {return TOK_STRING_TYPE;}
 true               {return TOK_TRUE;}
 false              {return TOK_FALSE;}
 

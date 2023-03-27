@@ -2,7 +2,7 @@ tok_list = [
     'ID', 'INTEGER', 'REAL', 'STRING', 'ERROR',
     # KEYWORDS
     'AND', 'ARRAY', 'BEGIN', 'CASE', 'CONST', 'DIV', 'DO', 'DOWNTO', 'ELSE', 'END', 'FILE', 'FOR', 'FUNCTION', 'GOTO', 'IF', 'IN', 'LABEL', 'MOD', 'NIL', 'NOT', 'OF', 'OR', 'PACKED', 'PROCEDURE', 'PROGRAM', 'RECORD', 'REPEAT', 'SET', 'THEN', 'TO', 'TYPE', 'UNTIL', 'VAR', 'WHILE', 'WITH',
-    'BOOLEAN', 'CHAR', 'TRUE', 'FALSE',
+    'INTEGER_TYPE', 'REAL_TYPE', 'BOOLEAN_TYPE', 'CHAR_TYPE', 'STRING_TYPE', 'TRUE', 'FALSE',
     # OPERATORS
     'NEQOP', 'LEOP', 'GEOP', 'ASSIGNOP', 'DOTDOT',
 ]
