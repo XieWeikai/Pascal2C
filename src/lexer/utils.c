@@ -1,13 +1,6 @@
 #include "lexer.h"
 #include <stdio.h>
 
-void yyreset(FILE* in) {
-    yylineno = 1;
-    yycolno = 1;
-    yyerrno = 0;
-    yyin = in;
-}
-
 char* TokenToString(int token) {
     static char* tokenNames[] = {
         [TOK_ID] = "TOK_ID",
@@ -73,11 +66,14 @@ char* TokenToString(int token) {
         ['^'] = "TOK_^",
         ['('] = "TOK_(",
         [')'] = "TOK_)",
+<<<<<<< HEAD
         [TOK_NEQOP] = "TOK_NEQOP",
         [TOK_LEOP] = "TOK_LEOP",
         [TOK_GEOP] = "TOK_GEOP",
         [TOK_ASSIGNOP] = "TOK_ASSIGNOP",
         [TOK_DOTDOT] = "TOK_DOTDOT",
+=======
+>>>>>>> 69aec48 (✨ (lexer): TokenToString)
     };
     return tokenNames[token];
 }
