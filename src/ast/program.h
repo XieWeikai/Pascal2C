@@ -411,6 +411,212 @@ namespace pascal2c::ast
 
         inline const shared_ptr<ProgramBody> &program_body() const { return program_body_; }
 
+        const string ToString(const int &level) const override;
+
+    private:
+        shared_ptr<ProgramHead> program_head_; // eg. program f(a, b)
+        shared_ptr<ProgramBody> program_body_; // eg. var a, b; begin a := 1; b := 2; end.
+    };
+
+    // ProgramHead -> program id(IdList) | program id
+    class ProgramHead
+    {
+    public:
+        ProgramHead(const string &id, shared_ptr<IdList> id_list)
+            : id_(id), id_list_(std::move(id_list)) {}
+
+        explicit ProgramHead(const string &id) : id_(id) {}
+
+        const string ToString(const int &level) const;
+
+    private:
+        string id_;
+        shared_ptr<IdList> id_list_; // can be empty
+    };
+
+    // ProgramBody -> (const const_declarations | EMPTY)
+    //                (var var_declarations | EMPTY)
+    //                (subprogram_declarations | EMPTY)
+    //                 statement_list
+    // const_declarations -> ConstDeclaration | (const_declarations ; ConstDeclaration)
+    // var_declarations -> VarDeclaration | var_declarations ; VarDeclaration
+    // subprogram_declarations -> Subprogram | subprogram_declarations ; Subprogram
+    // statement_list -> statement | statement_list ; statement
+    class ProgramBody
+    {
+    public:
+        inline const vector<shared_ptr<ConstDeclaration>> &const_declarations() const { return const_declarations_; }
+
+        inline const vector<shared_ptr<VarDeclaration>> &var_declarations() const { return var_declarations_; }
+
+        inline const vector<shared_ptr<Statement>> &statement_list() const { return statement_list_; }
+
+        inline void AddConstDeclaration(shared_ptr<ConstDeclaration> const_declaration)
+        {
+            const_declarations_.push_back(std::move(const_declaration));
+        }
+
+        inline void AddVarDeclaration(shared_ptr<VarDeclaration> var_declaration)
+        {
+            var_declarations_.push_back(std::move(var_declaration));
+        }
+
+        inline void AddStatement(shared_ptr<Statement> statement) { statement_list_.push_back(std::move(statement)); }
+
+        // for test use
+        // param:
+        //     level is the level of indentation that should be applied to the returned string
+        // return:
+        //     a string represents the statement
+        const string ToString(const int &level) const;
+
+    private:
+        vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be empty, eg. const a = 1; b = 2;
+        vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be empty, eg. var c, d : integer;
+        vector<shared_ptr<Statement>> statement_list_;            // can be empty, eg. begin end
+    };
+
+    // Subprogram -> SubprogramHead ; SubprogramBody
+    //
+    // eg. function f(a, b : integer) : integer;
+    // eg. procedure p(var c, d : real);
+    class Subprogram
+    {
+    public:
+        // param:
+        //     subprogram_head is the head of the subprogram
+        //     subprogram_body is the body of the subprogram
+        Subprogram(shared_ptr<SubprogramHead> subprogram_head, shared_ptr<SubprogramBody> subprogram_body)
+            : subprogram_head(std::move(subprogram_head)), subprogram_body(std::move(subprogram_body)) {}
+
+        inline const shared_ptr<SubprogramHead> &subprogram_head() const { return subprogram_head; }
+
+        inline const shared_ptr<SubprogramBody> &subprogram_body() const { return subprogram_body; }
+
+        // for test use
+        // param:
+        //     level is the level of indentation that should be applied to the returned string
+        // return:
+        //     a string represents the statement
+        const string ToString(const int &level) const;
+
+    private:
+        shared_ptr<SubprogramHead> subprogram_head; // eg. function f(a, b : integer) : integer;
+        shared_ptr<SubprogramBody> subprogram_body; // eg. begin ... end;
+    };
+
+    // ProgramHead -> program id(IdList) | program id
+    //
+    // eg. program f(a, b)
+    // eg. program f
+    class ProgramHead
+    {
+    public:
+        // param:
+        //     id is the program name
+        //     id_list is the parameters of the program
+        ProgramHead(const string &id, shared_ptr<IdList> id_list)
+            : id_(id), id_list_(std::move(id_list)) {}
+
+        // param:
+        //     id is the program name
+        explicit ProgramHead(const string &id) : id_(id) {}
+
+        inline const string &id() const { return id_; }
+
+        inline const shared_ptr<IdList> &id_list() const { return id_list_; }
+
+        // check if the program has parameters
+        // return:
+        //     true if the program has parameters
+        inline const bool &HasIdList() const { return id_list_ != nullptr; }
+
+        // for test use
+        // param:
+        //     level is the level of indentation that should be applied to the returned string
+        // return:
+        //     a string represents the statement
+        const string ToString(const int &level) const;
+
+    private:
+        string id_;                  // program name, eg. f
+        shared_ptr<IdList> id_list_; // parameters, can be empty, eg. (a, b)
+    };
+
+    // ProgramBody -> (const const_declarations | EMPTY)
+    //                (var var_declarations | EMPTY)
+    //                (subprogram_declarations | EMPTY)
+    //                (statement_list | EMPTY)
+    // const_declarations -> ConstDeclaration | (const_declarations ; ConstDeclaration)
+    // var_declarations -> VarDeclaration | var_declarations ; VarDeclaration
+    // subprogram_declarations -> Subprogram | subprogram_declarations ; Subprogram
+    // statement_list -> statement | statement_list ; statement
+    //
+    // eg. const a = 1; b = 2; var c, d : integer; procedure p; begin end; begin end
+    class ProgramBody
+    {
+    public:
+        inline const vector<shared_ptr<ConstDeclaration>> &const_declarations() const { return const_declarations_; }
+
+        inline const vector<shared_ptr<VarDeclaration>> &var_declarations() const { return var_declarations_; }
+
+        inline const vector<shared_ptr<Subprogram>> &subprogram_declarations() const { return subprogram_declarations_; }
+
+        inline const vector<shared_ptr<Statement>> &statement_list() const { return statement_list_; }
+
+        inline void AddConstDeclaration(shared_ptr<ConstDeclaration> const_declaration)
+        {
+            const_declarations_.push_back(std::move(const_declaration));
+        }
+
+        inline void AddVarDeclaration(shared_ptr<VarDeclaration> var_declaration)
+        {
+            var_declarations_.push_back(std::move(var_declaration));
+        }
+
+        inline void AddSubprogram(shared_ptr<Subprogram> subprogram)
+        {
+            subprogram_declarations_.push_back(std::move(subprogram));
+        }
+
+        void AddSubprogram(shared_ptr<SubprogramHead> subprogram_head, shared_ptr<SubprogramBody> subprogram_body)
+        {
+            subprogram_declarations_.push_back({std::move(subprogram_head), std::move(subprogram_body)});
+        }
+
+        inline void AddStatement(shared_ptr<Statement> statement) { statement_list_.push_back(std::move(statement)); }
+
+        // for test use
+        // param:
+        //     level is the level of indentation that should be applied to the returned string
+        // return:
+        //     a string represents the statement
+        const string ToString(const int &level) const;
+
+    private:
+        vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be empty, eg. const a = 1; b = 2;
+        vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be empty, eg. var c, d : integer;
+        vector<shared_ptr<Subprogram>> subprogram_declarations_;  // can be empty, eg. procedure p; begin end;
+        vector<shared_ptr<Statement>> statement_list_;            // can be empty, eg. begin end
+    };
+
+    // Program -> ProgramHead; ProgramBody.
+    //
+    // eg. program f(a, b); var a, b; begin a := 1; b := 2; end.
+    class Program
+    {
+    public:
+        // param:
+        //     program_head is the shared pointer of ProgramHead
+        //     program_body is the shared pointer of ProgramBody
+        Program(shared_ptr<ProgramHead> program_head, shared_ptr<ProgramBody> program_body)
+            : program_head_(std::move(program_head)), program_body_(std::move(program_body)) {}
+
+        inline const shared_ptr<ProgramHead> &program_head() const { return program_head_; }
+
+        inline const shared_ptr<ProgramBody> &program_body() const { return program_body_; }
+
+        const string ToString(const int &level) const;
         // for test use
         // param:
         //     level is the level of indentation that should be applied to the returned string
