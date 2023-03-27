@@ -10,17 +10,22 @@
 #include "gtest/gtest.h"
 #include "ast/ast.h"
 
-extern "C" {
-    #include "lexer/lexer.h"
+extern "C"
+{
+#include "lexer/lexer.h"
 };
 
-namespace pascal2c::parser {
-    template<typename Tp> using vector = ::std::vector<Tp>;
+namespace pascal2c::parser
+{
+    template <typename Tp>
+    using vector = ::std::vector<Tp>;
 
-    class SyntaxErr : public ::std::exception {
+    class SyntaxErr : public ::std::exception
+    {
     public:
         explicit SyntaxErr(std::string err_msg) : err_msg_(std::move(err_msg)) {}
-        inline const char* what() const noexcept override {
+        inline const char *what() const noexcept override
+        {
             return err_msg_.c_str();
         }
 
@@ -28,24 +33,26 @@ namespace pascal2c::parser {
         std::string err_msg_;
     };
 
-    class Parser{
+    class Parser
+    {
     public:
         explicit Parser(FILE *in);
-    private:
-        FRIEND_TEST(TokenTest,TestNextToken);
-        FRIEND_TEST(ExprParserTest,TestParsePrimary);
-        FRIEND_TEST(ExprParserTest,TestParseExpr);
 
-        int token_,next_token_;
+    private:
+        FRIEND_TEST(TokenTest, TestNextToken);
+        FRIEND_TEST(ExprParserTest, TestParsePrimary);
+        FRIEND_TEST(ExprParserTest, TestParseExpr);
+
+        int token_, next_token_;
         int lexer_errno_;
-        YYSTYPE tok_value_,next_tok_value_;
-        int line_,next_line_;                        // line number of token in the input file
-        int column_,next_column_;                      // column number of token in the input file
-        std::string text_,next_text_;
+        YYSTYPE tok_value_, next_tok_value_;
+        int line_, next_line_;     // line number of token in the input file
+        int column_, next_column_; // column number of token in the input file
+        std::string text_, next_text_;
 
         std::shared_ptr<ast::Expression> (Parser::*prefix_parser_[302])();
 
-        vector<std::string> err_msg_;     // error massages
+        vector<std::string> err_msg_; // error massages
 
         int NextToken();
 
@@ -53,11 +60,35 @@ namespace pascal2c::parser {
 
         std::string GetLexerErrMsg();
 
+        std::shared_ptr<ast::Program> ParseProgram();
+
+        std::shared_ptr<ast::ProgramHead> ParseProgramHead();
+
+        std::shared_ptr<ast::ProgramBody> ParseProgramBody();
+
+        std::shared_ptr<ast::ConstDeclaration> ParseConstDeclaration();
+
+        std::shared_ptr<ast::VarDeclaration> ParseVarDeclaration();
+
+        std::shared_ptr<ast::Subprogram> ParseSubprogram();
+
+        std::shared_ptr<ast::SubprogramHead> ParseSubprogramHead();
+
+        std::shared_ptr<ast::SubprogramBody> ParseSubprogramBody();
+
+        std::shared_ptr<ast::IdList> ParseIdList();
+
+        std::shared_ptr<ast::Type> ParseType();
+
+        ast::Type::Period ParsePeriod();
+
+        std::shared_ptr<ast::Parameter> ParseParameter();
+
         std::shared_ptr<ast::Expression> ParseExpr();
 
         std::shared_ptr<ast::Expression> ParseExpr(int prec);
 
-        vector<std::shared_ptr<ast::Expression> > ParseExprList();
+        vector<std::shared_ptr<ast::Expression>> ParseExprList();
 
         std::shared_ptr<ast::Expression> ParsePrimary();
 
@@ -80,6 +111,5 @@ namespace pascal2c::parser {
         std::shared_ptr<ast::Statement> ParseAssignAndCallStatement();
     };
 }
-
 
 #endif // !PASCAL2C_SRC_PARSER_PARSER_H_
