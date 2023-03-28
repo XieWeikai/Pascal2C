@@ -17,16 +17,26 @@ namespace pascal2c::ast {
         INT = 0,
         REAL = 1,
         CHAR = 2,
-        VARIABLE = 3,
-        CALL = 4,
-        BINARY = 5,
-        UNARY = 6,
+        BOOLEAN = 3,
+        VARIABLE = 4,
+        CALL = 5,
+        BINARY = 6,
+        UNARY = 7,
     };
 
     // base class for expression
     class Expression {
     public:
+        // for test use
+        // param:
+        //     level is the level of indentation that should be applied to the returned string
+        // return:
+        //     a string represents the statement
         virtual std::string ToString(int level) const = 0;
+
+        // get the exact type of the expression
+        // return:
+        //     one of ExprType
         virtual ExprType GetType() const = 0;
     };
 
@@ -73,6 +83,21 @@ namespace pascal2c::ast {
 
     private:
         int ch_;
+    };
+
+    // leaf node
+    // represent a boolean value
+    // e.g. true  false
+    // value_ store the value
+    class BooleanValue : public Expression {
+    public:
+        explicit BooleanValue(bool value) : value_(value) {}
+
+        std::string ToString(int level) const override;
+        inline ExprType GetType() const override {return BOOLEAN;}
+
+    private:
+        bool value_;
     };
 
     // represent a function call
@@ -126,8 +151,8 @@ namespace pascal2c::ast {
         inline ExprType GetType() const override {return BINARY;}
 
     private:
-        int op_;
-        std::shared_ptr<Expression> lhs_, rhs_;
+        int op_;                 // operator
+        std::shared_ptr<Expression> lhs_, rhs_; // two operands
     };
 
     // represent unary expression

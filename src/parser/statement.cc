@@ -96,6 +96,7 @@ namespace pascal2c::parser {
         vector<std::shared_ptr<ast::Expression> > expr_list;
         auto var = std::make_shared<ast::Variable>(id);
         bool is_var = false;
+
         switch (token_) {
             case '(':
                 NextToken();
@@ -107,6 +108,7 @@ namespace pascal2c::parser {
                 Match(')');
                 return std::make_shared<ast::CallStatement>(id,expr_list);
             case '[':
+                NextToken();
                 expr_list = ParseExprList();
                 Match(']');
                 var = std::make_shared<ast::Variable>(id,expr_list);

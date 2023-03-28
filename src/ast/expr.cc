@@ -100,6 +100,13 @@ namespace pascal2c{
         return str_s.str();
     }
 
+    std::string ast::BooleanValue::ToString(int level) const {
+        std::stringstream str_s;
+        IndentOutput(str_s, level);
+        str_s << value_ ;
+        return str_s.str();
+    }
+
     std::string ast::BinaryExpr::ToString(int level) const {
         std::stringstream str_s;
         IndentOutput(str_s, level);

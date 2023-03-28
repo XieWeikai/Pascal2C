@@ -39,9 +39,13 @@ namespace pascal2c::parser
         explicit Parser(FILE *in);
 
     private:
-        FRIEND_TEST(TokenTest, TestNextToken);
-        FRIEND_TEST(ExprParserTest, TestParsePrimary);
-        FRIEND_TEST(ExprParserTest, TestParseExpr);
+        FRIEND_TEST(TokenTest,TestNextToken);
+        FRIEND_TEST(ExprParserTest,TestParsePrimary);
+        FRIEND_TEST(ExprParserTest,TestParseExpr);
+        FRIEND_TEST(StatementParserTest,TestAssignStatement);
+        FRIEND_TEST(StatementParserTest, TestIfStatement);
+        FRIEND_TEST(StatementParserTest, TestForStatement);
+        FRIEND_TEST(StatementParserTest, TestCompoundStatement);
 
         int token_, next_token_;
         int lexer_errno_;
