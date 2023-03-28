@@ -326,6 +326,7 @@ namespace pascal2c::ast
 
         inline const shared_ptr<IdList> &id_list() const { return id_list_; }
 
+        // check if the program has parameters
         // return:
         //     true if the program has parameters
         inline const bool &HasIdList() const { return id_list_ != nullptr; }
