@@ -92,8 +92,8 @@ namespace pascal2c::ast
 
     private:
         bool is_array_;          // true if the type is array type
-        int basic_type_;         // TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE, eg. integer, real, boolean, char
-        vector<Period> periods_; // can be empty, eg. [1..10, 20..30]
+        int basic_type_;         // TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE from lexer, eg. integer, real, boolean, char
+        vector<Period> periods_; // can be ε, eg. [1..10, 20..30]
     };
 
     // Parameter -> var_parameter | value_parameter
@@ -128,7 +128,7 @@ namespace pascal2c::ast
     private:
         bool is_var_;                // true if the parameter is var parameter
         shared_ptr<IdList> id_list_; // a list of identifiers, eg. a, b
-        int type_;                   // TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE, eg. integer, real, boolean, char
+        int type_;                   // TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE from lexer, eg. integer, real, boolean, char
     };
 
     // ConstDeclaration -> id= (IntegerValue | RealValue | UnaryExpr | CharValue)
@@ -156,7 +156,7 @@ namespace pascal2c::ast
 
     private:
         string id;                          // the identifier, eg. a
-        shared_ptr<Expression> const_value; // IntegerValue | RealValue | UnaryExpr | CharValue, eg. 1, 2.0, -1, 'a'
+        shared_ptr<Expression> const_value; // IntegerValue | RealValue | UnaryExpr | CharValue from expr.h, eg. 1, 2.0, -1, 'a'
     };
 
     // VarDeclaration -> IdList : Type
@@ -188,7 +188,7 @@ namespace pascal2c::ast
         shared_ptr<Type> type;      // the type of the identifiers, eg. integer
     };
 
-    // SubprogramHead -> function id (EMPTY | parameters) : (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE) | procedure id (EMPTY | parameters)
+    // SubprogramHead -> function id (ε | parameters) : (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE) | procedure id (ε | parameters)
     // parameters -> Parameter | parameters ; Parameter
     //
     // eg. function f(a, b : integer) : integer
@@ -224,12 +224,12 @@ namespace pascal2c::ast
     private:
         string id_;                                // name of the subprogram, eg. f, p
         int return_type_;                          // -1 means procedure, eg. integer, real
-        vector<shared_ptr<Parameter>> parameters_; // can be empty, eg. a, b : integer
+        vector<shared_ptr<Parameter>> parameters_; // can be ε, eg. a, b : integer
     };
 
-    // SubprogramBody -> (const const_declarations | EMPTY)
-    //                   (var var_declarations | EMPTY)
-    //                   (statement_list | EMPTY)
+    // SubprogramBody -> (const const_declarations | ε)
+    //                   (var var_declarations | ε)
+    //                   (statement_list | ε)
     // const_declarations -> id=ConstValue | const_declarations ; id=ConstValue
     // var_declarations -> IdList : Type | var_declarations ; IdList : Type
     // statement_list -> statement | statement_list ; statement
@@ -264,9 +264,9 @@ namespace pascal2c::ast
         const string ToString(const int &level) const;
 
     private:
-        vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be empty, eg. const a = 1; b = 2;
-        vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be empty, eg. var c, d : integer;
-        vector<shared_ptr<Statement>> statement_list_;            // can be empty, eg. begin end
+        vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be ε, eg. const a = 1; b = 2;
+        vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be ε, eg. var c, d : integer;
+        vector<shared_ptr<Statement>> statement_list_;            // can be ε, eg. begin end
     };
 
     // Subprogram -> SubprogramHead ; SubprogramBody
@@ -333,13 +333,13 @@ namespace pascal2c::ast
 
     private:
         string id_;                  // program name, eg. f
-        shared_ptr<IdList> id_list_; // parameters, can be empty, eg. (a, b)
+        shared_ptr<IdList> id_list_; // parameters, can be ε, eg. (a, b)
     };
 
-    // ProgramBody -> (const const_declarations | EMPTY)
-    //                (var var_declarations | EMPTY)
-    //                (subprogram_declarations | EMPTY)
-    //                (statement_list | EMPTY)
+    // ProgramBody -> (const const_declarations | ε)
+    //                (var var_declarations | ε)
+    //                (subprogram_declarations | ε)
+    //                (statement_list | ε)
     // const_declarations -> ConstDeclaration | (const_declarations ; ConstDeclaration)
     // var_declarations -> VarDeclaration | var_declarations ; VarDeclaration
     // subprogram_declarations -> Subprogram | subprogram_declarations ; Subprogram
@@ -382,10 +382,10 @@ namespace pascal2c::ast
         const string ToString(const int &level) const;
 
     private:
-        vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be empty, eg. const a = 1; b = 2;
-        vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be empty, eg. var c, d : integer;
-        vector<shared_ptr<Subprogram>> subprogram_declarations_;  // can be empty, eg. procedure p; begin end;
-        vector<shared_ptr<Statement>> statement_list_;            // can be empty, eg. begin end
+        vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be ε, eg. const a = 1; b = 2;
+        vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be ε, eg. var c, d : integer;
+        vector<shared_ptr<Subprogram>> subprogram_declarations_;  // can be ε, eg. procedure p; begin end;
+        vector<shared_ptr<Statement>> statement_list_;            // can be ε, eg. begin end
     };
 
     // Program -> ProgramHead; ProgramBody.
