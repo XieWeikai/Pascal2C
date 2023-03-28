@@ -322,11 +322,13 @@ namespace pascal2c::ast
         //     id is the program name
         ProgramHead(const int line, const int column, const string &id) : Ast(line, column), id_(id) {}
 
-        const string &id() const { return id_; }
+        inline const string &id() const { return id_; }
 
-        const shared_ptr<IdList> &id_list() const { return id_list_; }
+        inline const shared_ptr<IdList> &id_list() const { return id_list_; }
 
-        const bool &HasIdList() const { return id_list_ != nullptr; }
+        // return:
+        //     true if the program has parameters
+        inline const bool &HasIdList() const { return id_list_ != nullptr; }
 
         inline const string &id() const { return id_; }
 
