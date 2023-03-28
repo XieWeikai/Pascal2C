@@ -1044,6 +1044,17 @@ private:
 
 #### Parser定义
 
+`Parser`的构造函数接收一个`FILE *`，即输入文件。各个成员变量作用:
+
+- `token_`:当前token
+- `lexer_errno_`:若获取下一个token时出现了词法错误，则该变量存着错误号
+- `line_`:当前token在源文件的行数
+- `column_`:当前token在源文件中的列数
+- `text_`:当前token对应的字符串
+- `err_msg_`:当出现语法错误时，错误信息均存在这里面
+
+成员中形如`next_***_`的变量为下一个token对应的信息，再做语法分析时有时多看一个token对确定产生式有帮助，故有`next_***_`成员变量。
+
 parser类的定义如下
 
 ```c++
@@ -1065,17 +1076,6 @@ private:
     vector<std::string> err_msg_;     // error massages
 };
 ```
-
-`Parser`的构造函数接收一个`FILE *`，即输入文件。各个成员变量作用:
-
-- `token_`:当前token
-- `lexer_errno_`:若获取下一个token时出现了词法错误，则该变量存着错误号
-- `line_`:当前token在源文件的行数
-- `column_`:当前token在源文件中的列数
-- `text_`:当前token对应的字符串
-- `err_msg_`:当出现语法错误时，错误信息均存在这里面
-
-成员中形如`next_***_`的变量为下一个token对应的信息，再做语法分析时有时多看一个token对确定产生式有帮助，故有`next_***_`成员变量。
 
 #### 算法描述（还不完善）
 
@@ -1100,7 +1100,9 @@ private:
 |      ParseExpr(int prec)      |          解析运算符等级不小于`prec`的表达式，用该函数可以简化表达式解析难度，正确处理结合性问题           |
 |        ParsePrimary()         |                            解析一个表达式的基本单元，如整数、实数、函数调用等                             |
 
-![语法分析流程图](assets/parser_flowchart.jpg)
+主要的分析过程顺序图如下：
+
+![语法分析顺序图](assets/parser_flowchart.png)
 
 进行**错误处理**时，将采取如下策略:
 
