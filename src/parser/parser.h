@@ -20,17 +20,24 @@ namespace pascal2c::parser
     template <typename Tp>
     using vector = ::std::vector<Tp>;
 
+    // exception class for syntax error
     class SyntaxErr : public ::std::exception
     {
     public:
+        // param:
+        //     err_msg is the error message
         explicit SyntaxErr(std::string err_msg) : err_msg_(std::move(err_msg)) {}
+
+        // get the error message
+        // return:
+        //     the error message
         inline const char *what() const noexcept override
         {
             return err_msg_.c_str();
         }
 
     private:
-        std::string err_msg_;
+        std::string err_msg_; // error message
     };
 
     class Parser
