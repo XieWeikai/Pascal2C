@@ -4,13 +4,13 @@
 
 ### 数据结构说明
 
-- TOKEN: `yylex()` 的返回值，类型是 int, 表示 token 的类型. 单字符的 token 的类型就是字符本身, 例如 `+` 对应 int 值为 `'+'`; 多字符的 token 的类型是一个预定义的宏, 例如 `PROGRAM` 对应 int 值为 `TOK_PROGRAM`. 多字符的预定义宏的值从 257 开始, 自动分配.
-- yylval: token 的词法属性, 类型为 `union { uint32_t intval; double realval; char strval[MAX_STR_LEN]; }`. `intval` 保存整型数的值, `realval` 保存实数的值, `strval` 保存字符串的值.
-- yylineno: 行号, 类型为 int, 从 1 开始计数.
-- yycolno: 列号, 类型为 int, 从 1 开始计数.
-- yyerrno: 错误类型, 类型为 int, 用于保存最后一次的错误类型.
-- yytext: token 的文本, 类型为 char*, 用于 TOK_ID 的词法属性.
-- YYERRMSG: 错误信息, 类型为 char**, 保存错误类型对应的错误信息.
+* TOKEN: `yylex()` 的返回值，类型是 int, 表示 token 的类型. 单字符的 token 的类型就是字符本身, 例如 `+` 对应 int 值为 `'+'`; 多字符的 token 的类型是一个预定义的宏, 例如 `PROGRAM` 对应 int 值为 `TOK_PROGRAM`. 多字符的预定义宏的值从 257 开始, 自动分配.
+* yylval: token 的词法属性, 类型为 `union { uint32_t intval; double realval; char strval[MAX_STR_LEN]; }`. `intval` 保存整型数的值,  `realval` 保存实数的值,  `strval` 保存字符串的值.
+* yylineno: 行号, 类型为 int, 从 1 开始计数.
+* yycolno: 列号, 类型为 int, 从 1 开始计数.
+* yyerrno: 错误类型, 类型为 int, 用于保存最后一次的错误类型.
+* yytext: token 的文本, 类型为 char*, 用于 TOK_ID 的词法属性.
+* YYERRMSG: 错误信息, 类型为 char**, 保存错误类型对应的错误信息.
 
 ### 函数、方法说明
 
@@ -58,13 +58,13 @@ char* TokenToString(int token) {
 
 #### 处理字符串
 
-1. 遇到单引号（'），进入STRING状态，初始化字符串。
-2. 在STRING状态下：
+01. 遇到单引号（'），进入STRING状态，初始化字符串。
+02. 在STRING状态下：
     - 遇到换行符或文件结尾，报告未正常结束的字符串错误。
     - 遇到非转义字符，将它们追加到字符串中。
     - 遇到转义序列，将对应的实际字符追加到字符串中。
     - 遇到其他转义字符，将原始的内容追加到字符串中。
-4. 遇到单引号（'），返回到初始状态。
+04. 遇到单引号（'），返回到初始状态。
 
 ```
 %x STRING
@@ -83,7 +83,7 @@ char* TokenToString(int token) {
 
 #### 处理关键字
 
-直接匹配, 例如 `and {return TOK_AND;}`.
+直接匹配, 例如 `and {return TOK_AND;}` .
 
 #### 处理标识符
 
@@ -185,12 +185,14 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 
 #### 数据结构定义（为类定义里的函数（除了get和set这类简单函数）和数据成员加上注释，直接复制过来）
 
-为了完整表示源程序的所有信息，我们为pascal各种语法结构设计了相应的AST节点，各个类的定义均放在`pascal2c::ast`命名空间中，具体定义如下文所述
+为了完整表示源程序的所有信息，我们为pascal各种语法结构设计了相应的AST节点，各个类的定义均放在 `pascal2c::ast` 命名空间中，具体定义如下文所述
 
 ##### class Program
-  AST 树根节点，存有指向 `ProgramHead`、`ProgramBody`的指针
+
+  AST 树根节点，存有指向 `ProgramHead` 、 `ProgramBody` 的指针
 
 ```c++
+
     // Program -> ProgramHead; ProgramBody.
     //
     // eg. program f(a, b); var a, b; begin a := 1; b := 2; end.
@@ -218,7 +220,9 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
         shared_ptr<ProgramHead> program_head_; // eg. program f(a, b)
         shared_ptr<ProgramBody> program_body_; // eg. var a, b; begin a := 1; b := 2; end.
     };
+
 ```
+
 ##### class ProgramHead
 
 存储程序头部信息，存有程序名和程序输入参数列表
@@ -268,6 +272,7 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 存储程序体信息，存有常数声明列表，变量声明列表，子程序列表以及程序内容
 
 ```c++
+
     // ProgramBody -> (const const_declarations | EMPTY)
     //                (var var_declarations | EMPTY)
     //                (subprogram_declarations | EMPTY)
@@ -319,6 +324,7 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
         vector<shared_ptr<Subprogram>> subprogram_declarations_;  // can be empty, eg. procedure p; begin end;
         vector<shared_ptr<Statement>> statement_list_;            // can be empty, eg. begin end
     };
+
 ```
 
 ##### class ConstDeclaration
@@ -360,6 +366,7 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 存储变量声明信息，存有类型名，变量名。
 
 ```c++
+
     // VarDeclaration -> IdList : Type
     //
     // eg. a, b, c : integer
@@ -388,6 +395,7 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
         shared_ptr<IdList> id_list; // a list of identifiers, eg. a, b, c
         shared_ptr<Type> type;      // the type of the identifiers, eg. integer
     };
+
 ```
 
 ##### class Subprogram
@@ -430,6 +438,7 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 存储子程序头信息，子程序可能为 function 或 procedure。存有子程序名，子程序参数以及返回值类型。
 
 ```c++
+
     // SubprogramHead -> function id (EMPTY | parameters) : (TOK_INTEGER | TOK_REAL | TOK_BOOLEAN | TOK_CHAR) | procedure id (EMPTY | parameters)
     // parameters -> Parameter | parameters ; Parameter
     //
@@ -468,6 +477,7 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
         int return_type_;                          // -1 means procedure, eg. integer, real
         vector<shared_ptr<Parameter>> parameters_; // can be empty, eg. a, b : integer
     };
+
 ```
 
 ##### class SubprogramBody
@@ -523,6 +533,7 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 存储子程序参数信息，参数可以为值或引用，存有参数名列表，参数类型以及是否为引用。
 
 ```c++
+
     // Parameter -> var_parameter | value_parameter
     // var_parameter -> var value_parameter
     // value_parameter -> id_list : (TOK_INTEGER | TOK_REAL | TOK_BOOLEAN | TOK_CHAR)
@@ -557,6 +568,7 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
         shared_ptr<IdList> id_list_; // a list of identifiers, eg. a, b
         int type_;                   // TOK_INTEGER | TOK_REAL | TOK_BOOLEAN | TOK_CHAR, eg. integer, real, boolean, char
     };
+
 ```
 
 ##### class IdList
@@ -596,11 +608,12 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 
 ##### class Type
 
-存储类型信息，类型可以为普通类型（integer, real, bool, char）或数组类型，存有基础类型（lexer 输出的 `TOK_INTEGER_TYPE`, `TOK_REAL_TYPE`, `TOK_BOOLEAN_TYPE`, `TOK_CHAR_TYPE`）、是否为数组，若为数组还应包括数组下标范围。
+存储类型信息，类型可以为普通类型（integer, real, bool, char）或数组类型，存有基础类型（lexer 输出的 `TOK_INTEGER_TYPE` , `TOK_REAL_TYPE` , `TOK_BOOLEAN_TYPE` , `TOK_CHAR_TYPE` ）、是否为数组，若为数组还应包括数组下标范围。
 
-包含 struct `Period`，存储数组下标，存有下标上界和下界。
+包含 struct `Period` ，存储数组下标，存有下标上界和下界。
 
 ```c++
+
     // Type -> (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE) | array [Period] of (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE)
     // Period -> digits ... digits | period , digits ... digits
     //
@@ -651,6 +664,7 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
         int basic_type_;         // TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE, eg. integer, real, boolean, char
         vector<Period> periods_; // can be empty, eg. [1..10, 20..30]
     };
+
 ```
 
 ##### class Statement
@@ -674,17 +688,20 @@ public:
 };
 ```
 
-其中`StatementType`为枚举类型，其定义如下
+其中 `StatementType` 为枚举类型，其定义如下
 
 ```c++
 // to identify what type a statement is
 enum StatementType{
+
     ASSIGN_STATEMENT = 1,
     CALL_STATEMENT = 2,
     COMPOUND_STATEMENT = 3,
     IF_STATEMENT = 4,
     FOR_STATEMENT = 5,
-};
+
+}; 
+
 ```
 
 ##### class AssignStatement
@@ -712,7 +729,7 @@ private:
 };
 ```
 
-其中`Variable`类型和`Expression`类型放在后文解释。
+其中 `Variable` 类型和 `Expression` 类型放在后文解释。
 
 ##### class CallStatement
 
@@ -726,6 +743,7 @@ private:
 // write and read are treated as CallStatement as built-in function
 class CallStatement : public Statement {
 public:
+
     CallStatement(std::string name, vector<std::shared_ptr<Expression> > expr_list) :
             name_(std::move(name)), expr_list_(std::move(expr_list)) {}
 
@@ -734,11 +752,15 @@ public:
     inline StatementType GetType() const override { return CALL_STATEMENT; }
 
     std::string ToString(int level) const override;
+
 private:
+
     std::string name_;   // procedure name or function name
 
     vector<std::shared_ptr<Expression> > expr_list_; // can be empty:  e.g. procedure_name;   func();
-};
+
+}; 
+
 ```
 
 ##### class CompoundStatement
@@ -766,7 +788,7 @@ private:
 
 ##### class  IfStatement
 
-该类表示pascal中的`if`语句，定义如下
+该类表示pascal中的 `if` 语句，定义如下
 
 ```c++
 // if condition_ then
@@ -775,6 +797,7 @@ private:
 //      else_
 class IfStatement : public Statement {
 public:
+
     IfStatement(std::shared_ptr<Expression> cond,std::shared_ptr<Statement> then,
                 std::shared_ptr<Statement> else_part)
                 : condition_(std::move(cond)),then_(std::move(then)),else_(std::move(else_part)) {}
@@ -782,11 +805,15 @@ public:
     inline StatementType GetType() const override { return IF_STATEMENT; }
 
     std::string ToString(int level) const override;
+
 private:
+
     std::shared_ptr<Expression> condition_;    // condition expression
     std::shared_ptr<Statement>  then_;         // then part of if statement
     std::shared_ptr<Statement>  else_;         // else part of if statement, can be empty
-};
+
+}; 
+
 ```
 
 ##### class ForStatement
@@ -814,12 +841,13 @@ private:
 
 ##### class Expression
 
-该类表示pascal中一条合法的表达式，由于pascal中表达式有很多个部分构成、有很多种表达式，故统一用一个`Expression`类来做表达式的基类，该类定义如下
+该类表示pascal中一条合法的表达式，由于pascal中表达式有很多个部分构成、有很多种表达式，故统一用一个 `Expression` 类来做表达式的基类，该类定义如下
 
 ```c++
 // base class for expression
 class Expression {
 public:
+
     // for test use
     // param:
     //     level is the level of indentation that should be applied to the returned string
@@ -831,7 +859,9 @@ public:
     // return:
     //     one of ExprType
     virtual ExprType GetType() const = 0;
-};
+
+}; 
+
 ```
 
 其中`ExprType`的定义如下
@@ -860,14 +890,19 @@ enum ExprType{
 // value_ stores the value of the integer
 class IntegerValue : public Expression {
 public:
+
     explicit IntegerValue(int value) : value_(value) {}
 
     std::string ToString(int level) const override;
-    inline ExprType GetType() const override {return INT;}
+
+    inline ExprType GetType() const override {return INT; }
 
 private:
+
     int value_;
-};
+
+}; 
+
 ```
 
 ##### Class RealValue
@@ -893,7 +928,7 @@ private:
 
 ##### class CharValue
 
-该类表示一个字符，形如`'a'`，表示该类型值的节点如下
+该类表示一个字符，形如 `'a'` ，表示该类型值的节点如下
 
 ```c++
 // leaf node
@@ -902,14 +937,19 @@ private:
 // value_ store the value
 class BooleanValue : public Expression {
 public:
+
     explicit BooleanValue(bool value) : value_(value) {}
 
     std::string ToString(int level) const override;
-    inline ExprType GetType() const override {return BOOLEAN;}
+
+    inline ExprType GetType() const override {return BOOLEAN; }
 
 private:
+
     bool value_;
-};
+
+}; 
+
 ```
 
 ##### class BooleanValue
@@ -935,27 +975,32 @@ private:
 
 ##### class CallValue
 
-该类表示调用一个函数产生的值，如`add(1,2)`，其中`add`为一个函数，返回值为整数。该类节点定义如下
+该类表示调用一个函数产生的值，如 `add(1,2)` ，其中 `add` 为一个函数，返回值为整数。该类节点定义如下
 
 ```c++
 // represent a function call
-// e.g. add(3+4,5)
+// e.g. add(3+4, 5)
 // params_ is a vector of expressions used as parameters of the function
 // params_ can be empty
 class CallValue : public Expression {
 public:
+
     explicit CallValue(std::string func_name) : func_name_(std::move(func_name)) {}
     CallValue(std::string func_name,vector<std::shared_ptr<Expression> > params) : func_name_(std::move(func_name)),params_(
             std::move(params)) {}
     void AddParam(std::shared_ptr<Expression> expr);
 
     std::string ToString(int level) const override;
-    inline ExprType GetType() const override {return CALL;}
+
+    inline ExprType GetType() const override {return CALL; }
 
 private:
+
     std::string func_name_;
     vector<std::shared_ptr<Expression> > params_;
-};
+
+}; 
+
 ```
 
 ##### class Variable
@@ -991,19 +1036,24 @@ private:
 ```c++
 // represent binary expression
 // e.g. 3 + 4 + 5    3 * ((6 + 7) - 2)
-// in the example of 3 + 4 + 5, lhs_ is 3 + 4 ,rhs_ is 5 and op_ is '+'
+// in the example of 3 + 4 + 5, lhs_ is 3 + 4 , rhs_ is 5 and op_ is '+'
 class BinaryExpr : public Expression {
 public:
+
     BinaryExpr(int op, std::shared_ptr<Expression> lhs, std::shared_ptr<Expression> rhs) :
             op_(op), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
 
     std::string ToString(int level) const override;
-    inline ExprType GetType() const override {return BINARY;}
+
+    inline ExprType GetType() const override {return BINARY; }
 
 private:
+
     int op_;                 // operator
     std::shared_ptr<Expression> lhs_, rhs_; // two operands
-};
+
+}; 
+
 ```
 
 ##### class UnaryExpr
@@ -1033,10 +1083,10 @@ private:
 
 以token为输入，解析Pascal-S中的各种语法结构，如表达式、语句、常量声明、变量声明、子查询定义等。在对符合语法的输入进行解析后生成对应的抽象语法树(AST)，该抽象语法树能完整的表达源码包含的信息，语法分析器生成AST后将交由语义分析模块处理。
 
-
 #### 接口描述
 
 ##### class Parser
+
 | 描述                                               | 接口             | 参数                    | 返回值      | 异常                                                       |
 | -------------------------------------------------- | ---------------- | ----------------------- | ----------- | ---------------------------------------------------------- |
 | 给定输入文件指针，返回一个针对特定文件的Parser实例 | Parser(FILE *in) | FILE *in : 输入文件指针 | Parser实例  | 无                                                         |
@@ -1060,22 +1110,44 @@ parser类的定义如下
 ```c++
 class Parser{
 public:
+
     // param:
     //     in is the input file
     explicit Parser(FILE *in);
+
 private:
+
     int token_,next_token_;                      // current token and next token
+
   	// if an lex error occur, error number will be stored in this variable
+
     int lexer_errno_;     
+
   	// token value
+
     YYSTYPE tok_value_,next_tok_value_;
     int line_,next_line_;                        // line number of token in the input file
     int column_,next_column_;                      // column number of token in the input file
     std::string text_,next_text_;
+
   
+
     vector<std::string> err_msg_;     // error massages
-};
+
+}; 
+
 ```
+
+`Parser` 的构造函数接收一个 `FILE *` ，即输入文件。各个成员变量作用:
+
+* `token_`: 当前token
+* `lexer_errno_`: 若获取下一个token时出现了词法错误，则该变量存着错误号
+* `line_`: 当前token在源文件的行数
+* `column_`: 当前token在源文件中的列数
+* `text_`: 当前token对应的字符串
+* `err_msg_`: 当出现语法错误时，错误信息均存在这里面
+
+成员中形如 `next_***_` 的变量为下一个token对应的信息，再做语法分析时有时多看一个token对确定产生式有帮助，故有 `next_***_` 成员变量。
 
 #### 算法描述（还不完善）
 
@@ -1092,12 +1164,12 @@ private:
 |     ParseSubprogramHead()     |                                               分析子程序头                                                |
 |     ParseSubprogramBody()     |                                              分析子程序主体                                               |
 |   ParseCompoundStatement()    |                                               分析复合语句                                                |
-|       ParseStatement()        |                                解析任意一种`statement`，返回Statement指针                                 |
-|      ParseIfStatement()       |                                     解析`if`语句，返回`Statement`指针                                     |
-|      ParseForStatement()      |                                    解析`for`语句，返回`Statement`指针                                     |
-| ParseAssignAndCallStatement() | 解析赋值语句或函数、过程调用语句，返回`Statement`指针。两种语句放在一起解析是因为两种语句均以`TOK_ID`开头 |
-|          ParseExpr()          |                                   解析一个表达式，返回`Expression`指针                                    |
-|      ParseExpr(int prec)      |          解析运算符等级不小于`prec`的表达式，用该函数可以简化表达式解析难度，正确处理结合性问题           |
+|       ParseStatement()        |                                解析任意一种 `statement` ，返回Statement指针                                 |
+|      ParseIfStatement()       |                                     解析 `if` 语句，返回 `Statement` 指针                                     |
+|      ParseForStatement()      |                                    解析 `for` 语句，返回 `Statement` 指针                                     |
+| ParseAssignAndCallStatement() | 解析赋值语句或函数、过程调用语句，返回 `Statement` 指针。两种语句放在一起解析是因为两种语句均以 `TOK_ID` 开头 |
+|          ParseExpr()          |                                   解析一个表达式，返回 `Expression` 指针                                    |
+|      ParseExpr(int prec)      |          解析运算符等级不小于 `prec` 的表达式，用该函数可以简化表达式解析难度，正确处理结合性问题           |
 |        ParsePrimary()         |                            解析一个表达式的基本单元，如整数、实数、函数调用等                             |
 
 主要的分析过程顺序图如下：
@@ -1106,14 +1178,13 @@ private:
 
 进行**错误处理**时，将采取如下策略:
 
-- 在较低层的解析方法中碰到语法错误时抛出异常
-- 在较高层的解析方法调用底层解析函数时捕获异常，将错误信息存入`err_msg_`
-- 继续解析的两种处理策略:
-  - 碰到异常后，跳过若干`token`直到碰到想要的`token`
-  - 碰到异常后，忽略一些`token`接着解析
+* 在较低层的解析方法中碰到语法错误时抛出异常
+* 在较高层的解析方法调用底层解析函数时捕获异常，将错误信息存入`err_msg_`
+* 继续解析的两种处理策略:
+  + 碰到异常后，跳过若干`token`直到碰到想要的`token`
+  + 碰到异常后，忽略一些`token`接着解析
 
-如`ParseExpr`和`ParseStatement`在碰到语法错误时直接抛出异常，`ParseCompoundStatement`调用`ParseStatement`来解析一系列语句，若捕获异常，则记录下异常，并不断跳过`token`直到遇到`;`或者可能的语句开头的`token`再接着进行解析。`ParseCompoundStatement`在碰到缺少`begin`的错误时，记录错误并忽略`begin`直接进行statement的解析操作。
-
+如 `ParseExpr` 和 `ParseStatement` 在碰到语法错误时直接抛出异常， `ParseCompoundStatement` 调用 `ParseStatement` 来解析一系列语句，若捕获异常，则记录下异常，并不断跳过 `token` 直到遇到 `;` 或者可能的语句开头的 `token` 再接着进行解析。 `ParseCompoundStatement` 在碰到缺少 `begin` 的错误时，记录错误并忽略 `begin` 直接进行statement的解析操作。
 
 ---
 
@@ -1123,11 +1194,7 @@ private:
 
 #### 数据结构说明
 
-
-
 #### 函数、方法说明
-
-
 
 ### ast 处理
 
@@ -1151,9 +1218,538 @@ graph LR;
 
 ## 代码生成
 
+该环节的任务是将由Pascal代码生成的AST进行遍历, 生成对应的 C 代码. 将遵循以下详细设计步骤：
+
+1. 定义需求：
+目标是创建Pascal2C项目的一个模块，该模块能够将 Pascal 源代码生成的AST转换为具有相同功能的 C 代码。转换后的代码应该与Pascal源代码有相同的表现。
+
+1. 选择技术和工具：
+为了实现这个任务，选用C++14来处理 Pascal 源代码生成的AST树, 以及将其生成为对应的C代码。
+
+1. 设计阶段：
+代码生成部分包括如下几个方面:
+
+    a. 与语法分析和语义分析的 AST 接口
+
+    为了方便各部分的并行开发, 设计一套AST接口, 与前面环节对输入的 Pascal 源代码进行词法分析和语法分析，生成的抽象语法树（AST）进行对接。
+
+    b. AST 遍历与转换规则：
+
+    为了将 Pascal 代码转换为等价的 C 代码，需要定义一系列的转换规则，这些规则将在 AST 上执行。例如：
+    * 将 Pascal 的 `begin` 和 `end` 转换为 C 语言中的 `{` 和 `}`；
+    * 将 Pascal 的 `:=` 转换为 C 语言中的 `=`；
+    * 将 Pascal 的 `div` 和 `mod` 转换为 C 语言中的 `/` 和 `%`；
+    * 将 Pascal 的数组下标从 1 开始转换为 C 语言中从 0 开始；
+    * 将 Pascal 的 `record` 转换为 C 语言中的 `struct`。
+
+    c. 代码生成：根据转换规则先序遍历 AST，并将每个节点转换为等价的 C 语言结构。在这个过
+    程中，需要确保生成的代码具有良好的可读性, 例如合理的缩进、注释和变量命名, 并且能
+    够产生与源Pascal代码相同的行为。
+
+1. 测试和验证：
+使用GoogleTest编写测试用例，确保转换后的 C 代码具有与输入的 Pascal 代码相同的功能。对于不同的输入，检查转换后的 C 代码是否符合预期，并在时间允许的情况下提高其执行性能。
+
+1. 文档和维护：
+为了确保代码的可维护性和可扩展性，需要编写详细的文档，包括设计决策、转换规则、已知限制和示例。同时，为了确保代码质量，需要遵循良好的编码实践，例如代码审查和持续集成。
+
+1. 优化和改进：
+在实现了基本功能之后，可以对转换器进行优化和改进，以提高生成代码的性能和可读性。
+例如，可以使用优化算法来消除冗余代码、优化循环结构等。改进后, 确保仍旧能够通过测
+试, 以尽量确保改进的等价性.
+
+1. 错误处理和恢复：
+在遍历AST树并生成C代码的过程中，需要考虑各种可能的错误情况，如语法错误、未定义的
+变量等。为了提高用户体验，当发生这些错误时，转换器将尝试恢复没有二义性的错误, 对
+其他的错误, 提供有关错误的详细信息和友好提示，以帮助用户识别和解决问题。
+
 ### 数据结构说明
+
+首先介绍与前面的语法分析和语义分析部分接驳的AST接口的定义.
+
+#### AST接口部分说明
+
+```cpp
+// ASTNode 是抽象语法树节点的基类，所有其他 AST 节点类型都应从这个类派生
+class ASTNode {
+  public:
+    ASTNode(){};
+    virtual ~ASTNode() = default;
+};
+
+// ASTRoot 是 ASTNode 的类型别名，表示抽象语法树的根节点
+typedef ASTNode ASTRoot;
+
+// Program 类表示 Pascal 程序的整体结构，包含程序的名称和一个指向 Block 类型的智能指针
+class Program : public ASTNode {
+  public:
+    Program(const string &name, const std::shared_ptr<Block> &block)
+        : name_(name), block_(block){};
+    string getName() const { return name_; }
+    const std::shared_ptr<Block> &GetBlock() const { return block_; }
+
+  private:
+    string name_;
+    std::shared_ptr<Block> block_;
+};
+
+// Block 类表示 Pascal 代码中的一个代码块，包含一个用于存储声明语句的 ASTNode 类型的向量和一个表示复合语句的指向 Compound 类型的智能指针
+class Block : public ASTNode {
+  public:
+    Block(const vector<std::shared_ptr<ASTNode>> &declarations,
+          const std::shared_ptr<Compound> &compound_statement);
+    const vector<std::shared_ptr<ASTNode>> &GetDeclarations() const {
+        return declarations_;
+    }
+    const std::shared_ptr<Compound> &GetCompoundStatement() const {
+        return compound_statement_;
+    }
+
+  private:
+    vector<std::shared_ptr<ASTNode>> &declarations_;
+    std::shared_ptr<Compound> compound_statement_;
+};
+
+// VarDecl 类表示一个变量声明，包含一个指向 Var 类型的智能指针（表示变量节点）和一个指向 Type 类型的智能指针（表示类型节点）
+class VarDecl : public ASTNode {
+  public:
+    VarDecl(const std::shared_ptr<Var> &var_node,
+            const std::shared_ptr<Type> &type_node)
+        : var_node_(var_node), type_node_(type_node){};
+    const std::shared_ptr<Var> &GetVarNode() const { return var_node_; }
+    const std::shared_ptr<Type> &GetTypeNode() const { return type_node_; }
+
+  private:
+    std::shared_ptr<Var> var_node_;
+    std::shared_ptr<Type> type_node_;
+};
+
+// Type 类表示变量的类型，包含一个指向 lexer::Token 类型的智能指针和一个表示类型的枚举值 lexer::TokenType
+class Type : public ASTNode {
+  public:
+    Type(const std::shared_ptr<lexer::Token> token)
+        : token_(token), type_(token->getType()){};
+    const lexer::TokenType GetType() const { return type_; }
+
+  private:
+    std::shared_ptr<lexer::Token> token_;
+    const lexer::TokenType type_;
+};
+
+// Compound 表示一个复合语句，它包含一个或多个语句或声明
+class Compound : public ASTNode {
+  public:
+    Compound(){};
+    explicit Compound(const std::vector<std::shared_ptr<ASTNode>> &children);
+    void AddChild(std::shared_ptr<ASTNode> node);
+    const vector<std::shared_ptr<ASTNode>> &GetChildren() const {
+        return children_;
+    }
+
+  private:
+    vector<std::shared_ptr<ASTNode>> children_;
+};
+
+// Assign 表示一个赋值语句，它包含左值、操作符（赋值符号）和右值
+class Assign : public ASTNode {
+  public:
+    Assign(const std::shared_ptr<ASTNode> &left, const lexer::Token &token,
+           const std::shared_ptr<ASTNode> &right)
+        : left_(left), token_(token), right_(right){};
+    const std::shared_ptr<ASTNode> &GetLeft() const { return left_; }
+    const std::shared_ptr<ASTNode> &GetRight() const { return right_; }
+
+  private:
+    std::shared_ptr<ASTNode> left_;
+    lexer::Token token_;
+    std::shared_ptr<ASTNode> right_;
+};
+
+// Var 表示一个变量，它包含一个标识符（名称）和关联的 Token
+class Var : public ASTNode {
+  public:
+    Var(const std::shared_ptr<lexer::Token> &token)
+        : token_(token), value_(token->GetValue()){};
+    const string GetValue() const { return value_; }
+
+  private:
+    std::shared_ptr<lexer::Token> token_;
+    string value_;
+};
+
+// Term 表示一个表达式中的术语，这是一个基类，由其他具体的术语类型继承
+class Term : public ASTNode {
+  public:
+    Term() {}
+};
+
+// Factor 表示一个表达式中的因子，这是一个基类，由其他具体的因子类型继承
+class Factor : public ASTNode {
+  public:
+    Factor() {}
+};
+
+// Expr 表示一个表达式，它包含一个或多个子表达式
+class Expr : public ASTNode {
+  public:
+    Expr() {}
+
+  private:
+    vector<std::shared_ptr<ASTNode>> children_;
+};
+
+// Num 表示一个数值，它包含一个数值 Token 和一个整数值
+class Num : public ASTNode {
+  public:
+    Num(std::shared_ptr<lexer::Token> &token)
+        : token_(token), value_(std::stoi(token->GetValue())) {}
+    int getValue() const { return (value_); }
+
+  private:
+    std::shared_ptr<lexer::Token> token_;
+    int value_;
+};
+
+// BinOp 表示一个二元操作，包括两个操作数（左操作数和右操作数）以及一个操作符
+class BinOp : public ASTNode {
+  public:
+    explicit BinOp(std::shared_ptr<Var> &left,
+                   std::shared_ptr<lexer::Token> &token,
+                   std::shared_ptr<Expr> &right)
+        : left_(left), oper_(token), right_(right) {}
+
+    explicit BinOp(std::shared_ptr<Var> &left,
+                   std::shared_ptr<lexer::Token> &token,
+                   std::shared_ptr<Var> &right)
+        : left_(left), oper_(token), right_(right) {}
+
+    explicit BinOp(std::shared_ptr<Expr> &left,
+                   std::shared_ptr<lexer::Token> &token,
+                   std::shared_ptr<Var> &right)
+        : left_(left), oper_(token), right_(right) {}
+
+    explicit BinOp(std::shared_ptr<Expr> &left,
+                   std::shared_ptr<lexer::Token> &token,
+                   std::shared_ptr<Expr> &right)
+        : left_(left), oper_(token), right_(right) {}
+
+    const std::shared_ptr<ASTNode> &getLeft() { return left_; }
+    const std::shared_ptr<lexer::Token> &getOper() { return oper_; }
+    const std::shared_ptr<ASTNode> &getRight() { return right_; }
+
+  private:
+    std::shared_ptr<ASTNode> left_;
+    std::shared_ptr<lexer::Token> oper_;
+    std::shared_ptr<ASTNode> right_;
+};
+
+// NoOp 表示一个空操作，用于表示没有实际操作的情况，例如空语句或空块等
+class NoOp : public ASTNode {
+  public:
+    NoOp(){};
+};
+
+```
 
 ### 函数、方法说明
 
-### 算法说明
+#### AST打印类 AST Printer
 
+该类用于打印AST, 方便debug. 由于打印和代码生成一样都需要对AST进行遍历, 这样可以更方便的定位错误.
+
+```cpp
+// ASTPrinter 类负责访问和打印抽象语法树（AST）的各个节点。它通过使用访问者模式来实现对不同类型节点的处理。
+class ASTPrinter {
+  public:
+    // 构造函数
+    explicit ASTPrinter(){};
+
+    // 根据节点类型访问相应的 Visit 函数，处理抽象语法树的节点
+    void Visit(const std::shared_ptr<semantic::ASTNode> &node);
+
+  private:
+    // 处理二元操作符节点
+    void VisitBinOp(const std::shared_ptr<semantic::BinOp> &node);
+    // 处理数值节点
+    void VisitNum(const std::shared_ptr<semantic::Num> &node);
+    // 处理程序节点
+    void VisitProgram(const std::shared_ptr<semantic::Program> &node);
+    // 处理代码块节点
+    void VisitBlock(const std::shared_ptr<semantic::Block> &node);
+    // 处理变量声明节点
+    void VisitVarDecl(const std::shared_ptr<semantic::VarDecl> &node);
+    // 处理复合语句节点
+    void VisitCompound(const std::shared_ptr<semantic::Compound> &node);
+    // 处理赋值语句节点
+    void VisitAssign(const std::shared_ptr<semantic::Assign> &node);
+    // 处理变量节点
+    void VisitVar(const std::shared_ptr<semantic::Var> &node);
+    // 处理类型节点
+    void VisitType(const std::shared_ptr<semantic::Type> &node);
+    // 处理 NoOp（空操作）节点
+    void VisitNoOp(const std::shared_ptr<semantic::NoOp> &node);
+
+    // 输出流，用于保存访问节点的输出结果
+    std::stringstream ostream_;
+    // 当前缩进级别，用于控制输出格式
+    int indent_level_;
+};
+```
+
+其具体遍历过程如下.
+
+```cpp
+// 访问并处理抽象语法树的各种节点类型
+void ASTPrinter::Visit(const std::shared_ptr<semantic::ASTRoot> &node) {
+    // 根据节点类型，调用相应的 Visit 函数
+    if (std::dynamic_pointer_cast<semantic::Program>(node)) {
+        VisitProgram(std::dynamic_pointer_cast<semantic::Program>(node));
+    } else if (std::dynamic_pointer_cast<semantic::Block>(node)) {
+        VisitBlock(std::dynamic_pointer_cast<semantic::Block>(node));
+    } else if (std::dynamic_pointer_cast<semantic::VarDecl>(node)) {
+        VisitVarDecl(std::dynamic_pointer_cast<semantic::VarDecl>(node));
+    } else if (std::dynamic_pointer_cast<semantic::Type>(node)) {
+        VisitType(std::dynamic_pointer_cast<semantic::Type>(node));
+    } else if (std::dynamic_pointer_cast<semantic::Compound>(node)) {
+        VisitCompound(std::dynamic_pointer_cast<semantic::Compound>(node));
+    } else if (std::dynamic_pointer_cast<semantic::Assign>(node)) {
+        VisitAssign(std::dynamic_pointer_cast<semantic::Assign>(node));
+    } else if (std::dynamic_pointer_cast<semantic::Var>(node)) {
+        VisitVar(std::dynamic_pointer_cast<semantic::Var>(node));
+    } else if (std::dynamic_pointer_cast<semantic::NoOp>(node)) {
+        VisitNoOp(std::dynamic_pointer_cast<semantic::NoOp>(node));
+    } else if (std::dynamic_pointer_cast<semantic::BinOp>(node)) {
+        VisitBinOp(std::dynamic_pointer_cast<semantic::BinOp>(node));
+    } else if (std::dynamic_pointer_cast<semantic::Num>(node)) {
+        VisitNum(std::dynamic_pointer_cast<semantic::Num>(node));
+    }
+
+    // 如果节点类型无效，抛出异常
+    throw std::runtime_error("Invalid node type");
+}
+
+// 处理程序节点
+void ASTPrinter::VisitProgram(const std::shared_ptr<semantic::Program> &node) {
+    // 输出程序节点的名称
+    ostream_ << "Program: " << node->getName() << std::endl;
+    // 增加缩进级别
+    indent_level_++;
+    // 访问程序节点的子节点（代码块）
+    Visit(node->GetBlock());
+    // 减少缩进级别
+    indent_level_--;
+}
+
+// 处理代码块节点
+void ASTPrinter::VisitBlock(const std::shared_ptr<semantic::Block> &node) {
+    // 输出 Block
+    ostream_ << string(indent_level_, ' ') << " Block" << std::endl;
+    // 增加缩进级别
+    indent_level_++;
+    // 访问代码块节点的子节点（声明和复合语句）
+    for (auto decl : node->GetDeclarations()) {
+        Visit(decl);
+    }
+    Visit(node->GetCompoundStatement());
+    // 减少缩进级别
+    indent_level_--;
+}
+
+// 处理变量声明节点
+void ASTPrinter::VisitVarDecl(const std::shared_ptr<semantic::VarDecl> &node) {
+    // 输出变量声明节点的信息（变量名和类型）
+    ostream_ << string(indent_level_, ' ')
+             << "VarDecl: " << node->Get
+             VarNode()->GetValue() << ": "
+             << node->GetTypeNode()->GetType() << std::endl;
+}
+
+// 处理复合语句节点
+void ASTPrinter::VisitCompound(
+    const std::shared_ptr<semantic::Compound> &node) {
+    // 输出 Compound
+    ostream_ << string(indent_level_, ' ') << "Compound" << std::endl;
+    // 增加缩进级别
+    indent_level_++;
+    // 访问复合语句节点的子节点
+    for (const auto &child : node->GetChildren()) {
+        Visit(child);
+    }
+    // 减少缩进级别
+    indent_level_--;
+}
+
+// 处理赋值语句节点
+void ASTPrinter::VisitAssign(const std::shared_ptr<semantic::Assign> &node) {
+    // 输出 Assign
+    ostream_ << string(indent_level_, ' ') << "Assign" << std::endl;
+    // 增加缩进级别
+    indent_level_++;
+    // 访问赋值语句节点的左侧子节点
+    ostream_ << string(indent_level_, ' ') << "Left:" << std::endl;
+    Visit(node->GetLeft());
+    // 访问赋值语句节点的右侧子节点
+    ostream_ << string(indent_level_, ' ') << "Right:" << std::endl;
+    Visit(node->GetRight());
+    // 减少缩进级别
+    indent_level_--;
+}
+
+// 处理变量节点
+void ASTPrinter::VisitVar(const std::shared_ptr<semantic::Var> &node) {
+    // 输出变量节点的值（变量名）
+    ostream_ << string(indent_level_, ' ') << "Var:" << node->GetValue()
+             << std::endl;
+}
+
+// 处理类型节点
+void ASTPrinter::VisitType(const std::shared_ptr<semantic::Type> &node) {
+    // 输出类型节点的类型
+    ostream_ << string(indent_level_, ' ') << "Type:" << node->GetType()
+             << std::endl;
+}
+
+// 处理空操作节点
+void ASTPrinter::VisitNoOp(const std::shared_ptr<semantic::NoOp> &node) {
+    // 输出 NoOp
+    ostream_ << string(indent_level_, ' ') << "NoOp" << std::endl;
+}
+
+// 处理二元操作节点
+void ASTPrinter::VisitBinOp(const std::shared_ptr<semantic::BinOp> &node) {
+    // 输出二元操作节点的操作符
+    ostream_ << string(indent_level_, ' ')
+             << "BinOp:" << node->getOper()->getType() << std::endl;
+    // 增加缩进级别
+    indent_level_++;
+    // 访问二元操作节点的左侧子节点
+    Visit(node->getLeft());
+    // 访问二元操作节点的右侧子节点
+    Visit(node->getRight());
+    // 减少缩进级别
+    indent_level_--;
+}
+
+// 处理数字节点
+void ASTPrinter::VisitNum(const std::shared_ptr<semantic::Num> &node) {
+    // 输出数字节点的值
+    ostream_ << string(indent_level_, ' ') << "Num:" << node->getValue()
+             << std::endl;
+}
+```
+
+#### 代码生成CodeGenerator
+
+`CodeGenerator` 类用于将给定的 Pascal 代码的抽象语法树转换为等价的 C 代码。它包含了访问不同类型 AST 节点的成员函数，以生成相应的 C 代码。类还维护一个输出流，用于保存生成的 C 代码，以及当前缩进级别，以生成格式化的 C 代码。
+
+```cpp
+class CodeGenerator {
+  public:
+    // 构造函数，接收一个指向 parser::Parser 类型的智能指针，用于解析源代码生成抽象语法树
+    explicit CodeGenerator(std::shared_ptr<parser::Parser> parser)
+        : parser_(parser) {}
+
+    // 访问抽象语法树的根节点，生成 C 代码
+    void Visit(const semantic::ASTRoot &ast);
+
+    // 执行抽象语法树的解释
+    int Interpret();
+
+    // 获取生成的 C 代码
+    string GetCCode();
+
+  private:
+    // 访问 ASTNode 类型的节点，并生成相应的 C 代码
+    int Visit(const std::shared_ptr<semantic::ASTNode> &node);
+
+    // ... 类似的 Visit 函数，用于访问不同类型的节点 ...
+    
+    // 访问 Program 类型的节点
+    void VisitProgram(const std::shared_ptr<semantic::Program> &node);
+
+    // 访问 Block 类型的节点
+    void VisitBlock(const std::shared_ptr<semantic::Block> &node);
+
+    // 访问 VarDecl 类型的节点
+    void VisitVarDecl(const std::shared_ptr<semantic::VarDecl> &node);
+
+    // 访问 Compound 类型的节点
+    int VisitCompound(const std::shared_ptr<semantic::Compound> &node);
+
+    // 访问 Assign 类型的节点
+    int VisitAssign(const std::shared_ptr<semantic::Assign> &node);
+
+    // 访问 Var 类型的节点
+    int VisitVar(const std::shared_ptr<semantic::Var> &node);
+
+    // 访问 NoOp 类型的节点
+    int VisitNoOp(const std::shared_ptr<semantic::NoOp> &node);
+
+    // Parser，用于解析源代码
+    std::shared_ptr<parser::Parser> parser_;
+
+    // 抽象语法树的根节点
+    semantic::ASTRoot ast_;
+
+    // 全局作用域中的符号
+    vector<semantic::ASTNode> global_scope_;
+
+    // 输出流，用于保存生成的 C 代码
+    std::stringstream ostream_;
+
+    // 当前缩进级别，用于生成格式化的 C 代码
+    int indent_level_;
+};
+```
+
+### 算法说明
+在软件工程中，将抽象语法树（AST）转换为C代码的算法设计可以分为以下几个步骤：
+
+1. 遍历AST：从根节点开始，使用深度优先搜索（DFS）遍历AST。在遍历过程中，访问并处理每个节点。
+
+2. 节点类型处理：根据不同的节点类型，实现相应的代码生成方法。例如：
+
+   - 对于声明节点，生成相应的变量或函数声明代码。
+   - 对于赋值语句节点，生成赋值操作的C代码。
+   - 对于表达式节点，生成相应的算术或逻辑运算代码。
+   - 对于控制流节点（如if、while等），生成相应的条件和循环代码。
+   - 对于函数调用节点，生成函数调用语句。
+
+3. 代码生成：根据节点类型处理的结果，逐步构建目标C代码。每次访问一个节点时，将生成的代码片段连接到输出代码中。
+
+4. 优化：对生成的C代码进行优化，以提高生成代码的质量和性能。例如：
+
+   - 删除无用的变量声明和赋值。
+   - 优化表达式计算，减少冗余运算。
+   - 合并连续的条件判断和循环语句。
+
+5. 格式化：为生成的C代码添加适当的缩进和换行，以提高代码的可读性。
+
+以下是一个简单的伪代码实现：
+
+```python
+def generate_c_code(ast):
+    output_code = ""
+
+    def visit(node):
+        nonlocal output_code
+        if node.type == 'declaration':
+            output_code += generate_declaration_code(node)
+        elif node.type == 'assignment':
+            output_code += generate_assignment_code(node)
+        # ... handle other node types ...
+
+    def generate_declaration_code(node):
+        # return C code for the declaration node
+        pass
+
+    def generate_assignment_code(node):
+        # return C code for the assignment node
+        pass
+
+    # ... implement other code generation functions ...
+
+    visit(ast.root)
+    return output_code
+```
+
+这个算法首先遍历AST，针对不同的节点类型生成C代码。然后，将生成的代码逐个连接到输出代码中，最后返回生成的C代码。在实际实现中，可能需要添加更多的错误处理和优化功能。
