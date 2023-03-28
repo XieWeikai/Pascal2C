@@ -1,3 +1,4 @@
+#include <map>
 #include "../ast/ast.h"
 
 namespace symbol_table{
@@ -28,7 +29,7 @@ namespace symbol_table{
         
     private:
         std::shared_ptr<SymbolTableBlock> father;
-        map<string,pascal2c::ast::ExprType> idlist;
+        std::map<std::string,pascal2c::ast::ExprType> idlist;
         
     };
     
