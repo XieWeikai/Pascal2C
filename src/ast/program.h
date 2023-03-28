@@ -45,7 +45,7 @@ namespace pascal2c::ast
         vector<string> id_list_; // a list of identifiers, eg. a, b, c
     };
 
-    // Type -> (TOK_INTEGER | TOK_REAL | TOK_BOOLEAN | TOK_CHAR) | array [Period] of (TOK_INTEGER | TOK_REAL | TOK_BOOLEAN | TOK_CHAR)
+    // Type -> (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE) | array [Period] of (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE)
     // Period -> digits ... digits | period , digits ... digits
     //
     // eg. integer, real, boolean, char
@@ -92,13 +92,13 @@ namespace pascal2c::ast
 
     private:
         bool is_array_;          // true if the type is array type
-        int basic_type_;         // TOK_INTEGER | TOK_REAL | TOK_BOOLEAN | TOK_CHAR, eg. integer, real, boolean, char
+        int basic_type_;         // TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE, eg. integer, real, boolean, char
         vector<Period> periods_; // can be empty, eg. [1..10, 20..30]
     };
 
     // Parameter -> var_parameter | value_parameter
     // var_parameter -> var value_parameter
-    // value_parameter -> id_list : (TOK_INTEGER | TOK_REAL | TOK_BOOLEAN | TOK_CHAR)
+    // value_parameter -> id_list : (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE)
     //
     // eg. a, b : integer
     // eg. var c, d : real
@@ -128,7 +128,7 @@ namespace pascal2c::ast
     private:
         bool is_var_;                // true if the parameter is var parameter
         shared_ptr<IdList> id_list_; // a list of identifiers, eg. a, b
-        int type_;                   // TOK_INTEGER | TOK_REAL | TOK_BOOLEAN | TOK_CHAR, eg. integer, real, boolean, char
+        int type_;                   // TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE, eg. integer, real, boolean, char
     };
 
     // ConstDeclaration -> id= (IntegerValue | RealValue | UnaryExpr | CharValue)
@@ -188,7 +188,7 @@ namespace pascal2c::ast
         shared_ptr<Type> type;      // the type of the identifiers, eg. integer
     };
 
-    // SubprogramHead -> function id (EMPTY | parameters) : (TOK_INTEGER | TOK_REAL | TOK_BOOLEAN | TOK_CHAR) | procedure id (EMPTY | parameters)
+    // SubprogramHead -> function id (EMPTY | parameters) : (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE) | procedure id (EMPTY | parameters)
     // parameters -> Parameter | parameters ; Parameter
     //
     // eg. function f(a, b : integer) : integer
@@ -204,6 +204,8 @@ namespace pascal2c::ast
 
         inline const string &id() const { return id_; }
 
+        // return:
+        //     the return type of the subprogram, -1 means procedure
         inline const int &return_type() const { return return_type_; }
 
         inline const vector<shared_ptr<Parameter>> &parameters() const { return parameters_; }
@@ -317,6 +319,7 @@ namespace pascal2c::ast
 
         inline const shared_ptr<IdList> &id_list() const { return id_list_; }
 
+        // check if the program has parameters
         // return:
         //     true if the program has parameters
         inline const bool &HasIdList() const { return id_list_ != nullptr; }
