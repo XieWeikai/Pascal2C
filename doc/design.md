@@ -4,15 +4,166 @@
 
 ### 数据结构说明
 
-
+- TOKEN: `yylex()` 的返回值，类型是 int, 表示 token 的类型. 单字符的 token 的类型就是字符本身, 例如 `+` 对应 int 值为 `'+'`; 多字符的 token 的类型是一个预定义的宏, 例如 `PROGRAM` 对应 int 值为 `TOK_PROGRAM`. 多字符的预定义宏的值从 257 开始, 自动分配.
+- yylval: token 的词法属性, 类型为 `union { uint32_t intval; double realval; char strval[MAX_STR_LEN]; }`. `intval` 保存整型数的值, `realval` 保存实数的值, `strval` 保存字符串的值.
+- yylineno: 行号, 类型为 int, 从 1 开始计数.
+- yycolno: 列号, 类型为 int, 从 1 开始计数.
+- yyerrno: 错误类型, 类型为 int, 用于保存最后一次的错误类型.
+- yytext: token 的文本, 类型为 char*, 用于 TOK_ID 的词法属性.
+- YYERRMSG: 错误信息, 类型为 char**, 保存错误类型对应的错误信息.
 
 ### 函数、方法说明
 
-
+```c
+// 这个宏会在每次识别出一个 token 时执行, 用于维护列号计数器
+#define YY_USER_ACTION {yycolno = yycolno_next; yycolno_next += yyleng;}
+// ...
+// 设定词法分析器遇到 EOF 后直接退出
+int yywrap() {
+    return 1;
+}
+// ...
+// 返回 token 的字符串描述, 方便输出和调试
+char* TokenToString(int token) {
+    static char* tokenNames[] = {
+        // ...
+    };
+    return tokenNames[token];
+}
+```
 
 ### 算法描述
 
+#### 处理注释
 
+使用 Flex 提供的词法分析环境, 遇到 `{` 时注释开始, 深度加一, 遇到 `}` 时注释结束, 深度减一, 当深度为 0 时注释结束.
+
+```
+    // 声明注释状态
+%x COMMENT
+
+    // 开始注释, 初始化 cmt_level
+"{"                    {BEGIN(COMMENT); cmt_level = 1;}
+    // 嵌套注释, 深度加一
+<COMMENT>"{"           {++cmt_level;}
+    // 更新列号计数器
+<COMMENT>\n            {yycolno_next = 1;}
+    // 遇到 EOF, 报错
+<COMMENT><<EOF>>       {yyerrno = ERR_EOF_IN_COMMENT; BEGIN(INITIAL); return TOK_ERROR;}
+    // 遇到 } 时, 深度减一, 当深度为 0 时注释结束
+<COMMENT>"}"           {--cmt_level; if (cmt_level == 0) BEGIN(INITIAL);}
+    // 忽略注释中的其他字符
+<COMMENT>.
+```
+
+#### 处理字符串
+
+1. 遇到单引号（'），进入STRING状态，初始化字符串。
+2. 在STRING状态下：
+    - 遇到换行符或文件结尾，报告未正常结束的字符串错误。
+    - 遇到非转义字符，将它们追加到字符串中。
+    - 遇到转义序列，将对应的实际字符追加到字符串中。
+    - 遇到其他转义字符，将原始的内容追加到字符串中。
+4. 遇到单引号（'），返回到初始状态。
+
+```
+%x STRING
+
+"'"                {BEGIN(STRING); yylval.strval[0] = '\0';}
+<STRING>\n         {yycolno_next = 1; yyerrno = ERR_UNTERMINATED_STRING; BEGIN(INITIAL); return TOK_ERROR;}
+<STRING><<EOF>>    {yyerrno = ERR_UNTERMINATED_STRING; BEGIN(INITIAL); return TOK_ERROR;}
+<STRING>[^\\']     {strcat(yylval.strval, yytext);}
+<STRING>\\n        {strcat(yylval.strval, "\n");}
+<STRING>\\t        {strcat(yylval.strval, "\t");}
+<STRING>\\r        {strcat(yylval.strval, "\r");}
+<STRING>\\'        {strcat(yylval.strval, "'");}
+<STRING>\\.        {strcat(yylval.strval, yytext);}
+<STRING>"'"        {BEGIN(INITIAL); return TOK_STRING;}
+```
+
+#### 处理关键字
+
+直接匹配, 例如 `and {return TOK_AND;}`.
+
+#### 处理标识符
+
+使用正则表达式匹配字母开头, 中间包含字母和数字的字符串. 标识符的值已经在 `yytext` 中, 只需要返回 `TOK_ID` 即可.
+
+```
+alpha             [A-Za-z_]
+alpha_num         ({alpha}|{digit})
+identifier        {alpha}{alpha_num}*
+
+{identifier}         {return TOK_ID;}
+```
+
+#### 处理整数
+
+使用正则表达式匹配十进制整数, 并将其转换为整型数. 如果整数过大, 则报错. 用 `strtoul` 函数将字符串转换为整型数, 并将结果保存在 `yylval.intval` 中.
+
+```
+digit             [0-9]
+unsigned_integer  {digit}+
+
+{unsigned_integer} {
+    if (strlen(yytext) > MAX_INT_LEN) {
+        yyerrno = ERR_INTEGER_TOO_LARGE;
+        return TOK_ERROR;
+    }
+    yylval.intval = strtoul(yytext, NULL, 10);
+    return TOK_INTEGER;
+}
+```
+
+#### 处理浮点数
+
+使用正则表达式匹配十进制浮点数, 并将其转换为浮点数. 用 `strtod` 函数将字符串转换为浮点数, 并将结果保存在 `yylval.realval` 中.
+
+```
+exponent          e[+-]?{digit}+
+u                 {unsigned_integer}
+real              ({u}\.{u}?|{u}?\.{u}){exponent}?
+
+{real} {
+    yylval.realval = strtod(yytext, NULL);
+    return TOK_REAL;
+}
+```
+
+#### 处理运算符
+
+若是单字符的运算符, 直接返回它的 char 值. 若是多字符的运算符, 返回对应的 token 值.
+
+```
+[+\-*/=<>\[\]\.,:;^()]   {return yytext[0];}
+"<>"                {return TOK_NEQOP;}
+"<="                {return TOK_LEOP;}
+">="                {return TOK_GEOP;}
+":="                {return TOK_ASSIGNOP;}
+".."                {return TOK_DOTDOT;}
+```
+
+#### 忽略空白符
+
+```
+[ \t]*
+```
+
+#### 处理换行
+
+重置列号计数器.
+
+```
+\n                 {yycolno_next = 1;}
+```
+
+#### 处理其他字符
+
+报告未知字符错误.
+
+```
+.                  {yyerrno = ERR_ILLEGAL_INPUT; return TOK_ERROR;}
+```
 
 ---
 
