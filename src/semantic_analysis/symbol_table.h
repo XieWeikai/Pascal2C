@@ -13,15 +13,13 @@ namespace symbol_table{
 	
 	class SymbolTablePara{
 	public:
-		SymbolTablePara(ItemType type, std::string name, bool is_var, bool is_func):
-			type_(type), name_(name), is_var_(is_var), is_func_(is_func){}
+		SymbolTablePara(ItemType type, bool is_var):
+			type_(type), is_var_(is_var){}
 			
 		bool operator==(const SymbolTablePara &x);
 	private:
 		ItemType type_;
-        std::string name_;
         bool is_var_;
-        bool is_func_;
 	};
 	
     //item of symbol table
