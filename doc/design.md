@@ -175,7 +175,7 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 
 存储 AST 树，作为语法分析的输出，交给语义分析进一步处理
 
-#### 接口描述（描述其他模块可能使用到的接口函数）
+#### 接口描述
 
 ##### class Program
 
@@ -183,7 +183,7 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
   | ---------- | ---------------------------------------------------- | ---- | ------ | ---- |
   | 获取程序头 | const shared_ptr\<ProgramHead> &program_head() const | 无   | 程序头 | 无   |
 
-#### 数据结构定义（为类定义里的函数（除了get和set这类简单函数）和数据成员加上注释，直接复制过来）
+#### 数据结构定义
 
 为了完整表示源程序的所有信息，我们为pascal各种语法结构设计了相应的AST节点，各个类的定义均放在`pascal2c::ast`命名空间中，具体定义如下文所述
 
@@ -1077,7 +1077,7 @@ private:
 };
 ```
 
-#### 算法描述（还不完善）
+#### 算法描述
 
 我们采用递归下降的方式来实现语法分析，对于每种语法成分，均编写对应方法进行解析，在这个过程中还会用到一些辅助方法，具体方法描述如下表
 
@@ -1112,7 +1112,29 @@ private:
   - 碰到异常后，跳过若干`token`直到碰到想要的`token`
   - 碰到异常后，忽略一些`token`接着解析
 
-如`ParseExpr`和`ParseStatement`在碰到语法错误时直接抛出异常，`ParseCompoundStatement`调用`ParseStatement`来解析一系列语句，若捕获异常，则记录下异常，并不断跳过`token`直到遇到`;`或者可能的语句开头的`token`再接着进行解析。`ParseCompoundStatement`在碰到缺少`begin`的错误时，记录错误并忽略`begin`直接进行statement的解析操作。
+如`ParseExpr`和`ParseStatement`在碰到语法错误时直接抛出异常，`ParseCompoundStatement`调用`ParseStatement`来解析一系列语句，若捕获异常，则记录下异常，并不断跳过`token`直到遇到`;`或者可能的语句开头的`token`再接着进行析。`ParseCompoundStatement`在碰到缺少`begin`的错误时，记录错误并忽略`begin`直接进行statement的解析操作。
+
+对于多数的语法结构解析，均可以根据产生式编写对应的一个解析该语法结构的方法来进行解析，但是对于**表达式解析**，若完全按照产生式来写会较为繁琐，因为表达式中有单目运算符、双目运算符、括号等很多元素，在解析时需要考虑运算符的优先级和结合性问题，若采用传统的方法，需要为每一个优先级的运算符写一个函数解析对应优先级，还要消除左递归，较繁琐，故在本项目中采用`pratt parser`的方式来进行表达式解析，对应伪代码如下
+
+```
+parse_expression()
+    return parse_expression_1(parse_primary(), 0)
+
+parse_expression_1(lhs, min_precedence)
+    lookahead := peek next token
+    while lookahead is a binary operator whose precedence is >= min_precedence
+        op := lookahead
+        advance to next token
+        rhs := parse_primary ()
+        lookahead := peek next token
+        while lookahead is a binary operator whose precedence is greater
+                 than op's, or a right-associative operator
+                 whose precedence is equal to op's
+            rhs := parse_expression_1 (rhs, precedence of op + (1 if lookahead precedence is greater, else 0))
+            lookahead := peek next token
+        lhs := the result of applying op with operands lhs and rhs
+    return lhs
+```
 
 
 ---
