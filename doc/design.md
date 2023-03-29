@@ -1575,6 +1575,53 @@ void ASTPrinter::VisitNum(const std::shared_ptr<semantic::Num> &node) {
 
 `CodeGenerator` 类用于将给定的 Pascal 代码的抽象语法树转换为等价的 C 代码。它包含了访问不同类型 AST 节点的成员函数，以生成相应的 C 代码。类还维护一个输出流，用于保存生成的 C 代码，以及当前缩进级别，以生成格式化的 C 代码。
 
+`CodeGenerator`的流程图如下.
+```mermaid
+graph TD
+  A(开始) --> B(构造CodeGenerator对象)
+  B --> C(解析Pascal源代码)
+  C --> D(生成抽象语法树)
+  D --> E[访问ASTRoot节点]
+  E --> F[根据节点类型调用对应的Visit函数]
+  F --> G[访问Program节点]
+  F --> H[访问Block节点]
+  F --> I[访问VarDecl节点]
+  F --> J[访问Compound节点]
+  F --> K[访问Assign节点]
+  F --> L[访问Var节点]
+  F --> AA[访问Function节点]
+  F --> AB[访问Procedure节点]
+  F --> M[访问NoOp节点]
+  G --> N(递归访问Program子节点)
+  H --> O(递归访问Block子节点)
+  I --> P(递归访问VarDecl子节点)
+  J --> Q(递归访问Compound子节点)
+  K --> R(递归访问Assign子节点)
+  L --> S(递归访问Var子节点)
+  M --> T(递归访问NoOp子节点)
+  AA --> AC(递归访问Function子节点)
+  AB --> AD(递归访问Procedure子节点)
+  N --> F
+  O --> F
+  P --> F
+  Q --> F
+  R --> F
+  S --> F
+  T --> F
+  AC --> F
+  AD --> F
+  F --> X(错误检测)
+  X -- No Error --> Y{所有节点访问完毕?}
+  X -- Error --> Z(错误处理)
+  Z -- 错误可恢复 --> Z1(恢复错误)
+  Z1 --> F
+  Z -- 错误不可恢复 --> Y1(报错并生成提示信息)
+  Y1 --> W
+  Y -- Yes --> V(生成C代码)
+  V --> W(结束)
+  Y -- No --> F
+```
+
 ```cpp
 class CodeGenerator {
   public:
