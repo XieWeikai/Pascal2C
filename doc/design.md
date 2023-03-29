@@ -66,6 +66,8 @@ char* TokenToString(int token) {
     - 遇到其他转义字符，将原始的内容追加到字符串中。
 4. 遇到单引号（'），返回到初始状态。
 
+<img src="./assets/escape-char.png" style="zoom: 20%;" />
+
 ```
 %x STRING
 
