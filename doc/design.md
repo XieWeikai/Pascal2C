@@ -1123,6 +1123,27 @@ private:
 
 #### 数据结构说明
 
+- `enum ItemType;`表示检查类型所需的基本类型，包括INT、CHAR、BOOL等；
+- `class SymbolTableItem;`记录检查表达式类型所需的信息，如表达式名、类型、参数等；
+- `class SymbolTablePara;`表示表达式参数的所需信息。仅包含其类型、是否可传引用及是否为函数调用；
+- `class SymbolTableBlock;`表示一个作用域对应的符号表。内有符号表的查询、插入方法以及一个表示访问链的指针；
+
+在作用域的内部，采用map和set容器来完成符号表的查询、插入工作。
+
+#### 函数、方法说明
+
+- `SymbolTablePara`重载了`==``运算符以完成对`SymbolTableItem`的类型检查；
+- `SymbolTableItem`重载了`==``运算符以完成对`SymbolTableItem`的类型检查；
+- `SymbolTableItem`中`Name()`方法以提取对象的变量/函数名；
+- `SymbolTableBlock`中`AddItem()`方法为向当前作用域的符号表中插入一个新的变量/函数；
+- `SymbolTableBlock`中`Query()`方法为在当前作用域的符号表中查询该变量/函数是否存在；
+- `std::shared_ptr<SymbolTableBlock>  Locate(std::shared_ptr<SymbolTableBlock> father);`为符号表的定位操作，从当前位置新建一个新的作用域；
+- `std::shared_ptr<SymbolTableBlock> Relocate(std::shared_ptr<SymbolTableBlock> to_del);`为符号表的重定位操作，删除当前作用域并返回上一级作用域。
+
+### 语义分析器设计
+
+#### 数据结构说明
+
 语义分析器中使用vector容器存储调用链，nowblockName存储当前程序块的名称。
 nameTable中使用map容器存储程序块名称和符号表Block的对应关系。
 
