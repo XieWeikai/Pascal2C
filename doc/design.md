@@ -1132,8 +1132,8 @@ private:
 
 #### 函数、方法说明
 
-- `SymbolTablePara`重载了`==``运算符以完成对`SymbolTableItem`的类型检查；
-- `SymbolTableItem`重载了`==``运算符以完成对`SymbolTableItem`的类型检查；
+- `SymbolTablePara`重载了`==`运算符以完成对`SymbolTableItem`的类型检查；
+- `SymbolTableItem`重载了`==`运算符以完成对`SymbolTableItem`的类型检查；
 - `SymbolTableItem`中`Name()`方法以提取对象的变量/函数名；
 - `SymbolTableBlock`中`AddItem()`方法为向当前作用域的符号表中插入一个新的变量/函数；
 - `SymbolTableBlock`中`Query()`方法为在当前作用域的符号表中查询该变量/函数是否存在；
