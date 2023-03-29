@@ -70,6 +70,7 @@ add_executable(
         ${PARSER}
         ${AST}
         src/lexer/lex.yy.c
+        # src/lexer/utils.c
 )
 add_executable(
         ast_test

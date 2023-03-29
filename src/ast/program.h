@@ -141,11 +141,11 @@ namespace pascal2c::ast
         //     id is the identifier
         //     const_value is the value of the identifier
         ConstDeclaration(const string &id, shared_ptr<Expression> const_value)
-            : id(id), const_value(std::move(const_value)) {}
+            : id_(id), const_value_(std::move(const_value)) {}
 
-        inline const string &id() const { return id; }
+        inline const string &id() const { return id_; }
 
-        inline const shared_ptr<Expression> &const_value() const { return const_value; }
+        inline const shared_ptr<Expression> &const_value() const { return const_value_; }
 
         // for test use
         // param:
@@ -155,8 +155,8 @@ namespace pascal2c::ast
         const string ToString(const int &level) const;
 
     private:
-        string id;                          // the identifier, eg. a
-        shared_ptr<Expression> const_value; // IntegerValue | RealValue | UnaryExpr | CharValue from expr.h, eg. 1, 2.0, -1, 'a'
+        string id_;                          // the identifier, e.g. a
+        shared_ptr<Expression> const_value_; // IntegerValue | RealValue | UnaryExpr | CharValue from expr.h, eg. 1, 2.0, -1, 'a'
     };
 
     // VarDeclaration -> IdList : Type
@@ -170,11 +170,11 @@ namespace pascal2c::ast
         //     id_list is a list of identifiers
         //     type is the type of the identifiers
         VarDeclaration(shared_ptr<IdList> id_list, shared_ptr<Type> type)
-            : id_list(std::move(id_list)), type(std::move(type)) {}
+            : id_list_(std::move(id_list)), type_(std::move(type)) {}
 
-        inline const shared_ptr<IdList> &id_list() const { return id_list; }
+        inline const shared_ptr<IdList> &id_list() const { return id_list_; }
 
-        inline const shared_ptr<Type> &type() const { return type; }
+        inline const shared_ptr<Type> &type() const { return type_; }
 
         // for test use
         // param:
@@ -184,8 +184,8 @@ namespace pascal2c::ast
         const string ToString(const int &level) const;
 
     private:
-        shared_ptr<IdList> id_list; // a list of identifiers, eg. a, b, c
-        shared_ptr<Type> type;      // the type of the identifiers, eg. integer
+        shared_ptr<IdList> id_list_; // a list of identifiers, eg. a, b, c
+        shared_ptr<Type> type_;      // the type of the identifiers, eg. integer
     };
 
     // SubprogramHead -> function id (ε | parameters) : (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE) | procedure id (ε | parameters)
@@ -280,11 +280,11 @@ namespace pascal2c::ast
         //     subprogram_head is the head of the subprogram
         //     subprogram_body is the body of the subprogram
         Subprogram(shared_ptr<SubprogramHead> subprogram_head, shared_ptr<SubprogramBody> subprogram_body)
-            : subprogram_head(std::move(subprogram_head)), subprogram_body(std::move(subprogram_body)) {}
+            : subprogram_head_(std::move(subprogram_head)), subprogram_body_(std::move(subprogram_body)) {}
 
-        inline const shared_ptr<SubprogramHead> &subprogram_head() const { return subprogram_head; }
+        inline const shared_ptr<SubprogramHead> &subprogram_head() const { return subprogram_head_; }
 
-        inline const shared_ptr<SubprogramBody> &subprogram_body() const { return subprogram_body; }
+        inline const shared_ptr<SubprogramBody> &subprogram_body() const { return subprogram_body_; }
 
         // for test use
         // param:
@@ -294,8 +294,8 @@ namespace pascal2c::ast
         const string ToString(const int &level) const;
 
     private:
-        shared_ptr<SubprogramHead> subprogram_head; // eg. function f(a, b : integer) : integer;
-        shared_ptr<SubprogramBody> subprogram_body; // eg. begin ... end;
+        shared_ptr<SubprogramHead> subprogram_head_; // eg. function f(a, b : integer) : integer;
+        shared_ptr<SubprogramBody> subprogram_body_; // eg. begin ... end;
     };
 
     // ProgramHead -> program id(IdList) | program id

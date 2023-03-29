@@ -58,7 +58,7 @@ namespace pascal2c::parser
 
         int token_, next_token_; // current token and next token
 
-        // if an lex error occur, error number will be stored in this variable
+        // if a lex error occur, error number will be stored in this variable
         int lexer_errno_;
 
         // token value
@@ -68,6 +68,8 @@ namespace pascal2c::parser
         std::string text_, next_text_;
 
         vector<std::string> err_msg_; // error massages
+
+        std::shared_ptr<ast::Expression> (Parser::*prefix_parser_[500])();
 
         // get next token
         // return:
@@ -87,7 +89,7 @@ namespace pascal2c::parser
         std::string GetLexerErrMsg();
 
         // parse the whole program
-        // eg. program p; const a = 1; var b : integer; function f(a : integer) : integer; begin end; begin end.
+        // e.g. program p; const a = 1; var b : integer; function f(a : integer) : integer; begin end; begin end.
         // return:
         //     the ast of the program
         std::shared_ptr<ast::Program> ParseProgram();
@@ -99,7 +101,7 @@ namespace pascal2c::parser
         std::shared_ptr<ast::ProgramHead> ParseProgramHead();
 
         // parse the program body
-        // eg. const a = 1; var b : integer; function f(a : integer) : integer; begin end; begin end.
+        // e.g. const a = 1; var b : integer; function f(a : integer) : integer; begin end; begin end.
         // return:
         //     the ast of the program body
         std::shared_ptr<ast::ProgramBody> ParseProgramBody();
