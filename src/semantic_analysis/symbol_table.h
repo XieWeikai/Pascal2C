@@ -1,46 +1,65 @@
 #include <map>
+#include <set>
 #include "../ast/ast.h"
 
 namespace symbol_table{
+    class SymbolTableItem;
+	enum ItemType{
+		INT,
+		REAL,
+		CHAR,
+		BOOL,
+	};
+	
+	class SymbolTablePara{
+	public:
+		SymbolTablePara(ItemType type, std::string name, bool is_var, bool is_func):
+			type_(type), name_(name), is_var_(is_var), is_func_(is_func){}
+			
+		bool operator==(const SymbolTablePara &x);
+	private:
+		ItemType type_;
+        std::string name_;
+        bool is_var_;
+        bool is_func_;
+	};
+	
     //item of symbol table
     class SymbolTableItem{
     public:
-        SymbolTableItem(std::string name, pascal2c::ast::ExprType type) 
-            : name_(name), type_(type){};
+		SymbolTableItem(ItemType type, std::string name, bool is_var, bool is_func, std::vector<SymbolTablePara> para):
+			type_(type), name_(name), is_var_(is_var), is_func_(is_func), para_(para){}
+		
         std::string Name(){return name_;}
-        pascal2c::ast::ExprType Type(){return type_;}
+		bool operator==(const SymbolTableItem &x);
     private:
+		ItemType type_;
         std::string name_;
-        pascal2c::ast::ExprType type_;
+        bool is_var_;
+        bool is_func_;
+		std::vector<SymbolTablePara> para_;
     };
 	
     class SymbolTableBlock{
     public:
-        //add identify: id_name=name id_type=type
-        //return success or failure
-        //e.g. a := 2 lead to add("a",int);
-        bool AddItem(std::string name, pascal2c::ast::ExprType type);
+        //add identify with format SymbolTableItem
+        //return 0 if success; otherwise failure
+        int AddItem(const SymbolTableItem &x);
         
-        //find identify id_name=name
-        //return success or failure  if success,ansType=id_type
-        //e.g. a := 2 
-        //     Query("a",a_type); -> return true,a_type=ExprType.INT
-        bool Query(std::string name,pascal2c::ast::ExprType &ansType);
+        //find identify with format SymbolTableItem
+        //return if exist
+        bool Query(SymbolTableItem &x);
         
     private:
         std::shared_ptr<SymbolTableBlock> father;
-        std::map<std::string,pascal2c::ast::ExprType> idlist;
-        
+        std::map<std::string,int> idlist;
+        std::set<SymbolTableBlock> table;
     };
+
+    //create a new block of SymbolTable from father block; return the new block
+    std::shared_ptr<SymbolTableBlock>  Locate(std::shared_ptr<SymbolTableBlock> father);
     
-	class SymbolTable{
-    public:
-        //create a new block of SymbolTable from father block
-        void Locate(std::shared_ptr<SymbolTableBlock> father);
-        
-        //delete the block of SymbolTable and return to father block
-        std::shared_ptr<SymbolTableBlock> Relocate(std::shared_ptr<SymbolTableBlock> to_del);
-    private:
-    };
+    //delete the block of SymbolTable and return the father block
+    std::shared_ptr<SymbolTableBlock> Relocate(std::shared_ptr<SymbolTableBlock> to_del);
     
 }
