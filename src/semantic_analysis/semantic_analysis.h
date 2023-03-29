@@ -1,6 +1,8 @@
 #include "symbol_table.h"
 
 namespace analysiser{
+    std::vector<std::string> blockNames;//memary name of the latest block
+    std::string nowblockName; 
     //manage SymbolTableBlock
     class nameTable{
     public:
