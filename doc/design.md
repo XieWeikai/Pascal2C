@@ -1123,9 +1123,20 @@ private:
 
 #### 数据结构说明
 
-
+语义分析器中使用vector容器存储调用链，nowblockName存储当前程序块的名称。
+nameTable中使用map容器存储程序块名称和符号表Block的对应关系。
 
 #### 函数、方法说明
+
+|        方法         |                            描述                             |
+| :-----------------: | :---------------------------------------------------------: |
+|  nameTable::Add();  |                    向name添加对应的block                    |
+| nameTable::Query(); |                     查询name对应的block                     |
+|       init();       |                       初始化语义分析                        |
+|    BlockExit();     |                       退出当前程序块                        |
+|     BlockIn();      |                  进入新程序块并命名为name                   |
+|     XToItem();      | 转换pascal2c::ast中的X类为symbol_table中的SymbolTableItem类 |
+|       DoX();        |                  处理pascal2c::ast中的X类                   |
 
 
 
