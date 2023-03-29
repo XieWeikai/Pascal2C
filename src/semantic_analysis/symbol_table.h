@@ -9,6 +9,7 @@ namespace symbol_table{
 		REAL,
 		CHAR,
 		BOOL,
+        VOID,
 	};
 	
 	class SymbolTablePara{
@@ -29,7 +30,7 @@ namespace symbol_table{
 		SymbolTableItem(ItemType type, std::string name, bool is_var, bool is_func, std::vector<SymbolTablePara> para):
 			type_(type), name_(name), is_var_(is_var), is_func_(is_func), para_(para){}
 		
-        std::string Name(){return name_;}
+        std::string name(){return name_;}
 		bool operator==(const SymbolTableItem &x);
     private:
 		ItemType type_;
