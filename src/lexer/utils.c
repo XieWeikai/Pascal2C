@@ -69,7 +69,7 @@ char* TokenToString(int token) {
         [TOK_NEQOP] = "TOK_NEQOP",
         [TOK_LEOP] = "TOK_LEOP",
         [TOK_GEOP] = "TOK_GEOP",
-        [TOK_ASSIGN] = "TOK_ASSIGNOP",
+        [TOK_ASSIGNOP] = "TOK_ASSIGNOP",
         [TOK_DOTDOT] = "TOK_DOTDOT",
     };
     return tokenNames[token];
