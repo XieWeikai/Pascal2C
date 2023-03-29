@@ -1578,9 +1578,8 @@ void ASTPrinter::VisitNum(const std::shared_ptr<semantic::Num> &node) {
 `CodeGenerator`的流程图如下.
 ```mermaid
 graph TD
-  A(开始) --> B(构造CodeGenerator对象)
-  B --> C(解析Pascal源代码)
-  C --> D(生成抽象语法树)
+  A(开始) --> C(构造CodeGenerator对象)
+  C --> D(解析Pascal源代码生成的AST树)
   D --> E[访问ASTRoot节点]
   E --> F[根据节点类型调用对应的Visit函数]
   F --> G[访问Program节点]
