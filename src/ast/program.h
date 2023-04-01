@@ -93,7 +93,7 @@ namespace pascal2c::ast
     private:
         bool is_array_;          // true if the type is array type
         int basic_type_;         // TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE from lexer, eg. integer, real, boolean, char
-        vector<Period> periods_; // can be ε, eg. [1..10, 20..30]
+        vector<Period> periods_; // can be empty, eg. [1..10, 20..30]
     };
 
     // Parameter -> var_parameter | value_parameter
@@ -224,7 +224,7 @@ namespace pascal2c::ast
     private:
         string id_;                                // name of the subprogram, eg. f, p
         int return_type_;                          // -1 means procedure, eg. integer, real
-        vector<shared_ptr<Parameter>> parameters_; // can be ε, eg. a, b : integer
+        vector<shared_ptr<Parameter>> parameters_; // can be empty, eg. a, b : integer
     };
 
     // SubprogramBody -> (const const_declarations | ε)
@@ -264,9 +264,9 @@ namespace pascal2c::ast
         const string ToString(const int &level) const;
 
     private:
-        vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be ε, eg. const a = 1; b = 2;
-        vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be ε, eg. var c, d : integer;
-        vector<shared_ptr<Statement>> statement_list_;            // can be ε, eg. begin end
+        vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be empty, eg. const a = 1; b = 2;
+        vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be empty, eg. var c, d : integer;
+        vector<shared_ptr<Statement>> statement_list_;            // can be empty, eg. begin end
     };
 
     // Subprogram -> SubprogramHead ; SubprogramBody
@@ -333,7 +333,7 @@ namespace pascal2c::ast
 
     private:
         string id_;                  // program name, eg. f
-        shared_ptr<IdList> id_list_; // parameters, can be ε, eg. (a, b)
+        shared_ptr<IdList> id_list_; // parameters, can be empty, eg. (a, b)
     };
 
     // ProgramBody -> (const const_declarations | ε)
@@ -382,10 +382,10 @@ namespace pascal2c::ast
         const string ToString(const int &level) const;
 
     private:
-        vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be ε, eg. const a = 1; b = 2;
-        vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be ε, eg. var c, d : integer;
-        vector<shared_ptr<Subprogram>> subprogram_declarations_;  // can be ε, eg. procedure p; begin end;
-        vector<shared_ptr<Statement>> statement_list_;            // can be ε, eg. begin end
+        vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be empty, eg. const a = 1; b = 2;
+        vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be empty, eg. var c, d : integer;
+        vector<shared_ptr<Subprogram>> subprogram_declarations_;  // can be empty, eg. procedure p; begin end;
+        vector<shared_ptr<Statement>> statement_list_;            // can be empty, eg. begin end
     };
 
     // Program -> ProgramHead; ProgramBody.
