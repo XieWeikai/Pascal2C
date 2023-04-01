@@ -6,7 +6,7 @@
 
 namespace pascal2c::parser {
 
-    static int binary_prec[302] = {
+    static int binary_prec[500] = {
             ['=']       = 1,
             [TOK_NEQOP] = 1,
             ['<']       = 1,
