@@ -76,7 +76,7 @@ namespace pascal2c::parser
         //     the next token
         int NextToken();
 
-        // match token
+        // match token and get next token
         // param:
         //     token is the token to match
         // throw:

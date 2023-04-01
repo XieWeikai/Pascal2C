@@ -9,13 +9,17 @@
 #include <vector>
 #include <string>
 
+#include "ast.h"
 #include "expr.h"
 
-namespace pascal2c::ast {
-    template<typename Tp> using vector = ::std::vector<Tp>;
+namespace pascal2c::ast
+{
+    template <typename tp>
+    using vector = ::std::vector<Tp>;
 
     // to identify what type a statement is
-    enum StatementType{
+    enum StatementType
+    {
         ASSIGN_STATEMENT = 1,
         CALL_STATEMENT = 2,
         COMPOUND_STATEMENT = 3,
@@ -24,7 +28,8 @@ namespace pascal2c::ast {
     };
 
     // base type of statement
-    class Statement {
+    class Statement : public Ast
+    {
     public:
         // for test use
         // param:
@@ -40,21 +45,23 @@ namespace pascal2c::ast {
 
     // var_ := expr_
     // var_ can be: var_name    var_name[expr_list]  func_id
-    class AssignStatement : public Statement {
+    class AssignStatement : public Statement
+    {
     public:
         // basic constructor
         // param:
         //     var is used to initialize the class member var_
         //     expr is used to initialize the class member expr_
-        AssignStatement(std::shared_ptr<Variable> var,std::shared_ptr<Expression> expr) : var_(std::move(var)),expr_(
-                std::move(expr)) {}
+        AssignStatement(std::shared_ptr<Variable> var, std::shared_ptr<Expression> expr) : var_(std::move(var)), expr_(
+                                                                                                                     std::move(expr)) {}
 
         inline StatementType GetType() const override { return ASSIGN_STATEMENT; }
 
         std::string ToString(int level) const override;
+
     private:
-        std::shared_ptr<Variable> var_;      // lhs of the assign statement
-        std::shared_ptr<Expression> expr_;   // rhs of the assign statement
+        std::shared_ptr<Variable> var_;    // lhs of the assign statement
+        std::shared_ptr<Expression> expr_; // rhs of the assign statement
     };
 
     // represents procedure and function call
@@ -62,20 +69,21 @@ namespace pascal2c::ast {
     // expr_list_ is the arguments of procedure or function
     // expr_list_ can be empty
     // write and read are treated as CallStatement as built-in function
-    class CallStatement : public Statement {
+    class CallStatement : public Statement
+    {
     public:
-        CallStatement(std::string name, vector<std::shared_ptr<Expression> > expr_list) :
-                name_(std::move(name)), expr_list_(std::move(expr_list)) {}
+        CallStatement(std::string name, vector<std::shared_ptr<Expression>> expr_list) : name_(std::move(name)), expr_list_(std::move(expr_list)) {}
 
         explicit CallStatement(std::string name) : name_(std::move(name)) {}
 
         inline StatementType GetType() const override { return CALL_STATEMENT; }
 
         std::string ToString(int level) const override;
-    private:
-        std::string name_;   // procedure name or function name
 
-        vector<std::shared_ptr<Expression> > expr_list_; // can be empty:  e.g. procedure_name;   func();
+    private:
+        std::string name_; // procedure name or function name
+
+        vector<std::shared_ptr<Expression>> expr_list_; // can be empty:  e.g. procedure_name;   func();
     };
 
     // a series of statements
@@ -84,52 +92,58 @@ namespace pascal2c::ast {
     //    statement2 ;
     //    ...
     // end
-    class CompoundStatement: public Statement {
+    class CompoundStatement : public Statement
+    {
     public:
-        explicit CompoundStatement(vector<std::shared_ptr<Statement> > statements) : statements_(std::move(statements)) {}
+        explicit CompoundStatement(vector<std::shared_ptr<Statement>> statements) : statements_(std::move(statements)) {}
 
         inline StatementType GetType() const override { return COMPOUND_STATEMENT; }
 
         std::string ToString(int level) const override;
+
     private:
-        vector<std::shared_ptr<Statement> > statements_;  // vector of statement
+        vector<std::shared_ptr<Statement>> statements_; // vector of statement
     };
 
     // if condition_ then
     //      then_
     // else
     //      else_
-    class IfStatement : public Statement {
+    class IfStatement : public Statement
+    {
     public:
-        IfStatement(std::shared_ptr<Expression> cond,std::shared_ptr<Statement> then,
+        IfStatement(std::shared_ptr<Expression> cond, std::shared_ptr<Statement> then,
                     std::shared_ptr<Statement> else_part)
-                    : condition_(std::move(cond)),then_(std::move(then)),else_(std::move(else_part)) {}
+            : condition_(std::move(cond)), then_(std::move(then)), else_(std::move(else_part)) {}
 
         inline StatementType GetType() const override { return IF_STATEMENT; }
 
         std::string ToString(int level) const override;
+
     private:
-        std::shared_ptr<Expression> condition_;    // condition expression
-        std::shared_ptr<Statement>  then_;         // then part of if statement
-        std::shared_ptr<Statement>  else_;         // else part of if statement, can be empty
+        std::shared_ptr<Expression> condition_; // condition expression
+        std::shared_ptr<Statement> then_;       // then part of if statement
+        std::shared_ptr<Statement> else_;       // else part of if statement, can be empty
     };
 
     // for id_ := from_ to to_ do statement_
-    class ForStatement : public Statement {
+    class ForStatement : public Statement
+    {
     public:
-        ForStatement(std::shared_ptr<Expression> from,std::shared_ptr<Expression> to,
-                     std::shared_ptr<Statement>  statement)
-                     : from_(std::move(from)),to_(std::move(to)),statement_(std::move(statement)) {}
+        ForStatement(std::shared_ptr<Expression> from, std::shared_ptr<Expression> to,
+                     std::shared_ptr<Statement> statement)
+            : from_(std::move(from)), to_(std::move(to)), statement_(std::move(statement)) {}
 
         inline StatementType GetType() const override { return FOR_STATEMENT; }
 
         std::string ToString(int level) const override;
+
     private:
         std::string id_;
         std::shared_ptr<Expression> from_;
         std::shared_ptr<Expression> to_;
-        std::shared_ptr<Statement>  statement_;
+        std::shared_ptr<Statement> statement_;
     };
 }
 
-#endif //PASCAL2C_STATEMENT_H
+#endif // PASCAL2C_STATEMENT_H

@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 
+#include "ast.h"
 #include "expr.h"
 #include "statement.h"
 
@@ -19,7 +20,7 @@ namespace pascal2c::ast
     // IdList -> id | IdList , id
     //
     // eg. a, b, c
-    class IdList
+    class IdList : public Ast
     {
     public:
         // param:
@@ -50,7 +51,7 @@ namespace pascal2c::ast
     //
     // eg. integer, real, boolean, char
     // eg. array [1..10] of integer, array [1..10, 20..30] of real
-    class Type
+    class Type : public Ast
     {
     public:
         // digits_1 is the lower bound, digits_2 is the upper bound
@@ -102,7 +103,7 @@ namespace pascal2c::ast
     //
     // eg. a, b : integer
     // eg. var c, d : real
-    class Parameter
+    class Parameter : public Ast
     {
     public:
         // param:
@@ -134,18 +135,18 @@ namespace pascal2c::ast
     // ConstDeclaration -> id= (IntegerValue | RealValue | UnaryExpr | CharValue)
     //
     // eg. a=1, b=2.0, c=-1, d='a'
-    class ConstDeclaration
+    class ConstDeclaration : public Ast
     {
     public:
         // param:
         //     id is the identifier
         //     const_value is the value of the identifier
         ConstDeclaration(const string &id, shared_ptr<Expression> const_value)
-            : id_(id), const_value_(std::move(const_value)) {}
+            : id(id), const_value(std::move(const_value)) {}
 
-        inline const string &id() const { return id_; }
+        inline const string &id() const { return id; }
 
-        inline const shared_ptr<Expression> &const_value() const { return const_value_; }
+        inline const shared_ptr<Expression> &const_value() const { return const_value; }
 
         // for test use
         // param:
@@ -155,26 +156,26 @@ namespace pascal2c::ast
         const string ToString(const int &level) const;
 
     private:
-        string id_;                          // the identifier, e.g. a
-        shared_ptr<Expression> const_value_; // IntegerValue | RealValue | UnaryExpr | CharValue from expr.h, eg. 1, 2.0, -1, 'a'
+        string id;                          // the identifier, eg. a
+        shared_ptr<Expression> const_value; // IntegerValue | RealValue | UnaryExpr | CharValue from expr.h, eg. 1, 2.0, -1, 'a'
     };
 
     // VarDeclaration -> IdList : Type
     //
     // eg. a, b, c : integer
     // eg. d, e : array [1..10] of integer
-    class VarDeclaration
+    class VarDeclaration : public Ast
     {
     public:
         // param:
         //     id_list is a list of identifiers
         //     type is the type of the identifiers
         VarDeclaration(shared_ptr<IdList> id_list, shared_ptr<Type> type)
-            : id_list_(std::move(id_list)), type_(std::move(type)) {}
+            : id_list(std::move(id_list)), type(std::move(type)) {}
 
-        inline const shared_ptr<IdList> &id_list() const { return id_list_; }
+        inline const shared_ptr<IdList> &id_list() const { return id_list; }
 
-        inline const shared_ptr<Type> &type() const { return type_; }
+        inline const shared_ptr<Type> &type() const { return type; }
 
         // for test use
         // param:
@@ -184,8 +185,8 @@ namespace pascal2c::ast
         const string ToString(const int &level) const;
 
     private:
-        shared_ptr<IdList> id_list_; // a list of identifiers, eg. a, b, c
-        shared_ptr<Type> type_;      // the type of the identifiers, eg. integer
+        shared_ptr<IdList> id_list; // a list of identifiers, eg. a, b, c
+        shared_ptr<Type> type;      // the type of the identifiers, eg. integer
     };
 
     // SubprogramHead -> function id (ε | parameters) : (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE) | procedure id (ε | parameters)
@@ -193,7 +194,7 @@ namespace pascal2c::ast
     //
     // eg. function f(a, b : integer) : integer
     // eg. procedure p(var c, d : real)
-    class SubprogramHead
+    class SubprogramHead : public Ast
     {
     public:
         // param:
@@ -235,7 +236,7 @@ namespace pascal2c::ast
     // statement_list -> statement | statement_list ; statement
     //
     // eg. const a = 1; b = 2; var c, d : integer; begin end
-    class SubprogramBody
+    class SubprogramBody : public Ast
     {
     public:
         inline const vector<shared_ptr<ConstDeclaration>> &const_declarations() const { return const_declarations_; }
@@ -273,18 +274,18 @@ namespace pascal2c::ast
     //
     // eg. function f(a, b : integer) : integer;
     // eg. procedure p(var c, d : real);
-    class Subprogram
+    class Subprogram : public Ast
     {
     public:
         // param:
         //     subprogram_head is the head of the subprogram
         //     subprogram_body is the body of the subprogram
         Subprogram(shared_ptr<SubprogramHead> subprogram_head, shared_ptr<SubprogramBody> subprogram_body)
-            : subprogram_head_(std::move(subprogram_head)), subprogram_body_(std::move(subprogram_body)) {}
+            : subprogram_head(std::move(subprogram_head)), subprogram_body(std::move(subprogram_body)) {}
 
-        inline const shared_ptr<SubprogramHead> &subprogram_head() const { return subprogram_head_; }
+        inline const shared_ptr<SubprogramHead> &subprogram_head() const { return subprogram_head; }
 
-        inline const shared_ptr<SubprogramBody> &subprogram_body() const { return subprogram_body_; }
+        inline const shared_ptr<SubprogramBody> &subprogram_body() const { return subprogram_body; }
 
         // for test use
         // param:
@@ -294,15 +295,15 @@ namespace pascal2c::ast
         const string ToString(const int &level) const;
 
     private:
-        shared_ptr<SubprogramHead> subprogram_head_; // eg. function f(a, b : integer) : integer;
-        shared_ptr<SubprogramBody> subprogram_body_; // eg. begin ... end;
+        shared_ptr<SubprogramHead> subprogram_head; // eg. function f(a, b : integer) : integer;
+        shared_ptr<SubprogramBody> subprogram_body; // eg. begin ... end;
     };
 
     // ProgramHead -> program id(IdList) | program id
     //
     // eg. program f(a, b)
     // eg. program f
-    class ProgramHead
+    class ProgramHead : public Ast
     {
     public:
         // param:
@@ -346,7 +347,7 @@ namespace pascal2c::ast
     // statement_list -> statement | statement_list ; statement
     //
     // eg. const a = 1; b = 2; var c, d : integer; procedure p; begin end; begin end
-    class ProgramBody
+    class ProgramBody : public Ast
     {
     public:
         inline const vector<shared_ptr<ConstDeclaration>> &const_declarations() const { return const_declarations_; }
@@ -391,7 +392,7 @@ namespace pascal2c::ast
     // Program -> ProgramHead; ProgramBody.
     //
     // eg. program f(a, b); var a, b; begin a := 1; b := 2; end.
-    class Program
+    class Program : public Ast
     {
     public:
         // param:
