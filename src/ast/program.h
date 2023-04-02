@@ -328,7 +328,7 @@ namespace pascal2c::ast
 
         // return:
         //     true if the program has parameters
-        inline const bool &HasIdList() const { return id_list_ != nullptr; }
+        inline const bool HasIdList() const { return id_list_ != nullptr; }
 
         inline const string &id() const { return id_; }
 
