@@ -3,6 +3,7 @@
 //
 #include <unordered_map>
 #include "parser.h"
+#include "ast/expr.h"
 
 namespace pascal2c::parser {
 

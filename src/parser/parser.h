@@ -9,6 +9,8 @@
 
 #include "gtest/gtest.h"
 #include "ast/ast.h"
+#include "ast/expr.h"
+#include "ast/program.h"
 
 extern "C"
 {

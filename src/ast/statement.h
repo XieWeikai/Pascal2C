@@ -14,7 +14,7 @@
 
 namespace pascal2c::ast
 {
-    template <typename tp>
+    template <typename Tp>
     using vector = ::std::vector<Tp>;
 
     // to identify what type a statement is

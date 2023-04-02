@@ -1,11 +1,14 @@
-#include "program.h"
+#include <vector>
+
+#include "parser.h"
+#include "ast/program.h"
 
 extern "C"
 {
 #include "lexer/lexer.h"
 }
 
-namespace pascal2c::ast
+namespace pascal2c::parser
 {
     template <typename Tp>
     using vector = ::std::vector<Tp>;
@@ -13,9 +16,9 @@ namespace pascal2c::ast
     std::shared_ptr<ast::Program> Parser::ParseProgram()
     {
         auto program_head = ParseProgramHead();
-        Match(TOK_SEMICOLON);
+        Match(';');
         auto program_body = ParseProgramBody();
-        Match(TOK_DOT);
+        Match('.');
         return std::move(std::make_shared<ast::Program>(std::move(program_head), std::move(program_body)));
     }
 
@@ -24,11 +27,11 @@ namespace pascal2c::ast
         Match(TOK_PROGRAM);
         auto name = text_;
         Match(TOK_ID);
-        if (token_ == TOK_LPAREN)
+        if (token_ == '(')
         {
             NextToken();
             auto id_list = ParseIdList();
-            Match(TOK_RPAREN);
+            Match(')');
             return std::move(std::make_shared<ast::ProgramHead>(name, std::move(id_list)));
         }
         return std::move(std::make_shared<ast::ProgramHead>(name));
@@ -39,7 +42,7 @@ namespace pascal2c::ast
         auto program_body = std::make_shared<ast::ProgramBody>();
 
         // Parse const declarations
-        if (token_ = TOK_CONST)
+        if (token_ == TOK_CONST)
         {
             NextToken();
             while (token_ != TOK_VAR && token_ != TOK_PROCEDURE && token_ != TOK_FUNCTION && token_ != TOK_BEGIN)
@@ -50,7 +53,7 @@ namespace pascal2c::ast
         }
 
         // Parse var declarations
-        if (token_ = TOK_VAR)
+        if (token_ == TOK_VAR)
         {
             NextToken();
             while (token_ != TOK_PROCEDURE && token_ != TOK_FUNCTION && token_ != TOK_BEGIN)
@@ -61,7 +64,7 @@ namespace pascal2c::ast
         }
 
         // Parse subprograms
-        if (token_ = TOK_PROCEDURE || token_ = TOK_FUNCTION)
+        if (token_ == TOK_PROCEDURE || token_ == TOK_FUNCTION)
         {
             while (token_ != TOK_BEGIN)
             {

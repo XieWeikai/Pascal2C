@@ -1,6 +1,9 @@
 #ifndef AST_H
 #define AST_H
 
+#include <iostream>
+#include <sstream>
+
 namespace pascal2c::ast
 {
     class Ast
@@ -12,7 +15,7 @@ namespace pascal2c::ast
         Ast(const int &line, const int &column)
             : line_(line), column_(column){};
 
-        virtual ~Ast() = 0;
+        Ast() : line_(1),column_(1){};
 
         virtual const int &line() const { return line_; }
 
@@ -26,6 +29,12 @@ namespace pascal2c::ast
         {
             while (level-- > 0)
                 str_s << "    ";
+        }
+
+        void SetLineAndColumn(const int line, const int column)
+        {
+            line_ = line;
+            column_ = column;
         }
 
     private:
