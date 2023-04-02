@@ -1,34 +1,32 @@
 //
 // Created by 谢卫凯 on 2023/3/22.
 //
-
+#include <unordered_map>
 #include "parser.h"
 
 namespace pascal2c::parser {
 
-    static int binary_prec[500] = {
-            ['=']       = 1,
-            [TOK_NEQOP] = 1,
-            ['<']       = 1,
-            [TOK_LEOP]  = 1,
-            ['>']       = 1,
-
-            [TOK_GEOP]  = 1,
-            ['+']       = 2,
-            ['-']       = 2,
-            [TOK_OR]    = 2,
-
-            [TOK_AND]   = 3,
-            [TOK_DIV]   = 3,
-            ['*']       = 3,
-            ['/']       = 3,
-            [TOK_MOD]   = 3,
+    static std::unordered_map<char, int> binary_prec = {
+            {'=', 1},
+            {TOK_NEQOP, 1},
+            {'<', 1},
+            {TOK_LEOP, 1},
+            {'>', 1},
+            {TOK_GEOP, 1},
+            {'+', 2},
+            {'-', 2},
+            {TOK_OR, 2},
+            {TOK_AND, 3},
+            {TOK_DIV, 3},
+            {'*', 3},
+            {'/', 3},
+            {TOK_MOD, 3},
     };
 
-    static int unary_prec[302] = {
-            [TOK_NOT] = 4,
-            ['+']     = 4,
-            ['-']     = 4,
+    static std::unordered_map<char, int> unary_prec = {
+            {TOK_NOT, 4},
+            {'+', 4},
+            {'-', 4},
     };
 
     std::shared_ptr<ast::Expression> Parser::ParsePrimary(){

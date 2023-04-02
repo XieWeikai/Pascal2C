@@ -1,6 +1,7 @@
 //
 // Created by 谢卫凯 on 2023/3/20.
 //
+#include <unordered_map>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -19,10 +20,9 @@ namespace pascal2c
     static int Op(int token)
     {
         static bool inited = false;
-        static int op[302] = {};
-        if (!inited)
-        {
-            for (int i = 0; i < 302; i++)
+        static std::unordered_map<int,int> op;
+        if(!inited){
+            for(int i = 0;i < 500;i ++)
                 op[i] = i;
             op['+'] = '+';
             op['-'] = '-';
