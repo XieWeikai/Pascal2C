@@ -3,15 +3,16 @@
 #include <string>
 #include <vector>
 #include "gtest/gtest.h"
+
 extern "C" {
-    #include "lexer.h"
+#include "lexer.h"
 }
 
 using namespace std;
 
 static void RunTest(const string &input, int *expected_tokens, YYSTYPE *expected_vals,
                     int *expected_lines, int *expected_columns) {
-    FILE *file = fmemopen((void *)input.c_str(), input.size(), "r");
+    FILE *file = fmemopen((void *) input.c_str(), input.size(), "r");
     yyreset(file);
 
     int i = 0;
@@ -35,20 +36,20 @@ TEST(LexerSimpleTest, SimpleTest) {
 5 6 7 8
 )";
     int expected_tokens[] = {
-        TOK_INTEGER, TOK_INTEGER, TOK_INTEGER, TOK_INTEGER,
-        TOK_INTEGER, TOK_INTEGER, TOK_INTEGER, TOK_INTEGER,
+            TOK_INTEGER, TOK_INTEGER, TOK_INTEGER, TOK_INTEGER,
+            TOK_INTEGER, TOK_INTEGER, TOK_INTEGER, TOK_INTEGER,
     };
     int expected_vals[] = {
-        1, 2, 3, 4, 5, 6, 7, 8,
+            1, 2, 3, 4, 5, 6, 7, 8,
     };
     int expected_lines[] = {
-        1, 1, 1, 1, 2, 2, 2, 2,
+            1, 1, 1, 1, 2, 2, 2, 2,
     };
     int expected_columns[] = {
-        1, 3, 5, 7, 1, 3, 5, 7,
+            1, 3, 5, 7, 1, 3, 5, 7,
     };
 
-    RunTest(input, expected_tokens, (YYSTYPE *)expected_vals,
+    RunTest(input, expected_tokens, (YYSTYPE *) expected_vals,
             expected_lines, expected_columns);
 }
 
@@ -59,9 +60,9 @@ begin
 end.
 )";
     int expected_tokens[] = {
-        TOK_PROGRAM, TOK_ID, ';',
-        TOK_BEGIN, TOK_ID, '(', TOK_STRING, ')',';',
-        TOK_END, '.'
+            TOK_PROGRAM, TOK_ID, ';',
+            TOK_BEGIN, TOK_ID, '(', TOK_STRING, ')', ';',
+            TOK_END, '.'
     };
     YYSTYPE expected_vals[11] = {{0}};
     strcpy(expected_vals[1].strval, "hello");
@@ -69,14 +70,14 @@ end.
     strcpy(expected_vals[6].strval, "Hello, world!\n");
 
     int expected_lines[] = {
-        1, 1, 1,
-        2, 3, 3, 3, 3, 3,
-        4, 4,
+            1, 1, 1,
+            2, 3, 3, 3, 3, 3,
+            4, 4,
     };
     int expected_columns[] = {
-        1, 9, 14,
-        1, 5, 10, 11, 28, 29,
-        1, 4,
+            1, 9, 14,
+            1, 5, 10, 11, 28, 29,
+            1, 4,
     };
 
     RunTest(input, expected_tokens, expected_vals,
@@ -92,10 +93,10 @@ TEST(LexerCommentTest, SimpleComment) {
     YYSTYPE expected_vals[2] = {{0}};
 
     int expected_lines[] = {
-             1, 1,
+            1, 1,
     };
     int expected_columns[] = {
-             1, 20,
+            1, 20,
     };
 
     RunTest(input, expected_tokens, expected_vals,
@@ -111,10 +112,10 @@ TEST(LexerCommentTest, NestedComment) {
     YYSTYPE expected_vals[2] = {{0}};
 
     int expected_lines[] = {
-             1, 1,
+            1, 1,
     };
     int expected_columns[] = {
-             1, 34,
+            1, 34,
     };
 
     RunTest(input, expected_tokens, expected_vals,
@@ -134,10 +135,10 @@ begin
     YYSTYPE expected_vals[2] = {{0}};
 
     int expected_lines[] = {
-             2, 3, 5,
+            2, 3, 5,
     };
     int expected_columns[] = {
-             1, 16, 1,
+            1, 16, 1,
     };
 
     RunTest(input, expected_tokens, expected_vals,
@@ -199,6 +200,103 @@ TEST(LexerIdentifierTest, CaseInsensitiveTest) {
 
     int expected_columns[] = {
             1, 5, 15, 17, 27, 29, 39, 41, 51, 53, 60
+    };
+
+    RunTest(input, expected_tokens, expected_vals,
+            expected_lines, expected_columns);
+}
+
+TEST(LexerIntegerTest, SimpleInteger) {
+    string input = R"(12345, 9494949, 0;
+)";
+    int expected_tokens[] = {
+            TOK_INTEGER, ',', TOK_INTEGER, ',', TOK_INTEGER, ';',
+    };
+
+    YYSTYPE expected_vals[6] = {{0}};
+    expected_vals[0].intval = 12345;
+    expected_vals[2].intval = 9494949;
+    expected_vals[4].intval = 0;
+
+    int expected_lines[] = {
+            1, 1, 1, 1, 1, 1,
+    };
+
+    int expected_columns[] = {
+            1, 6, 8, 15, 17, 18,
+    };
+
+    RunTest(input, expected_tokens, expected_vals,
+            expected_lines, expected_columns);
+}
+
+TEST(LexerIntegerTest, IntegerLengthTest) {
+    string input = R"(2147483647, 2147483648
+)";
+    int expected_tokens[] = {
+            TOK_INTEGER, ',', TOK_ERROR,
+    };
+
+    YYSTYPE expected_vals[3] = {{0}};
+    expected_vals[0].intval = 2147483647;
+
+    int expected_lines[] = {
+            1, 1, 1,
+    };
+
+    int expected_columns[] = {
+            1, 11, 13,
+    };
+
+    RunTest(input, expected_tokens, expected_vals,
+            expected_lines, expected_columns);
+}
+
+TEST(LexerRealTest, SimpleRealTest) {
+    string input = R"(123.456, 123., 123.0, 123.0e10, 123.0e+10, 123.0e-10;
+)";
+    int expected_tokens[] = {
+            TOK_REAL, ',', TOK_REAL, ',', TOK_REAL, ',', TOK_REAL, ',',
+            TOK_REAL, ',', TOK_REAL, ';',
+    };
+
+    YYSTYPE expected_vals[12] = {{0}};
+    expected_vals[0].realval = 123.456;
+    expected_vals[2].realval = 123.0;
+    expected_vals[4].realval = 123.0;
+    expected_vals[6].realval = 123.0e10;
+    expected_vals[8].realval = 123.0e+10;
+    expected_vals[10].realval = 123.0e-10;
+
+    int expected_lines[] = {
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    };
+
+    int expected_columns[] = {
+            1, 8, 10, 14, 16, 21, 23, 31, 33, 42, 44, 53,
+    };
+
+    RunTest(input, expected_tokens, expected_vals,
+            expected_lines, expected_columns);
+}
+
+TEST(LexerRealTest, RealOmitNumberTest) {
+    string input = R"(123.e10, .1e+10;
+)";
+    int expected_tokens[] = {
+            TOK_REAL, ',', TOK_REAL, ';',
+    };
+
+    YYSTYPE expected_vals[4] = {{0}};
+    expected_vals[0].realval = 123.0e10;
+    expected_vals[2].realval = 0.1e+10;
+
+    int expected_lines[] = {
+            1, 1, 1, 1,
+    };
+
+    int expected_columns[] = {
+            1, 8, 10, 16,
     };
 
     RunTest(input, expected_tokens, expected_vals,

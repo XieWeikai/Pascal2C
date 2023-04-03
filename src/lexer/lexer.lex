@@ -2,6 +2,7 @@
 #include "lexer.h"
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
 
 #define ERR_NO_ERROR 0
 #define ERR_ILLEGAL_INPUT 1
@@ -121,7 +122,12 @@ false              {return TOK_FALSE;}
         yyerrno = ERR_INTEGER_TOO_LARGE;
         return TOK_ERROR;
     }
-    yylval.intval = strtoul(yytext, NULL, 10);
+    unsigned long int n = strtoul(yytext, NULL, 10);
+    if (n > INT_MAX) {
+        yyerrno = ERR_INTEGER_TOO_LARGE;
+        return TOK_ERROR;
+    }
+    yylval.intval = n;
     return TOK_INTEGER;
 }
 {real}               {
