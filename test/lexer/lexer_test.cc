@@ -82,3 +82,64 @@ end.
     RunTest(input, expected_tokens, expected_vals,
             expected_lines, expected_columns);
 }
+
+TEST(LexerCommentTest, SimpleComment) {
+    string input = R"(begin{comment here}begin
+)";
+    int expected_tokens[] = {
+            TOK_BEGIN, TOK_BEGIN,
+    };
+    YYSTYPE expected_vals[2] = {{0}};
+
+    int expected_lines[] = {
+             1, 1,
+    };
+    int expected_columns[] = {
+             1, 20,
+    };
+
+    RunTest(input, expected_tokens, expected_vals,
+            expected_lines, expected_columns);
+}
+
+TEST(LexerCommentTest, NestedComment) {
+    string input = R"(begin{comment here{comment here}}begin
+)";
+    int expected_tokens[] = {
+            TOK_BEGIN, TOK_BEGIN,
+    };
+    YYSTYPE expected_vals[2] = {{0}};
+
+    int expected_lines[] = {
+             1, 1,
+    };
+    int expected_columns[] = {
+             1, 34,
+    };
+
+    RunTest(input, expected_tokens, expected_vals,
+            expected_lines, expected_columns);
+}
+
+TEST(LexerCommentTest, ComplexComment) {
+    string input = R"({{{{}}}}
+begin {begin{end
+}}             begin  {begin
+}
+begin
+)";
+    int expected_tokens[] = {
+            TOK_BEGIN, TOK_BEGIN, TOK_BEGIN,
+    };
+    YYSTYPE expected_vals[2] = {{0}};
+
+    int expected_lines[] = {
+             2, 3, 5,
+    };
+    int expected_columns[] = {
+             1, 16, 1,
+    };
+
+    RunTest(input, expected_tokens, expected_vals,
+            expected_lines, expected_columns);
+}
