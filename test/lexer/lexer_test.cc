@@ -143,3 +143,39 @@ begin
     RunTest(input, expected_tokens, expected_vals,
             expected_lines, expected_columns);
 }
+
+TEST(LexerIdentifierTest, VaildIdentifier) {
+    string input = R"(begin
+    var a, a1, _a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q_: integer;
+    writeln('Valid identifiers');
+end.
+)";
+    int expected_tokens[] = {
+            TOK_BEGIN,
+            TOK_VAR, TOK_ID, ',', TOK_ID, ',', TOK_ID, ':', TOK_INTEGER_TYPE, ';',
+            TOK_ID, '(', TOK_STRING, ')', ';',
+            TOK_END, '.',
+    };
+    YYSTYPE expected_vals[17] = {{0}};
+    strcpy(expected_vals[2].strval, "a");
+    strcpy(expected_vals[4].strval, "a1");
+    strcpy(expected_vals[6].strval, "_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q_");
+    strcpy(expected_vals[10].strval, "writeln");
+    strcpy(expected_vals[12].strval, "Valid identifiers");
+
+    int expected_lines[] = {
+            1,
+            2, 2, 2, 2, 2, 2, 2, 2, 2,
+            3, 3, 3, 3, 3,
+            4, 4,
+    };
+    int expected_columns[] = {
+            1,
+            5, 9, 10, 12, 14, 16, 51, 53, 60,
+            5, 12, 13, 32, 33,
+            1, 4,
+    };
+
+    RunTest(input, expected_tokens, expected_vals,
+            expected_lines, expected_columns);
+}
