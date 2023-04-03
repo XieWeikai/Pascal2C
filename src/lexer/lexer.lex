@@ -1,6 +1,7 @@
 %{
 #include "lexer.h"
 #include <string.h>
+#include <ctype.h>
 
 #define ERR_NO_ERROR 0
 #define ERR_ILLEGAL_INPUT 1
@@ -25,7 +26,14 @@ union YYSTYPE yylval;
 int cmt_level = 0;
 int str_start_col = 0;
 
-#define YY_USER_ACTION {yycolno = yycolno_next; yycolno_next += yyleng;}
+#define YY_USER_ACTION {                            \
+    if (YYSTATE == INITIAL) {                       \
+        char* p = yytext;                           \
+        for (; *p; ++p) *p = tolower(*p);           \
+    }                                               \
+    yycolno = yycolno_next; yycolno_next += yyleng; \
+}
+
 
 %}
 

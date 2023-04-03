@@ -179,3 +179,28 @@ end.
     RunTest(input, expected_tokens, expected_vals,
             expected_lines, expected_columns);
 }
+
+TEST(LexerIdentifierTest, CaseInsensitiveTest) {
+    string input = R"(var Identifier, identifier, IDENTIFIER, IdEnTiFiEr: integer;
+)";
+    int expected_tokens[] = {
+            TOK_VAR, TOK_ID, ',', TOK_ID, ',', TOK_ID, ',', TOK_ID, ':', TOK_INTEGER_TYPE, ';',
+    };
+
+    YYSTYPE expected_vals[11] = {{0}};
+    strcpy(expected_vals[1].strval, "identifier");
+    strcpy(expected_vals[3].strval, "identifier");
+    strcpy(expected_vals[5].strval, "identifier");
+    strcpy(expected_vals[7].strval, "identifier");
+
+    int expected_lines[] = {
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    };
+
+    int expected_columns[] = {
+            1, 5, 15, 17, 27, 29, 39, 41, 51, 53, 60
+    };
+
+    RunTest(input, expected_tokens, expected_vals,
+            expected_lines, expected_columns);
+}
