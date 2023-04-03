@@ -81,6 +81,7 @@ target_include_directories(lexer_exe PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(lexer_test
         test/lexer/lexer_test.cc
+        src/lexer/utils.c
         ${FLEX_Scanner_OUTPUTS}
         ${OUTPUT_HEADER}
         )

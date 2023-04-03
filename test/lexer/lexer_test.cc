@@ -9,6 +9,27 @@ extern "C" {
 
 using namespace std;
 
+static void RunTest(const string &input, int *expected_tokens, YYSTYPE *expected_vals,
+                    int *expected_lines, int *expected_columns) {
+    FILE *file = fmemopen((void *)input.c_str(), input.size(), "r");
+    yyreset(file);
+
+    int i = 0;
+    int token;
+    while ((token = yylex()) != 0) {
+        EXPECT_EQ(token, expected_tokens[i]);
+        if (token == TOK_ID) {
+            EXPECT_STREQ(yytext, expected_vals[i].strval);
+        } else if (token == TOK_STRING) {
+            EXPECT_STREQ(yylval.strval, expected_vals[i].strval);
+        }
+        EXPECT_EQ(yylineno, expected_lines[i]);
+        EXPECT_EQ(yycolno, expected_columns[i]);
+        i++;
+    }
+    fclose(file);
+}
+
 TEST(LexerSimpleTest, SimpleTest) {
     string input = R"(1 2 3 4
 5 6 7 8
@@ -27,20 +48,8 @@ TEST(LexerSimpleTest, SimpleTest) {
         1, 3, 5, 7, 1, 3, 5, 7,
     };
 
-    FILE *file = fmemopen((void *)input.c_str(), input.size(), "r");
-    SetInput(file);
-
-    int i = 0;
-    int token;
-    while ((token = yylex()) != 0) {
-        EXPECT_EQ(token, expected_tokens[i]);
-        EXPECT_EQ(yylval.intval, expected_vals[i]);
-        EXPECT_EQ(yylineno, expected_lines[i]);
-        EXPECT_EQ(yycolno, expected_columns[i]);
-        i++;
-    }
-
-    fclose(file);
+    RunTest(input, expected_tokens, (YYSTYPE *)expected_vals,
+            expected_lines, expected_columns);
 }
 
 TEST(LexerSimpleTest, HelloWorld) {
@@ -70,22 +79,6 @@ end.
         1, 4,
     };
 
-    FILE *file = fmemopen((void *)input.c_str(), input.size(), "r");
-    SetInput(file);
-
-    int i = 0;
-    int token;
-    while ((token = yylex()) != 0) {
-        EXPECT_EQ(token, expected_tokens[i]);
-        if (token == TOK_ID) {
-            EXPECT_STREQ(yytext, expected_vals[i].strval);
-        } else if (token == TOK_STRING) {
-            EXPECT_STREQ(yylval.strval, expected_vals[i].strval);
-        }
-        EXPECT_EQ(yylineno, expected_lines[i]);
-        EXPECT_EQ(yycolno, expected_columns[i]);
-        i++;
-    }
-
-    fclose(file);
+    RunTest(input, expected_tokens, expected_vals,
+            expected_lines, expected_columns);
 }

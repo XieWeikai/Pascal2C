@@ -26,6 +26,7 @@ union YYSTYPE {
 
 int yylex();
 char* TokenToString(int token);
+void yyreset(FILE *in);
 extern int yylineno;
 extern int yycolno;
 extern int yyerrno;
