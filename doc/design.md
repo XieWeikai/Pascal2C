@@ -458,6 +458,10 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 
         inline void set_return_type(const int &return_type) { return_type_ = return_type; }
 
+        // return:
+        //     true if the subprogram is a function
+        inline const bool is_function() const { return return_type_ != -1; }
+
         // for test use
         // param:
         //     level is the level of indentation that should be applied to the returned string
