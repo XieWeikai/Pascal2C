@@ -58,6 +58,41 @@ if(NOT DEFINED $ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
     set($ENV{CMAKE_EXPORT_COMPILE_COMMANDS} true)
 endif()
 
+# >>> lexer test >>>
+find_package(FLEX REQUIRED)
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+set(SCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/lexer/token_generator.py")
+set(OUTPUT_HEADER "${CMAKE_CURRENT_BINARY_DIR}/lexer.h")
+add_custom_command(
+        OUTPUT ${OUTPUT_HEADER}
+        COMMAND ${Python3_EXECUTABLE} ${SCRIPT_PATH} ${OUTPUT_HEADER}
+        DEPENDS ${SCRIPT_PATH}
+        COMMENT "Generating lexer.h"
+)
+FLEX_TARGET(Scanner src/lexer/lexer.lex ${CMAKE_CURRENT_BINARY_DIR}/lexer.yy.c)
+
+add_executable(lexer_exe
+        src/lexer/main.c
+        src/lexer/utils.c
+        ${FLEX_Scanner_OUTPUTS}
+        ${OUTPUT_HEADER}
+        )
+target_include_directories(lexer_exe PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+add_executable(lexer_test
+        test/lexer/lexer_test.cc
+        src/lexer/utils.c
+        ${FLEX_Scanner_OUTPUTS}
+        ${OUTPUT_HEADER}
+        )
+target_include_directories(lexer_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(
+        lexer_test
+        gtest_main
+        gmock_main
+)
+# <<< lexer test <<<
+
 
 
 aux_source_directory(src/ast AST)
@@ -69,7 +104,7 @@ add_executable(
         ${PARSER_TEST}
         ${PARSER}
         ${AST}
-        src/lexer/lex.yy.c
+        ${CMAKE_CURRENT_BINARY_DIR}/lexer.yy.c
 )
 add_executable(
         ast_test
