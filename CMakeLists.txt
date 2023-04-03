@@ -70,12 +70,26 @@ add_custom_command(
         COMMENT "Generating lexer.h"
 )
 FLEX_TARGET(Scanner src/lexer/lexer.lex ${CMAKE_CURRENT_BINARY_DIR}/lexer.yy.c)
+
 add_executable(lexer_exe
         src/lexer/main.c
+        src/lexer/utils.c
         ${FLEX_Scanner_OUTPUTS}
         ${OUTPUT_HEADER}
         )
 target_include_directories(lexer_exe PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+add_executable(lexer_test
+        test/lexer/lexer_test.cc
+        ${FLEX_Scanner_OUTPUTS}
+        ${OUTPUT_HEADER}
+        )
+target_include_directories(lexer_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(
+        lexer_test
+        gtest_main
+        gmock_main
+)
 # <<< lexer test <<<
 
 
@@ -89,7 +103,7 @@ add_executable(
         ${PARSER_TEST}
         ${PARSER}
         ${AST}
-        src/lexer/lex.yy.c
+        ${CMAKE_CURRENT_BINARY_DIR}/lexer.yy.c
 )
 add_executable(
         ast_test
