@@ -23,6 +23,7 @@ char* YYERRMSG[] = {
 union YYSTYPE yylval;
 
 int cmt_level = 0;
+int str_start_col = 0;
 
 #define YY_USER_ACTION {yycolno = yycolno_next; yycolno_next += yyleng;}
 
@@ -51,16 +52,16 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 <COMMENT>"}"           {--cmt_level; if (cmt_level == 0) BEGIN(INITIAL);}
 <COMMENT>.            
 
-"'"                {BEGIN(STRING); yylval.strval[0] = '\0';}
-<STRING>\n         {yycolno_next = 1; yyerrno = ERR_UNTERMINATED_STRING; BEGIN(INITIAL); return TOK_ERROR;}
+"'"                {str_start_col = yycolno; BEGIN(STRING); yylval.strval[0] = '\0';}
+<STRING>\n         {yycolno = str_start_col; yycolno_next = 1; yyerrno = ERR_UNTERMINATED_STRING; BEGIN(INITIAL); return TOK_ERROR;}
 <STRING><<EOF>>    {yyerrno = ERR_UNTERMINATED_STRING; BEGIN(INITIAL); return TOK_ERROR;}
-<STRING>[^\\']     {strcat(yylval.strval, yytext);}
-<STRING>\\n        {strcat(yylval.strval, "\n");}
-<STRING>\\t        {strcat(yylval.strval, "\t");}
-<STRING>\\r        {strcat(yylval.strval, "\r");}
-<STRING>\\'        {strcat(yylval.strval, "'");}
-<STRING>\\.        {strcat(yylval.strval, yytext);}
-<STRING>"'"        {BEGIN(INITIAL); return TOK_STRING;}
+<STRING>[^\\']     {yycolno = str_start_col; strcat(yylval.strval, yytext);}
+<STRING>\\n        {yycolno = str_start_col; strcat(yylval.strval, "\n");}
+<STRING>\\t        {yycolno = str_start_col; strcat(yylval.strval, "\t");}
+<STRING>\\r        {yycolno = str_start_col; strcat(yylval.strval, "\r");}
+<STRING>\\'        {yycolno = str_start_col; strcat(yylval.strval, "'");}
+<STRING>\\.        {yycolno = str_start_col; strcat(yylval.strval, yytext);}
+<STRING>"'"        {yycolno = str_start_col; BEGIN(INITIAL); return TOK_STRING;}
 
 and                {return TOK_AND;}
 array              {return TOK_ARRAY;}
