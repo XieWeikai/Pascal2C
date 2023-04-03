@@ -1,6 +1,13 @@
 #include "lexer.h"
 #include <stdio.h>
 
+void yyreset(FILE* in) {
+    yylineno = 1;
+    yycolno = 1;
+    yyerrno = 0;
+    yyin = in;
+}
+
 char* TokenToString(int token) {
     static char* tokenNames[] = {
         [TOK_ID] = "TOK_ID",
