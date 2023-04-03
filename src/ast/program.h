@@ -84,6 +84,8 @@ namespace pascal2c::ast
             periods_.push_back({digits_1, digits_2});
         }
 
+        inline void set_basic_type(const int &basic_type) { basic_type_ = basic_type; }
+
         // for test use
         // param:
         //     level is the level of indentation that should be applied to the returned string
@@ -215,6 +217,10 @@ namespace pascal2c::ast
 
         inline void set_return_type(const int &return_type) { return_type_ = return_type; }
 
+        // return:
+        //     true if the subprogram is a function
+        inline const bool is_function() const { return return_type_ != -1; }
+
         // for test use
         // param:
         //     level is the level of indentation that should be applied to the returned string
@@ -224,7 +230,7 @@ namespace pascal2c::ast
 
     private:
         string id_;                                // name of the subprogram, eg. f, p
-        int return_type_;                          // -1 means procedure, eg. integer, real
+        int return_type_;                          // -1 means procedure,TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE ,eg. integer, real
         vector<shared_ptr<Parameter>> parameters_; // can be empty, eg. a, b : integer
     };
 
