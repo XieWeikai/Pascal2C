@@ -89,7 +89,7 @@ namespace pascal2c::parser
         auto name = text_;
         Match(TOK_ID);
         Match(TOK_ASSIGNOP);
-        // TODO: Parse const value
+        return std::move(std::make_shared<ast::ConstDeclaration>(name, std::move(ParsePrimary())));
     }
 
     std::shared_ptr<ast::VarDeclaration> Parser::ParseVarDeclaration()
@@ -268,7 +268,14 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::Period> Parser::ParsePeriod()
     {
-        // TODO: ParsePeriod
+        int value1 = tok_value_.inval;
+        Match(TOK_INTEGER);
+        Match('.');
+        Match('.');
+        Match('.');
+        int value2 = tok_value.inval;
+        Match(TOK_INTEGER);
+        return std::move(std::make_shared<ast::Period>(value1, value2));
     }
 
     std::shared_ptr<ast::Parameter> Parser::ParseParameter()
