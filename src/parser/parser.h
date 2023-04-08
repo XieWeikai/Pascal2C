@@ -14,7 +14,7 @@
 
 extern "C"
 {
-#include "lexer/lexer.h"
+#include "lexer.h"
 };
 
 namespace pascal2c::parser

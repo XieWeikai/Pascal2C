@@ -16,7 +16,7 @@ OTHER_CONTENT = '''#pragma once
 #include <stdio.h>
 
 #define MAX_STR_LEN 256
-#define MAX_INT_LEN 32
+#define MAX_INT_LEN 10
 
 union YYSTYPE {
     uint32_t intval;
@@ -26,6 +26,7 @@ union YYSTYPE {
 
 int yylex();
 char* TokenToString(int token);
+void yyreset(FILE *in);
 extern int yylineno;
 extern int yycolno;
 extern int yyerrno;

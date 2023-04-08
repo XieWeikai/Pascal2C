@@ -7,7 +7,7 @@
 
 namespace pascal2c::parser {
 
-    static std::unordered_map<char, int> binary_prec = {
+    static std::unordered_map<int, int> binary_prec = {
             {'=', 1},
             {TOK_NEQOP, 1},
             {'<', 1},
@@ -24,7 +24,7 @@ namespace pascal2c::parser {
             {TOK_MOD, 3},
     };
 
-    static std::unordered_map<char, int> unary_prec = {
+    static std::unordered_map<int, int> unary_prec = {
             {TOK_NOT, 4},
             {'+', 4},
             {'-', 4},
@@ -132,4 +132,12 @@ namespace pascal2c::parser {
         return std::move(res);
     }
 
+    // TODO:
+    //      parse boolean value, string value , char value
+    // TODO:
+    //      add a new class CallOrVariable to represent call or variable, this can be the base type of CallValue and Variable
+    //      we use CallOrVariable in case that we can't distinguish call and variable in the grammar, such as a := add;
+    //      we don't know whether add is a variable or a function call, so we use CallOrVariable to represent it
+    // TODO:
+    //     add line and column information to the ast node
 }

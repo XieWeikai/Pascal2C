@@ -44,7 +44,6 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
-    // TODO
     std::string CompoundStatement::ToString(int level) const
     {
         std::stringstream str_s;
@@ -60,7 +59,6 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
-    // TODO
     std::string IfStatement::ToString(int level) const
     {
         std::stringstream str_s;
@@ -79,7 +77,6 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
-    // TODO
     std::string ForStatement::ToString(int level) const
     {
         std::stringstream str_s;

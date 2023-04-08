@@ -7,7 +7,7 @@
 #include "ast/statement.h"
 
 extern "C" {
-    #include "lexer/lexer.h"
+    #include "lexer.h"
 }
 
 namespace pascal2c::parser {
@@ -92,7 +92,7 @@ namespace pascal2c::parser {
 
     std::shared_ptr<ast::Statement> Parser::ParseAssignAndCallStatement(){
         std::string id = text_;
-        Match(TOK_ID);
+        Match(TOK_ID);  // TODO: handle id not found
         vector<std::shared_ptr<ast::Expression> > expr_list;
         auto var = std::make_shared<ast::Variable>(id);
         bool is_var = false;
@@ -122,4 +122,6 @@ namespace pascal2c::parser {
         auto expr = ParseExpr();
         return std::make_shared<ast::AssignStatement>(var,expr);
     }
+
+    // TODO: add line and column information to AST
 }
