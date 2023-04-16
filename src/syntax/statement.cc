@@ -6,11 +6,10 @@
 #include "syntax.h"
 #include "ast/statement.h"
 
-extern "C" {
-    #include "lexer.h"
-}
+#include "lexer.h"
 
-namespace Pascal2C::Syntax {
+namespace Pascal2C::Syntax 
+{
     template<typename Tp> using vector = ::std::vector<Tp>;
 
     static bool isStatementStartTok(int tok){
@@ -23,19 +22,21 @@ namespace Pascal2C::Syntax {
 
     std::shared_ptr<ast::Statement> Parser::ParseStatement(){
         static char buff[1024];
-        switch (token_) {
-            case TOK_IF:
-                return std::move(ParseIFStatement());
-            case TOK_FOR:
-                return std::move(ParseForStatement());
-            case TOK_BEGIN:
-                return std::move(ParseCompoundStatement());
-            case TOK_ID:
-                return std::move(ParseAssignAndCallStatement());
+        switch (cur.token) 
+        {
+        case TOK_IF:
+            return std::move(ParseIFStatement());
+        case TOK_FOR:
+            return std::move(ParseForStatement());
+        case TOK_BEGIN:
+            return std::move(ParseCompoundStatement());
+        case TOK_ID:
+            return std::move(ParseAssignAndCallStatement());
 
-            default:
-                sprintf(buff,"%d:%d: not expected token to parse statement",line_,column_);
-                throw SyntaxErr(buff);
+        default:
+            sprintf(buff ,"%d:%d: not expected token to parse statement" ,
+                            cur.line ,cur.column);
+            throw SyntaxErr{buff};
         }
         return nullptr;
     }
@@ -45,17 +46,19 @@ namespace Pascal2C::Syntax {
         auto cond = ParseExpr();
         Match(TOK_THEN);
         auto statement = ParseStatement();
-        if(token_ == TOK_ELSE){
+
+        if(cur.token == TOK_ELSE) {
             Match(TOK_ELSE);
             auto else_part = ParseStatement();
             return std::move(std::make_shared<ast::IfStatement>(cond,statement,else_part));
         }
+
         return std::move(std::make_shared<ast::IfStatement>(cond,statement,nullptr));
     }
 
     std::shared_ptr<ast::Statement> Parser::ParseForStatement(){
         Match(TOK_FOR);
-        auto id = text_;
+        auto id = cur.text;
         Match(TOK_ID);
         Match(TOK_ASSIGNOP);
         auto from = ParseExpr();
@@ -71,18 +74,18 @@ namespace Pascal2C::Syntax {
         vector<std::shared_ptr<ast::Statement> > statements;
         std::shared_ptr<ast::Statement> statement;
 
-        while(token_ != 0 && token_ != TOK_END){
+        while(cur.token != 0 && cur.token != TOK_END){
             try {
                 statement = ParseStatement();
                 statements.push_back(std::move(statement));
-                if(token_ == ';')
+                if(cur.token == ';')
                     NextToken();
             }catch (SyntaxErr &e){
                 err_msg_.push_back(std::string(e.what()));
-                while(token_ != 0 && !isStatementStartTok(token_) && token_ != ';' && token_ != TOK_END){
+                while(cur.token != 0 && !isStatementStartTok(cur.token) && cur.token != ';' && cur.token != TOK_END){
                     NextToken();
                 }
-                if(token_ == ';')
+                if(cur.token == ';')
                     NextToken();
             }
         }
@@ -91,16 +94,16 @@ namespace Pascal2C::Syntax {
     }
 
     std::shared_ptr<ast::Statement> Parser::ParseAssignAndCallStatement(){
-        std::string id = text_;
+        std::string id = cur.text;
         Match(TOK_ID);  // TODO: handle id not found
         vector<std::shared_ptr<ast::Expression> > expr_list;
         auto var = std::make_shared<ast::Variable>(id);
         bool is_var = false;
 
-        switch (token_) {
+        switch (cur.token) {
             case '(':
                 NextToken();
-                if(token_ == ')'){
+                if(cur.token == ')'){
                     NextToken();
                     return std::make_shared<ast::CallStatement>(id);
                 }
@@ -115,7 +118,7 @@ namespace Pascal2C::Syntax {
                 is_var = true;
         }
 
-        if(!is_var && token_ == ';')
+        if(!is_var && cur.token == ';')
             return std::make_shared<ast::CallStatement>(id);
 
         Match(TOK_ASSIGNOP);

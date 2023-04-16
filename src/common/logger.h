@@ -39,12 +39,11 @@
 /**
  * @brief 输出带有console颜色的字符串
  */
-#define COLOR_STR(color , str) color str COLOR_END
+#define COLOR_STR(color ,str) color str COLOR_END
 
-
-#define LOGGER(file , line , color , level , str , ...) do {					\
+#define LOGGER(file ,line ,color ,level ,str ,...) do {	\
 	fprintf(stderr, COLOR_STR(color , "["#level " @%s:%d]\t")	\
-			str, file , line , ##__VA_ARGS__);	\
+			str, file, line, ##__VA_ARGS__);	\
 } while (0)	
 
 /**
@@ -53,7 +52,7 @@
  * @param line 提示来源的行号 %d
  * @param str  格式化字符串
  */
-#define INFO(file , line , str , ...) \
+#define INFO(file ,line ,str ,...) \
 	LOGGER(file , line , COLOR_GREE ,INFO	, str , ##__VA_ARGS__)
 
 /**
@@ -62,7 +61,7 @@
  * @param line 警告来源的行号 %d
  * @param str  格式化字符串
  */
-#define WARN(file , line , str , ...) \
+#define WARN(file ,line ,str ,...) \
 	LOGGER(file , line , COLOR_YELL ,WARNING , str , ##__VA_ARGS__)
 
 /**
@@ -71,7 +70,7 @@
  * @param line 错误来源的行号 %d
  * @param str  格式化字符串
  */
-#define ERROR(file , line, str , ...) \
+#define ERROR(file ,line ,str ,...) \
 	LOGGER(file , line , COLOR_RED  ,ERROR   , str , ##__VA_ARGS__)
 
 
@@ -82,21 +81,21 @@
  * @brief 给出一条系统提示信息，标记的颜色为绿色
  * @param str  格式化字符串
  */
-#define SYS_INFO(str , ...) \
+#define SYS_INFO(str ,...) \
 	LOGGER(TRIM(__FILE__), __LINE__, COLOR_GREE, INFO, str, ##__VA_ARGS__)
 
 /**
  * @brief 给出一条系统警告信息，标记的颜色为黄色
  * @param str  格式化字符串
  */
-#define SYS_WARN(str , ...) \
+#define SYS_WARN(str ,...) \
 	LOGGER(TRIM(__FILE__), __LINE__, COLOR_YELL, WARN, str, ##__VA_ARGS__)
 
 /**
  * @brief 给出一条系统警告信息，标记的颜色为红色
  * @param str  格式化字符串
  */
-#define SYS_ERROR(str, ...) \
+#define SYS_ERROR(str ,...) \
 	LOGGER(TRIM(__FILE__), __LINE__, COLOR_RED, ERROR, str, ##__VA_ARGS__)
 
 
@@ -104,7 +103,7 @@
  * @brief 给出一条调试信息，标记的颜色为蓝色
  * @param str  格式化字符串
  */
-#define DEBUG(str , ...) \
+#define DEBUG(str ,...) \
 	LOGGER(TRIM(__FILE__), __LINE__, COLOR_BLUE,DEBUG, str, ##__VA_ARGS__)
 
 /**
@@ -112,7 +111,7 @@
  * @param cond 断言条件
  * @param str 格式化字符串
  */
-#define ASSERT(cond , str , ...) do { 	\
+#define ASSERT(cond ,str ,...) do { 	\
 	if (!(cond)) {						\
 		SYS_ERROR(str , ##__VA_ARGS__);	\
 		exit(EXIT_FAILURE); }			\

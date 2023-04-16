@@ -1,4 +1,5 @@
 #include <vector>
+#include <common/logger.h>
 
 #include "syntax.h"
 #include "ast/program.h"
@@ -27,9 +28,9 @@ namespace Pascal2C::Syntax
     std::shared_ptr<ast::ProgramHead> Parser::ParseProgramHead()
     {
         Match(TOK_PROGRAM);
-        auto name = text_;
+        auto name = cur.text;
         Match(TOK_ID);
-        if (token_ == '(')
+        if (cur.token == '(')
         {
             NextToken();
             auto id_list = ParseIdList();
@@ -44,10 +45,13 @@ namespace Pascal2C::Syntax
         auto program_body = std::make_shared<ast::ProgramBody>();
 
         // Parse const declarations
-        if (token_ == TOK_CONST)
+        if (cur.token == TOK_CONST)
         {
             NextToken();
-            while (token_ != TOK_VAR && token_ != TOK_PROCEDURE && token_ != TOK_FUNCTION && token_ != TOK_BEGIN)
+            while ( cur.token != TOK_VAR && 
+                    cur.token != TOK_PROCEDURE && 
+                    cur.token != TOK_FUNCTION && 
+                    cur.token != TOK_BEGIN )
             {
                 program_body->AddConstDeclaration(std::move(ParseConstDeclaration()));
                 Match(TOK_SEMICOLON);
@@ -55,10 +59,10 @@ namespace Pascal2C::Syntax
         }
 
         // Parse var declarations
-        if (token_ == TOK_VAR)
+        if (cur.token == TOK_VAR)
         {
             NextToken();
-            while (token_ != TOK_PROCEDURE && token_ != TOK_FUNCTION && token_ != TOK_BEGIN)
+            while (cur.token != TOK_PROCEDURE && cur.token != TOK_FUNCTION && cur.token != TOK_BEGIN)
             {
                 program_body->AddVarDeclaration(std::move(ParseVarDeclaration()));
                 Match(TOK_SEMICOLON);
@@ -66,9 +70,9 @@ namespace Pascal2C::Syntax
         }
 
         // Parse subprograms
-        if (token_ == TOK_PROCEDURE || token_ == TOK_FUNCTION)
+        if (cur.token == TOK_PROCEDURE || cur.token == TOK_FUNCTION)
         {
-            while (token_ != TOK_BEGIN)
+            while (cur.token != TOK_BEGIN)
             {
                 program_body->AddSubprogram(std::move(ParseSubprogram()));
                 Match(TOK_SEMICOLON);
@@ -77,7 +81,7 @@ namespace Pascal2C::Syntax
 
         // Parse compound statement
         Match(TOK_BEGIN);
-        while (token_ != TOK_END)
+        while (cur.token != TOK_END)
         {
             program_body->AddStatement(std::move(ParseStatement()));
             Match(TOK_SEMICOLON);
@@ -88,7 +92,7 @@ namespace Pascal2C::Syntax
 
     std::shared_ptr<ast::ConstDeclaration> Parser::ParseConstDeclaration()
     {
-        auto name = text_;
+        auto name = cur.text;
         Match(TOK_ID);
         Match(TOK_ASSIGNOP);
         return std::move(std::make_shared<ast::ConstDeclaration>(name, std::move(ParsePrimary())));
@@ -112,19 +116,19 @@ namespace Pascal2C::Syntax
 
     std::shared_ptr<ast::SubprogramHead> Parser::ParseSubprogramHead()
     {
-        if (token_ == TOK_PROCEDURE)
+        if (cur.token == TOK_PROCEDURE)
         {
             NextToken();
-            auto name = text_;
+            auto name = cur.text;
             Match(TOK_ID);
             auto subprogram_head = std::make_shared<ast::SubprogramHead>(name);
-            if (token_ == TOK_LPAREN)
+            if (cur.token == TOK_LPAREN)
             {
                 NextToken();
                 while (true)
                 {
-                    subprogram_head->AddParam(std::move(ParseParament()));
-                    if (token_ == TOK_SEMICOLON)
+                    subprogram_head->AddParam(std::move(ParseParameter()));
+                    if (cur.token == TOK_SEMICOLON)
                     {
                         NextToken();
                     }
@@ -137,17 +141,17 @@ namespace Pascal2C::Syntax
             }
             return std::move(subprogram_head);
         }
-        else if (token_ == TOK_FUNCTION)
+        else if (cur.token == TOK_FUNCTION)
         {
             NextToken();
-            auto name = text_;
+            auto name = cur.text;
             Match(TOK_ID);
             auto subprogram_head = std::make_shared<ast::SubprogramHead>(name);
-            if (token_ == TOK_LPAREN)
+            if (cur.token == TOK_LPAREN)
             {
                 NextToken();
                 subprogram_head->AddParam(std::move(ParseParameter()));
-                while (token_ == TOK_SEMICOLON)
+                while (cur.token == TOK_SEMICOLON)
                 {
                     NextToken();
                     subprogram_head->AddParam(std::move(ParseParameter()));
@@ -155,14 +159,14 @@ namespace Pascal2C::Syntax
                 Match(TOK_RPAREN);
             }
             Match(TOK_COLON);
-            if (token_ == TOK_INTEGER_TYPE || token_ == TOK_REAL_TYPE || token_ == TOK_CHAR_TYPE || token_ == TOK_BOOLEAN_TYPE)
+            if (cur.token == TOK_INTEGER_TYPE || cur.token == TOK_REAL_TYPE || cur.token == TOK_CHAR_TYPE || cur.token == TOK_BOOLEAN_TYPE)
             {
-                subprogram_head->set_return_type(token_);
+                subprogram_head->set_return_type(cur.token);
                 NextToken();
             }
             else
             {
-                sprintf(buff, "%d:%d syntax err:expected basic type(integer, real, char, boolean) got %c", line_, col_, token_);
+                SYNTAX_ERROR;
                 NextToken();
                 throw SyntaxErr(std::string(buff));
             }
@@ -170,7 +174,7 @@ namespace Pascal2C::Syntax
         }
         else
         {
-            sprintf(buff, "%d:%d syntax err:expected function or procedure got %c", line_, col_, token_);
+            SYNTAX_ERROR;
             NextToken();
             throw SyntaxErr(std::string(buff));
         }
@@ -181,10 +185,10 @@ namespace Pascal2C::Syntax
         auto subprogram_body = std::make_shared<ast::SubprogramBody>();
 
         // Parse const declarations
-        if (token_ = TOK_CONST)
+        if (cur.token = TOK_CONST)
         {
             NextToken();
-            while (token_ != TOK_VAR && token_ != TOK_BEGIN)
+            while (cur.token != TOK_VAR && cur.token != TOK_BEGIN)
             {
                 subprogram_body->AddConstDeclaration(std::move(ParseConstDeclaration()));
                 Match(TOK_SEMICOLON);
@@ -192,11 +196,10 @@ namespace Pascal2C::Syntax
         }
 
         // Parse var declarations
-        if (token_ = TOK_VAR)
+        if (cur.token = TOK_VAR)
         {
             NextToken();
-            while (token_ != TOK_BEGIN)
-            {
+            while (cur.token != TOK_BEGIN) {
                 subprogram_body->AddVarDeclaration(std::move(ParseVarDeclaration()));
                 Match(TOK_SEMICOLON);
             }
@@ -204,7 +207,7 @@ namespace Pascal2C::Syntax
 
         // Parse compound statement
         Match(TOK_BEGIN);
-        while (token_ != TOK_END)
+        while (cur.token != TOK_END)
         {
             subprogram_body->AddStatement(std::move(ParseStatement()));
             Match(TOK_SEMICOLON);
@@ -216,12 +219,12 @@ namespace Pascal2C::Syntax
     std::shared_ptr<ast::IdList> Parser::ParseIdList()
     {
         auto id_list = std::make_shared<ast::IdList>();
-        id_list->AddId(text_);
+        id_list->AddId(cur.text);
         Match(TOK_ID);
-        while (token_ == TOK_COMMA)
+        while (cur.token == TOK_COMMA)
         {
             NextToken();
-            id_list->AddId(text_);
+            id_list->AddId(cur.text);
             Match(TOK_ID);
         }
         return std::move(id_list);
@@ -229,80 +232,84 @@ namespace Pascal2C::Syntax
 
     std::shared_ptr<ast::Type> Parser::ParseType()
     {
-        if (token_ == TOK_INTEGER_TYPE || token_ == TOK_REAL_TYPE || token_ == TOK_CHAR_TYPE || token_ == TOK_BOOLEAN_TYPE)
+        static char buff[256];
+        if (cur.token == TOK_INTEGER_TYPE || cur.token == TOK_REAL_TYPE || cur.token == TOK_CHAR_TYPE || cur.token == TOK_BOOLEAN_TYPE)
         {
-            auto type = std::make_shared<ast::Type>(false, token_);
+            auto type = std::make_shared<ast::Type>(false, cur.token);
             NextToken();
             return std::move(type);
         }
-        else if (token_ == TOK_ARRAY)
+        else if (cur.token == TOK_ARRAY)
         {
             auto type = std::make_shared<ast::Type>(true);
             NextToken();
             Match(TOK_LBRACK);
             type->AddPeriod(std::move(ParsePeriod()));
-            while (token_ == TOK_COMMA)
+            while (cur.token == TOK_COMMA)
             {
                 NextToken();
                 type->AddPeriod(std::move(ParsePeriod()));
             }
             Match(TOK_RBRACK);
             Match(TOK_OF);
-            if (token_ == TOK_INTEGER_TYPE || token_ == TOK_REAL_TYPE || token_ == TOK_CHAR_TYPE || token_ == TOK_BOOLEAN_TYPE)
+            if (cur.token == TOK_INTEGER_TYPE || cur.token == TOK_REAL_TYPE || cur.token == TOK_CHAR_TYPE || cur.token == TOK_BOOLEAN_TYPE)
             {
-                type->set_basic_type(token_);
+                type->set_basic_type(cur.token);
                 NextToken();
             }
             else
             {
-                sprintf(buff, "%d:%d syntax err:expected basic type(integer, real, char, boolean) got %c", line_, col_, token_);
+                sprintf(buff, "%d:%d syntax err:expected basic type(integer, real, char, boolean) got %c", 
+                                cur.line, cur.column, cur.token);
                 NextToken();
                 throw SyntaxErr(std::string(buff));
             }
         }
         else
         {
-            sprintf(buff, "%d:%d syntax err:expected basic type(integer, real, char, boolean) or array got %c", line_, col_, token_);
+            sprintf(buff, "%d:%d syntax err:expected basic type(integer, real, char, boolean) or array got %c", cur.line, cur.column, cur.token);
             NextToken();
             throw SyntaxErr(std::string(buff));
         }
     }
 
-    std::shared_ptr<ast::Period> Parser::ParsePeriod()
+
+    std::shared_ptr<ast::Type::Period> Parser::ParsePeriod()
     {
-        int value1 = tok_value_.inval;
+        int value1 = cur.tok_value.intval;
         Match(TOK_INTEGER);
         Match('.');
         Match('.');
         Match('.');
-        int value2 = tok_value.inval;
+        int value2 = cur.tok_value.intval;
         Match(TOK_INTEGER);
-        return std::move(std::make_shared<ast::Period>(value1, value2));
+        TODO; //这个区间类不一定是数字
+        return std::move(std::make_shared<ast::Type::Period>(value1, value2));
     }
 
     std::shared_ptr<ast::Parameter> Parser::ParseParameter()
     {
-        bool is_var;
-        if (token_ == TOK_VAR)
-        {
+        bool is_var = false;
+        if (cur.token == TOK_VAR) {
             is_var = true;
             NextToken();
-        }
-        else
-        {
-            is_var = false;
-        }
+        } 
+        
         auto id_list = ParseIdList();
         Match(TOK_COLON);
         int type;
-        if (token_ == TOK_INTEGER || token_ == TOK_REAL || token_ == TOK_CHAR || token_ == TOK_BOOLEAN)
+
+        if (cur.token == TOK_INTEGER || 
+            cur.token == TOK_REAL    || 
+            cur.token == TOK_CHAR    || 
+            cur.token == TOK_BOOLEAN )
         {
-            type = token_;
+            type = cur.token;
             NextToken();
-        }
-        else
-        {
-            sprintf(buff, "%d:%d syntax err:expected basic type(integer, real, char, boolean) got %c", line_, col_, token_);
+        
+        } else {
+            static char buff[256];
+            sprintf(buff, "%d:%d syntax err:expected basic type(integer, real, char, boolean) got %c", cur.line, cur.column, cur.token);
             NextToken();
             throw SyntaxErr(std::string(buff));
         }

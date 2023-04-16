@@ -34,7 +34,7 @@ int main(int argc , char* argv[])
 	/* ------------------------------------------------ */
 	SYS_INFO("Step 2 : Syntax Analysis\n");
 
-	Pascal2C::Syntax::Parser syn{nullptr};
+	Pascal2C::Syntax::Parser syn{info.source_file , nullptr};
 
 	return EXIT_SUCCESS;
 }

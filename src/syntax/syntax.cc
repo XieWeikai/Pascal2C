@@ -12,61 +12,61 @@
 namespace Pascal2C::Syntax 
 {
 
-    Parser::Parser(FILE *in) {
+    Parser::Parser(std::string_view file_name_ ,FILE *in) noexcept
+        : file_name(file_name_) 
+        {
         // for(auto & i : prefix_parser_)
         //     i = nullptr;
         // shared_ptr is initialized with nullptr by default
 
-        prefix_parser_[TOK_ID]      = std::make_shared<call_T>(ParseVariableAndCall);
-        prefix_parser_[TOK_INTEGER] = std::make_shared<call_T>(ParseNumber);
-        prefix_parser_[TOK_REAL]    = std::make_shared<call_T>(ParseNumber);
+        prefix_parser_[TOK_ID]      = &Parser::ParseVariableAndCall;
+        prefix_parser_[TOK_INTEGER] = &Parser::ParseNumber;
+        prefix_parser_[TOK_REAL]    = &Parser::ParseNumber;
 
-        prefix_parser_[TOK_NOT]     = std::make_shared<call_T>(ParsePrefix);
-        prefix_parser_['+']         = std::make_shared<call_T>(ParsePrefix);
-        prefix_parser_['-']         = std::make_shared<call_T>(ParsePrefix);
+        prefix_parser_[TOK_NOT]     = &Parser::ParsePrefix;
+        prefix_parser_['+']         = &Parser::ParsePrefix;
+        prefix_parser_['-']         = &Parser::ParsePrefix;
         
-        prefix_parser_['(']         = std::make_shared<call_T>(ParseParen);
+        prefix_parser_['(']         = &Parser::ParseParen;
 
         SetInput(in);
 
-        next_token_     = yylex();
-        next_tok_value_ = yylval;
-        next_line_      = yylineno;
-        next_column_    = yycolno;
-        next_text_      = yytext;
+        next = Cursor {
+            .token      {yylex() } ,
+            .tok_value  {yylval  } ,
+            .line       {yylineno} ,
+            .column     {yycolno } ,
+            .text       {yytext  }
+        };
 
         NextToken();
     }
 
-    int Parser::NextToken() {
-        token_ = next_token_;
-        tok_value_ = next_tok_value_;
-        line_ = next_line_;
-        column_ = next_column_;
-        text_ = next_text_;
-        lexer_errno_ = yyerrno;
+    void Parser::NextToken() noexcept {
+        cur = next;
+        lexer_errno_    = yyerrno;
 
-        next_token_ = yylex();
-        next_tok_value_ = yylval;
-        next_line_ = yylineno;
-        next_column_ = yycolno;
-        next_text_ = yytext;
-        return token_;
+        next = Cursor {
+            .token      {yylex() } ,
+            .tok_value  {yylval  } ,
+            .line       {yylineno} ,
+            .column     {yycolno } ,
+            .text       {yytext  }
+        };
     }
 
     std::string Parser::GetLexerErrMsg() {
-        return {YYERRMSG[lexer_errno_]};
+        return YYERRMSG[lexer_errno_];
     }
 
-    void Parser::Match(int token) {
-        int tok = token_;
-        int line = line_;
-        int column = column_;
-        char buff[1024];
+    void Parser::Match(i32 token) {
+        static char buff[1024];
         NextToken();
-        if(tok != token) {
-            sprintf(buff,"%d:%d syntax err:expected %c got %c",line,column,token,tok);
-            throw SyntaxErr(std::string(buff));
+
+        if(cur.token != token) {
+            sprintf(buff ,"%d:%d syntax ERR:expected %c got %c",
+                    cur.line, cur.column, token, cur.token);
+            throw SyntaxErr{std::string{buff}};
         }
     }
 
