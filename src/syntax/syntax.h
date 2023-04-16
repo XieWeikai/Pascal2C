@@ -6,24 +6,22 @@
 #include <vector>
 #include <cstdio>
 #include <string>
+#include <functional>
 
 #include "gtest/gtest.h"
 #include "ast/ast.h"
 #include "ast/expr.h"
 #include "ast/program.h"
 
-extern "C"
-{
 #include "lexer.h"
-};
 
-namespace pascal2c::parser
+namespace Pascal2C::Syntax
 {
     template <typename Tp>
-    using vector = ::std::vector<Tp>;
+    using vector = std::vector<Tp>;
 
     // exception class for syntax error
-    class SyntaxErr : public ::std::exception
+    class SyntaxErr : public std::exception
     {
     public:
         // param:
@@ -45,9 +43,11 @@ namespace pascal2c::parser
     class Parser
     {
     public:
-        // param:
-        //     in is the input file
-        explicit Parser(FILE *in);
+        /**
+         * @brief 创建新的语法分析器
+         * @param in C风格的文件指针
+        */
+        explicit Parser(FILE *in) noexcept;
 
     private:
         FRIEND_TEST(TokenTest, TestNextToken);
@@ -65,25 +65,29 @@ namespace pascal2c::parser
 
         // token value
         YYSTYPE tok_value_, next_tok_value_;
-        int line_, next_line_;     // line number of token in the input file
+        int line_  , next_line_;   // line   number of token in the input file
         int column_, next_column_; // column number of token in the input file
         std::string text_, next_text_;
 
         vector<std::string> err_msg_; // error massages
 
-        std::shared_ptr<ast::Expression> (Parser::*prefix_parser_[500])();
+        // Mapping from token to handler
+        using call_T = std::function<std::shared_ptr<ast::Expression>()>;
+        std::shared_ptr<call_T> prefix_parser_[512];
+        // std::shared_ptr<ast::Expression> (Parser::*prefix_parser_[512])();
 
-        // get next token
-        // return:
-        //     the next token
-        int NextToken();
+        /**
+         * @brief Get next token
+         * @return The next token
+        */
+        int NextToken() noexcept;
 
-        // match token and get next token
-        // param:
-        //     token is the token to match
-        // throw:
-        //     SyntaxErr if token not match
-        void Match(int token);
+        /**
+         * @brief match token and get next token
+         * @param token is the token to match
+         * @throw SyntaxErr
+        */
+        void Match(int token) ;
 
         // get the error message of lexer
         // return:
@@ -120,11 +124,12 @@ namespace pascal2c::parser
         //     the ast of the var declaration
         std::shared_ptr<ast::VarDeclaration> ParseVarDeclaration();
 
-        // parse the subprogram declaration
+        /** parse the subprogram declaration
         // eg. function f(a : integer) : integer; begin end;
         // eg. procedure p(a : integer); begin end;
-        // return:
+        // @returns :
         //     the ast of the subprogram declaration
+        */
         std::shared_ptr<ast::Subprogram> ParseSubprogram();
 
         // parse the subprogram head

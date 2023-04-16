@@ -8,6 +8,8 @@
 #include <common/common.h>
 #include <common/logger.h>
 #include <common/args_parser.h>
+#include <syntax/syntax.h>
+
 
 int main(int argc , char* argv[]) 
 {
@@ -24,10 +26,15 @@ int main(int argc , char* argv[])
 		return EXIT_FAILURE;
 	} 
 
+	/* ------------------------------------------------ */
+	SYS_INFO("Step 1 : Lexer Analysis\n");
+
 
 
 	/* ------------------------------------------------ */
-	SYS_INFO("Step 1 : \n");
+	SYS_INFO("Step 2 : Syntax Analysis\n");
+
+	Pascal2C::Syntax::Parser syn{nullptr};
 
 	return EXIT_SUCCESS;
 }

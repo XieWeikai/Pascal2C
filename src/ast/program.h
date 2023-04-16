@@ -9,7 +9,7 @@
 #include "expr.h"
 #include "statement.h"
 
-namespace pascal2c::ast
+namespace Pascal2C::ast
 {
     template <typename Tp>
     using shared_ptr = ::std::shared_ptr<Tp>;

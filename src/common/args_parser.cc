@@ -23,7 +23,7 @@ static void showInvalid(const char* arg) {
 }
 
 static void showVersion() {
-	::printf("[ Pascal2C ] Compiler System Version : %d\n" , __P2C_VERSION__);
+	::printf("[ Pascal2C ] Compiler System Version : %s\n" , __P2C_VERSION__);
 	::printf("For more details , pleace click %s\n" ,__GIT_URL__);
 	::printf("                 @ BUPT CS 2023 Spring");
 

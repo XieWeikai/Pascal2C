@@ -1,14 +1,16 @@
 #include <vector>
 
-#include "parser.h"
+#include "syntax.h"
 #include "ast/program.h"
-
-extern "C"
-{
 #include "lexer.h"
-}
 
-namespace pascal2c::parser
+#define TOK_SEMICOLON   ';'
+#define TOK_COLON       ':'
+#define TOK_LPAREN      '('
+#define TOK_RPAREN      ')'
+#define TOK_COMMA       ','
+
+namespace Pascal2C::Syntax
 {
     template <typename Tp>
     using vector = ::std::vector<Tp>;

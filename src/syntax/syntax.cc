@@ -5,34 +5,35 @@
 #include <cstdio>
 #include <exception>
 
-#include "parser.h"
+#include "syntax.h"
+#include "lexer.h"
 
-extern "C" {
-    #include "lexer.h"
-}
 
-namespace pascal2c::parser {
+namespace Pascal2C::Syntax 
+{
 
     Parser::Parser(FILE *in) {
-        for(auto & i : prefix_parser_)
-            i = nullptr;
+        // for(auto & i : prefix_parser_)
+        //     i = nullptr;
+        // shared_ptr is initialized with nullptr by default
 
-        prefix_parser_[TOK_ID] = &Parser::ParseVariableAndCall;
-        prefix_parser_[TOK_INTEGER] = &Parser::ParseNumber;
-        prefix_parser_[TOK_REAL] = &Parser::ParseNumber;
+        prefix_parser_[TOK_ID]      = std::make_shared<call_T>(ParseVariableAndCall);
+        prefix_parser_[TOK_INTEGER] = std::make_shared<call_T>(ParseNumber);
+        prefix_parser_[TOK_REAL]    = std::make_shared<call_T>(ParseNumber);
 
-        prefix_parser_['+'] = &Parser::ParsePrefix;
-        prefix_parser_['-'] = &Parser::ParsePrefix;
-        prefix_parser_[TOK_NOT] = &Parser::ParsePrefix;
-
-        prefix_parser_['('] = &Parser::ParseParen;
+        prefix_parser_[TOK_NOT]     = std::make_shared<call_T>(ParsePrefix);
+        prefix_parser_['+']         = std::make_shared<call_T>(ParsePrefix);
+        prefix_parser_['-']         = std::make_shared<call_T>(ParsePrefix);
+        
+        prefix_parser_['(']         = std::make_shared<call_T>(ParseParen);
 
         SetInput(in);
-        next_token_ = yylex();
+
+        next_token_     = yylex();
         next_tok_value_ = yylval;
-        next_line_ = yylineno;
-        next_column_ = yycolno;
-        next_text_ = yytext;
+        next_line_      = yylineno;
+        next_column_    = yycolno;
+        next_text_      = yytext;
 
         NextToken();
     }

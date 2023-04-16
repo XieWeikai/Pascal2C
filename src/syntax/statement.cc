@@ -3,14 +3,14 @@
 //
 #include <set>
 
-#include "parser.h"
+#include "syntax.h"
 #include "ast/statement.h"
 
 extern "C" {
     #include "lexer.h"
 }
 
-namespace pascal2c::parser {
+namespace Pascal2C::Syntax {
     template<typename Tp> using vector = ::std::vector<Tp>;
 
     static bool isStatementStartTok(int tok){

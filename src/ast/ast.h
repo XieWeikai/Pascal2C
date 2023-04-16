@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace pascal2c::ast
+namespace Pascal2C::ast
 {
     class Ast
     {

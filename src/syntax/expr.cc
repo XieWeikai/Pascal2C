@@ -2,10 +2,10 @@
 // Created by 谢卫凯 on 2023/3/22.
 //
 #include <unordered_map>
-#include "parser.h"
+#include "syntax.h"
 #include "ast/expr.h"
 
-namespace pascal2c::parser {
+namespace Pascal2C::Syntax {
 
     static std::unordered_map<int, int> binary_prec = {
             {'=', 1},

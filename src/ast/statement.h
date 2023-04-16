@@ -12,7 +12,7 @@
 #include "ast.h"
 #include "expr.h"
 
-namespace pascal2c::ast
+namespace Pascal2C::ast
 {
     template <typename Tp>
     using vector = ::std::vector<Tp>;
