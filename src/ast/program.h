@@ -23,10 +23,12 @@ namespace pascal2c::ast
     class IdList : public Ast
     {
     public:
-        // param:
-        //     id is the identifier
-        // return:
-        //     the id at the index
+        /** 
+         * @param
+         *    index the identifier
+         * @returns
+         *      the id at the index
+         */
         inline const string &operator[](const int &index) const { return id_list_[index]; }
 
         // return:

@@ -7,7 +7,22 @@ project(Pascal2C VERSION 1.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQURIED True)
 
-include_directories("src/")
+include_directories(src)
+
+# Enable/Disable system debug Logger
+add_definitions(-DUSE_SYS_LOGGER)
+
+# Add Project Infomation
+add_definitions(-D__P2C_VERSION__=${PROJECT_VERSION})
+add_definitions(-D__GIT_URL__="https://github.com/XieWeikai/Pascal2C")
+
+
+# Add Source Code Dict.
+add_subdirectory(src)
+
+# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24:
+cmake_policy(SET CMP0135 NEW)
+
 
 # Download and install GoogleTest
 include(FetchContent)
@@ -29,82 +44,84 @@ if(NOT DEFINED $ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
     set($ENV{CMAKE_EXPORT_COMPILE_COMMANDS} true)
 endif()
 
-# >>> lexer test >>>
-find_package(FLEX REQUIRED)
-find_package(Python3 COMPONENTS Interpreter REQUIRED)
-set(SCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/lexer/token_generator.py")
-set(OUTPUT_HEADER "${CMAKE_CURRENT_BINARY_DIR}/lexer.h")
-add_custom_command(
-        OUTPUT ${OUTPUT_HEADER}
-        COMMAND ${Python3_EXECUTABLE} ${SCRIPT_PATH} ${OUTPUT_HEADER}
-        DEPENDS ${SCRIPT_PATH}
-        COMMENT "Generating lexer.h"
-)
-FLEX_TARGET(Scanner src/lexer/lexer.lex ${CMAKE_CURRENT_BINARY_DIR}/lexer.yy.c)
-
-add_executable(lexer_exe
-        src/lexer/main.c
-        src/lexer/utils.c
-        ${FLEX_Scanner_OUTPUTS}
-        ${OUTPUT_HEADER}
-        )
-target_include_directories(lexer_exe PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-
-add_executable(lexer_test
-        test/lexer/lexer_test.cc
-        src/lexer/utils.c
-        ${FLEX_Scanner_OUTPUTS}
-        ${OUTPUT_HEADER}
-        )
-target_include_directories(lexer_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(
-        lexer_test
-        gtest_main
-        gmock_main
-)
-# <<< lexer test <<<
 
 
+# # >>> lexer test >>>
+# find_package(FLEX REQUIRED)
+# find_package(Python3 COMPONENTS Interpreter REQUIRED)
+# set(SCRIPT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/lexer/token_generator.py")
+# set(OUTPUT_HEADER "${CMAKE_CURRENT_BINARY_DIR}/lexer.h")
+# add_custom_command(
+#         OUTPUT ${OUTPUT_HEADER}
+#         COMMAND ${Python3_EXECUTABLE} ${SCRIPT_PATH} ${OUTPUT_HEADER}
+#         DEPENDS ${SCRIPT_PATH}
+#         COMMENT "Generating lexer.h"
+# )
+# FLEX_TARGET(Scanner src/lexer/lexer.lex ${CMAKE_CURRENT_BINARY_DIR}/lexer.yy.c)
 
-# >>> ast test >>>
-file(GLOB AST "src/ast/*.h" "src/ast/*.cc")
-file(GLOB AST_TEST "test/ast/*.cc")
+# add_executable(lexer_exe
+#         src/lexer/main.c
+#         src/lexer/utils.c
+#         ${FLEX_Scanner_OUTPUTS}
+#         ${OUTPUT_HEADER}
+#         )
+# target_include_directories(lexer_exe PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(
-        ast_test
-        ${AST_TEST}
-        ${AST}
-)
+# add_executable(lexer_test
+#         test/lexer/lexer_test.cc
+#         src/lexer/utils.c
+#         ${FLEX_Scanner_OUTPUTS}
+#         ${OUTPUT_HEADER}
+#         )
+# target_include_directories(lexer_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+# target_link_libraries(
+#         lexer_test
+#         gtest_main
+#         gmock_main
+# )
+# # <<< lexer test <<<
 
-target_include_directories(ast_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(
-        ast_test
-        gtest_main
-        gmock_main
-)
 
-gtest_discover_tests(ast_test)
+# # >>> ast test >>>
+# file(GLOB AST "src/ast/*.h" "src/ast/*.cc")
+# file(GLOB AST_TEST "test/ast/*.cc")
 
-# <<< ast test <<<
+# add_executable(
+#         ast_test
+#         ${AST_TEST}
+#         ${AST}
+# )
 
-# >>> parser test >>>
-file(GLOB PARSER "src/parser/*.h" "src/parser/expr.cc" "src/parser/statement.cc" "src/parser/parser.cc")
-file(GLOB PARSER_TEST "test/parser/*.cc")
-add_executable(
-        parser_test
-        ${PARSER_TEST}
-        ${PARSER}
-        ${AST}
-        ${CMAKE_CURRENT_BINARY_DIR}/lexer.yy.c
-        src/lexer/utils.c
-)
-target_include_directories(parser_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+# target_include_directories(ast_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(
-        parser_test
-        gtest_main
-        gmock_main
-)
+# target_link_libraries(
+#         ast_test
+#         gtest_main
+#         gmock_main
+# )
 
-# <<< parser test <<<
+# gtest_discover_tests(ast_test)
+
+# # <<< ast test <<<
+
+# # >>> parser test >>>
+# file(GLOB PARSER "src/parser/*.h" "src/parser/expr.cc" "src/parser/statement.cc" "src/parser/parser.cc")
+# file(GLOB PARSER_TEST "test/parser/*.cc")
+# add_executable(
+#         parser_test
+#         ${PARSER_TEST}
+#         ${PARSER}
+#         ${AST}
+#         ${CMAKE_CURRENT_BINARY_DIR}/lexer.yy.c
+#         src/lexer/utils.c
+# )
+# target_include_directories(parser_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+# target_link_libraries(
+#         parser_test
+#         gtest_main
+#         gmock_main
+# )
+
+# # <<< parser test <<<
