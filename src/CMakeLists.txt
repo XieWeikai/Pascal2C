@@ -1,6 +1,8 @@
 include_directories(common)
 
-add_executable(test
+add_subdirectory(lexer)
+
+add_executable( ${PROJECT_NAME}
 	main.cc
 	common/args_parser.cc
 )
