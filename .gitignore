@@ -46,4 +46,3 @@ compile_commands.json
 
 lexer.h
 lex.yy.c
-lexer
