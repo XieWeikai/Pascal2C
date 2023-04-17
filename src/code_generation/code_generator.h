@@ -4,7 +4,7 @@
 #include <sstream>
 #include <string>
 
-#include "ast_interface.h"
+#include "ast_adapter.h"
 #include "parser/parser.h"
 
 namespace pascal2c {

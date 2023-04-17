@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "code_generation/ast_interface.h"
+#include "code_generation/ast_adapter.h"
 #include "code_generator.h"
 #include "lexer/token.h"
 

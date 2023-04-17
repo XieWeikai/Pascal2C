@@ -1,5 +1,5 @@
-#ifndef PASCAL2C_SRC_SEMANTIC_AST_H_
-#define PASCAL2C_SRC_SEMANTIC_AST_H_
+#ifndef PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
+#define PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
 #include <memory>
 #include <string>
 #include <vector>
@@ -182,4 +182,4 @@ class NoOp : public ASTNode {
 
 } // namespace semantic
 } // namespace pascal2c
-#endif // !PASCAL2C_SRC_SEMANTIC_AST_H_
+#endif // !PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_

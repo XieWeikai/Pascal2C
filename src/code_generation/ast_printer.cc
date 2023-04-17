@@ -5,7 +5,7 @@
 #include <string>
 
 #include "ast_printer.h"
-#include "code_generation/ast_interface.h"
+#include "code_generation/ast_adapter.h"
 #include "lexer/token.h"
 
 namespace pascal2c {
