@@ -59,8 +59,9 @@ namespace Pascal2C::ast
         // digits_1 is the lower bound, digits_2 is the upper bound
         //
         // e.g. 1..10
-        struct Period
+        class Period
         {
+            public:
             int digits_1;
             int digits_2;
         };
@@ -81,10 +82,7 @@ namespace Pascal2C::ast
 
         inline const vector<Period> &periods() const { return periods_; }
 
-        inline void AddPeriod(const int &digits_1, const int &digits_2)
-        {
-            periods_.push_back({digits_1, digits_2});
-        }
+        inline void AddPeriod(Period&& per) { periods_.push_back(per); }
 
         inline void set_basic_type(const int &basic_type) { basic_type_ = basic_type; }
 

@@ -6,7 +6,6 @@
 #include <exception>
 
 #include "syntax.h"
-#include "lexer.h"
 
 
 namespace Pascal2C::Syntax 

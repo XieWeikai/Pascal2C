@@ -8,7 +8,7 @@
 
 #include "statement.h"
 
-namespace pascal2c::ast
+namespace Pascal2C::ast
 {
 
     std::string AssignStatement::ToString(int level) const

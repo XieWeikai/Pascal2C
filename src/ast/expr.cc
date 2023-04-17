@@ -14,7 +14,7 @@ extern "C"
 #include "lexer.h"
 }
 
-namespace pascal2c
+namespace Pascal2C
 {
 
     static int Op(int token)

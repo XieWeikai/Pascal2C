@@ -7,8 +7,6 @@ project(Pascal2C VERSION 1.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQURIED True)
 
-include_directories(src)
-
 # Enable/Disable system debug Logger
 add_definitions(-DUSE_SYS_LOGGER)
 

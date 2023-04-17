@@ -7,15 +7,16 @@
 #include <cstdio>
 #include <string>
 #include <functional>
-#include <common/common_type.h>
-#include <common/logger.h>
+#include "common/common_type.h"
 
 #include "gtest/gtest.h"
 #include "ast/ast.h"
 #include "ast/expr.h"
 #include "ast/program.h"
 
-#include "lexer.h"
+extern "C" {
+    #include "lexer.h"
+}
 
 namespace Pascal2C::Syntax
 {
@@ -32,7 +33,7 @@ struct Cursor {
 };
 
 #define SYN_ERROR(str , ...) \
-    ERROR(file_name ,cur.line ,"Col:%d "##str ,cur.colunm , ##__VA_ARGS__)
+    ERROR(file_name.c_str() ,cur.line ,"Col:%d " str ,cur.column , ##__VA_ARGS__)
 
 // exception class for syntax error
 class SyntaxErr : public std::exception
@@ -174,7 +175,7 @@ private:
     // eg. 1..10
     // return:
     //     the ast of the period
-    std::shared_ptr<ast::Type::Period> ParsePeriod();
+    ast::Type::Period ParsePeriod();
 
     // parse the parameter
     // eg. a : integer

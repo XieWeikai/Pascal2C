@@ -10,7 +10,7 @@ namespace ArgsParser{
 
 class ArgsInfo {
 public :
-	std::string source_file;
+	std::vector<std::string> source_files;
 	std::string target_name;
 	u8 opt_level;
 };

@@ -1,14 +1,10 @@
-include_directories(.)
+file(GLOB SYNTAX "*.cc" ".h")
 
-add_library( syntax STATIC
-	syntax.cc
-	expr.cc
-	program.cc
-	statement.cc
-)
+add_library( syntax STATIC ${SYNTAX} )
 
-target_link_libraries( syntax
+target_link_libraries( syntax PUBLIC
     gtest_main
     gmock_main
 	lexer
+	ast
 )

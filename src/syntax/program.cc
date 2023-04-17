@@ -3,12 +3,13 @@
 
 #include "syntax.h"
 #include "ast/program.h"
-#include "lexer.h"
 
 #define TOK_SEMICOLON   ';'
 #define TOK_COLON       ':'
 #define TOK_LPAREN      '('
 #define TOK_RPAREN      ')'
+#define TOK_LBRACK      '['
+#define TOK_RBRACK      ']'
 #define TOK_COMMA       ','
 
 namespace Pascal2C::Syntax
@@ -127,7 +128,7 @@ namespace Pascal2C::Syntax
                 NextToken();
                 while (true)
                 {
-                    subprogram_head->AddParam(std::move(ParseParameter()));
+                    subprogram_head->AddParameter(std::move(ParseParameter()));
                     if (cur.token == TOK_SEMICOLON)
                     {
                         NextToken();
@@ -150,11 +151,11 @@ namespace Pascal2C::Syntax
             if (cur.token == TOK_LPAREN)
             {
                 NextToken();
-                subprogram_head->AddParam(std::move(ParseParameter()));
+                subprogram_head->AddParameter(std::move(ParseParameter()));
                 while (cur.token == TOK_SEMICOLON)
                 {
                     NextToken();
-                    subprogram_head->AddParam(std::move(ParseParameter()));
+                    subprogram_head->AddParameter(std::move(ParseParameter()));
                 }
                 Match(TOK_RPAREN);
             }
@@ -166,7 +167,7 @@ namespace Pascal2C::Syntax
             }
             else
             {
-                SYNTAX_ERROR;
+                SYN_ERROR("Someing fatal");
                 NextToken();
                 throw SyntaxErr(std::string(buff));
             }
@@ -174,7 +175,7 @@ namespace Pascal2C::Syntax
         }
         else
         {
-            SYNTAX_ERROR;
+            SYN_ERROR("Someing fatal");
             NextToken();
             throw SyntaxErr(std::string(buff));
         }
@@ -244,11 +245,11 @@ namespace Pascal2C::Syntax
             auto type = std::make_shared<ast::Type>(true);
             NextToken();
             Match(TOK_LBRACK);
-            type->AddPeriod(std::move(ParsePeriod()));
+            type->AddPeriod(ParsePeriod());
             while (cur.token == TOK_COMMA)
             {
                 NextToken();
-                type->AddPeriod(std::move(ParsePeriod()));
+                type->AddPeriod(ParsePeriod());
             }
             Match(TOK_RBRACK);
             Match(TOK_OF);
@@ -271,10 +272,12 @@ namespace Pascal2C::Syntax
             NextToken();
             throw SyntaxErr(std::string(buff));
         }
+        TODO; // no return
+        return nullptr;
     }
 
 
-    std::shared_ptr<ast::Type::Period> Parser::ParsePeriod()
+    ast::Type::Period Parser::ParsePeriod()
     {
         int value1 = cur.tok_value.intval;
         Match(TOK_INTEGER);
@@ -284,7 +287,7 @@ namespace Pascal2C::Syntax
         int value2 = cur.tok_value.intval;
         Match(TOK_INTEGER);
         TODO; //这个区间类不一定是数字
-        return std::move(std::make_shared<ast::Type::Period>(value1, value2));
+        return {value1, value2};
     }
 
     std::shared_ptr<ast::Parameter> Parser::ParseParameter()
@@ -299,10 +302,10 @@ namespace Pascal2C::Syntax
         Match(TOK_COLON);
         int type;
 
-        if (cur.token == TOK_INTEGER || 
-            cur.token == TOK_REAL    || 
-            cur.token == TOK_CHAR    || 
-            cur.token == TOK_BOOLEAN )
+        if (cur.token == TOK_INTEGER_TYPE|| 
+            cur.token == TOK_REAL_TYPE   || 
+            cur.token == TOK_CHAR_TYPE   || 
+            cur.token == TOK_BOOLEAN_TYPE )
         {
             type = cur.token;
             NextToken();

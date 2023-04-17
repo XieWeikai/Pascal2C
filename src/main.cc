@@ -5,10 +5,10 @@
  * @copyright Copyright (c) 2023
  * 			  Please see LICENSE For more detail 
  */
-#include <common/common.h>
-#include <common/logger.h>
-#include <common/args_parser.h>
-#include <syntax/syntax.h>
+#include "common/common.h"
+#include "common/logger.h"
+#include "common/args_parser.h"
+#include "syntax/syntax.h"
 
 
 int main(int argc , char* argv[]) 
@@ -21,7 +21,7 @@ int main(int argc , char* argv[])
 	
 	ArgsParser::ArgsInfo info = ArgsParser::parser(argc , argv);
 
-	if (info.source_file.empty()) {
+	if (info.source_files.empty()) {
 		ERROR("P2C" ,0 ,"Fatal : no input files\n");
 		return EXIT_FAILURE;
 	} 
@@ -34,7 +34,9 @@ int main(int argc , char* argv[])
 	/* ------------------------------------------------ */
 	SYS_INFO("Step 2 : Syntax Analysis\n");
 
-	Pascal2C::Syntax::Parser syn{info.source_file , nullptr};
+	for (auto &file : info.source_files) {
+		Pascal2C::Syntax::Parser syn{file , nullptr};
+	}
 
 	return EXIT_SUCCESS;
 }
