@@ -1,7 +1,7 @@
 #include "ast_adapter.h"
 
 namespace pascal2c {
-namespace semantic {
+namespace code_generation {
 Block::Block(const vector<std::shared_ptr<ASTNode>> &declarations,
              const std::shared_ptr<Compound> &compound_statement)
     : declarations_(
