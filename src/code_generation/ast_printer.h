@@ -14,7 +14,8 @@ template <typename T> using vector = ::std::vector<T>;
 
 class ASTPrinter {
   public:
-    explicit ASTPrinter(){};
+    explicit ASTPrinter(const std::shared_ptr<semantic::ASTRoot> ast)
+        : ast_(ast){};
     // TODO: Output of Visit save into ostream
     void Visit(const std::shared_ptr<semantic::ASTNode> &node);
 
@@ -30,6 +31,8 @@ class ASTPrinter {
     void VisitType(const std::shared_ptr<semantic::Type> &node);
     void VisitNoOp(const std::shared_ptr<semantic::NoOp> &node);
 
+    // ast
+    const std::shared_ptr<semantic::ASTRoot> ast_;
     // ostream
     std::stringstream ostream_;
     // Current indent level

@@ -1,20 +1,18 @@
 #ifndef PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
+#include "token_adapter.h"
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "lexer/token.h"
-
 namespace pascal2c {
-namespace semantic {
+namespace code_generation {
 using string = ::std::string;
 template <typename Tp> using vector = ::std::vector<Tp>;
 
 class ASTNode {
   public:
-    ASTNode(){};
-    virtual ~ASTNode() = default;
+    virtual ~ASTNode();
 };
 
 // ASTRoot is an alias of ASTNode, represents root node of the AST.
@@ -25,7 +23,7 @@ class Program : public ASTNode {
   public:
     Program(const string &name, const std::shared_ptr<Block> &block)
         : name_(name), block_(block){};
-    string getName() const { return name_; }
+    string GetName() const { return name_; }
     const std::shared_ptr<Block> &GetBlock() const { return block_; }
 
   private:
@@ -67,13 +65,13 @@ class VarDecl : public ASTNode {
 
 class Type : public ASTNode {
   public:
-    Type(const std::shared_ptr<lexer::Token> token)
-        : token_(token), type_(token->getType()){};
-    const lexer::TokenType GetType() const { return type_; }
+    Type(const std::shared_ptr<Token> token)
+        : token_(token), type_(token->GetType()){};
+    const TokenType GetType() const { return type_; }
 
   private:
-    std::shared_ptr<lexer::Token> token_;
-    const lexer::TokenType type_;
+    std::shared_ptr<Token> token_;
+    const TokenType type_;
 };
 
 class Compound : public ASTNode {
@@ -91,7 +89,7 @@ class Compound : public ASTNode {
 
 class Assign : public ASTNode {
   public:
-    Assign(const std::shared_ptr<ASTNode> &left, const lexer::Token &token,
+    Assign(const std::shared_ptr<ASTNode> &left, const Token &token,
            const std::shared_ptr<ASTNode> &right)
         : left_(left), token_(token), right_(right){};
     const std::shared_ptr<ASTNode> &GetLeft() const { return left_; }
@@ -99,18 +97,18 @@ class Assign : public ASTNode {
 
   private:
     std::shared_ptr<ASTNode> left_;
-    lexer::Token token_;
+    Token token_;
     std::shared_ptr<ASTNode> right_;
 };
 
 class Var : public ASTNode {
   public:
-    Var(const std::shared_ptr<lexer::Token> &token)
+    Var(const std::shared_ptr<Token> &token)
         : token_(token), value_(token->GetValue()){};
     const string GetValue() const { return value_; }
 
   private:
-    std::shared_ptr<lexer::Token> token_;
+    std::shared_ptr<Token> token_;
     string value_;
 };
 
@@ -134,44 +132,40 @@ class Expr : public ASTNode {
 
 class Num : public ASTNode {
   public:
-    Num(std::shared_ptr<lexer::Token> &token)
+    Num(std::shared_ptr<Token> &token)
         : token_(token), value_(std::stoi(token->GetValue())) {}
-    int getValue() const { return (value_); }
+    int GetValue() const { return (value_); }
 
   private:
-    std::shared_ptr<lexer::Token> token_;
+    std::shared_ptr<Token> token_;
     int value_;
 };
 
 class BinOp : public ASTNode {
   public:
-    explicit BinOp(std::shared_ptr<Var> &left,
-                   std::shared_ptr<lexer::Token> &token,
+    explicit BinOp(std::shared_ptr<Var> &left, std::shared_ptr<Token> &token,
                    std::shared_ptr<Expr> &right)
         : left_(left), oper_(token), right_(right) {}
 
-    explicit BinOp(std::shared_ptr<Var> &left,
-                   std::shared_ptr<lexer::Token> &token,
+    explicit BinOp(std::shared_ptr<Var> &left, std::shared_ptr<Token> &token,
                    std::shared_ptr<Var> &right)
         : left_(left), oper_(token), right_(right) {}
 
-    explicit BinOp(std::shared_ptr<Expr> &left,
-                   std::shared_ptr<lexer::Token> &token,
+    explicit BinOp(std::shared_ptr<Expr> &left, std::shared_ptr<Token> &token,
                    std::shared_ptr<Var> &right)
         : left_(left), oper_(token), right_(right) {}
 
-    explicit BinOp(std::shared_ptr<Expr> &left,
-                   std::shared_ptr<lexer::Token> &token,
+    explicit BinOp(std::shared_ptr<Expr> &left, std::shared_ptr<Token> &token,
                    std::shared_ptr<Expr> &right)
         : left_(left), oper_(token), right_(right) {}
 
-    const std::shared_ptr<ASTNode> &getLeft() { return left_; }
-    const std::shared_ptr<lexer::Token> &getOper() { return oper_; }
-    const std::shared_ptr<ASTNode> &getRight() { return right_; }
+    const std::shared_ptr<ASTNode> &GetLeft() { return left_; }
+    const std::shared_ptr<Token> &GetOper() { return oper_; }
+    const std::shared_ptr<ASTNode> &GetRight() { return right_; }
 
   private:
     std::shared_ptr<ASTNode> left_;
-    std::shared_ptr<lexer::Token> oper_;
+    std::shared_ptr<Token> oper_;
     std::shared_ptr<ASTNode> right_;
 };
 
@@ -180,6 +174,6 @@ class NoOp : public ASTNode {
     NoOp(){};
 };
 
-} // namespace semantic
+} // namespace code_generation
 } // namespace pascal2c
 #endif // !PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_

@@ -9,7 +9,7 @@
 namespace pascal2c {
 namespace code_generation {
 
-int CodeGenerator::Interpret() { return Visit(parser_->Expression()); }
+// int CodeGenerator::Interpret() { return Visit(parser_->Expression()); }
 
 // TODO: Re-implement this method. Now it just visits BinOp and Num
 // And lead its output into ostream_
@@ -25,7 +25,7 @@ int CodeGenerator::Visit(const std::shared_ptr<semantic::ASTRoot> &node) {
 
 void CodeGenerator::VisitProgram(
     const std::shared_ptr<semantic::Program> &node) {
-    ostream_ << "Program: " << node->getName();
+    ostream_ << "Program: " << node->GetName();
     indent_level_++;
     Visit(node->GetBlock());
     indent_level_--;
@@ -63,7 +63,7 @@ int CodeGenerator::VisitBinOp(const std::shared_ptr<semantic::BinOp> &node) {
 }
 
 int CodeGenerator::VisitNum(const std::shared_ptr<semantic::Num> &node) {
-    return node->getValue();
+    return node->GetValue();
 }
 } // namespace code_generation
 } // namespace pascal2c

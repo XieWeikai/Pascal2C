@@ -37,7 +37,7 @@ void ASTPrinter::Visit(const std::shared_ptr<semantic::ASTRoot> &node) {
 }
 
 void ASTPrinter::VisitProgram(const std::shared_ptr<semantic::Program> &node) {
-    ostream_ << "Program: " << node->getName() << std::endl;
+    ostream_ << "Program: " << node->GetName() << std::endl;
     indent_level_++;
     Visit(node->GetBlock());
     indent_level_--;
@@ -103,7 +103,7 @@ void ASTPrinter::VisitBinOp(const std::shared_ptr<semantic::BinOp> &node) {
 }
 
 void ASTPrinter::VisitNum(const std::shared_ptr<semantic::Num> &node) {
-    ostream_ << string(indent_level_, ' ') << "Num:" << node->getValue()
+    ostream_ << string(indent_level_, ' ') << "Num:" << node->GetValue()
              << std::endl;
 }
 } // namespace code_generation
