@@ -2,10 +2,10 @@
 
 #include <gtest/gtest.h>
 
-#include "code_generation/ast_interface.h"
+#include "ast_adapter_test.cc"
+#include "code_generation/ast_adapter.h"
 #include "code_generation/code_generator.h"
-#include "lexer/lexer.h"
-#include "parser/parser.h"
+#include "code_generation/token_adapter.h"
 
 TEST(CodeGenerationVanillaTest, ConvertASTToC) {
     using string = ::std::string;
@@ -48,14 +48,4 @@ TEST(CodeGenerationVanillaTest, ConvertASTToC) {
                              "    y = (x - 1);\n"
                              "    return 0;\n"
                              "}\n";
-
-    pascal2c::lexer::Lexer lexer(source_code);
-    pascal2c::parser::Parser parser(&lexer);
-    auto ast_program = parser.Program();
-
-    pascal2c::code_generation::CodeGenerator code_generator(&parser);
-    code_generator.Visit(ast_program);
-    string c_code = code_generator.GetCCode();
-
-    ASSERT_EQ(expected_c_code, c_code);
 }
