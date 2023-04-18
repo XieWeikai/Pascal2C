@@ -38,7 +38,7 @@ class BaseToken {
 };
 class Token : public BaseToken {
   public:
-    Token(const TokenType type, const string value) : type_(type), value_(value) {}
+    Token(const TokenType type, const string value="") : type_(type), value_(value) {}
     const TokenType GetType() const { return type_; }
     const string GetValue() const { return value_; }
 

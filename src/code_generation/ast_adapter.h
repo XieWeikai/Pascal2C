@@ -122,6 +122,12 @@ class Factor : public ASTNode {
     Factor() {}
 };
 
+/**
+ * @brief Expression node
+ * Pseudo-code example:
+ * Expr e1 = Expr(2, +, 3);
+ * Expr e2 = Expr(e1, -, 1);
+ */
 class Expr : public ASTNode {
   public:
     Expr() {}
