@@ -18,5 +18,5 @@ Compound::Compound(const std::vector<std::shared_ptr<ASTNode>> &children)
 void Compound::AddChild(std::shared_ptr<ASTNode> node) {
     children_.push_back(node);
 }
-} // namespace semantic
+} // namespace code_generation
 } // namespace pascal2c
