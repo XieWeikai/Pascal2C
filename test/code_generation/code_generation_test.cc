@@ -31,15 +31,15 @@ TEST(ASTPrinterTest, ConvertASTToC) {
     vector<std::shared_ptr<ASTNode>> declarations;
 
     // VarDecl part
+    const auto type_int = std::make_shared<Type>(TokenType::TYPE, "integer");
+
     const auto token_x = std::make_shared<Token>(TokenType::INTEGER, "x");
     const auto var_x = std::make_shared<Var>(token_x);
-    const auto type_x = std::make_shared<Type>(token_x);
-    const auto var_decl_x = std::make_shared<VarDecl>(var_x, type_x);
+    const auto var_decl_x = std::make_shared<VarDecl>(var_x, type_int);
 
     const auto token_y = std::make_shared<Token>(TokenType::INTEGER, "y");
     const auto var_y = std::make_shared<Var>(token_y);
-    const auto type_y = std::make_shared<Type>(token_y);
-    const auto var_decl_y = std::make_shared<VarDecl>(var_y, type_y);
+    const auto var_decl_y = std::make_shared<VarDecl>(var_y, type_int);
 
     declarations.push_back(var_decl_x);
     declarations.push_back(var_decl_y);
@@ -47,11 +47,15 @@ TEST(ASTPrinterTest, ConvertASTToC) {
     // Compound statement part
     vector<std::shared_ptr<ASTNode>> children;
     // :=
-    const auto assign_op = std::make_shared<Token>(TokenType::ASSIGN, ":=");
+    const auto token_assign_op =
+        std::make_shared<Token>(TokenType::ASSIGN, ":=");
+    const auto assign_op = std::make_shared<Oper>(token_assign_op);
     // +
-    const auto plus_op = std::make_shared<Token>(TokenType::PLUS, "+");
+    const auto token_plus_op = std::make_shared<Token>(TokenType::PLUS, "+");
+    const auto plus_op = std::make_shared<Oper>(token_plus_op);
     // -
-    const auto minus_op = std::make_shared<Token>(TokenType::MINUS, "-");
+    const auto token_minus_op = std::make_shared<Token>(TokenType::MINUS, "-");
+    const auto minus_op = std::make_shared<Oper>(token_minus_op);
 
     // 2 + 3
     const auto token_2 = std::make_shared<Token>(TokenType::INTEGER, "2");

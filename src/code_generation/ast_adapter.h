@@ -147,31 +147,43 @@ class Num : public ASTNode {
     int value_;
 };
 
+// Operators, like '+', '-', etc.
+class Oper : public ASTNode {
+  public:
+    Oper(const std::shared_ptr<Token> &oper)
+        : oper_(oper), type_(oper->GetType()), value_(oper->GetValue()) {}
+
+  private:
+    const std::shared_ptr<Token> oper_;
+    const TokenType type_;
+    const string value_;
+};
+
 class BinOp : public ASTNode {
   public:
-    explicit BinOp(std::shared_ptr<Var> &left, std::shared_ptr<Token> &token,
+    explicit BinOp(std::shared_ptr<Var> &left, std::shared_ptr<Oper> &oper,
                    std::shared_ptr<Expr> &right)
-        : left_(left), oper_(token), right_(right) {}
+        : left_(left), oper_(oper), right_(right) {}
 
-    explicit BinOp(std::shared_ptr<Var> &left, std::shared_ptr<Token> &token,
+    explicit BinOp(std::shared_ptr<Var> &left, std::shared_ptr<Oper> &oper,
                    std::shared_ptr<Var> &right)
-        : left_(left), oper_(token), right_(right) {}
+        : left_(left), oper_(oper), right_(right) {}
 
-    explicit BinOp(std::shared_ptr<Expr> &left, std::shared_ptr<Token> &token,
+    explicit BinOp(std::shared_ptr<Expr> &left, std::shared_ptr<Oper> &oper,
                    std::shared_ptr<Var> &right)
-        : left_(left), oper_(token), right_(right) {}
+        : left_(left), oper_(oper), right_(right) {}
 
-    explicit BinOp(std::shared_ptr<Expr> &left, std::shared_ptr<Token> &token,
+    explicit BinOp(std::shared_ptr<Expr> &left, std::shared_ptr<Oper> &oper,
                    std::shared_ptr<Expr> &right)
-        : left_(left), oper_(token), right_(right) {}
+        : left_(left), oper_(oper), right_(right) {}
 
     const std::shared_ptr<ASTNode> &GetLeft() { return left_; }
-    const std::shared_ptr<Token> &GetOper() { return oper_; }
+    const std::shared_ptr<Oper> &GetOper() { return oper_; }
     const std::shared_ptr<ASTNode> &GetRight() { return right_; }
 
   private:
     std::shared_ptr<ASTNode> left_;
-    std::shared_ptr<Token> oper_;
+    std::shared_ptr<Oper> oper_;
     std::shared_ptr<ASTNode> right_;
 };
 
