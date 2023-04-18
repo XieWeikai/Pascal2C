@@ -1,8 +1,6 @@
-#include "gmock/gmock.h"
+#include "code_generation/ast_adapter.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
-#include "code_generation/ast_adapter.h"
 
 namespace pascal2c {
 namespace code_generation {
