@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <getopt.h>
+#include <gflags/gflags.h>
 
 namespace ArgsParser {
 
@@ -34,13 +35,13 @@ static void showHelp() {
 	TODO;
 }
 
-
-ArgsInfo parser(int argc , char* argv[]) 
+static ArgsInfo useUnixOpt(int argc , char* argv[]) 
 {
-	 i8 opt = 0;
+	TODO;
+	i8  opt = 0;
 	i32 opt_index = 0;
 	ArgsInfo info {};
-	DEBUG("Cname : %s\n" , argv[0]);
+	DEBUG("Num : %d Cname : %s\n" ,argc ,argv[0]);
 
 	while (optind != argc) {
 
@@ -51,6 +52,12 @@ ArgsInfo parser(int argc , char* argv[])
 			long_options ,
 			&opt_index
 		);
+
+		printf("opt : %d\nopt_index : %d\noptind : %d\n" ,
+				opt , opt_index , optind);
+		if (opt == -1) break;
+
+
 
 		switch (opt) {
 		
@@ -70,4 +77,14 @@ ArgsInfo parser(int argc , char* argv[])
 	return info;
 }
 
+DEFINE_string(o , "target.c" , "Ouput file\n");
+DEFINE_string(O , "0", "Optimizition level");
+ArgsInfo parser(int argc , char* argv[]) 
+{
+	gflags::ParseCommandLineFlags(&argc ,&argv ,true);
+	printf("Opt Level : %s\n" ,FLAGS_O.c_str());
+}
+
+
+// End of Namespace ArgsParser
 }

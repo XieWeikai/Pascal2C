@@ -62,6 +62,8 @@ public:
     */
     explicit Parser(std::string_view file_name_ ,FILE *in) noexcept;
 
+    auto Pass() { return ParseProgram(); }
+
 private:
     FRIEND_TEST(TokenTest, TestNextToken);
     FRIEND_TEST(ExprParserTest, TestParsePrimary);

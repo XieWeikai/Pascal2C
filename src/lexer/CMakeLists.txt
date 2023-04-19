@@ -1,4 +1,3 @@
-include_directories(.)
 
 find_package(FLEX REQUIRED)
 find_package(Python3 COMPONENTS Interpreter REQUIRED)

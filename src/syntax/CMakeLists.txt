@@ -1,4 +1,4 @@
-file(GLOB SYNTAX "*.cc" ".h")
+file(GLOB SYNTAX "*.cc" "*.h")
 
 add_library( syntax STATIC ${SYNTAX} )
 

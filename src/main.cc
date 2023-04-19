@@ -19,12 +19,12 @@ int main(int argc , char* argv[])
 	/* ------------------------------------------------ */
 	SYS_INFO("\nStep 0 : Initialize Arguments...\n");
 	
-	ArgsParser::ArgsInfo info = ArgsParser::parser(argc , argv);
+	// ArgsParser::ArgsInfo info = ArgsParser::parser(argc , argv);
 
-	if (info.source_files.empty()) {
-		ERROR("P2C" ,0 ,"Fatal : no input files\n");
-		return EXIT_FAILURE;
-	} 
+	// if (info.source_files.empty()) {
+	// 	ERROR("P2C" ,0 ,"Fatal : no input files\n");
+	// 	return EXIT_FAILURE;
+	// } 
 
 	/* ------------------------------------------------ */
 	SYS_INFO("Step 1 : Lexer Analysis\n");
@@ -34,9 +34,14 @@ int main(int argc , char* argv[])
 	/* ------------------------------------------------ */
 	SYS_INFO("Step 2 : Syntax Analysis\n");
 
-	for (auto &file : info.source_files) {
-		Pascal2C::Syntax::Parser syn{file , nullptr};
-	}
+	//for (auto &file : info.source_files) {
+		FILE* fp = fopen("../../example/example1.pas" , "r");
+
+		ASSERT(fp != nullptr , "Fopen error\n");
+
+		Pascal2C::Syntax::Parser syn{"source.pas" , fp};
+		syn.Pass();
+	//}
 
 	return EXIT_SUCCESS;
 }

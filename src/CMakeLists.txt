@@ -13,11 +13,6 @@ add_executable( ${PROJECT_NAME}
 
 target_link_libraries( ${PROJECT_NAME} PUBLIC 
 	common
-	lexer
 	syntax
 	ast
-)
-
-target_include_directories( ${PROJECT_NAME} PUBLIC
-	common
 )
