@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <exception>
 
+#include "common/logger.h"
 #include "syntax.h"
 
 
@@ -44,6 +45,10 @@ namespace Pascal2C::Syntax
     void Parser::NextToken() noexcept {
         cur = next;
         lexer_errno_    = yyerrno;
+
+        DEBUG("%s(%d) at line %d, column %d.\n", 
+                TokenToString(cur.token), cur.token,
+                yylineno, yycolno);
 
         next = Cursor {
             .token      {yylex() } ,
