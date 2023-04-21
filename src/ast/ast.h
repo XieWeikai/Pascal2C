@@ -26,13 +26,13 @@ namespace pascal2c::ast
         //     str_s is the string stream to output to
         //     level is the indentation level
         static void
-        IndentOutput(std::stringstream &str_s, int level)
+        IndentOutput(std::stringstream &str_s, const int &level)
         {
             while (level-- > 0)
                 str_s << "    ";
         }
 
-        void SetLineAndColumn(const int line, const int column)
+        void SetLineAndColumn(const int &line, const int &column)
         {
             line_ = line;
             column_ = column;

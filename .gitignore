@@ -31,7 +31,11 @@
 *.out
 *.app
 
+ast_test*
 CMakeCache.txt
+cmake_install.cmake
+Makefile
+_deps/
 CMakeFiles/
 build/**/*
 .cache/clangd/index
