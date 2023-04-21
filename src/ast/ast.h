@@ -28,7 +28,8 @@ namespace pascal2c::ast
         static void
         IndentOutput(std::stringstream &str_s, const int &level)
         {
-            while (level-- > 0)
+            int temp = level;
+            while (temp-- > 0)
                 str_s << "    ";
         }
 

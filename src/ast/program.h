@@ -79,10 +79,7 @@ namespace pascal2c::ast
 
         inline const vector<Period> &periods() const { return periods_; }
 
-        inline void AddPeriod(const int &digits_1, const int &digits_2)
-        {
-            periods_.push_back({digits_1, digits_2});
-        }
+        inline void AddPeriod(const Period &period) { periods_.push_back(period); }
 
         inline void set_basic_type(const int &basic_type) { basic_type_ = basic_type; }
 
@@ -422,7 +419,6 @@ namespace pascal2c::ast
         shared_ptr<ProgramHead> program_head_; // eg. program f(a, b)
         shared_ptr<ProgramBody> program_body_; // eg. var a, b; begin a := 1; b := 2; end.
     };
-
 }
 
 #endif // PASCAL2C_PROGRAM_H
