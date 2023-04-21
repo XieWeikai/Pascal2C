@@ -31,10 +31,13 @@
 *.out
 *.app
 
+CMakeCache.txt
+CMakeFiles/
 build/**/*
 .cache/clangd/index
 compile_commands.json
 
+.vscode/
 **/cmake-build-**/
 **/.idea/
 

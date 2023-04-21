@@ -15,7 +15,7 @@ namespace pascal2c::ast
         Ast(const int &line, const int &column)
             : line_(line), column_(column){};
 
-        Ast() : line_(1),column_(1){};
+        Ast() : line_(1), column_(1){};
 
         virtual const int &line() const { return line_; }
 
@@ -25,7 +25,8 @@ namespace pascal2c::ast
         // param:
         //     str_s is the string stream to output to
         //     level is the indentation level
-        static void IndentOutput(std::stringstream &str_s, int level)
+        static void
+        IndentOutput(std::stringstream &str_s, int level)
         {
             while (level-- > 0)
                 str_s << "    ";
