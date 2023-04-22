@@ -65,13 +65,13 @@ namespace pascal2c::ast
 
         // param:
         //     is_array is true if the type is array type
-        Type(const bool &is_array) : is_array_(is_array) {}
+        Type(const int &line, const int &column, const bool &is_array) : Ast(line, column), is_array_(is_array) {}
 
         // param:
         //     is_array is true if the type is array type
         //     basic_type is the basic type of the array, eg. integer, real, boolean, char
-        Type(const bool &is_array, const int &basic_type)
-            : is_array_(is_array), basic_type_(basic_type) {}
+        Type(const int &line, const int &column, const bool &is_array, const int &basic_type)
+            : Ast(line, column), is_array_(is_array), basic_type_(basic_type) {}
 
         inline const bool &is_array() const { return is_array_; }
 
@@ -109,8 +109,8 @@ namespace pascal2c::ast
         //     is_var is true if the parameter is var parameter
         //     id_list is a list of identifiers
         //     type is the type of the identifiers
-        Parameter(const bool &is_var, shared_ptr<IdList> id_list, const int &type)
-            : is_var_(is_var), id_list_(std::move(id_list)), type_(type) {}
+        Parameter(const int &line, const int &column, const bool &is_var, shared_ptr<IdList> id_list, const int &type)
+            : Ast(line, column), is_var_(is_var), id_list_(std::move(id_list)), type_(type) {}
 
         inline const bool &is_var() const { return is_var_; }
 
@@ -140,8 +140,8 @@ namespace pascal2c::ast
         // param:
         //     id is the identifier
         //     const_value is the value of the identifier
-        ConstDeclaration(const string &id, shared_ptr<Expression> const_value)
-            : id_(id), const_value_(std::move(const_value)) {}
+        ConstDeclaration(const int &line, const int &column, const string &id, shared_ptr<Expression> const_value)
+            : Ast(line, column), id_(id), const_value_(std::move(const_value)) {}
 
         inline const string &id() const { return id_; }
 
@@ -169,8 +169,8 @@ namespace pascal2c::ast
         // param:
         //     id_list is a list of identifiers
         //     type is the type of the identifiers
-        VarDeclaration(shared_ptr<IdList> id_list, shared_ptr<Type> type)
-            : id_list_(std::move(id_list)), type_(std::move(type)) {}
+        VarDeclaration(const int &line, const int &column, shared_ptr<IdList> id_list, shared_ptr<Type> type)
+            : Ast(line, column), id_list_(std::move(id_list)), type_(std::move(type)) {}
 
         inline const shared_ptr<IdList> &id_list() const { return id_list_; }
 
@@ -199,8 +199,8 @@ namespace pascal2c::ast
         // param:
         //     id is the name of the subprogram
         //     return_type is the return type of the subprogram, -1 means procedure
-        SubprogramHead(const string &id, const int &return_type = -1)
-            : id_(id), return_type_(return_type) {}
+        SubprogramHead(const int &line, const int &column, const string &id, const int &return_type = -1)
+            : Ast(line, column), id_(id), return_type_(return_type) {}
 
         inline const string &id() const { return id_; }
 
@@ -242,7 +242,10 @@ namespace pascal2c::ast
     class SubprogramBody : public Ast
     {
     public:
-        inline const vector<shared_ptr<ConstDeclaration>> &const_declarations() const { return const_declarations_; }
+        inline const vector<shared_ptr<ConstDeclaration>> &const_declarations() const
+        {
+            return const_declarations_;
+        }
 
         inline const vector<shared_ptr<VarDeclaration>> &var_declarations() const { return var_declarations_; }
 
@@ -283,8 +286,8 @@ namespace pascal2c::ast
         // param:
         //     subprogram_head is the head of the subprogram
         //     subprogram_body is the body of the subprogram
-        Subprogram(shared_ptr<SubprogramHead> subprogram_head, shared_ptr<SubprogramBody> subprogram_body)
-            : subprogram_head_(std::move(subprogram_head)), subprogram_body_(std::move(subprogram_body)) {}
+        Subprogram(const int &line, const int &column, shared_ptr<SubprogramHead> subprogram_head, shared_ptr<SubprogramBody> subprogram_body)
+            : Ast(line, column), subprogram_head_(std::move(subprogram_head)), subprogram_body_(std::move(subprogram_body)) {}
 
         inline const shared_ptr<SubprogramHead> &subprogram_head() const { return subprogram_head_; }
 
@@ -312,8 +315,8 @@ namespace pascal2c::ast
         // param:
         //     id is the program name
         //     id_list is the parameters of the program
-        ProgramHead(const string &id, shared_ptr<IdList> id_list)
-            : id_(id), id_list_(std::move(id_list)) {}
+        ProgramHead(const int &line, const int &column, const string &id, shared_ptr<IdList> id_list)
+            : Ast(line, column), id_(id), id_list_(std::move(id_list)) {}
 
         // param:
         //     id is the program name
@@ -401,8 +404,8 @@ namespace pascal2c::ast
         // param:
         //     program_head is the shared pointer of ProgramHead
         //     program_body is the shared pointer of ProgramBody
-        Program(shared_ptr<ProgramHead> program_head, shared_ptr<ProgramBody> program_body)
-            : program_head_(std::move(program_head)), program_body_(std::move(program_body)) {}
+        Program(const int &line, const int &column, shared_ptr<ProgramHead> program_head, shared_ptr<ProgramBody> program_body)
+            : Ast(line, column), program_head_(std::move(program_head)), program_body_(std::move(program_body)) {}
 
         inline const shared_ptr<ProgramHead> &program_head() const { return program_head_; }
 

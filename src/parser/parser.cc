@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <string>
+#include <sstream>
 #include <memory>
 #include <vector>
 #include <cstdio>
@@ -7,14 +8,17 @@
 
 #include "parser.h"
 
-extern "C" {
-    #include "lexer.h"
+extern "C"
+{
+#include "lexer.h"
 }
 
-namespace pascal2c::parser {
+namespace pascal2c::parser
+{
 
-    Parser::Parser(FILE *in) {
-        for(auto & i : prefix_parser_)
+    Parser::Parser(FILE *in)
+    {
+        for (auto &i : prefix_parser_)
             i = nullptr;
 
         prefix_parser_[TOK_ID] = &Parser::ParseVariableAndCall;
@@ -37,7 +41,8 @@ namespace pascal2c::parser {
         NextToken();
     }
 
-    int Parser::NextToken() {
+    int Parser::NextToken()
+    {
         token_ = next_token_;
         tok_value_ = next_tok_value_;
         line_ = next_line_;
@@ -53,19 +58,22 @@ namespace pascal2c::parser {
         return token_;
     }
 
-    std::string Parser::GetLexerErrMsg() {
+    std::string Parser::GetLexerErrMsg()
+    {
         return {YYERRMSG[lexer_errno_]};
     }
 
-    void Parser::Match(int token) {
+    void Parser::Match(int token)
+    {
         int tok = token_;
         int line = line_;
         int column = column_;
-        char buff[1024];
         NextToken();
-        if(tok != token) {
-            sprintf(buff,"%d:%d syntax err:expected %c got %c",line,column,token,tok);
-            throw SyntaxErr(std::string(buff));
+        if (tok != token)
+        {
+            std::ostringstream err;
+            err << line << ":" << column << " syntax err:expected " << token << " got " << tok;
+            throw SyntaxErr(err.str());
         }
     }
 

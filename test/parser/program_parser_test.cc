@@ -11,7 +11,7 @@
 
 namespace pascal2c::parser
 {
-    TEST(ExprParserTest, TestParseExpr)
+    TEST(ProgramParserTest, TestParseIdList)
     {
         const char *input_str = "1 + 2 + 3 + 4 #"
                                 "1 + 2 * 3  #"

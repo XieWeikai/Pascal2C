@@ -17,6 +17,12 @@ namespace pascal2c::ast
 
         Ast() : line_(1), column_(1){};
 
+        void SetLineAndColumn(const int &line, const int &column)
+        {
+            line_ = line;
+            column_ = column;
+        }
+
         virtual const int &line() const { return line_; }
 
         virtual const int &column() const { return column_; }
@@ -31,12 +37,6 @@ namespace pascal2c::ast
             int temp = level;
             while (temp-- > 0)
                 str_s << "    ";
-        }
-
-        void SetLineAndColumn(const int &line, const int &column)
-        {
-            line_ = line;
-            column_ = column;
         }
 
     private:
