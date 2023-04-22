@@ -9,6 +9,7 @@
 
 extern "C" {
     #include "lexer.h"
+    extern int yycolno_next;
 }
 
 namespace pascal2c::parser {
@@ -27,7 +28,9 @@ namespace pascal2c::parser {
 
         prefix_parser_['('] = &Parser::ParseParen;
 
-        SetInput(in);
+        yyreset(in);  // reset input file
+        yycolno_next = 1;  // reset token position marker
+
         next_token_ = yylex();
         next_tok_value_ = yylval;
         next_line_ = yylineno;
@@ -62,11 +65,24 @@ namespace pascal2c::parser {
         int line = line_;
         int column = column_;
         char buff[1024];
-        NextToken();
         if(tok != token) {
-            sprintf(buff,"%d:%d syntax err:expected %c got %c",line,column,token,tok);
+            sprintf(buff,"%d:%d syntax err:expected %s got %s",line,column, TokenToString(token), TokenToString(tok));
             throw SyntaxErr(std::string(buff));
         }
+        NextToken(); // only skip current token if it matches
+    }
+
+    void Parser::Match(int token, const std::string& err_msg) {
+        int tok = token_;
+        int line = line_;
+        int column = column_;
+        static char buff[1024];
+        if(tok != token) {
+            sprintf(buff,"%d:%d %s",line,column, err_msg.c_str());
+            throw SyntaxErr(std::string(buff));
+        }
+        NextToken(); // only skip current token if it matches
+
     }
 
 }

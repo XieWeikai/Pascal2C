@@ -23,10 +23,11 @@ namespace pascal2c::ast
         REAL = 1,
         CHAR = 2,
         BOOLEAN = 3,
-        VARIABLE = 4,
-        CALL = 5,
-        BINARY = 6,
-        UNARY = 7,
+        CALL_OR_VAR = 4,
+        VARIABLE = 5,
+        CALL = 6,
+        BINARY = 7,
+        UNARY = 8,
     };
 
     // base class for expression
@@ -110,23 +111,42 @@ namespace pascal2c::ast
         bool value_;
     };
 
+    // when we met some statement like var1 := A;
+    // we don't know whether var1 is a variable or a function call,
+    // so we use this node to represent it
+    class CallOrVar : public Expression
+    {
+    public:
+        CallOrVar(std::string id) : id_(std::move(id)) {}
+
+        std::string ToString(int level) const override;
+        inline virtual ExprType GetType() const override { return CALL_OR_VAR; }
+    protected:
+        // id_ is the name of the variable or function
+        // in the example of var1 := A;
+        // id_ is "var1"
+        // and we do not need an expression list since no matter
+        // it is a variable or a function call, it has no parameters
+        std::string id_;
+    };
+
     // represent a function call
     // e.g. add(3+4,5)
     // params_ is a vector of expressions used as parameters of the function
     // params_ can be empty
-    class CallValue : public Expression
+    class CallValue : public CallOrVar
     {
     public:
-        explicit CallValue(std::string func_name) : func_name_(std::move(func_name)) {}
-        CallValue(std::string func_name, vector<std::shared_ptr<Expression>> params) : func_name_(std::move(func_name)), params_(
-                                                                                                                             std::move(params)) {}
+        explicit CallValue(std::string func_name) : CallOrVar(std::move(func_name)) {}
+        CallValue(std::string func_name, vector<std::shared_ptr<Expression>> params) : CallOrVar(std::move(func_name)) , params_(std::move(params)) {}
         void AddParam(std::shared_ptr<Expression> expr);
 
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return CALL; }
 
     private:
-        std::string func_name_;
+        // id is defined in CallOrValue base class
+        // std::string id_;
         vector<std::shared_ptr<Expression>> params_;
     };
 
@@ -134,11 +154,11 @@ namespace pascal2c::ast
     // e.g. count  num[3+i]  pos[3,4]
     // in the example of pos[3,4] the elements of expr_list_ is 3 and 4
     // expr_list_ can be empty
-    class Variable : public Expression
+    class Variable : public CallOrVar
     {
     public:
-        explicit Variable(std::string id) : id_(std::move(id)) {}
-        Variable(std::string id, vector<std::shared_ptr<Expression>> expr_list) : id_(std::move(id)), expr_list_(
+        explicit Variable(std::string id) : CallOrVar(std::move(id)) {}
+        Variable(std::string id, vector<std::shared_ptr<Expression>> expr_list) : CallOrVar(std::move(id)) , expr_list_(
                                                                                                           std::move(expr_list)) {}
 
         void AddExpr(std::shared_ptr<Expression> expr);
@@ -147,7 +167,8 @@ namespace pascal2c::ast
         inline ExprType GetType() const override { return VARIABLE; }
 
     private:
-        std::string id_;
+        // id is defined in CallOrValue base class
+        // std::string id_;
         vector<std::shared_ptr<Expression>> expr_list_;
     };
 
