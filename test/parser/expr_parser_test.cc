@@ -36,11 +36,15 @@ namespace pascal2c::parser {
         int vals[] = {
                 1, -1, 2, -1, 3, -1, 4, -1, 5, -1, 6,
         };
+        int col[] = {
+                1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 22
+        };
         for (int i = 0; i < 11; i++) {
             EXPECT_EQ(par.token_, res_tokens[i]);
             if (vals[i] != -1)
                 EXPECT_EQ(par.tok_value_.intval, vals[i]);
-            std::cout << par.line_ << ":" << par.column_ << std::endl;
+            EXPECT_EQ(par.line_,1);
+            EXPECT_EQ(par.column_, col[i]);
             par.NextToken();
         }
     }
@@ -91,6 +95,7 @@ index 2:
             try {
                 expr = par.ParsePrimary();
             }catch (SyntaxErr &e){
+                std::cout << e.what() << std::endl;
                 EXPECT_EQ(std::string(e.what()),"1:69: parse expression error: no expected token");
                 break;
             }

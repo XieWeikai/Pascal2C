@@ -101,12 +101,20 @@ namespace pascal2c::parser
         //     the next token
         int NextToken();
 
-        // match token and get next token
+        // match token and get next token (only skip current token if it matches)
         // param:
         //     token is the token to match
         // throw:
         //     SyntaxErr if token not match
         void Match(int token);
+
+        // match token and get next token (only skip current token if it matches)
+        // param:
+        //     token is the token to match
+        //     err_msg is the error message that is going to be thrown if token not match
+        // throw:
+        //     SyntaxErr if token not match
+        void Match(int token,const std::string& err_msg);
 
         // get the error message of lexer
         // return:

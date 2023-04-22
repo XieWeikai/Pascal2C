@@ -11,6 +11,11 @@
 
 using namespace pascal2c;
 
+TEST(TestToString, TestCallOrVar){
+    std::shared_ptr<ast::Expression> call = std::make_shared<ast::CallOrVar>("add");
+    EXPECT_EQ(call->ToString(0),"CallOrValue: id: add");
+}
+
 TEST(TestToString,TestInteger) {
     auto integer = std::make_shared<ast::IntegerValue>(123);
     ast::Expression *ep = integer.get();
@@ -331,9 +336,4 @@ TEST(TestToString,TestForStatement) {
             "        expr 2:\n"
             "            variable:b";
     EXPECT_EQ(for_statement->ToString(0),res);
-}
-
-TEST(TestGetType,TestInteger){
-    std::shared_ptr<ast::Expression> ep(new ast::IntegerValue(4));
-    EXPECT_EQ(ep->GetType(),ast::INT);
 }

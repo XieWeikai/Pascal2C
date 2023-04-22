@@ -250,14 +250,68 @@ namespace pascal2c::parser
         FILE *input = fmemopen((void *)input_str, strlen(input_str), "r");
         pascal2c::parser::Parser par(input);
 
+        std::string res[] = {
+            "CompoundStatement :1\n"
+            "statement :1\n"
+            "    IfStatement :\n"
+            "    if_part:\n"
+            "        CompoundStatement :3\n"
+            "        statement :1\n"
+            "            AssignStatement :\n"
+            "            Variable:\n"
+            "                variable:mid\n"
+            "            Expr :\n"
+            "                binary_op:'/'\n"
+            "                lhs :\n"
+            "                    binary_op:'+'\n"
+            "                    lhs :\n"
+            "                        variable:l\n"
+            "                    rhs :\n"
+            "                        variable:r\n"
+            "                rhs :\n"
+            "                    2\n"
+            "        statement :2\n"
+            "            CallStatement :\n"
+            "            name:sort\n"
+            "            expr 1:\n"
+            "                variable:l\n"
+            "            expr 2:\n"
+            "                variable:mid\n"
+            "        statement :3\n"
+            "            CallStatement :\n"
+            "            name:sort\n"
+            "            expr 1:\n"
+            "                binary_op:'+'\n"
+            "                lhs :\n"
+            "                    variable:mid\n"
+            "                rhs :\n"
+            "                    1\n"
+            "            expr 2:\n"
+            "                variable:r\n"
+            "    else_part:\n"
+            "        CallStatement :\n"
+            "        name:write\n"
+            "        expr 1:\n"
+            "            variable:a\n"
+            "        expr 2:\n"
+            "            variable:b\n"
+            "        expr 3:\n"
+            "            binary_op:'+'\n"
+            "            lhs :\n"
+            "                variable:c\n"
+            "            rhs :\n"
+            "                variable:d"};
+
+        int idx = 0;
+
         while (par.token_ != 0)
         {
             auto statement = par.ParseStatement();
             if (par.token_ != 0)
                 par.Match(';');
 
-            std::cout << statement->ToString(0) << std::endl;
-            //            EXPECT_EQ(statement->ToString(0),res[idx++]) ;
+            //            std::cout << statement->ToString(0) << std::endl;
+            EXPECT_EQ(statement->ToString(0), res[idx++]);
         }
     }
 
