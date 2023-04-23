@@ -66,6 +66,19 @@ namespace pascal2c::ast
         std::string value_;
     };
 
+    class StringValue : public Expression{
+    public:
+        explicit StringValue(std::string value) : value_(std::move(value)) {}
+
+        std::string ToString(int level) const override;
+        inline ExprType GetType() const override { return STRING; }
+
+        GETTER(std::string, value);
+
+    private:
+        std::string value_;
+    };
+
     // leaf node of an expression
     // this node represents an integer value in pascal
     // e.g. 123  482
