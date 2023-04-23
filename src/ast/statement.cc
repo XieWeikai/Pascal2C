@@ -53,7 +53,7 @@ namespace pascal2c::ast
         {
             str_s << "\n";
             IndentOutput(str_s, level);
-            str_s << "statement :" << i + 1 << "\n"
+            str_s << "statement " << i + 1 << ":\n"
                   << statements_[i]->ToString(level + 1);
         }
         return str_s.str();
@@ -64,6 +64,9 @@ namespace pascal2c::ast
         std::stringstream str_s;
         IndentOutput(str_s, level);
         str_s << "IfStatement :\n";
+        IndentOutput(str_s, level);
+        str_s << "condition:\n"
+              << condition_->ToString(level + 1) << "\n";
         IndentOutput(str_s, level);
         str_s << "if_part:\n"
               << then_->ToString(level + 1);
@@ -82,6 +85,8 @@ namespace pascal2c::ast
         std::stringstream str_s;
         IndentOutput(str_s, level);
         str_s << "ForStatement:\n";
+        IndentOutput(str_s, level);
+        str_s << "id: " << id_ << "\n";
         IndentOutput(str_s, level);
         str_s << "from:\n"
               << from_->ToString(level + 1) << "\n";

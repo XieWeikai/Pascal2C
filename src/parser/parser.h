@@ -55,6 +55,8 @@ namespace pascal2c::parser
         //     in is the input file
         explicit Parser(FILE *in);
 
+        GETTER(vector<std::string>, err_msg);
+
     private:
         FRIEND_TEST(TokenTest, TestNextToken);
         FRIEND_TEST(ProgramParserTest, TestParseProgram);
@@ -75,6 +77,7 @@ namespace pascal2c::parser
         FRIEND_TEST(StatementParserTest, TestIfStatement);
         FRIEND_TEST(StatementParserTest, TestForStatement);
         FRIEND_TEST(StatementParserTest, TestCompoundStatement);
+        FRIEND_TEST(ErrorHandleTest, TestErrorHandle);
 
         int token_, next_token_; // current token and next token
 
@@ -249,13 +252,15 @@ namespace pascal2c::parser
 
         std::shared_ptr<ast::Expression> ParseVariableAndCall();
 
+        std::shared_ptr<ast::Expression> ParseStringAndChar();
+
         std::shared_ptr<ast::Statement> ParseStatement();
 
         std::shared_ptr<ast::Statement> ParseIFStatement();
 
         std::shared_ptr<ast::Statement> ParseForStatement();
 
-        std::shared_ptr<ast::Statement> ParseCompoundStatement();
+        std::shared_ptr<ast::Statement> ParseCompoundStatement() noexcept;
 
         std::shared_ptr<ast::Statement> ParseAssignAndCallStatement();
     };

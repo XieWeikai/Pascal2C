@@ -144,7 +144,15 @@ namespace pascal2c
     std::string ast::CallOrVar::ToString(int level) const {
         std::stringstream str_s;
         IndentOutput(str_s, level);
-        str_s << "CallOrValue: id: " << id_;
+        str_s << "CallOrVar: " << id_;
+
+        return str_s.str();
+    }
+
+    std::string ast::StringValue::ToString(int level) const {
+        std::stringstream str_s;
+        IndentOutput(str_s, level);
+        str_s << "string: " << value_;
 
         return str_s.str();
     }

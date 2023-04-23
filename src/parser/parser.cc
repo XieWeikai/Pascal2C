@@ -30,6 +30,7 @@ namespace pascal2c::parser
         prefix_parser_[TOK_NOT] = &Parser::ParsePrefix;
 
         prefix_parser_['('] = &Parser::ParseParen;
+        prefix_parser_[TOK_STRING] = &Parser::ParseStringAndChar;
 
         yyreset(in);  // reset input file
         yycolno_next = 1;  // reset token position marker
@@ -73,7 +74,7 @@ namespace pascal2c::parser
         if (tok != token)
         {
             std::ostringstream err;
-            err << line << ":" << column << " syntax err:expected " << token << " got " << tok;
+            err << line << ":" << column << " syntax err:expected " << TokenToString(token) << " got " << TokenToString(tok);
             throw SyntaxErr(err.str());
         }
         NextToken(); // only skip current token if it matches

@@ -23,11 +23,12 @@ namespace pascal2c::ast
         REAL = 1,
         CHAR = 2,
         BOOLEAN = 3,
-        CALL_OR_VAR = 4,
+        CALL_OR_VAR = 4, // TODO: not implemented
         VARIABLE = 5,
         CALL = 6,
         BINARY = 7,
         UNARY = 8,
+        STRING = 9,
     };
 
     // base class for expression
@@ -45,6 +46,19 @@ namespace pascal2c::ast
         // return:
         //     one of ExprType
         virtual ExprType GetType() const = 0;
+    };
+
+    class StringValue : public Expression{
+    public:
+        explicit StringValue(std::string value) : value_(std::move(value)) {}
+
+        std::string ToString(int level) const override;
+        inline ExprType GetType() const override { return STRING; }
+
+        GETTER(std::string, value);
+
+    private:
+        std::string value_;
     };
 
     // leaf node of an expression

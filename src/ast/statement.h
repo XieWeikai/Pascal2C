@@ -146,6 +146,10 @@ namespace pascal2c::ast
                      std::shared_ptr<Statement> statement)
             : from_(std::move(from)), to_(std::move(to)), statement_(std::move(statement)) {}
 
+        ForStatement(std::string id, std::shared_ptr<Expression> from, std::shared_ptr<Expression> to,
+                     std::shared_ptr<Statement> statement)
+                :id_(std::move(id)), from_(std::move(from)), to_(std::move(to)), statement_(std::move(statement)) {}
+
         inline StatementType GetType() const override { return FOR_STATEMENT; }
 
         std::string ToString(int level) const override;
