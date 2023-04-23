@@ -67,12 +67,12 @@ namespace pascal2c::ast
         IndentOutput(str_s, level);
         str_s << "if_part:\n"
               << then_->ToString(level + 1);
-        if (else_ != nullptr)
+        if (else_part_ != nullptr)
         {
             str_s << "\n";
             IndentOutput(str_s, level);
             str_s << "else_part:\n"
-                  << else_->ToString(level + 1);
+                  << else_part_->ToString(level + 1);
         }
         return str_s.str();
     }

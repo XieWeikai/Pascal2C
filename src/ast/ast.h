@@ -4,6 +4,9 @@
 #include <iostream>
 #include <sstream>
 
+#define GETTER(type, name) \
+    const type &name() const { return name##_; }
+
 namespace pascal2c::ast
 {
     class Ast

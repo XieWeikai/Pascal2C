@@ -59,6 +59,8 @@ namespace pascal2c::ast
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return INT; }
 
+        GETTER(int, value);
+
     private:
         int value_;
     };
@@ -74,6 +76,8 @@ namespace pascal2c::ast
 
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return REAL; }
+
+        GETTER(double, value);
 
     private:
         double value_;
@@ -91,6 +95,7 @@ namespace pascal2c::ast
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return CHAR; }
 
+        GETTER(int, ch);
     private:
         int ch_;
     };
@@ -107,6 +112,7 @@ namespace pascal2c::ast
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return BOOLEAN; }
 
+        GETTER(bool, value);
     private:
         bool value_;
     };
@@ -121,6 +127,8 @@ namespace pascal2c::ast
 
         std::string ToString(int level) const override;
         inline virtual ExprType GetType() const override { return CALL_OR_VAR; }
+
+        GETTER(std::string, id);
     protected:
         // id_ is the name of the variable or function
         // in the example of var1 := A;
@@ -144,6 +152,8 @@ namespace pascal2c::ast
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return CALL; }
 
+        GETTER(vector<std::shared_ptr<Expression>>, params);
+
     private:
         // id is defined in CallOrValue base class
         // std::string id_;
@@ -166,6 +176,8 @@ namespace pascal2c::ast
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return VARIABLE; }
 
+        GETTER(vector<std::shared_ptr<Expression>>, expr_list);
+
     private:
         // id is defined in CallOrValue base class
         // std::string id_;
@@ -183,6 +195,10 @@ namespace pascal2c::ast
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return BINARY; }
 
+        GETTER(int, op);
+        GETTER(std::shared_ptr<Expression>, lhs);
+        GETTER(std::shared_ptr<Expression>, rhs);
+
     private:
         int op_;                                // operator
         std::shared_ptr<Expression> lhs_, rhs_; // two operands
@@ -198,6 +214,9 @@ namespace pascal2c::ast
 
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return UNARY; }
+
+        GETTER(int, op);
+        GETTER(std::shared_ptr<Expression>, factor);
 
     private:
         int op_;
