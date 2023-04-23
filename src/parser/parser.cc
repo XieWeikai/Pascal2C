@@ -8,15 +8,9 @@
 
 #include "parser.h"
 
-<<<<<<< HEAD
-extern "C"
-{
-#include "lexer.h"
-=======
 extern "C" {
     #include "lexer.h"
     extern int yycolno_next;
->>>>>>> dc17493533518273dcf013908cdc7eacdfe38545
 }
 
 namespace pascal2c::parser
@@ -76,19 +70,11 @@ namespace pascal2c::parser
         int tok = token_;
         int line = line_;
         int column = column_;
-<<<<<<< HEAD
-        NextToken();
         if (tok != token)
         {
             std::ostringstream err;
             err << line << ":" << column << " syntax err:expected " << token << " got " << tok;
             throw SyntaxErr(err.str());
-=======
-        char buff[1024];
-        if(tok != token) {
-            sprintf(buff,"%d:%d syntax err:expected %s got %s",line,column, TokenToString(token), TokenToString(tok));
-            throw SyntaxErr(std::string(buff));
->>>>>>> dc17493533518273dcf013908cdc7eacdfe38545
         }
         NextToken(); // only skip current token if it matches
     }
@@ -103,7 +89,6 @@ namespace pascal2c::parser
             throw SyntaxErr(std::string(buff));
         }
         NextToken(); // only skip current token if it matches
-
     }
 
 }
