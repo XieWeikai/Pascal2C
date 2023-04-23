@@ -1,3 +1,4 @@
+#include <vector>
 #include "symbol_table.h"
 
 namespace analysiser{

@@ -1,5 +1,5 @@
 #include "semantic_analysis.h"
-
+#include <memory>
 namespace analysiser{
     bool nameTable::Add(std::string name, std::shared_ptr<symbol_table::SymbolTableBlock> block)
     {
