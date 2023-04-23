@@ -320,7 +320,7 @@ namespace pascal2c::ast
 
         // param:
         //     id is the program name
-        explicit ProgramHead(const string &id) : id_(id) {}
+        ProgramHead(const int &line, const int &column, const string &id) : Ast(line, column), id_(id) {}
 
         inline const string &id() const { return id_; }
 

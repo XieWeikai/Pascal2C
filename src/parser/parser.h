@@ -36,7 +36,6 @@ extern "C"
         std::ostringstream err;                                                     \
         err << line_ << ":" << column_ << " syntax err:expected " << expected_token \
             << " got " << token_;                                                   \
-        NextToken();                                                                \
         throw SyntaxErr(err.str());                                                 \
     } while (0)
 

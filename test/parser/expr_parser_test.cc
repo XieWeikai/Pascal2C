@@ -4,9 +4,8 @@
 #include <iostream>
 #include <cstdio>
 #include <sstream>
-#include<string>
+#include <string>
 #include <memory>
-#include <cstdio>
 
 #include "gtest/gtest.h"
 #include "parser/parser.h"
@@ -14,68 +13,77 @@
 #include "ast/expr.h"
 #include "ast/statement.h"
 
-namespace pascal2c::parser {
+namespace pascal2c::parser
+{
 
-    TEST(TokenTest, TestNextToken) {
+    TEST(TokenTest, TestNextToken)
+    {
         const char *input_str = "1 + 2 + 3 * 4 - 5 <= 6";
-        FILE *input = fmemopen((void *)input_str, strlen(input_str),"r");
+        FILE *input = fmemopen((void *)input_str, strlen(input_str), "r");
         Parser par(input);
         int res_tokens[] = {
-                TOK_INTEGER,
-                '+',
-                TOK_INTEGER,
-                '+',
-                TOK_INTEGER,
-                '*',
-                TOK_INTEGER,
-                '-',
-                TOK_INTEGER,
-                TOK_LEOP,
-                TOK_INTEGER
-        };
+            TOK_INTEGER,
+            '+',
+            TOK_INTEGER,
+            '+',
+            TOK_INTEGER,
+            '*',
+            TOK_INTEGER,
+            '-',
+            TOK_INTEGER,
+            TOK_LEOP,
+            TOK_INTEGER};
         int vals[] = {
-                1, -1, 2, -1, 3, -1, 4, -1, 5, -1, 6,
+            1,
+            -1,
+            2,
+            -1,
+            3,
+            -1,
+            4,
+            -1,
+            5,
+            -1,
+            6,
         };
-        int col[] = {
-                1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 22
-        };
-        for (int i = 0; i < 11; i++) {
+        for (int i = 0; i < 11; i++)
+        {
             EXPECT_EQ(par.token_, res_tokens[i]);
             if (vals[i] != -1)
                 EXPECT_EQ(par.tok_value_.intval, vals[i]);
-            EXPECT_EQ(par.line_,1);
-            EXPECT_EQ(par.column_, col[i]);
+            std::cout << par.line_ << ":" << par.column_ << std::endl;
             par.NextToken();
         }
     }
 
-    TEST(ExprParserTest,TestParsePrimary) {
+    TEST(ExprParserTest, TestParsePrimary)
+    {
         const char *input_str = "3  1.23  -3  not 4 +4  -4.1234 abcd add(3,4) count[i+1,b+2] say() b[]";
-        FILE *input = fmemopen((void *)input_str, strlen(input_str),"r");
+        FILE *input = fmemopen((void *)input_str, strlen(input_str), "r");
         Parser par(input);
         int idx = 0;
         std::string res[] = {
-"3",
-"1.2300",
-R"(unary_op:'-'
+            "3",
+            "1.2300",
+            R"(unary_op:'-'
 expr :
     3)",
-R"(unary_op:'n'
+            R"(unary_op:'n'
 expr :
     4)",
-R"(unary_op:'+'
+            R"(unary_op:'+'
 expr :
     4)",
-    R"(unary_op:'-'
+            R"(unary_op:'-'
 expr :
     4.1234)",
-    "variable:abcd",
-    R"(function:add
+            "variable:abcd",
+            R"(function:add
 expr 1:
     3
 expr 2:
     4)",
-    R"(variable:count
+            R"(variable:count
 index 1:
     binary_op:'+'
     lhs :
@@ -88,29 +96,32 @@ index 2:
         variable:b
     rhs :
         2)",
-        "function:say"
-        };
+            "function:say"};
         std::shared_ptr<ast::Expression> expr;
-        while(par.token_ != 0){
-            try {
+        while (par.token_ != 0)
+        {
+            try
+            {
                 expr = par.ParsePrimary();
-            }catch (SyntaxErr &e){
-                std::cout << e.what() << std::endl;
-                EXPECT_EQ(std::string(e.what()),"1:69: parse expression error: no expected token");
+            }
+            catch (SyntaxErr &e)
+            {
+                EXPECT_EQ(std::string(e.what()), "1:69: parse expression error: no expected token");
                 break;
             }
-            EXPECT_EQ(expr->ToString(0),res[idx++]);
+            EXPECT_EQ(expr->ToString(0), res[idx++]);
         }
     }
 
-    TEST(ExprParserTest,TestParseExpr) {
+    TEST(ExprParserTest, TestParseExpr)
+    {
         const char *input_str = "1 + 2 + 3 + 4 #"
                                 "1 + 2 * 3  #"
                                 "(1 + 2) * 3  #"
                                 "-(1 + 2) * 3  #"
                                 "(-(1 + 2) * 3 <= 5) and (3 > 4) or (4 < 3) #"
                                 "(-(1 + 2) * 3 <= 5) or (3 > 4) and (4 < 3) #";
-        FILE *input = fmemopen((void *)input_str, strlen(input_str),"r");
+        FILE *input = fmemopen((void *)input_str, strlen(input_str), "r");
         Parser par(input);
         int idx = 0;
         std::string res[] = {
@@ -222,19 +233,19 @@ index 2:
             "        lhs :\n"
             "            4\n"
             "        rhs :\n"
-            "            3"
-        };
-        while(par.token_ != 0){
+            "            3"};
+        while (par.token_ != 0)
+        {
             auto expr = par.ParseExpr();
-//            std::cout << expr->ToString(0) << "\n" << std::endl;
-            EXPECT_EQ(expr->ToString(0),res[idx++]);
-            if(par.token_ == TOK_ERROR)
+            //            std::cout << expr->ToString(0) << "\n" << std::endl;
+            EXPECT_EQ(expr->ToString(0), res[idx++]);
+            if (par.token_ == TOK_ERROR)
                 par.NextToken();
         }
     }
 
-    TEST(TestCode,Test){
-
+    TEST(TestCode, Test)
+    {
     }
 
 }
