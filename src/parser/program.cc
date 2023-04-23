@@ -15,7 +15,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::Program> Parser::ParseProgram()
     {
-        INIT;
+        InitParse();
 
         auto program_head = ParseProgramHead();
         Match(';');
@@ -26,7 +26,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::ProgramHead> Parser::ParseProgramHead()
     {
-        INIT;
+        InitParse();
 
         Match(TOK_PROGRAM);
         auto name = text_;
@@ -43,7 +43,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::ProgramBody> Parser::ParseProgramBody()
     {
-        INIT;
+        InitParse();
 
         auto program_body = std::make_shared<ast::ProgramBody>();
         program_body->SetLineAndColumn(begin_line_, begin_column_);
@@ -93,7 +93,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::ConstDeclaration> Parser::ParseConstDeclaration()
     {
-        INIT;
+        InitParse();
 
         auto name = text_;
         Match(TOK_ID);
@@ -103,7 +103,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::VarDeclaration> Parser::ParseVarDeclaration()
     {
-        INIT;
+        InitParse();
 
         auto id_list = ParseIdList();
         Match(':');
@@ -113,7 +113,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::Subprogram> Parser::ParseSubprogram()
     {
-        INIT;
+        InitParse();
 
         auto subprogram_head = ParseSubprogramHead();
         Match(';');
@@ -123,7 +123,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::SubprogramHead> Parser::ParseSubprogramHead()
     {
-        INIT;
+        InitParse();
 
         if (token_ == TOK_PROCEDURE)
         {
@@ -134,7 +134,7 @@ namespace pascal2c::parser
             if (token_ == '(')
             {
                 NextToken();
-                while (true)
+                while (token_ != ')')
                 {
                     subprogram_head->AddParameter(std::move(ParseParameter()));
                     if (token_ == ';')
@@ -175,19 +175,19 @@ namespace pascal2c::parser
             }
             else
             {
-                THROW_SYNTAX_ERR("basic type(integer, real, char, boolean)");
+                ThrowSyntaxErr("basic type(integer, real, char, boolean)");
             }
             return std::move(subprogram_head);
         }
         else
         {
-            THROW_SYNTAX_ERR("function or procedure");
+            ThrowSyntaxErr("function or procedure");
         }
     }
 
     std::shared_ptr<ast::SubprogramBody> Parser::ParseSubprogramBody()
     {
-        INIT;
+        InitParse();
 
         auto subprogram_body = std::make_shared<ast::SubprogramBody>();
         subprogram_body->SetLineAndColumn(begin_line_, begin_column_);
@@ -227,7 +227,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::IdList> Parser::ParseIdList()
     {
-        INIT;
+        InitParse();
 
         auto id_list = std::make_shared<ast::IdList>();
         id_list->SetLineAndColumn(begin_line_, begin_column_);
@@ -245,7 +245,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::Type> Parser::ParseType()
     {
-        INIT;
+        InitParse();
 
         if (token_ == TOK_INTEGER_TYPE || token_ == TOK_REAL_TYPE || token_ == TOK_CHAR_TYPE || token_ == TOK_BOOLEAN_TYPE)
         {
@@ -274,12 +274,12 @@ namespace pascal2c::parser
             }
             else
             {
-                THROW_SYNTAX_ERR("basic type(integer, real, char, boolean)");
+                ThrowSyntaxErr("basic type(integer, real, char, boolean)");
             }
         }
         else
         {
-            THROW_SYNTAX_ERR("basic type(integer, real, char, boolean) or array");
+            ThrowSyntaxErr("basic type(integer, real, char, boolean) or array");
         }
     }
 
@@ -297,7 +297,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::Parameter> Parser::ParseParameter()
     {
-        INIT;
+        InitParse();
 
         bool is_var;
         if (token_ == TOK_VAR)
@@ -319,7 +319,7 @@ namespace pascal2c::parser
         }
         else
         {
-            THROW_SYNTAX_ERR("basic type(integer, real, char, boolean)");
+            ThrowSyntaxErr("basic type(integer, real, char, boolean)");
         }
         return MAKE_AND_MOVE_SHARED(ast::Parameter, is_var, id_list, type);
     }

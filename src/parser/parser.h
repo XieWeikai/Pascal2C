@@ -18,26 +18,10 @@ extern "C"
 #include "lexer.h"
 }
 
-#define INIT                     \
-    do                           \
-    {                            \
-        begin_line_ = line_;     \
-        begin_column_ = column_; \
-    } while (0)
-
 #define MAKE_SHARED(constructor, ...) std::make_shared<constructor>(begin_line_, begin_column_, __VA_ARGS__)
 
 #define MAKE_AND_MOVE_SHARED(constructor, ...) \
     std::move(MAKE_SHARED(constructor, __VA_ARGS__))
-
-#define THROW_SYNTAX_ERR(expected_token)                                            \
-    do                                                                              \
-    {                                                                               \
-        std::ostringstream err;                                                     \
-        err << line_ << ":" << column_ << " syntax err:expected " << expected_token \
-            << " got " << token_;                                                   \
-        throw SyntaxErr(err.str());                                                 \
-    } while (0)
 
 namespace pascal2c::parser
 {
@@ -73,6 +57,18 @@ namespace pascal2c::parser
 
     private:
         FRIEND_TEST(TokenTest, TestNextToken);
+        FRIEND_TEST(ProgramParserTest, TestParseProgram);
+        FRIEND_TEST(ProgramParserTest, TestParseProgramHead);
+        FRIEND_TEST(ProgramParserTest, TestParseProgramBody);
+        FRIEND_TEST(ProgramParserTest, TestParseConstDecl);
+        FRIEND_TEST(ProgramParserTest, TestParseVarDecl);
+        FRIEND_TEST(ProgramParserTest, TestParseSubProgramDecl);
+        FRIEND_TEST(ProgramParserTest, TestParseSubProgramHead);
+        FRIEND_TEST(ProgramParserTest, TestParseSubProgramBody);
+        FRIEND_TEST(ProgramParserTest, TestParseIdList);
+        FRIEND_TEST(ProgramParserTest, TestParseType);
+        FRIEND_TEST(ProgramParserTest, TestParsePeriod);
+        FRIEND_TEST(ProgramParserTest, TestParseParameter);
         FRIEND_TEST(ExprParserTest, TestParsePrimary);
         FRIEND_TEST(ExprParserTest, TestParseExpr);
         FRIEND_TEST(StatementParserTest, TestAssignStatement);
@@ -119,6 +115,26 @@ namespace pascal2c::parser
         // return:
         //     the error message
         std::string GetLexerErrMsg();
+
+        // initialize before parsing
+        inline void InitParse()
+        {
+            begin_line_ = line_;
+            begin_column_ = column_;
+        }
+
+        // throw a syntax error
+        // param:
+        //     expected_token is the token that is expected
+        // throw:
+        //     SyntaxErr
+        inline void ThrowSyntaxErr(const std::string &expected_token)
+        {
+            std::ostringstream err;
+            err << line_ << ":" << column_ << " syntax err:expected " << expected_token
+                << " got " << token_;
+            throw SyntaxErr(err.str());
+        }
 
         // parse the whole program
         // e.g. program p; const a = 1; var b : integer; function f(a : integer) : integer; begin end; begin end.

@@ -27,7 +27,7 @@ namespace pascal2c::ast
         //     id is the identifier
         // return:
         //     the id at the index
-        inline const string &operator[](const int &index) const { return id_list_[index]; }
+        inline const string &operator[](const int index) const { return id_list_[index]; }
 
         // return:
         //     the number of identifiers
@@ -40,7 +40,7 @@ namespace pascal2c::ast
         //     level is the level of indentation that should be applied to the returned string
         // return:
         //     a string represents the statement
-        const string ToString(const int &level) const;
+        const string ToString(const int level) const;
 
     private:
         vector<string> id_list_; // a list of identifiers, eg. a, b, c
@@ -65,12 +65,12 @@ namespace pascal2c::ast
 
         // param:
         //     is_array is true if the type is array type
-        Type(const int &line, const int &column, const bool &is_array) : Ast(line, column), is_array_(is_array) {}
+        Type(const int line, const int column, const bool is_array) : Ast(line, column), is_array_(is_array) {}
 
         // param:
         //     is_array is true if the type is array type
         //     basic_type is the basic type of the array, eg. integer, real, boolean, char
-        Type(const int &line, const int &column, const bool &is_array, const int &basic_type)
+        Type(const int line, const int column, const bool is_array, const int basic_type)
             : Ast(line, column), is_array_(is_array), basic_type_(basic_type) {}
 
         inline const bool &is_array() const { return is_array_; }
@@ -81,14 +81,14 @@ namespace pascal2c::ast
 
         inline void AddPeriod(const Period &period) { periods_.push_back(period); }
 
-        inline void set_basic_type(const int &basic_type) { basic_type_ = basic_type; }
+        inline void set_basic_type(const int basic_type) { basic_type_ = basic_type; }
 
         // for test use
         // param:
         //     level is the level of indentation that should be applied to the returned string
         // return:
         //     a string represents the statement
-        const string ToString(const int &level) const;
+        const string ToString(const int level) const;
 
     private:
         bool is_array_;          // true if the type is array type
@@ -109,7 +109,7 @@ namespace pascal2c::ast
         //     is_var is true if the parameter is var parameter
         //     id_list is a list of identifiers
         //     type is the type of the identifiers
-        Parameter(const int &line, const int &column, const bool &is_var, shared_ptr<IdList> id_list, const int &type)
+        Parameter(const int line, const int column, const bool is_var, shared_ptr<IdList> id_list, const int type)
             : Ast(line, column), is_var_(is_var), id_list_(std::move(id_list)), type_(type) {}
 
         inline const bool &is_var() const { return is_var_; }
@@ -123,7 +123,7 @@ namespace pascal2c::ast
         //     level is the level of indentation that should be applied to the returned string
         // return:
         //     a string represents the statement
-        const string ToString(const int &level) const;
+        const string ToString(const int level) const;
 
     private:
         bool is_var_;                // true if the parameter is var parameter
@@ -140,7 +140,7 @@ namespace pascal2c::ast
         // param:
         //     id is the identifier
         //     const_value is the value of the identifier
-        ConstDeclaration(const int &line, const int &column, const string &id, shared_ptr<Expression> const_value)
+        ConstDeclaration(const int line, const int column, const string &id, shared_ptr<Expression> const_value)
             : Ast(line, column), id_(id), const_value_(std::move(const_value)) {}
 
         inline const string &id() const { return id_; }
@@ -152,7 +152,7 @@ namespace pascal2c::ast
         //     level is the level of indentation that should be applied to the returned string
         // return:
         //     a string represents the statement
-        const string ToString(const int &level) const;
+        const string ToString(const int level) const;
 
     private:
         string id_;                          // the identifier, eg. a
@@ -169,7 +169,7 @@ namespace pascal2c::ast
         // param:
         //     id_list is a list of identifiers
         //     type is the type of the identifiers
-        VarDeclaration(const int &line, const int &column, shared_ptr<IdList> id_list, shared_ptr<Type> type)
+        VarDeclaration(const int line, const int column, shared_ptr<IdList> id_list, shared_ptr<Type> type)
             : Ast(line, column), id_list_(std::move(id_list)), type_(std::move(type)) {}
 
         inline const shared_ptr<IdList> &id_list() const { return id_list_; }
@@ -181,7 +181,7 @@ namespace pascal2c::ast
         //     level is the level of indentation that should be applied to the returned string
         // return:
         //     a string represents the statement
-        const string ToString(const int &level) const;
+        const string ToString(const int level) const;
 
     private:
         shared_ptr<IdList> id_list_; // a list of identifiers, eg. a, b, c
@@ -199,7 +199,7 @@ namespace pascal2c::ast
         // param:
         //     id is the name of the subprogram
         //     return_type is the return type of the subprogram, -1 means procedure
-        SubprogramHead(const int &line, const int &column, const string &id, const int &return_type = -1)
+        SubprogramHead(const int line, const int column, const string &id, const int return_type = -1)
             : Ast(line, column), id_(id), return_type_(return_type) {}
 
         inline const string &id() const { return id_; }
@@ -212,7 +212,7 @@ namespace pascal2c::ast
 
         inline void AddParameter(shared_ptr<Parameter> parameter) { parameters_.push_back(std::move(parameter)); }
 
-        inline void set_return_type(const int &return_type) { return_type_ = return_type; }
+        inline void set_return_type(const int return_type) { return_type_ = return_type; }
 
         // return:
         //     true if the subprogram is a function
@@ -223,7 +223,7 @@ namespace pascal2c::ast
         //     level is the level of indentation that should be applied to the returned string
         // return:
         //     a string represents the statement
-        const string ToString(const int &level) const;
+        const string ToString(const int level) const;
 
     private:
         string id_;                                // name of the subprogram, eg. f, p
@@ -268,7 +268,7 @@ namespace pascal2c::ast
         //     level is the level of indentation that should be applied to the returned string
         // return:
         //     a string represents the statement
-        const string ToString(const int &level) const;
+        const string ToString(const int level) const;
 
     private:
         vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be empty, eg. const a = 1; b = 2;
@@ -278,15 +278,15 @@ namespace pascal2c::ast
 
     // Subprogram -> SubprogramHead ; SubprogramBody
     //
-    // eg. function f(a, b : integer) : integer;
-    // eg. procedure p(var c, d : real);
+    // eg. function f(a, b : integer) : integer; begin end
+    // eg. procedure p(var c, d : real); begin end
     class Subprogram : public Ast
     {
     public:
         // param:
         //     subprogram_head is the head of the subprogram
         //     subprogram_body is the body of the subprogram
-        Subprogram(const int &line, const int &column, shared_ptr<SubprogramHead> subprogram_head, shared_ptr<SubprogramBody> subprogram_body)
+        Subprogram(const int line, const int column, shared_ptr<SubprogramHead> subprogram_head, shared_ptr<SubprogramBody> subprogram_body)
             : Ast(line, column), subprogram_head_(std::move(subprogram_head)), subprogram_body_(std::move(subprogram_body)) {}
 
         inline const shared_ptr<SubprogramHead> &subprogram_head() const { return subprogram_head_; }
@@ -298,7 +298,7 @@ namespace pascal2c::ast
         //     level is the level of indentation that should be applied to the returned string
         // return:
         //     a string represents the statement
-        const string ToString(const int &level) const;
+        const string ToString(const int level) const;
 
     private:
         shared_ptr<SubprogramHead> subprogram_head_; // eg. function f(a, b : integer) : integer;
@@ -315,12 +315,12 @@ namespace pascal2c::ast
         // param:
         //     id is the program name
         //     id_list is the parameters of the program
-        ProgramHead(const int &line, const int &column, const string &id, shared_ptr<IdList> id_list)
+        ProgramHead(const int line, const int column, const string &id, shared_ptr<IdList> id_list)
             : Ast(line, column), id_(id), id_list_(std::move(id_list)) {}
 
         // param:
         //     id is the program name
-        ProgramHead(const int &line, const int &column, const string &id) : Ast(line, column), id_(id) {}
+        ProgramHead(const int line, const int column, const string &id) : Ast(line, column), id_(id) {}
 
         inline const string &id() const { return id_; }
 
@@ -336,7 +336,7 @@ namespace pascal2c::ast
         //     level is the level of indentation that should be applied to the returned string
         // return:
         //     a string represents the statement
-        const string ToString(const int &level) const;
+        const string ToString(const int level) const;
 
     private:
         string id_;                  // program name, eg. f
@@ -386,7 +386,7 @@ namespace pascal2c::ast
         //     level is the level of indentation that should be applied to the returned string
         // return:
         //     a string represents the statement
-        const string ToString(const int &level) const;
+        const string ToString(const int level) const;
 
     private:
         vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be empty, eg. const a = 1; b = 2;
@@ -404,7 +404,7 @@ namespace pascal2c::ast
         // param:
         //     program_head is the shared pointer of ProgramHead
         //     program_body is the shared pointer of ProgramBody
-        Program(const int &line, const int &column, shared_ptr<ProgramHead> program_head, shared_ptr<ProgramBody> program_body)
+        Program(const int line, const int column, shared_ptr<ProgramHead> program_head, shared_ptr<ProgramBody> program_body)
             : Ast(line, column), program_head_(std::move(program_head)), program_body_(std::move(program_body)) {}
 
         inline const shared_ptr<ProgramHead> &program_head() const { return program_head_; }
@@ -416,7 +416,7 @@ namespace pascal2c::ast
         //     level is the level of indentation that should be applied to the returned string
         // return:
         //     a string represents the statement
-        const string ToString(const int &level) const;
+        const string ToString(const int level) const;
 
     private:
         shared_ptr<ProgramHead> program_head_; // eg. program f(a, b)

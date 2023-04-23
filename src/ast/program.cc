@@ -8,12 +8,17 @@ extern "C"
 #include "lexer.h"
 }
 
+#define INIT_TOSTRING(str_s, level) \
+    std::stringstream str_s;        \
+    LineColumnOutput(str_s);        \
+    IndentOutput(str_s, level);
+
 namespace pascal2c::ast
 {
     using string = ::std::string;
     using stringstream = ::std::stringstream;
 
-    const string TypeToString(const int &type)
+    const string TypeToString(const int type)
     {
         switch (type)
         {
@@ -27,10 +32,10 @@ namespace pascal2c::ast
             return "boolean";
         }
     }
-    const string IdList::ToString(const int &level) const
+    const string IdList::ToString(const int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
+
         str_s << "IdList: ";
 
         str_s << id_list_[0];
@@ -41,10 +46,9 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
-    const string Type::ToString(const int &level) const
+    const string Type::ToString(const int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
 
         str_s << "Type: ";
         if (is_array_)
@@ -68,10 +72,10 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
-    const string Parameter::ToString(const int &level) const
+    const string Parameter::ToString(const int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
+
         str_s << "Parameter: ";
 
         if (is_var_)
@@ -84,20 +88,18 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
-    const string ConstDeclaration::ToString(const int &level) const
+    const string ConstDeclaration::ToString(const int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
 
         str_s << "ConstDeclaration: " << id_ << std::endl;
         str_s << const_value_->ToString(level + 1);
         return str_s.str();
     }
 
-    const string VarDeclaration::ToString(const int &level) const
+    const string VarDeclaration::ToString(const int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
 
         str_s << "VarDeclaration: " << std::endl;
         str_s << type_->ToString(level + 1) << std::endl;
@@ -105,10 +107,9 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
-    const string SubprogramHead::ToString(const int &level) const
+    const string SubprogramHead::ToString(const int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
 
         str_s << "SubprogramHead: ";
         if (return_type_ == -1)
@@ -131,10 +132,9 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
-    const string SubprogramBody::ToString(const int &level) const
+    const string SubprogramBody::ToString(const int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
 
         str_s << "SubprogramBody: " << std::endl;
         if (const_declarations_.size() > 0)
@@ -168,10 +168,9 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
-    const string Subprogram::ToString(const int &level) const
+    const string Subprogram::ToString(const int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
 
         str_s << "Subprogram: " << std::endl;
         str_s << subprogram_head_->ToString(level + 1) << std::endl;
@@ -179,10 +178,9 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
-    const string ProgramHead::ToString(const int &level) const
+    const string ProgramHead::ToString(const int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
 
         str_s << "ProgramHead: " << id_ << std::endl;
         if (id_list_ != nullptr)
@@ -192,10 +190,9 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
-    const string ProgramBody::ToString(const int &level) const
+    const string ProgramBody::ToString(const int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
 
         str_s << "ProgramBody: " << std::endl;
         if (const_declarations_.size() > 0)
@@ -237,10 +234,9 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
-    const string Program::ToString(const int &level) const
+    const string Program::ToString(const int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
 
         str_s << "Program: " << std::endl;
         str_s << program_head_->ToString(level + 1) << std::endl;

@@ -46,5 +46,8 @@ compile_commands.json
 **/.idea/
 
 lexer.h
+lexer.yy.c
 lex.yy.c
 lexer
+lexer_exe
+lexer_test
