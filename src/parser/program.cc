@@ -15,7 +15,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::Program> Parser::ParseProgram()
     {
-        InitParse();
+        INIT_PARSE(line_, column_);
 
         auto program_head = ParseProgramHead();
         Match(';');
@@ -26,7 +26,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::ProgramHead> Parser::ParseProgramHead()
     {
-        InitParse();
+        INIT_PARSE(line_, column_);
 
         Match(TOK_PROGRAM);
         auto name = text_;
@@ -43,10 +43,10 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::ProgramBody> Parser::ParseProgramBody()
     {
-        InitParse();
+        INIT_PARSE(line_, column_);
 
         auto program_body = std::make_shared<ast::ProgramBody>();
-        program_body->SetLineAndColumn(begin_line_, begin_column_);
+        program_body->SetLineAndColumn(begin_line, begin_column);
 
         // Parse const declarations
         if (token_ == TOK_CONST)
@@ -93,7 +93,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::ConstDeclaration> Parser::ParseConstDeclaration()
     {
-        InitParse();
+        INIT_PARSE(line_, column_);
 
         auto name = text_;
         Match(TOK_ID);
@@ -103,7 +103,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::VarDeclaration> Parser::ParseVarDeclaration()
     {
-        InitParse();
+        INIT_PARSE(line_, column_);
 
         auto id_list = ParseIdList();
         Match(':');
@@ -113,7 +113,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::Subprogram> Parser::ParseSubprogram()
     {
-        InitParse();
+        INIT_PARSE(line_, column_);
 
         auto subprogram_head = ParseSubprogramHead();
         Match(';');
@@ -123,7 +123,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::SubprogramHead> Parser::ParseSubprogramHead()
     {
-        InitParse();
+        INIT_PARSE(line_, column_);
 
         if (token_ == TOK_PROCEDURE)
         {
@@ -187,10 +187,10 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::SubprogramBody> Parser::ParseSubprogramBody()
     {
-        InitParse();
+        INIT_PARSE(line_, column_);
 
         auto subprogram_body = std::make_shared<ast::SubprogramBody>();
-        subprogram_body->SetLineAndColumn(begin_line_, begin_column_);
+        subprogram_body->SetLineAndColumn(begin_line, begin_column);
 
         // Parse const declarations
         if (token_ == TOK_CONST)
@@ -227,10 +227,10 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::IdList> Parser::ParseIdList()
     {
-        InitParse();
+        INIT_PARSE(line_, column_);
 
         auto id_list = std::make_shared<ast::IdList>();
-        id_list->SetLineAndColumn(begin_line_, begin_column_);
+        id_list->SetLineAndColumn(begin_line, begin_column);
 
         id_list->AddId(text_);
         Match(TOK_ID);
@@ -245,7 +245,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::Type> Parser::ParseType()
     {
-        InitParse();
+        INIT_PARSE(line_, column_);
 
         if (token_ == TOK_INTEGER_TYPE || token_ == TOK_REAL_TYPE || token_ == TOK_CHAR_TYPE || token_ == TOK_BOOLEAN_TYPE)
         {
@@ -297,7 +297,7 @@ namespace pascal2c::parser
 
     std::shared_ptr<ast::Parameter> Parser::ParseParameter()
     {
-        InitParse();
+        INIT_PARSE(line_, column_);
 
         bool is_var;
         if (token_ == TOK_VAR)

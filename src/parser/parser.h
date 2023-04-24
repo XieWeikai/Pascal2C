@@ -18,7 +18,11 @@ extern "C"
 #include "lexer.h"
 }
 
-#define MAKE_SHARED(constructor, ...) std::make_shared<constructor>(begin_line_, begin_column_, __VA_ARGS__)
+#define INIT_PARSE(line, column) \
+    int begin_line = line;       \
+    int begin_column = column;
+
+#define MAKE_SHARED(constructor, ...) std::make_shared<constructor>(begin_line, begin_column, __VA_ARGS__)
 
 #define MAKE_AND_MOVE_SHARED(constructor, ...) \
     std::move(MAKE_SHARED(constructor, __VA_ARGS__))
@@ -86,8 +90,8 @@ namespace pascal2c::parser
 
         // token value
         YYSTYPE tok_value_, next_tok_value_;
-        int line_, next_line_, begin_line_;       // line number of token in the input file
-        int column_, next_column_, begin_column_; // column number of token in the input file
+        int line_, next_line_;     // line number of token in the input file
+        int column_, next_column_; // column number of token in the input file
         std::string text_, next_text_;
 
         vector<std::string> err_msg_; // error massages
@@ -118,13 +122,6 @@ namespace pascal2c::parser
         // return:
         //     the error message
         std::string GetLexerErrMsg();
-
-        // initialize before parsing
-        inline void InitParse()
-        {
-            begin_line_ = line_;
-            begin_column_ = column_;
-        }
 
         // throw a syntax error
         // param:
