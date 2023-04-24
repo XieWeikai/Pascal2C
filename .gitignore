@@ -31,6 +31,12 @@
 *.out
 *.app
 
+ast_test*
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+_deps/
+CMakeFiles/
 # Clangd cache
 .cache/
 compile_commands.json
@@ -41,9 +47,13 @@ build/**/*
 .cache/clangd/index
 compile_commands.json
 
+.vscode/
 **/cmake-build-**/
 **/.idea/
 
 lexer.h
+lexer.yy.c
 lex.yy.c
 lexer
+lexer_exe
+lexer_test

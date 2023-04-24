@@ -4,6 +4,9 @@
 #include <iostream>
 #include <sstream>
 
+#define GETTER(type, name) \
+    const type &name() const { return name##_; }
+
 namespace pascal2c::ast
 {
     class Ast
@@ -12,29 +15,38 @@ namespace pascal2c::ast
         // param:
         //     line is the line number of the first token of the node
         //     column is the column number of the first token of the node
-        Ast(const int &line, const int &column)
+        Ast(const int line, const int column)
             : line_(line), column_(column){};
 
-        Ast() : line_(1),column_(1){};
+        Ast() : line_(1), column_(1){};
 
-        virtual const int &line() const { return line_; }
+        inline void SetLineAndColumn(const int line, const int column)
+        {
+            line_ = line;
+            column_ = column;
+        }
 
-        virtual const int &column() const { return column_; }
+        inline virtual const int &line() const { return line_; }
+
+        inline virtual const int &column() const { return column_; }
 
     protected:
         // param:
         //     str_s is the string stream to output to
         //     level is the indentation level
-        static void IndentOutput(std::stringstream &str_s, int level)
+        inline static void
+        IndentOutput(std::stringstream &str_s, const int level)
         {
-            while (level-- > 0)
+            int temp = level;
+            while (temp-- > 0)
                 str_s << "    ";
         }
 
-        void SetLineAndColumn(const int line, const int column)
+        // param:
+        //     str_s is the string stream to output to
+        inline void LineColumnOutput(std::stringstream &str_s) const
         {
-            line_ = line;
-            column_ = column;
+            str_s << "line: " << line_ << " column: " << column_ << std::endl;
         }
 
     private:

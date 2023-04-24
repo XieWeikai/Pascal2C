@@ -14,7 +14,7 @@ namespace pascal2c::parser {
     template<typename Tp> using vector = ::std::vector<Tp>;
 
     static bool isStatementStartTok(int tok){
-        static std::set<int> tokens = {TOK_IF,TOK_ID,TOK_BEGIN,TOK_ID};
+        static std::set<int> tokens = {TOK_IF,TOK_ID,TOK_BEGIN,TOK_FOR};
         auto it = tokens.find(tok);
         if(it != tokens.end())
             return true;
@@ -34,10 +34,12 @@ namespace pascal2c::parser {
                 return std::move(ParseAssignAndCallStatement());
 
             default:
-                sprintf(buff,"%d:%d: not expected token to parse statement",line_,column_);
+                if(token_ == TOK_PROCEDURE || token_ == TOK_FUNCTION || token_ == TOK_VAR || token_ == TOK_CONST)
+                    sprintf(buff,"%d:%d: syntax error: declaration is not part of statement",line_,column_);
+                else
+                    sprintf(buff,"%d:%d: not expected token to parse statement",line_,column_);
                 throw SyntaxErr(buff);
         }
-        return nullptr;
     }
 
     std::shared_ptr<ast::Statement> Parser::ParseIFStatement(){
@@ -56,18 +58,22 @@ namespace pascal2c::parser {
     std::shared_ptr<ast::Statement> Parser::ParseForStatement(){
         Match(TOK_FOR);
         auto id = text_;
-        Match(TOK_ID);
-        Match(TOK_ASSIGNOP);
+        Match(TOK_ID,"syntax error: missing id in for statement");
+        Match(TOK_ASSIGNOP,"syntax error: missing ':=' in for statement");
         auto from = ParseExpr();
-        Match(TOK_TO);
+        Match(TOK_TO, "syntax error: missing 'to' in for statement");
         auto to = ParseExpr();
-        Match(TOK_DO);
+        Match(TOK_DO, "missing 'do' in for statement");
         auto statement = ParseStatement();
-        return std::move(std::make_shared<ast::ForStatement>(from,to,statement));
+        return std::move(std::make_shared<ast::ForStatement>(id,from,to,statement));
     }
 
-    std::shared_ptr<ast::Statement> Parser::ParseCompoundStatement(){
-        Match(TOK_BEGIN);
+    std::shared_ptr<ast::Statement> Parser::ParseCompoundStatement() noexcept{
+        try {
+            Match(TOK_BEGIN, "syntax error: missing begin when parsing compound statement");
+        }catch (SyntaxErr &e){
+            err_msg_.push_back(std::string(e.what()));
+        }
         vector<std::shared_ptr<ast::Statement> > statements;
         std::shared_ptr<ast::Statement> statement;
 
@@ -75,8 +81,8 @@ namespace pascal2c::parser {
             try {
                 statement = ParseStatement();
                 statements.push_back(std::move(statement));
-                if(token_ == ';')
-                    NextToken();
+                if(token_ != TOK_END)
+                    Match(';', "syntax error: missing ';' at the end of statement");
             }catch (SyntaxErr &e){
                 err_msg_.push_back(std::string(e.what()));
                 while(token_ != 0 && !isStatementStartTok(token_) && token_ != ';' && token_ != TOK_END){
@@ -86,13 +92,17 @@ namespace pascal2c::parser {
                     NextToken();
             }
         }
-        Match(TOK_END);
+        try {
+            Match(TOK_END, "syntax error: missing end when parsing compound statement");
+        }catch (SyntaxErr &e){
+            err_msg_.push_back(std::string(e.what()));
+        }
         return std::move(std::make_shared<ast::CompoundStatement>(statements));
     }
 
     std::shared_ptr<ast::Statement> Parser::ParseAssignAndCallStatement(){
         std::string id = text_;
-        Match(TOK_ID);  // TODO: handle id not found
+        Match(TOK_ID);
         vector<std::shared_ptr<ast::Expression> > expr_list;
         auto var = std::make_shared<ast::Variable>(id);
         bool is_var = false;
@@ -105,12 +115,12 @@ namespace pascal2c::parser {
                     return std::make_shared<ast::CallStatement>(id);
                 }
                 expr_list = ParseExprList();
-                Match(')');
+                Match(')',"syntax error: unclosed parentheses");
                 return std::make_shared<ast::CallStatement>(id,expr_list);
             case '[':
                 NextToken();
                 expr_list = ParseExprList();
-                Match(']');
+                Match(']',"syntax error: unclosed brackets");
                 var = std::make_shared<ast::Variable>(id,expr_list);
                 is_var = true;
         }
@@ -118,7 +128,7 @@ namespace pascal2c::parser {
         if(!is_var && token_ == ';')
             return std::make_shared<ast::CallStatement>(id);
 
-        Match(TOK_ASSIGNOP);
+        Match(TOK_ASSIGNOP,"syntax error: lost ':=' when parsing assign statement");
         auto expr = ParseExpr();
         return std::make_shared<ast::AssignStatement>(var,expr);
     }

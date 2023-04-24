@@ -11,6 +11,11 @@
 
 using namespace pascal2c;
 
+TEST(TestToString, TestCallOrVar){
+    std::shared_ptr<ast::Expression> call = std::make_shared<ast::CallOrVar>("add");
+    EXPECT_EQ(call->ToString(0),"CallOrVar: add");
+}
+
 TEST(TestToString,TestInteger) {
     auto integer = std::make_shared<ast::IntegerValue>(123);
     ast::Expression *ep = integer.get();
@@ -191,7 +196,7 @@ TEST(TestToString,TestCompoundStatement) {
     auto compound = std::make_shared<ast::CompoundStatement>(statements);
     auto res =
             "CompoundStatement :2\n"
-            "statement :1\n"
+            "statement 1:\n"
             "    AssignStatement :\n"
             "    Variable:\n"
             "        variable:i\n"
@@ -201,7 +206,7 @@ TEST(TestToString,TestCompoundStatement) {
             "            variable:i\n"
             "        rhs :\n"
             "            1\n"
-            "statement :2\n"
+            "statement 2:\n"
             "    CallStatement :\n"
             "    name:add\n"
             "    expr 1:\n"
@@ -233,9 +238,15 @@ TEST(TestToString,TestIfStatement) {
     auto call2 = std::make_shared<ast::CallStatement>("sayhello");
     auto res =
             "IfStatement :\n"
+            "condition:\n"
+            "    binary_op:'+'\n"
+            "    lhs :\n"
+            "        variable:i\n"
+            "    rhs :\n"
+            "        1\n"
             "if_part:\n"
             "    CompoundStatement :2\n"
-            "    statement :1\n"
+            "    statement 1:\n"
             "        AssignStatement :\n"
             "        Variable:\n"
             "            variable:i\n"
@@ -245,21 +256,28 @@ TEST(TestToString,TestIfStatement) {
             "                3\n"
             "            rhs :\n"
             "                4\n"
-            "    statement :2\n"
+            "    statement 2:\n"
             "        CallStatement :\n"
             "        name:add\n"
             "        expr 1:\n"
             "            variable:a\n"
             "        expr 2:\n"
             "            variable:b";
+//    std::cout << if_statement->ToString(0) << std::endl;
     EXPECT_EQ(if_statement->ToString(0),res);
 
     if_statement = std::make_shared<ast::IfStatement>(cond,compound,call2);
     res =
             "IfStatement :\n"
+            "condition:\n"
+            "    binary_op:'+'\n"
+            "    lhs :\n"
+            "        variable:i\n"
+            "    rhs :\n"
+            "        1\n"
             "if_part:\n"
             "    CompoundStatement :2\n"
-            "    statement :1\n"
+            "    statement 1:\n"
             "        AssignStatement :\n"
             "        Variable:\n"
             "            variable:i\n"
@@ -269,7 +287,7 @@ TEST(TestToString,TestIfStatement) {
             "                3\n"
             "            rhs :\n"
             "                4\n"
-            "    statement :2\n"
+            "    statement 2:\n"
             "        CallStatement :\n"
             "        name:add\n"
             "        expr 1:\n"
@@ -279,6 +297,7 @@ TEST(TestToString,TestIfStatement) {
             "else_part:\n"
             "    CallStatement :\n"
             "    name:sayhello";
+//    std::cout << if_statement->ToString(0) << std::endl;
     EXPECT_EQ(if_statement->ToString(0),res);
 }
 
@@ -304,16 +323,17 @@ TEST(TestToString,TestForStatement) {
 
     auto compound = std::make_shared<ast::CompoundStatement>(statements);
 
-    auto for_statement = std::make_shared<ast::ForStatement>(from,to,compound);
+    auto for_statement = std::make_shared<ast::ForStatement>("i",from,to,compound);
     auto res =
             "ForStatement:\n"
+            "id: i\n"
             "from:\n"
             "    1\n"
             "to:\n"
             "    10\n"
             "do:\n"
             "    CompoundStatement :2\n"
-            "    statement :1\n"
+            "    statement 1:\n"
             "        AssignStatement :\n"
             "        Variable:\n"
             "            variable:i\n"
@@ -323,7 +343,7 @@ TEST(TestToString,TestForStatement) {
             "                3\n"
             "            rhs :\n"
             "                4\n"
-            "    statement :2\n"
+            "    statement 2:\n"
             "        CallStatement :\n"
             "        name:add\n"
             "        expr 1:\n"
@@ -331,9 +351,4 @@ TEST(TestToString,TestForStatement) {
             "        expr 2:\n"
             "            variable:b";
     EXPECT_EQ(for_statement->ToString(0),res);
-}
-
-TEST(TestGetType,TestInteger){
-    std::shared_ptr<ast::Expression> ep(new ast::IntegerValue(4));
-    EXPECT_EQ(ep->GetType(),ast::INT);
 }

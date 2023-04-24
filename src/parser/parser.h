@@ -6,6 +6,7 @@
 #include <vector>
 #include <cstdio>
 #include <string>
+#include <sstream>
 
 #include "gtest/gtest.h"
 #include "ast/ast.h"
@@ -15,7 +16,12 @@
 extern "C"
 {
 #include "lexer.h"
-};
+}
+
+#define MAKE_SHARED(constructor, ...) std::make_shared<constructor>(begin_line_, begin_column_, __VA_ARGS__)
+
+#define MAKE_AND_MOVE_SHARED(constructor, ...) \
+    std::move(MAKE_SHARED(constructor, __VA_ARGS__))
 
 namespace pascal2c::parser
 {
@@ -49,14 +55,29 @@ namespace pascal2c::parser
         //     in is the input file
         explicit Parser(FILE *in);
 
+        GETTER(vector<std::string>, err_msg);
+
     private:
         FRIEND_TEST(TokenTest, TestNextToken);
+        FRIEND_TEST(ProgramParserTest, TestParseProgram);
+        FRIEND_TEST(ProgramParserTest, TestParseProgramHead);
+        FRIEND_TEST(ProgramParserTest, TestParseProgramBody);
+        FRIEND_TEST(ProgramParserTest, TestParseConstDecl);
+        FRIEND_TEST(ProgramParserTest, TestParseVarDecl);
+        FRIEND_TEST(ProgramParserTest, TestParseSubProgramDecl);
+        FRIEND_TEST(ProgramParserTest, TestParseSubProgramHead);
+        FRIEND_TEST(ProgramParserTest, TestParseSubProgramBody);
+        FRIEND_TEST(ProgramParserTest, TestParseIdList);
+        FRIEND_TEST(ProgramParserTest, TestParseType);
+        FRIEND_TEST(ProgramParserTest, TestParsePeriod);
+        FRIEND_TEST(ProgramParserTest, TestParseParameter);
         FRIEND_TEST(ExprParserTest, TestParsePrimary);
         FRIEND_TEST(ExprParserTest, TestParseExpr);
         FRIEND_TEST(StatementParserTest, TestAssignStatement);
         FRIEND_TEST(StatementParserTest, TestIfStatement);
         FRIEND_TEST(StatementParserTest, TestForStatement);
         FRIEND_TEST(StatementParserTest, TestCompoundStatement);
+        FRIEND_TEST(ErrorHandleTest, TestErrorHandle);
 
         int token_, next_token_; // current token and next token
 
@@ -65,8 +86,8 @@ namespace pascal2c::parser
 
         // token value
         YYSTYPE tok_value_, next_tok_value_;
-        int line_, next_line_;     // line number of token in the input file
-        int column_, next_column_; // column number of token in the input file
+        int line_, next_line_, begin_line_;       // line number of token in the input file
+        int column_, next_column_, begin_column_; // column number of token in the input file
         std::string text_, next_text_;
 
         vector<std::string> err_msg_; // error massages
@@ -78,17 +99,45 @@ namespace pascal2c::parser
         //     the next token
         int NextToken();
 
-        // match token and get next token
+        // match token and get next token (only skip current token if it matches)
         // param:
         //     token is the token to match
         // throw:
         //     SyntaxErr if token not match
         void Match(int token);
 
+        // match token and get next token (only skip current token if it matches)
+        // param:
+        //     token is the token to match
+        //     err_msg is the error message that is going to be thrown if token not match
+        // throw:
+        //     SyntaxErr if token not match
+        void Match(int token,const std::string& err_msg);
+
         // get the error message of lexer
         // return:
         //     the error message
         std::string GetLexerErrMsg();
+
+        // initialize before parsing
+        inline void InitParse()
+        {
+            begin_line_ = line_;
+            begin_column_ = column_;
+        }
+
+        // throw a syntax error
+        // param:
+        //     expected_token is the token that is expected
+        // throw:
+        //     SyntaxErr
+        inline void ThrowSyntaxErr(const std::string &expected_token)
+        {
+            std::ostringstream err;
+            err << line_ << ":" << column_ << " syntax err:expected " << expected_token
+                << " got " << token_;
+            throw SyntaxErr(err.str());
+        }
 
         // parse the whole program
         // e.g. program p; const a = 1; var b : integer; function f(a : integer) : integer; begin end; begin end.
@@ -203,13 +252,15 @@ namespace pascal2c::parser
 
         std::shared_ptr<ast::Expression> ParseVariableAndCall();
 
+        std::shared_ptr<ast::Expression> ParseStringAndChar();
+
         std::shared_ptr<ast::Statement> ParseStatement();
 
         std::shared_ptr<ast::Statement> ParseIFStatement();
 
         std::shared_ptr<ast::Statement> ParseForStatement();
 
-        std::shared_ptr<ast::Statement> ParseCompoundStatement();
+        std::shared_ptr<ast::Statement> ParseCompoundStatement() noexcept;
 
         std::shared_ptr<ast::Statement> ParseAssignAndCallStatement();
     };
