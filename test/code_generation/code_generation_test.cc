@@ -14,39 +14,31 @@ namespace pascal2c {
 namespace code_generation {
 using ::testing::Return;
 using ::testing::ReturnRef;
+using string = ::std::string;
 
-TEST(GeneratorTest, ASTPrinterTest) {
-    using string = ::std::string;
-    string source_code = R"(
-    program Simple;
-    var
-        x, y: integer;
-    begin
-        x := 2 + 3;
-        y := x - 1;
-    end.
-    )";
-    const auto mock_program = std::make_shared<MockProgram>();
-    const auto mock_block = std::make_shared<MockBlock>();
-    vector<std::shared_ptr<ASTNode>> declarations;
+std::shared_ptr<Program> SimpleProgramAST() {
+    // vector<std::shared_ptr<ASTNode>> declarations;
+    auto declarations = std::make_shared<vector<std::shared_ptr<ASTNode>>>();
 
     // VarDecl part
     const auto token_int = std::make_shared<Token>(TokenType::TYPE, "integer");
-    const auto type_int = std::make_shared<Type>(token_int);
+    const auto type_int = std::make_shared<Type>(std::move(token_int));
 
     const auto token_x = std::make_shared<Token>(TokenType::INTEGER, "x");
-    const auto var_x = std::make_shared<Var>(token_x);
-    const auto var_decl_x = std::make_shared<VarDecl>(var_x, type_int);
+    const auto var_x = std::make_shared<Var>(std::move(token_x));
+    const auto var_decl_x =
+        std::make_shared<VarDecl>(std::move(var_x), std::move(type_int));
 
     const auto token_y = std::make_shared<Token>(TokenType::INTEGER, "y");
-    const auto var_y = std::make_shared<Var>(token_y);
-    const auto var_decl_y = std::make_shared<VarDecl>(var_y, type_int);
+    const auto var_y = std::make_shared<Var>(std::move(token_y));
+    const auto var_decl_y =
+        std::make_shared<VarDecl>(std::move(var_y), std::move(type_int));
 
-    declarations.push_back(var_decl_x);
-    declarations.push_back(var_decl_y);
+    declarations->push_back(var_decl_x);
+    declarations->push_back(var_decl_y);
 
     // Compound statement part
-    vector<std::shared_ptr<ASTNode>> children;
+    auto children = std::make_shared<vector<std::shared_ptr<ASTNode>>>();
     // :=
     const auto token_assign_op =
         std::make_shared<Token>(TokenType::ASSIGN, ":=");
@@ -74,19 +66,28 @@ TEST(GeneratorTest, ASTPrinterTest) {
     const auto assign_y = std::make_shared<Assign>(var_y, bin_minus_op);
 
     // Construct compound
-    children.push_back(assign_x);
-    children.push_back(assign_y);
-    const auto compound = std::make_shared<Compound>(children);
+    children->push_back(assign_x);
+    children->push_back(assign_y);
+    const auto compound = std::make_shared<Compound>(*children);
 
-    EXPECT_CALL(*mock_program, GetName()).WillOnce(Return("Simple"));
-    // EXPECT_CALL(*mock_program, GetBlock()).WillOnce(ReturnRef(mock_block));
-    EXPECT_CALL(*mock_block, GetDeclarations())
-        .WillOnce(ReturnRef(declarations));
-    EXPECT_CALL(*mock_block, GetCompoundStatement())
-        .WillOnce(ReturnRef(compound));
-    auto block = std::make_shared<Block>(mock_block->GetDeclarations(),
-                                         mock_block->GetCompoundStatement());
-    auto program = std::make_shared<Program>(mock_program->GetName(), block);
+    auto block = std::make_shared<Block>(*declarations, compound);
+    auto program = std::make_shared<Program>("Simple", block);
+
+    return program;
+}
+
+TEST(GeneratorTest, ASTPrinterTest) {
+    string source_code = R"(program Simple;
+var
+    x, y: integer;
+begin
+    x := 2 + 3;
+    y := x - 1;
+end.
+)";
+
+    auto program = SimpleProgramAST();
+    EXPECT_EQ(program->GetBlock()->GetDeclarations().size(), 2);
     auto ast_printer = std::make_shared<ASTPrinter>(program);
     ast_printer->Visit();
     string printed_ast = ast_printer->ToString();
@@ -113,6 +114,22 @@ TEST(GeneratorTest, ASTPrinterTest) {
 )";
 
     EXPECT_EQ(printed_ast, expected_ast);
+}
+
+TEST(GeneratorTest, CodeGeneratorTest) {
+    string source_code = R"(program Simple;
+var
+    x, y: integer;
+begin
+    x := 2 + 3;
+    y := x - 1;
+end.
+)";
+
+    auto program = SimpleProgramAST();
+    auto code_generator = std::make_shared<CodeGenerator>(program);
+    code_generator->Interpret();
+    auto generated_ccode = code_generator->GetCCode();
 
     string expected_c_code = "#include <stdio.h>\n"
                              "\n"
@@ -123,6 +140,7 @@ TEST(GeneratorTest, ASTPrinterTest) {
                              "    y = (x - 1);\n"
                              "    return 0;\n"
                              "}\n";
+    EXPECT_EQ(generated_ccode, expected_c_code);
 }
 } // namespace code_generation
 } // namespace pascal2c
