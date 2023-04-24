@@ -44,7 +44,7 @@ namespace pascal2c::ast
 
         // param:
         //     str_s is the string stream to output to
-        inline void LineColumnOutput(std::stringstream &str_s)
+        inline void LineColumnOutput(std::stringstream &str_s) const
         {
             str_s << "line: " << line_ << " column: " << column_ << std::endl;
         }
