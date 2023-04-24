@@ -49,13 +49,13 @@ void CodeGenerator::VisitVarDecl(
 }
 
 int CodeGenerator::VisitBinOp(const std::shared_ptr<code_generation::BinOp> &node) {
-    if (node->GetOper()->GetType() == PLUS) {
+    if (node->GetOper()->GetType() == TokenType::TYPE) {
         return Visit(node->GetLeft());
-    } else if (node->GetOper()->GetType() == MINUS) {
+    } else if (node->GetOper()->GetType() == TokenType::TYPE) {
         return Visit(node->GetLeft()) - Visit(node->GetRight());
-    } else if (node->GetOper()->GetType() == MUL) {
+    } else if (node->GetOper()->GetType() == TokenType::TYPE) {
         return Visit(node->GetLeft()) * Visit(node->GetRight());
-    } else if (node->GetOper()->GetType() == DIV) {
+    } else if (node->GetOper()->GetType() == TokenType::TYPE) {
         return Visit(node->GetLeft()) / Visit(node->GetRight());
     }
 
