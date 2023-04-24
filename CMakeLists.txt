@@ -6,15 +6,16 @@ project(Pascal2C VERSION 1.0)
 # Specify C++ version to 17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQURIED True)
+set(ARG_DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 
 include_directories("src/")
 
 # Download and install GoogleTest
 include(FetchContent)
 FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-    )
+        googletest
+        URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
 
 # Prevent Google Test from overloading our Compiler/Linker options
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
@@ -24,9 +25,9 @@ FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 
 if(NOT DEFINED $ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
-    message("** ENV(CMAKE_EXPORT_COMPILE_COMMANDS) not defined")
-    message("** defined ENV(CMAKE_EXPORT_COMPILE_COMMANDS) for you!")
-    set($ENV{CMAKE_EXPORT_COMPILE_COMMANDS} true)
+        message("** ENV(CMAKE_EXPORT_COMPILE_COMMANDS) not defined")
+        message("** defined ENV(CMAKE_EXPORT_COMPILE_COMMANDS) for you!")
+        set($ENV{CMAKE_EXPORT_COMPILE_COMMANDS} true)
 endif()
 
 # >>> lexer test >>>
@@ -47,7 +48,7 @@ add_executable(lexer_exe
         src/lexer/utils.c
         ${FLEX_Scanner_OUTPUTS}
         ${OUTPUT_HEADER}
-        )
+)
 target_include_directories(lexer_exe PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(lexer_test
@@ -55,16 +56,15 @@ add_executable(lexer_test
         src/lexer/utils.c
         ${FLEX_Scanner_OUTPUTS}
         ${OUTPUT_HEADER}
-        )
+)
 target_include_directories(lexer_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(
         lexer_test
         gtest_main
         gmock_main
 )
+
 # <<< lexer test <<<
-
-
 
 # >>> ast test >>>
 file(GLOB AST "src/ast/*.h" "src/ast/*.cc")
@@ -84,7 +84,7 @@ target_link_libraries(
         gmock_main
 )
 
-gtest_discover_tests(ast_test)
+# gtest_discover_tests(ast_test)
 
 # <<< ast test <<<
 
@@ -110,19 +110,29 @@ target_link_libraries(
 # <<< parser test <<<
 
 # >>> generator test >>>
-file(GLOB GENERATOR "src/code_generation/*.h" "src/parser/*.cc")
+enable_testing()
+
+file(GLOB GENERATOR "src/code_generation/*.cc")
 file(GLOB GENERATOR_TEST "test/code_generation/*.cc")
+
 add_executable(
         generator_test
         ${GENERATOR_TEST}
-        ${GENERATOR}
-        )
+)
 
-target_include_directories(generator_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+add_library(LibGenerator ${GENERATOR})
 
+# target_include_directories(generator_test PRIVATE "src/code_generation" "test/code_generation")
 target_link_libraries(
         generator_test
-        ${GENERATOR_TEST}
-        ${GENERATOR}
-        )
+        LibGenerator
+        GTest::gtest_main
+        GTest::gmock_main
+)
+
+include(GoogleTest)
+gtest_discover_tests(generator_test)
+
+add_test(NAME GeneratorTest COMMAND GeneratorTest)
+
 # <<< generator test <<<

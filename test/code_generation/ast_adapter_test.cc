@@ -13,7 +13,7 @@ class MockBlock : public ASTNode {
   public:
     MOCK_METHOD(const vector<std::shared_ptr<ASTNode>> &, GetDeclarations, (),
                 (const));
-    MOCK_METHOD(const std::shared_ptr<MockCompound> &, GetCompoundStatement, (),
+    MOCK_METHOD(const std::shared_ptr<Compound> &, GetCompoundStatement, (),
                 (const));
 };
 class MockProgram : public ASTNode {
