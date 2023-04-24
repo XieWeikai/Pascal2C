@@ -4,10 +4,12 @@
 #include "code_generation/code_generator.h"
 #include "code_generation/token_adapter.h"
 #include "gmock/gmock.h"
+#include <algorithm>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace pascal2c {
@@ -34,44 +36,52 @@ std::shared_ptr<Program> SimpleProgramAST() {
     const auto var_decl_y =
         std::make_shared<VarDecl>(std::move(var_y), std::move(type_int));
 
-    declarations->push_back(var_decl_x);
-    declarations->push_back(var_decl_y);
+    declarations->push_back(std::move(var_decl_x));
+    declarations->push_back(std::move(var_decl_y));
 
     // Compound statement part
     auto children = std::make_shared<vector<std::shared_ptr<ASTNode>>>();
     // :=
     const auto token_assign_op =
         std::make_shared<Token>(TokenType::ASSIGN, ":=");
-    const auto assign_op = std::make_shared<Oper>(token_assign_op);
+    const auto assign_op = std::make_shared<Oper>(std::move(token_assign_op));
     // +
     const auto token_plus_op = std::make_shared<Token>(TokenType::PLUS, "+");
-    const auto plus_op = std::make_shared<Oper>(token_plus_op);
+    const auto plus_op = std::make_shared<Oper>(std::move(token_plus_op));
     // -
     const auto token_minus_op = std::make_shared<Token>(TokenType::MINUS, "-");
-    const auto minus_op = std::make_shared<Oper>(token_minus_op);
+    const auto minus_op = std::make_shared<Oper>(std::move(token_minus_op));
 
     // 2 + 3
     const auto token_2 = std::make_shared<Token>(TokenType::INTEGER, "2");
-    const auto num_2 = std::make_shared<Num>(token_2);
+    const auto num_2 = std::make_shared<Num>(std::move(token_2));
     const auto token_3 = std::make_shared<Token>(TokenType::INTEGER, "3");
-    const auto num_3 = std::make_shared<Num>(token_3);
-    const auto bin_plus_op = std::make_shared<BinOp>(num_2, plus_op, num_3);
+    const auto num_3 = std::make_shared<Num>(std::move(token_3));
+    const auto bin_plus_op = std::make_shared<BinOp>(
+        std::move(num_2), std::move(plus_op), std::move(num_3));
 
     // x - 1
     const auto token_1 = std::make_shared<Token>(TokenType::INTEGER, "1");
-    const auto num_1 = std::make_shared<Num>(token_1);
-    const auto bin_minus_op = std::make_shared<BinOp>(var_x, minus_op, num_1);
+    const auto num_1 = std::make_shared<Num>(std::move(token_1));
+    const auto bin_minus_op = std::make_shared<BinOp>(
+        std::move(var_x), std::move(minus_op), std::move(num_1));
 
-    const auto assign_x = std::make_shared<Assign>(var_x, bin_plus_op);
-    const auto assign_y = std::make_shared<Assign>(var_y, bin_minus_op);
+    const auto assign_x =
+        std::make_shared<Assign>(std::move(var_x), std::move(bin_plus_op));
+    const auto assign_y =
+        std::make_shared<Assign>(std::move(var_y), std::move(bin_minus_op));
 
     // Construct compound
-    children->push_back(assign_x);
-    children->push_back(assign_y);
-    const auto compound = std::make_shared<Compound>(*children);
+    children->push_back(std::move(assign_x));
+    children->push_back(std::move(assign_y));
+    const auto compound = std::make_shared<Compound>(std::move(*children));
 
-    auto block = std::make_shared<Block>(*declarations, compound);
-    auto program = std::make_shared<Program>("Simple", block);
+    const auto declaration =
+        std::make_shared<Declaration>(std::move(*declarations));
+
+    auto block =
+        std::make_shared<Block>(std::move(declaration), std::move(compound));
+    auto program = std::make_shared<Program>("Simple", std::move(block));
 
     return program;
 }
@@ -87,6 +97,7 @@ end.
 )";
 
     auto program = SimpleProgramAST();
+    EXPECT_EQ(program->GetName(), "Simple");
     EXPECT_EQ(program->GetBlock()->GetDeclarations().size(), 2);
     auto ast_printer = std::make_shared<ASTPrinter>(program);
     ast_printer->Visit();

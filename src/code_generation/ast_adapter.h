@@ -34,19 +34,30 @@ class Program : public ASTNode {
 };
 
 class Compound;
+class Declaration : public ASTNode {
+  public:
+    Declaration(const vector<std::shared_ptr<ASTNode>> &declarations)
+        : declaration_(std::move(declarations)) {}
+    const vector<std::shared_ptr<ASTNode>> &GetDeclarations() const {
+        return declaration_;
+    }
+
+  private:
+    vector<std::shared_ptr<ASTNode>> declaration_;
+};
 class Block : public ASTNode {
   public:
-    Block(const vector<std::shared_ptr<ASTNode>> &declarations,
+    Block(const std::shared_ptr<Declaration> &declarations,
           const std::shared_ptr<Compound> &compound_statement);
     const vector<std::shared_ptr<ASTNode>> &GetDeclarations() const {
-        return declarations_;
+        return declarations_->GetDeclarations();
     }
     const std::shared_ptr<Compound> &GetCompoundStatement() const {
         return compound_statement_;
     }
 
   private:
-    vector<std::shared_ptr<ASTNode>> &declarations_;
+    std::shared_ptr<Declaration> declarations_;
     std::shared_ptr<Compound> compound_statement_;
 };
 

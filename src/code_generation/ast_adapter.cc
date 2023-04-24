@@ -1,5 +1,6 @@
 #include "ast_adapter.h"
 #include "code_generation/token_adapter.h"
+#include <memory>
 
 namespace pascal2c {
 namespace code_generation {
@@ -14,11 +15,9 @@ Var::~Var() { token_.reset(); }
 Oper::~Oper() { oper_.reset(); }
 Num::~Num() { token_.reset(); }
 
-Block::Block(const vector<std::shared_ptr<ASTNode>> &declarations,
+Block::Block(const std::shared_ptr<Declaration> &declarations,
              const std::shared_ptr<Compound> &compound_statement)
-    : declarations_(
-          const_cast<vector<std::shared_ptr<ASTNode>> &>(declarations)),
-      compound_statement_(compound_statement){};
+    : declarations_(declarations), compound_statement_(compound_statement){};
 
 Compound::Compound(const std::vector<std::shared_ptr<ASTNode>> &children)
     : children_(
