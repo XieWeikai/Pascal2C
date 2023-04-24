@@ -12,6 +12,7 @@ VarDecl::~VarDecl() {
 Type::~Type() { token_.reset(); }
 Var::~Var() { token_.reset(); }
 Oper::~Oper() { oper_.reset(); }
+Num::~Num() { token_.reset(); }
 
 Block::Block(const vector<std::shared_ptr<ASTNode>> &declarations,
              const std::shared_ptr<Compound> &compound_statement)

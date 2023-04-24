@@ -60,56 +60,60 @@ TEST(ASTPrinterTest, ConvertASTToC) {
 
     // 2 + 3
     const auto token_2 = std::make_shared<Token>(TokenType::INTEGER, "2");
-    const auto var_2 = std::make_shared<Var>(token_2);
+    const auto num_2 = std::make_shared<Num>(token_2);
     const auto token_3 = std::make_shared<Token>(TokenType::INTEGER, "3");
-    const auto var_3 = std::make_shared<Var>(token_3);
-    const auto bin_plus_op = std::make_shared<BinOp>(var_2, plus_op, var_3);
+    const auto num_3 = std::make_shared<Num>(token_3);
+    const auto bin_plus_op = std::make_shared<BinOp>(num_2, plus_op, num_3);
 
     // x - 1
-    const auto token_1 = std::make_shared<Token>(INTEGER, "1");
-    const auto var_1 = std::make_shared<Var>(token_1);
-    const auto bin_minus_op = std::make_shared<BinOp>(var_x, minus_op, var_1);
+    const auto token_1 = std::make_shared<Token>(TokenType::INTEGER, "1");
+    const auto num_1 = std::make_shared<Num>(token_1);
+    const auto bin_minus_op = std::make_shared<BinOp>(var_x, minus_op, num_1);
 
-    const auto bin_x_op =
-        std::make_shared<BinOp>(var_x, assign_op, bin_plus_op);
-    const auto bin_y_op =
-        std::make_shared<BinOp>(var_y, assign_op, bin_minus_op);
+    const auto assign_x = std::make_shared<Assign>(var_x, bin_plus_op);
+    const auto assign_y = std::make_shared<Assign>(var_y, bin_minus_op);
 
     // Construct compound
-    children.push_back(bin_x_op);
-    children.push_back(bin_y_op);
+    children.push_back(assign_x);
+    children.push_back(assign_y);
     const auto compound = std::make_shared<Compound>(children);
 
     EXPECT_CALL(*mock_program, GetName()).WillOnce(Return("Simple"));
-    EXPECT_CALL(*mock_program, GetBlock()).WillOnce(ReturnRef(mock_block));
+    // EXPECT_CALL(*mock_program, GetBlock()).WillOnce(ReturnRef(mock_block));
     EXPECT_CALL(*mock_block, GetDeclarations())
         .WillOnce(ReturnRef(declarations));
     EXPECT_CALL(*mock_block, GetCompoundStatement())
         .WillOnce(ReturnRef(compound));
-    auto ast_printer = std::make_shared<ASTPrinter>(mock_program);
+    auto block = std::make_shared<Block>(mock_block->GetDeclarations(),
+                                         mock_block->GetCompoundStatement());
+    auto program = std::make_shared<Program>(mock_program->GetName(), block);
+    auto ast_printer = std::make_shared<ASTPrinter>(program);
     ast_printer->Visit();
+    string printed_ast = ast_printer->ToString();
 
-    string expected_ast = R"(
-    Program: Simple
-     Block
-      VarDecl: x : integer
-      VarDecl: y : integer
-      Compound
-       Assign
-        Left:
-         Var: x
-        Right:
-         BinOp: PLUS
-          Num: 2
-          Num: 3
-       Assign
-        Left:
-         Var: y
-        Right:
-         BinOp: MINUS
-          Var: x
-          Num: 1
-    )";
+    string expected_ast = R"(Program: Simple
+ Block
+  VarDecl: x: integer
+  VarDecl: y: integer
+  Compound
+   Assign
+    Left:
+     Var: x
+    Right:
+     BinOp: PLUS
+      Num: 2
+      Num: 3
+   Assign
+    Left:
+     Var: y
+    Right:
+     BinOp: MINUS
+      Var: x
+      Num: 1
+)";
+
+    EXPECT_EQ(printed_ast, expected_ast);
+
     string expected_c_code = "#include <stdio.h>\n"
                              "\n"
                              "int main() {\n"

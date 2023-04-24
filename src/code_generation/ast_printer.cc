@@ -10,8 +10,11 @@
 
 namespace pascal2c {
 namespace code_generation {
-void ASTPrinter::Visit() { Visit(ast_); }
-void ASTPrinter::Visit(const std::shared_ptr<code_generation::ASTRoot> &node) {
+void ASTPrinter::Visit() {
+    auto program = std::dynamic_pointer_cast<Program>(ast_);
+    Visit(program);
+}
+void ASTPrinter::Visit(const std::shared_ptr<code_generation::ASTNode> &node) {
     if (std::dynamic_pointer_cast<code_generation::Program>(node)) {
         VisitProgram(std::dynamic_pointer_cast<code_generation::Program>(node));
     } else if (std::dynamic_pointer_cast<code_generation::Block>(node)) {
@@ -48,7 +51,7 @@ void ASTPrinter::VisitProgram(
 
 void ASTPrinter::VisitBlock(
     const std::shared_ptr<code_generation::Block> &node) {
-    ostream_ << string(indent_level_, ' ') << " Block" << std::endl;
+    ostream_ << string(indent_level_, ' ') << "Block" << std::endl;
     indent_level_++;
     for (auto decl : node->GetDeclarations()) {
         Visit(decl);
@@ -78,20 +81,27 @@ void ASTPrinter::VisitAssign(
     const std::shared_ptr<code_generation::Assign> &node) {
     ostream_ << string(indent_level_, ' ') << "Assign" << std::endl;
     indent_level_++;
+
     ostream_ << string(indent_level_, ' ') << "Left:" << std::endl;
+    indent_level_++;
     Visit(node->GetLeft());
+    indent_level_--;
+
     ostream_ << string(indent_level_, ' ') << "Right:" << std::endl;
+    indent_level_++;
     Visit(node->GetRight());
+    indent_level_--;
+
     indent_level_--;
 }
 
 void ASTPrinter::VisitVar(const std::shared_ptr<code_generation::Var> &node) {
-    ostream_ << string(indent_level_, ' ') << "Var:" << node->GetValue()
+    ostream_ << string(indent_level_, ' ') << "Var: " << node->GetValue()
              << std::endl;
 }
 
 void ASTPrinter::VisitType(const std::shared_ptr<code_generation::Type> &node) {
-    ostream_ << string(indent_level_, ' ') << "Type:" << node->GetType()
+    ostream_ << string(indent_level_, ' ') << "Type: " << node->GetType()
              << std::endl;
 }
 
@@ -102,7 +112,7 @@ void ASTPrinter::VisitNoOp(const std::shared_ptr<code_generation::NoOp> &node) {
 void ASTPrinter::VisitBinOp(
     const std::shared_ptr<code_generation::BinOp> &node) {
     ostream_ << string(indent_level_, ' ')
-             << "BinOp:" << node->GetOper()->GetType() << std::endl;
+             << "BinOp: " << node->GetOper()->GetType().ToString() << std::endl;
     indent_level_++;
     Visit(node->GetLeft());
     Visit(node->GetRight());
@@ -110,8 +120,9 @@ void ASTPrinter::VisitBinOp(
 }
 
 void ASTPrinter::VisitNum(const std::shared_ptr<code_generation::Num> &node) {
-    ostream_ << string(indent_level_, ' ') << "Num:" << node->GetValue()
+    ostream_ << string(indent_level_, ' ') << "Num: " << node->GetValue()
              << std::endl;
 }
+string ASTPrinter::ToString() const { return ostream_.str(); }
 } // namespace code_generation
 } // namespace pascal2c

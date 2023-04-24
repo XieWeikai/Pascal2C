@@ -17,6 +17,7 @@ class ASTPrinter {
         : ast_(ast){};
     // TODO: Output of Visit save into ostream
     void Visit();
+    string ToString() const;
 
   private:
     void Visit(const std::shared_ptr<code_generation::ASTNode> &node);

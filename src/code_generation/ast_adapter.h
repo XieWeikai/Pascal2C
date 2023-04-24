@@ -69,13 +69,13 @@ class VarDecl : public ASTNode {
 class Type : public ASTNode {
   public:
     Type(const std::shared_ptr<Token> token)
-        : token_(token), type_(token->GetType()){};
+        : token_(token), type_(token->GetValue()){};
     virtual ~Type();
-    const TokenType GetType() const { return type_; }
+    const string GetType() const { return type_; }
 
   private:
     std::shared_ptr<Token> token_;
-    const TokenType type_;
+    string type_;
 };
 
 class Compound : public ASTNode {
@@ -93,15 +93,14 @@ class Compound : public ASTNode {
 
 class Assign : public ASTNode {
   public:
-    Assign(const std::shared_ptr<ASTNode> &left, const Token &token,
+    Assign(const std::shared_ptr<ASTNode> &left,
            const std::shared_ptr<ASTNode> &right)
-        : left_(left), token_(token), right_(right){};
+        : left_(left), right_(right){};
     const std::shared_ptr<ASTNode> &GetLeft() const { return left_; }
     const std::shared_ptr<ASTNode> &GetRight() const { return right_; }
 
   private:
     std::shared_ptr<ASTNode> left_;
-    Token token_;
     std::shared_ptr<ASTNode> right_;
 };
 
@@ -143,8 +142,9 @@ class Expr : public ASTNode {
 
 class Num : public ASTNode {
   public:
-    Num(std::shared_ptr<Token> &token)
+    Num(const std::shared_ptr<Token> &token)
         : token_(token), value_(std::stoi(token->GetValue())) {}
+    ~Num();
     int GetValue() const { return (value_); }
 
   private:
