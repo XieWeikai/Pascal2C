@@ -131,8 +131,9 @@ target_link_libraries(
 )
 
 include(GoogleTest)
+
 gtest_discover_tests(generator_test)
 
-add_test(NAME GeneratorTest COMMAND GeneratorTest)
+# add_test(NAME GeneratorTest COMMAND generator_test)
 
 # <<< generator test <<<

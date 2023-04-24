@@ -15,7 +15,7 @@ namespace code_generation {
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-TEST(ASTPrinterTest, ConvertASTToC) {
+TEST(GeneratorTest, ASTPrinterTest) {
     using string = ::std::string;
     string source_code = R"(
     program Simple;
