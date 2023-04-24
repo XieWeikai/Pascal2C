@@ -108,3 +108,21 @@ target_link_libraries(
 )
 
 # <<< parser test <<<
+
+# >>> generator test >>>
+file(GLOB GENERATOR "src/code_generation/*.h" "src/parser/*.cc")
+file(GLOB GENERATOR_TEST "test/code_generation/*.cc")
+add_executable(
+        generator_test
+        ${GENERATOR_TEST}
+        ${GENERATOR}
+        )
+
+target_include_directories(generator_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+target_link_libraries(
+        generator_test
+        ${GENERATOR_TEST}
+        ${GENERATOR}
+        )
+# <<< generator test <<<
