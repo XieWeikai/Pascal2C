@@ -41,6 +41,9 @@ namespace pascal2c::ast
         // return:
         //     exact type of statement
         virtual StatementType GetType() const = 0;
+
+        Statement() = default;
+        Statement(int line, int col) : Ast(line, col) {}
     };
 
     // var_ := expr_
@@ -54,6 +57,9 @@ namespace pascal2c::ast
         //     expr is used to initialize the class member expr_
         AssignStatement(std::shared_ptr<Variable> var, std::shared_ptr<Expression> expr) : var_(std::move(var)), expr_(
                                                                                                                      std::move(expr)) {}
+
+        AssignStatement(int line,int col, std::shared_ptr<Variable> var, std::shared_ptr<Expression> expr) :Statement(line,col), var_(std::move(var)), expr_(
+                std::move(expr)) {}
 
         inline StatementType GetType() const override { return ASSIGN_STATEMENT; }
 
@@ -76,8 +82,11 @@ namespace pascal2c::ast
     {
     public:
         CallStatement(std::string name, vector<std::shared_ptr<Expression>> expr_list) : name_(std::move(name)), expr_list_(std::move(expr_list)) {}
-
+        CallStatement(int line,int col, std::string name, vector<std::shared_ptr<Expression>> expr_list) :
+                            Statement(line,col), name_(std::move(name)), expr_list_(std::move(expr_list)) {}
         explicit CallStatement(std::string name) : name_(std::move(name)) {}
+        explicit CallStatement(int line,int col,std::string name) :Statement(line,col), name_(std::move(name)) {}
+
 
         inline StatementType GetType() const override { return CALL_STATEMENT; }
 
@@ -102,6 +111,8 @@ namespace pascal2c::ast
     {
     public:
         explicit CompoundStatement(vector<std::shared_ptr<Statement>> statements) : statements_(std::move(statements)) {}
+        explicit CompoundStatement(int line,int col, vector<std::shared_ptr<Statement>> statements) :
+                               Statement(line,col), statements_(std::move(statements)) {}
 
         inline StatementType GetType() const override { return COMPOUND_STATEMENT; }
 
@@ -123,6 +134,10 @@ namespace pascal2c::ast
         IfStatement(std::shared_ptr<Expression> cond, std::shared_ptr<Statement> then,
                     std::shared_ptr<Statement> else_part)
             : condition_(std::move(cond)), then_(std::move(then)), else_part_(std::move(else_part)) {}
+
+        IfStatement(int line,int col, std::shared_ptr<Expression> cond, std::shared_ptr<Statement> then,
+                    std::shared_ptr<Statement> else_part) :
+                    Statement(line,col), condition_(std::move(cond)), then_(std::move(then)), else_part_(std::move(else_part)) {}
 
         inline StatementType GetType() const override { return IF_STATEMENT; }
 
@@ -149,6 +164,10 @@ namespace pascal2c::ast
         ForStatement(std::string id, std::shared_ptr<Expression> from, std::shared_ptr<Expression> to,
                      std::shared_ptr<Statement> statement)
                 :id_(std::move(id)), from_(std::move(from)), to_(std::move(to)), statement_(std::move(statement)) {}
+
+        ForStatement(int line,int col, std::string id, std::shared_ptr<Expression> from, std::shared_ptr<Expression> to,
+                     std::shared_ptr<Statement> statement) :
+                     Statement(line,col), id_(std::move(id)), from_(std::move(from)), to_(std::move(to)), statement_(std::move(statement)) {}
 
         inline StatementType GetType() const override { return FOR_STATEMENT; }
 

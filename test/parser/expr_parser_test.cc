@@ -106,13 +106,13 @@ namespace pascal2c::parser {
     }
 
     TEST(ExprParserTest,TestParseExpr) {
-        const char *input_str = "1 + 2 + 3 + 4 #"
-                                "1 + 2 * 3  #"
-                                "(1 + 2) * 3  #"
-                                "-(1 + 2) * 3  #"
-                                "(-(1 + 2) * 3 <= 5) and (3 > 4) or (4 < 3) #"
-                                "(-(1 + 2) * 3 <= 5) or (3 > 4) and (4 < 3) #"
-                                "1 + 'a' + 'abc' + a + b # ";
+        const char *input_str = "1 + 2 + 3 + 4;\n"
+                                "1 + 2 * 3  ;\n"
+                                "(1 + 2) * 3 ;\n"
+                                "-(1 + 2) * 3  ;\n"
+                                "(-(1 + 2) * 3 <= 5) and (3 > 4) or (4 < 3) ;\n"
+                                "(-(1 + 2) * 3 <= 5) or (3 > 4) and (4 < 3) ;\n"
+                                "1 + 'a' + 'abc' + a + b \n";
         FILE *input = fmemopen((void *)input_str, strlen(input_str),"r");
         Parser par(input);
 
@@ -248,7 +248,7 @@ namespace pascal2c::parser {
         while(par.token_ != 0){
             auto expr = par.ParseExpr();
             str_s << expr->ToString(0) << "\n" << std::endl;
-            if(par.token_ == TOK_ERROR)
+            if(par.token_ == ';')
                 par.NextToken();
         }
 //        std::cout << str_s.str() << std::endl;

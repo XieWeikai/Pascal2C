@@ -46,11 +46,16 @@ namespace pascal2c::ast
         // return:
         //     one of ExprType
         virtual ExprType GetType() const = 0;
+
+        Expression() = default;
+        Expression(int line, int col) : Ast(line, col) {}
     };
 
     class StringValue : public Expression{
     public:
         explicit StringValue(std::string value) : value_(std::move(value)) {}
+        StringValue(int line, int col, std::string value) :Expression(line,col), value_(std::move(value)) {}
+
 
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return STRING; }
@@ -69,6 +74,7 @@ namespace pascal2c::ast
     {
     public:
         explicit IntegerValue(int value) : value_(value) {}
+        IntegerValue(int line, int col, int value) : Expression(line, col), value_(value) {}
 
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return INT; }
@@ -87,6 +93,7 @@ namespace pascal2c::ast
     {
     public:
         explicit RealValue(double value) : value_(value) {}
+        RealValue(int line, int col, double value) : Expression(line, col), value_(value) {}
 
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return REAL; }
@@ -105,6 +112,7 @@ namespace pascal2c::ast
     {
     public:
         explicit CharValue(int ch) : ch_(ch) {}
+        CharValue(int line,int col, int ch) :Expression(line, col), ch_(ch) {}
 
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return CHAR; }
@@ -122,6 +130,7 @@ namespace pascal2c::ast
     {
     public:
         explicit BooleanValue(bool value) : value_(value) {}
+        BooleanValue(int line, int col, bool value) : Expression(line, col), value_(value) {}
 
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return BOOLEAN; }
@@ -137,7 +146,8 @@ namespace pascal2c::ast
     class CallOrVar : public Expression
     {
     public:
-        CallOrVar(std::string id) : id_(std::move(id)) {}
+        explicit CallOrVar(std::string id) : id_(std::move(id)) {}
+        CallOrVar(int line, int col, std::string id) : Expression(line, col), id_(std::move(id)) {}
 
         std::string ToString(int level) const override;
         inline virtual ExprType GetType() const override { return CALL_OR_VAR; }
@@ -160,7 +170,11 @@ namespace pascal2c::ast
     {
     public:
         explicit CallValue(std::string func_name) : CallOrVar(std::move(func_name)) {}
+        CallValue(int line, int col, std::string func_name) : CallOrVar(line, col, std::move(func_name)) {}
         CallValue(std::string func_name, vector<std::shared_ptr<Expression>> params) : CallOrVar(std::move(func_name)) , params_(std::move(params)) {}
+        CallValue(int line, int col, std::string func_name, vector<std::shared_ptr<Expression>> params) :
+                                        CallOrVar(line, col, std::move(func_name)), params_(std::move(params)) {}
+
         void AddParam(std::shared_ptr<Expression> expr);
 
         std::string ToString(int level) const override;
@@ -182,8 +196,11 @@ namespace pascal2c::ast
     {
     public:
         explicit Variable(std::string id) : CallOrVar(std::move(id)) {}
+        Variable(int line, int col, std::string id) : CallOrVar(line, col, std::move(id)) {}
         Variable(std::string id, vector<std::shared_ptr<Expression>> expr_list) : CallOrVar(std::move(id)) , expr_list_(
                                                                                                           std::move(expr_list)) {}
+        Variable(int line, int col, std::string id, vector<std::shared_ptr<Expression>> expr_list) :
+                CallOrVar(line, col, std::move(id)), expr_list_(std::move(expr_list)) {}
 
         void AddExpr(std::shared_ptr<Expression> expr);
 
@@ -205,6 +222,8 @@ namespace pascal2c::ast
     {
     public:
         BinaryExpr(int op, std::shared_ptr<Expression> lhs, std::shared_ptr<Expression> rhs) : op_(op), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+        BinaryExpr(int line, int col, int op, std::shared_ptr<Expression> lhs, std::shared_ptr<Expression> rhs) :
+                Expression(line, col), op_(op), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
 
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return BINARY; }
@@ -225,6 +244,8 @@ namespace pascal2c::ast
     {
     public:
         UnaryExpr(int op, std::shared_ptr<Expression> factor) : op_(op), factor_(std::move(factor)) {}
+        UnaryExpr(int line, int col, int op, std::shared_ptr<Expression> factor) :
+                Expression(line, col), op_(op), factor_(std::move(factor)) {}
 
         std::string ToString(int level) const override;
         inline ExprType GetType() const override { return UNARY; }

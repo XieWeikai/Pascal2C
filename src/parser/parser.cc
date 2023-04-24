@@ -46,6 +46,8 @@ namespace pascal2c::parser
 
     int Parser::NextToken()
     {
+        static char buff[MAX_STR_LEN];
+
         token_ = next_token_;
         tok_value_ = next_tok_value_;
         line_ = next_line_;
@@ -58,6 +60,12 @@ namespace pascal2c::parser
         next_line_ = yylineno;
         next_column_ = yycolno;
         next_text_ = yytext;
+
+        if(token_ == TOK_ERROR) {
+            sprintf(buff,"%d:%d lexical error: %s",line_,column_, GetLexerErrMsg().c_str());
+            throw SyntaxErr(buff);
+        }
+
         return token_;
     }
 
