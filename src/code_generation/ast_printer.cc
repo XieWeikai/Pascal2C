@@ -4,12 +4,13 @@
 #include <stdexcept>
 #include <string>
 
-#include "ast_printer.h"
 #include "ast_adapter.h"
+#include "ast_printer.h"
 #include "token_adapter.h"
 
 namespace pascal2c {
 namespace code_generation {
+void ASTPrinter::Visit() { Visit(ast_); }
 void ASTPrinter::Visit(const std::shared_ptr<code_generation::ASTRoot> &node) {
     if (std::dynamic_pointer_cast<code_generation::Program>(node)) {
         VisitProgram(std::dynamic_pointer_cast<code_generation::Program>(node));
@@ -20,7 +21,8 @@ void ASTPrinter::Visit(const std::shared_ptr<code_generation::ASTRoot> &node) {
     } else if (std::dynamic_pointer_cast<code_generation::Type>(node)) {
         VisitType(std::dynamic_pointer_cast<code_generation::Type>(node));
     } else if (std::dynamic_pointer_cast<code_generation::Compound>(node)) {
-        VisitCompound(std::dynamic_pointer_cast<code_generation::Compound>(node));
+        VisitCompound(
+            std::dynamic_pointer_cast<code_generation::Compound>(node));
     } else if (std::dynamic_pointer_cast<code_generation::Assign>(node)) {
         VisitAssign(std::dynamic_pointer_cast<code_generation::Assign>(node));
     } else if (std::dynamic_pointer_cast<code_generation::Var>(node)) {
@@ -31,19 +33,21 @@ void ASTPrinter::Visit(const std::shared_ptr<code_generation::ASTRoot> &node) {
         VisitBinOp(std::dynamic_pointer_cast<code_generation::BinOp>(node));
     } else if (std::dynamic_pointer_cast<code_generation::Num>(node)) {
         VisitNum(std::dynamic_pointer_cast<code_generation::Num>(node));
+    } else {
+        throw std::runtime_error("Invalid node type");
     }
-
-    throw std::runtime_error("Invalid node type");
 }
 
-void ASTPrinter::VisitProgram(const std::shared_ptr<code_generation::Program> &node) {
+void ASTPrinter::VisitProgram(
+    const std::shared_ptr<code_generation::Program> &node) {
     ostream_ << "Program: " << node->GetName() << std::endl;
     indent_level_++;
     Visit(node->GetBlock());
     indent_level_--;
 }
 
-void ASTPrinter::VisitBlock(const std::shared_ptr<code_generation::Block> &node) {
+void ASTPrinter::VisitBlock(
+    const std::shared_ptr<code_generation::Block> &node) {
     ostream_ << string(indent_level_, ' ') << " Block" << std::endl;
     indent_level_++;
     for (auto decl : node->GetDeclarations()) {
@@ -53,7 +57,8 @@ void ASTPrinter::VisitBlock(const std::shared_ptr<code_generation::Block> &node)
     indent_level_--;
 }
 
-void ASTPrinter::VisitVarDecl(const std::shared_ptr<code_generation::VarDecl> &node) {
+void ASTPrinter::VisitVarDecl(
+    const std::shared_ptr<code_generation::VarDecl> &node) {
     ostream_ << string(indent_level_, ' ')
              << "VarDecl: " << node->GetVarNode()->GetValue() << ": "
              << node->GetTypeNode()->GetType() << std::endl;
@@ -69,7 +74,8 @@ void ASTPrinter::VisitCompound(
     indent_level_--;
 }
 
-void ASTPrinter::VisitAssign(const std::shared_ptr<code_generation::Assign> &node) {
+void ASTPrinter::VisitAssign(
+    const std::shared_ptr<code_generation::Assign> &node) {
     ostream_ << string(indent_level_, ' ') << "Assign" << std::endl;
     indent_level_++;
     ostream_ << string(indent_level_, ' ') << "Left:" << std::endl;
@@ -93,7 +99,8 @@ void ASTPrinter::VisitNoOp(const std::shared_ptr<code_generation::NoOp> &node) {
     ostream_ << string(indent_level_, ' ') << "NoOp" << std::endl;
 }
 
-void ASTPrinter::VisitBinOp(const std::shared_ptr<code_generation::BinOp> &node) {
+void ASTPrinter::VisitBinOp(
+    const std::shared_ptr<code_generation::BinOp> &node) {
     ostream_ << string(indent_level_, ' ')
              << "BinOp:" << node->GetOper()->GetType() << std::endl;
     indent_level_++;

@@ -1,5 +1,6 @@
 #include "ast_adapter_test.cc"
 #include "code_generation/ast_adapter.h"
+#include "code_generation/ast_printer.h"
 #include "code_generation/code_generator.h"
 #include "code_generation/token_adapter.h"
 #include "gmock/gmock.h"
@@ -83,6 +84,11 @@ TEST(ASTPrinterTest, ConvertASTToC) {
     EXPECT_CALL(*mock_program, GetBlock()).WillOnce(ReturnRef(mock_block));
     EXPECT_CALL(*mock_block, GetDeclarations())
         .WillOnce(ReturnRef(declarations));
+    EXPECT_CALL(*mock_block, GetCompoundStatement())
+        .WillOnce(ReturnRef(compound));
+    auto ast_printer = std::make_shared<ASTPrinter>(mock_program);
+    ast_printer->Visit();
+
     string expected_ast = R"(
     Program: Simple
      Block
