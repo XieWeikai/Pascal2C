@@ -23,6 +23,8 @@ namespace pascal2c::ast
     class IdList : public Ast
     {
     public:
+        IdList(const int line, const int column) : Ast(line, column) {}
+
         // param:
         //     id is the identifier
         // return:
@@ -241,6 +243,8 @@ namespace pascal2c::ast
     class SubprogramBody : public Ast
     {
     public:
+        SubprogramBody(const int line, const int column) : Ast(line, column) {}
+
         inline const vector<shared_ptr<ConstDeclaration>> &const_declarations() const
         {
             return const_declarations_;
@@ -354,6 +358,9 @@ namespace pascal2c::ast
     class ProgramBody : public Ast
     {
     public:
+        ProgramBody(const int line, const int column)
+            : Ast(line, column) {}
+
         inline const vector<shared_ptr<ConstDeclaration>> &const_declarations() const { return const_declarations_; }
 
         inline const vector<shared_ptr<VarDeclaration>> &var_declarations() const { return var_declarations_; }

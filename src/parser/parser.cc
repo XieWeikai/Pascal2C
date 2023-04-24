@@ -80,10 +80,23 @@ namespace pascal2c::parser
         if (token_ != token)
         {
             std::ostringstream err;
-            err << line_ << ":" << column_ << " syntax err:expected " << TokenToString(token) << " got " << TokenToString(token_);
+            err << line_ << ":" << column_ << " syntax err:expected " << TokenToString(token) << " before " << TokenToString(token_);
             throw SyntaxErr(err.str());
         }
         NextToken(); // only skip current token if it matches
+    }
+
+    const int Parser::Match(const std::set<int> &tokens, const std::string &expected_token)
+    {
+        int tok = token_;
+        if (tokens.find(token_) == tokens.end())
+        {
+            std::ostringstream err;
+            err << line_ << ":" << column_ << " syntax err:expected " << expected_token << " before " << TokenToString(token_);
+            throw SyntaxErr(err.str());
+        }
+        NextToken(); // only skip current token if it matches
+        return tok;
     }
 
     void Parser::Match(int token, const std::string &err_msg)
@@ -115,6 +128,32 @@ namespace pascal2c::parser
             if (token_ == token)
             {
                 NextToken(); // skip to the next token when the expected token is met
+                return token;
+            }
+            return token_;
+        }
+    }
+
+    const int Parser::CheckMatch(const std::set<int> &tokens, const std::string &expected_token, const std::set<int> &delimiters)
+    {
+        try
+        {
+            int ret = Match(tokens, expected_token);
+            return ret;
+        }
+        catch (const SyntaxErr err)
+        {
+            err_msg_.push_back(err.what());
+            NextToken();
+            while (tokens.find(token_) == tokens.end() && delimiters.find(token_) == delimiters.end() && token_ != TOK_EOF)
+            {
+                NextToken();
+            }
+            if (tokens.find(token_) != tokens.end())
+            {
+                int tok = token_;
+                NextToken(); // skip to the next token when the expected token is met
+                return tok;
             }
             return token_;
         }

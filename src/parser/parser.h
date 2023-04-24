@@ -28,6 +28,8 @@ extern "C"
 // make the shared pointer of Ast node
 #define MAKE_SHARED(constructor, ...) std::make_shared<constructor>(begin_line, begin_column, __VA_ARGS__)
 
+#define MAKE_SHARED_WITH_NO_ARGUMENT(constructor) std::make_shared<constructor>(begin_line, begin_column)
+
 // make and move the shared pointer of Ast node
 #define MAKE_AND_MOVE_SHARED(constructor, ...) \
     std::move(MAKE_SHARED(constructor, __VA_ARGS__))
@@ -131,35 +133,45 @@ namespace pascal2c::parser
         //     SyntaxErr if token not match
         void Match(int token,const std::string& err_msg);
 
+        // match tokens and get next token (only skip current token if it matches)
+        // param:
+        //     tokens are the tokens to match
+        //     expected_token is the primary expected token in the err_msg
+        // return:
+        //     the matched token or the unexpected token
+        // throw:
+        //     SyntaxErr if token not match
+        const int Match(const std::set<int> &tokens, const std::string &expected_token);
+
         // Check if the token is matched,
-        // if not get next token until either the expected token or the delimiters or the end of the file is found
-        // Note that
-        // the current token will skip to the next token of the expected token only if the expected token is found
-        // otherwise, the current token will jump to the position of the delimiters or the end of the file
+        // if not, get next token until either the expected token or the delimiters or the end of the file is found
+        // Note:
+        //     the current token will skip to the next token of the expected token if the expected token is found
+        //     otherwise, the current token will jump to the position of the delimiters or the end of the file
         // param:
         //     token is the token to match
-        //     delimiters is the end symbols to stop finding the expected token
+        //     delimiters is the end symbols to stop finding the expected token, that is the expected token of the next part
         // return:
-        //     the founded expected token or the delimiters or TOK_EOF
+        //     the matched token or the delimiters or end of the file
         const int CheckMatch(const int token, const std::set<int> &delimiters);
+
+        // Check if the token is matched,
+        // if not, get next token until either the expected tokens or the delimiters or the end of the file is found
+        // Note:
+        //     the current token will skip to the next token of the expected token only if the expected token is found
+        //     otherwise, the current token will jump to the position of the delimiters or the end of the file
+        // param:
+        //     tokens are the tokens to match
+        //     expected_token is the primary expected token in the err_msg
+        //     delimiters is the end symbols to stop finding the expected token, that is the expected token of the next part
+        // return:
+        //     the matched token or the delimiters or end of the file
+        const int CheckMatch(const std::set<int> &tokens, const std::string &expected_token, const std::set<int> &delimiters);
 
         // get the error message of lexer
         // return:
         //     the error message
         std::string GetLexerErrMsg();
-
-        // throw a syntax error
-        // param:
-        //     expected_token is the token that is expected
-        // throw:
-        //     SyntaxErr
-        inline void ThrowSyntaxErr(const std::string &expected_token)
-        {
-            std::ostringstream err;
-            err << line_ << ":" << column_ << " syntax err:expected " << expected_token
-                << " got " << token_;
-            throw SyntaxErr(err.str());
-        }
 
         // parse the whole program
         // e.g. program p; const a = 1; var b : integer; function f(a : integer) : integer; begin end; begin end.
