@@ -61,6 +61,14 @@ namespace pascal2c::parser
 
         GETTER(vector<std::string>, err_msg);
 
+        // parse the whole program
+        // return:
+        //     the ast of the program
+        inline std::shared_ptr<ast::Program> Parse()
+        {
+            return ParseProgram();
+        }
+
     private:
         FRIEND_TEST(TokenTest, TestNextToken);
         FRIEND_TEST(ProgramParserTest, TestParseProgram);
