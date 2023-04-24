@@ -3,6 +3,7 @@
 #include <sstream>
 #include <memory>
 #include <vector>
+#include <set>
 #include <cstdio>
 #include <exception>
 
@@ -76,28 +77,46 @@ namespace pascal2c::parser
 
     void Parser::Match(int token)
     {
-        int tok = token_;
-        int line = line_;
-        int column = column_;
-        if (tok != token)
+        if (token_ != token)
         {
             std::ostringstream err;
-            err << line << ":" << column << " syntax err:expected " << TokenToString(token) << " got " << TokenToString(tok);
+            err << line_ << ":" << column_ << " syntax err:expected " << TokenToString(token) << " got " << TokenToString(token_);
             throw SyntaxErr(err.str());
         }
         NextToken(); // only skip current token if it matches
     }
 
-    void Parser::Match(int token, const std::string& err_msg) {
-        int tok = token_;
-        int line = line_;
-        int column = column_;
+    void Parser::Match(int token, const std::string &err_msg)
+    {
         static char buff[1024];
-        if(tok != token) {
-            sprintf(buff,"%d:%d %s",line,column, err_msg.c_str());
+        if (token_ != token)
+        {
+            sprintf(buff, "%d:%d %s", line_, column_, err_msg.c_str());
             throw SyntaxErr(std::string(buff));
         }
         NextToken(); // only skip current token if it matches
     }
 
+    const int Parser::CheckMatch(const int token, const std::set<int> &delimiters)
+    {
+        try
+        {
+            Match(token);
+            return token;
+        }
+        catch (const SyntaxErr err)
+        {
+            err_msg_.push_back(err.what());
+            NextToken();
+            while (token_ != token && delimiters.find(token_) == delimiters.end() && token_ != TOK_EOF)
+            {
+                NextToken();
+            }
+            if (token_ == token)
+            {
+                NextToken(); // skip to the next token when the expected token is met
+            }
+            return token_;
+        }
+    }
 }

@@ -81,13 +81,8 @@ namespace pascal2c::parser
         }
 
         // Parse compound statement
-        Match(TOK_BEGIN);
-        while (token_ != TOK_END)
-        {
-            program_body->AddStatement(std::move(ParseStatement()));
-            Match(';');
-        }
-        Match(TOK_END);
+        program_body->set_statements(std::move(ParseCompoundStatement()));
+
         return std::move(program_body);
     }
 
@@ -215,13 +210,8 @@ namespace pascal2c::parser
         }
 
         // Parse compound statement
-        Match(TOK_BEGIN);
-        while (token_ != TOK_END)
-        {
-            subprogram_body->AddStatement(std::move(ParseStatement()));
-            Match(';');
-        }
-        Match(TOK_END);
+        subprogram_body->set_statements(std::move(ParseCompoundStatement()));
+
         return std::move(subprogram_body);
     }
 

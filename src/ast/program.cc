@@ -156,15 +156,8 @@ namespace pascal2c::ast
             }
         }
 
-        if (statement_list_.size() > 0)
-        {
-            str_s << statement_list_[0]->ToString(level + 1);
-            for (int i = 1; i < statement_list_.size(); i++)
-            {
-                str_s << std::endl
-                      << statement_list_[i]->ToString(level + 1);
-            }
-        }
+        str_s << statements_->ToString(level + 1);
+
         return str_s.str();
     }
 
@@ -222,15 +215,9 @@ namespace pascal2c::ast
                       << subprogram_declarations_[i]->ToString(level + 1);
             }
         }
-        if (statement_list_.size() > 0)
-        {
-            str_s << statement_list_[0]->ToString(level + 1);
-            for (int i = 1; i < statement_list_.size(); i++)
-            {
-                str_s << std::endl
-                      << statement_list_[i]->ToString(level + 1);
-            }
-        }
+
+        str_s << statements_->ToString(level + 1);
+
         return str_s.str();
     }
 

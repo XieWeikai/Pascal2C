@@ -18,12 +18,17 @@ extern "C"
 #include "lexer.h"
 }
 
+#define TOK_EOF 0
+
+// init the begin line and the begin column before parsing
 #define INIT_PARSE(line, column) \
     int begin_line = line;       \
     int begin_column = column;
 
+// make the shared pointer of Ast node
 #define MAKE_SHARED(constructor, ...) std::make_shared<constructor>(begin_line, begin_column, __VA_ARGS__)
 
+// make and move the shared pointer of Ast node
 #define MAKE_AND_MOVE_SHARED(constructor, ...) \
     std::move(MAKE_SHARED(constructor, __VA_ARGS__))
 
@@ -125,6 +130,18 @@ namespace pascal2c::parser
         // throw:
         //     SyntaxErr if token not match
         void Match(int token,const std::string& err_msg);
+
+        // Check if the token is matched,
+        // if not get next token until either the expected token or the delimiters or the end of the file is found
+        // Note that
+        // the current token will skip to the next token of the expected token only if the expected token is found
+        // otherwise, the current token will jump to the position of the delimiters or the end of the file
+        // param:
+        //     token is the token to match
+        //     delimiters is the end symbols to stop finding the expected token
+        // return:
+        //     the founded expected token or the delimiters or TOK_EOF
+        const int CheckMatch(const int token, const std::set<int> &delimiters);
 
         // get the error message of lexer
         // return:

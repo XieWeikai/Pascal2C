@@ -233,10 +233,9 @@ namespace pascal2c::ast
 
     // SubprogramBody -> (const const_declarations | ε)
     //                   (var var_declarations | ε)
-    //                   (statement_list | ε)
+    //                   statements
     // const_declarations -> id=ConstValue | const_declarations ; id=ConstValue
     // var_declarations -> IdList : Type | var_declarations ; IdList : Type
-    // statement_list -> statement | statement_list ; statement
     //
     // eg. const a = 1; b = 2; var c, d : integer; begin end
     class SubprogramBody : public Ast
@@ -249,7 +248,7 @@ namespace pascal2c::ast
 
         inline const vector<shared_ptr<VarDeclaration>> &var_declarations() const { return var_declarations_; }
 
-        inline const vector<shared_ptr<Statement>> &statement_list() const { return statement_list_; }
+        inline const shared_ptr<Statement> &statement_list() const { return statements_; }
 
         inline void AddConstDeclaration(shared_ptr<ConstDeclaration> const_declaration)
         {
@@ -261,7 +260,7 @@ namespace pascal2c::ast
             var_declarations_.push_back(std::move(var_declaration));
         }
 
-        inline void AddStatement(shared_ptr<Statement> statement) { statement_list_.push_back(std::move(statement)); }
+        inline void set_statements(shared_ptr<Statement> statements) { statements_ = std::move(statements); }
 
         // for test use
         // param:
@@ -273,7 +272,7 @@ namespace pascal2c::ast
     private:
         vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be empty, eg. const a = 1; b = 2;
         vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be empty, eg. var c, d : integer;
-        vector<shared_ptr<Statement>> statement_list_;            // can be empty, eg. begin end
+        shared_ptr<Statement> statements_;                        // eg. begin end
     };
 
     // Subprogram -> SubprogramHead ; SubprogramBody
@@ -346,11 +345,10 @@ namespace pascal2c::ast
     // ProgramBody -> (const const_declarations | ε)
     //                (var var_declarations | ε)
     //                (subprogram_declarations | ε)
-    //                (statement_list | ε)
+    //                statements
     // const_declarations -> ConstDeclaration | (const_declarations ; ConstDeclaration)
     // var_declarations -> VarDeclaration | var_declarations ; VarDeclaration
     // subprogram_declarations -> Subprogram | subprogram_declarations ; Subprogram
-    // statement_list -> statement | statement_list ; statement
     //
     // eg. const a = 1; b = 2; var c, d : integer; procedure p; begin end; begin end
     class ProgramBody : public Ast
@@ -362,7 +360,7 @@ namespace pascal2c::ast
 
         inline const vector<shared_ptr<Subprogram>> &subprogram_declarations() const { return subprogram_declarations_; }
 
-        inline const vector<shared_ptr<Statement>> &statement_list() const { return statement_list_; }
+        inline const shared_ptr<Statement> &statements() const { return statements_; }
 
         inline void AddConstDeclaration(shared_ptr<ConstDeclaration> const_declaration)
         {
@@ -379,7 +377,7 @@ namespace pascal2c::ast
             subprogram_declarations_.push_back(std::move(subprogram));
         }
 
-        inline void AddStatement(shared_ptr<Statement> statement) { statement_list_.push_back(std::move(statement)); }
+        inline void set_statements(shared_ptr<Statement> statements) { statements_ = std::move(statements); }
 
         // for test use
         // param:
@@ -392,7 +390,7 @@ namespace pascal2c::ast
         vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be empty, eg. const a = 1; b = 2;
         vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be empty, eg. var c, d : integer;
         vector<shared_ptr<Subprogram>> subprogram_declarations_;  // can be empty, eg. procedure p; begin end;
-        vector<shared_ptr<Statement>> statement_list_;            // can be empty, eg. begin end
+        shared_ptr<Statement> statements_;                        // eg. begin end
     };
 
     // Program -> ProgramHead; ProgramBody.
