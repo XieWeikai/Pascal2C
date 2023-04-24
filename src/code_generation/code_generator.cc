@@ -9,15 +9,18 @@
 namespace pascal2c {
 namespace code_generation {
 
-// int CodeGenerator::Interpret() { return Visit(parser_->Expression()); }
+void CodeGenerator::Interpret() { Visit(ast_); }
+
+const string CodeGenerator::GetCCode() const { return ostream_.str(); }
 
 // TODO: Re-implement this method. Now it just visits BinOp and Num
 // And lead its output into ostream_
-int CodeGenerator::Visit(const std::shared_ptr<code_generation::ASTRoot> &node) {
+void CodeGenerator::Visit(
+    const std::shared_ptr<code_generation::ASTRoot> &node) {
     if (std::dynamic_pointer_cast<code_generation::BinOp>(node)) {
-        return VisitBinOp(std::dynamic_pointer_cast<code_generation::BinOp>(node));
+        VisitBinOp(std::dynamic_pointer_cast<code_generation::BinOp>(node));
     } else if (std::dynamic_pointer_cast<code_generation::Num>(node)) {
-        return VisitNum(std::dynamic_pointer_cast<code_generation::Num>(node));
+        VisitNum(std::dynamic_pointer_cast<code_generation::Num>(node));
     }
 
     throw std::runtime_error("Invalid node type");
@@ -48,22 +51,16 @@ void CodeGenerator::VisitVarDecl(
              << node->GetTypeNode()->GetType();
 }
 
-int CodeGenerator::VisitBinOp(const std::shared_ptr<code_generation::BinOp> &node) {
-    if (node->GetOper()->GetType() == TokenType::TYPE) {
-        return Visit(node->GetLeft());
-    } else if (node->GetOper()->GetType() == TokenType::TYPE) {
-        return Visit(node->GetLeft()) - Visit(node->GetRight());
-    } else if (node->GetOper()->GetType() == TokenType::TYPE) {
-        return Visit(node->GetLeft()) * Visit(node->GetRight());
-    } else if (node->GetOper()->GetType() == TokenType::TYPE) {
-        return Visit(node->GetLeft()) / Visit(node->GetRight());
-    }
-
-    throw std::runtime_error("Invalid operator");
+void CodeGenerator::VisitBinOp(
+    const std::shared_ptr<code_generation::BinOp> &node) {
+    Visit(node->GetLeft());
+    ostream_ << node->GetOper()->GetType().ToString();
+    Visit(node->GetRight());
 }
 
-int CodeGenerator::VisitNum(const std::shared_ptr<code_generation::Num> &node) {
-    return node->GetValue();
+void CodeGenerator::VisitNum(
+    const std::shared_ptr<code_generation::Num> &node) {
+    node->GetValue();
 }
 } // namespace code_generation
 } // namespace pascal2c
