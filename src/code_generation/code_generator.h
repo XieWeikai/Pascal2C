@@ -17,20 +17,20 @@ class CodeGenerator {
         : ast_(ast) {}
     // TODO: Output of Visit save into ostream
     void Visit(const code_generation::ASTRoot &ast);
-    int Interpret();
-    string GetCCode();
+    void Interpret();
+    const string GetCCode() const;
 
   private:
-    int Visit(const std::shared_ptr<code_generation::ASTNode> &node);
-    int VisitBinOp(const std::shared_ptr<code_generation::BinOp> &node);
-    int VisitNum(const std::shared_ptr<code_generation::Num> &node);
+    void Visit(const std::shared_ptr<code_generation::ASTNode> &node);
+    void VisitBinOp(const std::shared_ptr<code_generation::BinOp> &node);
+    void VisitNum(const std::shared_ptr<code_generation::Num> &node);
     void VisitProgram(const std::shared_ptr<code_generation::Program> &node);
     void VisitBlock(const std::shared_ptr<code_generation::Block> &node);
     void VisitVarDecl(const std::shared_ptr<code_generation::VarDecl> &node);
-    int VisitCompound(const std::shared_ptr<code_generation::Compound> &node);
-    int VisitAssign(const std::shared_ptr<code_generation::Assign> &node);
-    int VisitVar(const std::shared_ptr<code_generation::Var> &node);
-    int VisitNoOp(const std::shared_ptr<code_generation::NoOp> &node);
+    void VisitCompound(const std::shared_ptr<code_generation::Compound> &node);
+    void VisitAssign(const std::shared_ptr<code_generation::Assign> &node);
+    void VisitVar(const std::shared_ptr<code_generation::Var> &node);
+    void VisitNoOp(const std::shared_ptr<code_generation::NoOp> &node);
 
     // AST root node
     std::shared_ptr<code_generation::ASTRoot> ast_;
