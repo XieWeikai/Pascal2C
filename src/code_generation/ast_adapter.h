@@ -1,9 +1,10 @@
 #ifndef PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
-#include "token_adapter.h"
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "token_adapter.h"
 
 namespace pascal2c {
 namespace code_generation {
@@ -12,7 +13,8 @@ template <typename Tp> using vector = ::std::vector<Tp>;
 
 class ASTNode {
   public:
-    virtual ~ASTNode();
+    ASTNode() = default;
+    virtual ~ASTNode() = 0;
 };
 
 // ASTRoot is an alias of ASTNode, represents root node of the AST.
@@ -55,6 +57,7 @@ class VarDecl : public ASTNode {
     VarDecl(const std::shared_ptr<Var> &var_node,
             const std::shared_ptr<Type> &type_node)
         : var_node_(var_node), type_node_(type_node){};
+    virtual ~VarDecl();
     const std::shared_ptr<Var> &GetVarNode() const { return var_node_; }
     const std::shared_ptr<Type> &GetTypeNode() const { return type_node_; }
 
@@ -67,6 +70,7 @@ class Type : public ASTNode {
   public:
     Type(const std::shared_ptr<Token> token)
         : token_(token), type_(token->GetType()){};
+    virtual ~Type();
     const TokenType GetType() const { return type_; }
 
   private:
@@ -105,6 +109,7 @@ class Var : public ASTNode {
   public:
     Var(const std::shared_ptr<Token> &token)
         : token_(token), value_(token->GetValue()){};
+    virtual ~Var();
     const string GetValue() const { return value_; }
 
   private:
@@ -152,29 +157,20 @@ class Oper : public ASTNode {
   public:
     Oper(const std::shared_ptr<Token> &oper)
         : oper_(oper), type_(oper->GetType()), value_(oper->GetValue()) {}
+    virtual ~Oper();
+    const TokenType GetType() { return type_; };
 
   private:
-    const std::shared_ptr<Token> oper_;
-    const TokenType type_;
-    const string value_;
+    std::shared_ptr<Token> oper_;
+    TokenType type_;
+    string value_;
 };
 
 class BinOp : public ASTNode {
   public:
-    explicit BinOp(std::shared_ptr<Var> &left, std::shared_ptr<Oper> &oper,
-                   std::shared_ptr<Expr> &right)
-        : left_(left), oper_(oper), right_(right) {}
-
-    explicit BinOp(std::shared_ptr<Var> &left, std::shared_ptr<Oper> &oper,
-                   std::shared_ptr<Var> &right)
-        : left_(left), oper_(oper), right_(right) {}
-
-    explicit BinOp(std::shared_ptr<Expr> &left, std::shared_ptr<Oper> &oper,
-                   std::shared_ptr<Var> &right)
-        : left_(left), oper_(oper), right_(right) {}
-
-    explicit BinOp(std::shared_ptr<Expr> &left, std::shared_ptr<Oper> &oper,
-                   std::shared_ptr<Expr> &right)
+    explicit BinOp(const std::shared_ptr<ASTNode> &left,
+                   const std::shared_ptr<Oper> &oper,
+                   const std::shared_ptr<ASTNode> &right)
         : left_(left), oper_(oper), right_(right) {}
 
     const std::shared_ptr<ASTNode> &GetLeft() { return left_; }

@@ -12,7 +12,6 @@
 
 namespace pascal2c {
 namespace code_generation {
-using ::testing::AtLeast;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -27,12 +26,13 @@ TEST(ASTPrinterTest, ConvertASTToC) {
         y := x - 1;
     end.
     )";
-    const auto mock_program = std::make_shared<MockProgram>(MockProgram());
-    const auto mock_block = std::make_shared<MockBlock>(MockBlock());
+    const auto mock_program = std::make_shared<MockProgram>();
+    const auto mock_block = std::make_shared<MockBlock>();
     vector<std::shared_ptr<ASTNode>> declarations;
 
     // VarDecl part
-    const auto type_int = std::make_shared<Type>(TokenType::TYPE, "integer");
+    const auto token_int = std::make_shared<Token>(TokenType::TYPE, "integer");
+    const auto type_int = std::make_shared<Type>(token_int);
 
     const auto token_x = std::make_shared<Token>(TokenType::INTEGER, "x");
     const auto var_x = std::make_shared<Var>(token_x);
