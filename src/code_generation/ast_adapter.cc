@@ -15,6 +15,11 @@ Var::~Var() { token_.reset(); }
 Oper::~Oper() { oper_.reset(); }
 Num::~Num() { token_.reset(); }
 
+void Program::Accept(Visitor &visitor) {
+    visitor.VisitProgram(
+        std::dynamic_pointer_cast<Program>(shared_from_this()));
+}
+
 Block::Block(const std::shared_ptr<Declaration> &declarations,
              const std::shared_ptr<Compound> &compound_statement)
     : declarations_(declarations), compound_statement_(compound_statement){};

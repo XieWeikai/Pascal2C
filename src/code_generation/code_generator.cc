@@ -20,30 +20,7 @@ const string CodeGenerator::GetCCode() const { return ostream_.str(); }
 // And lead its output into ostream_
 void CodeGenerator::Visit(
     const std::shared_ptr<code_generation::ASTNode> &node) {
-    if (std::dynamic_pointer_cast<code_generation::Program>(node)) {
-        VisitProgram(std::dynamic_pointer_cast<code_generation::Program>(node));
-    } else if (std::dynamic_pointer_cast<code_generation::Block>(node)) {
-        VisitBlock(std::dynamic_pointer_cast<code_generation::Block>(node));
-    } else if (std::dynamic_pointer_cast<code_generation::VarDecl>(node)) {
-        VisitVarDecl(std::dynamic_pointer_cast<code_generation::VarDecl>(node));
-    } else if (std::dynamic_pointer_cast<code_generation::Type>(node)) {
-        VisitType(std::dynamic_pointer_cast<code_generation::Type>(node));
-    } else if (std::dynamic_pointer_cast<code_generation::Compound>(node)) {
-        VisitCompound(
-            std::dynamic_pointer_cast<code_generation::Compound>(node));
-    } else if (std::dynamic_pointer_cast<code_generation::Assign>(node)) {
-        VisitAssign(std::dynamic_pointer_cast<code_generation::Assign>(node));
-    } else if (std::dynamic_pointer_cast<code_generation::Var>(node)) {
-        VisitVar(std::dynamic_pointer_cast<code_generation::Var>(node));
-    } else if (std::dynamic_pointer_cast<code_generation::NoOp>(node)) {
-        VisitNoOp(std::dynamic_pointer_cast<code_generation::NoOp>(node));
-    } else if (std::dynamic_pointer_cast<code_generation::BinOp>(node)) {
-        VisitBinOp(std::dynamic_pointer_cast<code_generation::BinOp>(node));
-    } else if (std::dynamic_pointer_cast<code_generation::Num>(node)) {
-        VisitNum(std::dynamic_pointer_cast<code_generation::Num>(node));
-    } else {
-        throw std::runtime_error("Invalid node type");
-    }
+    node->Accept(*this);
 }
 
 void CodeGenerator::VisitProgram(
