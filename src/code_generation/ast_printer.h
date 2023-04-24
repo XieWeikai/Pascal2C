@@ -16,9 +16,10 @@ class ASTPrinter {
     explicit ASTPrinter(const std::shared_ptr<code_generation::ASTRoot> ast)
         : ast_(ast){};
     // TODO: Output of Visit save into ostream
-    void Visit(const std::shared_ptr<code_generation::ASTNode> &node);
+    void Visit();
 
   private:
+    void Visit(const std::shared_ptr<code_generation::ASTNode> &node);
     void VisitBinOp(const std::shared_ptr<code_generation::BinOp> &node);
     void VisitNum(const std::shared_ptr<code_generation::Num> &node);
     void VisitProgram(const std::shared_ptr<code_generation::Program> &node);
