@@ -7,7 +7,8 @@ namespace pascal2c {
 namespace code_generation {
 class Visitor {
   public:
-    virtual void Visit(const std::shared_ptr<ASTNode> &node) = 0;
+    virtual void Visit(const std::shared_ptr<ASTNode> &node,
+                       bool indent = false) = 0;
     virtual void VisitProgram(const std::shared_ptr<Program> &node) = 0;
     virtual void VisitBlock(const std::shared_ptr<Block> &node) = 0;
     virtual void VisitDeclaration(const std::shared_ptr<Declaration> &node) = 0;
