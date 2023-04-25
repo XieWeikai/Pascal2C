@@ -89,7 +89,7 @@ gtest_discover_tests(ast_test)
 # <<< ast test <<<
 
 # >>> parser test >>>
-file(GLOB PARSER "src/parser/*.h" "src/parser/expr.cc" "src/parser/statement.cc" "src/parser/parser.cc")
+file(GLOB PARSER "src/parser/*.h" "src/parser/expr.cc" "src/parser/statement.cc" "src/parser/parser.cc" "src/parser/program.cc")
 file(GLOB PARSER_TEST "test/parser/*.cc")
 add_executable(
         parser_test

@@ -74,6 +74,17 @@ namespace pascal2c::parser {
         return std::move(expr);
     }
 
+    std::shared_ptr<ast::Expression> Parser::ParseStringAndChar() {
+        size_t len = strlen(tok_value_.strval);
+        std::shared_ptr<ast::Expression> res;
+        if(len == 1)
+            res = std::move(std::make_shared<ast::CharValue>(tok_value_.strval[0]));
+        else
+            res = std::move(std::make_shared<ast::StringValue>(tok_value_.strval));
+        NextToken();
+        return std::move(res);
+    }
+
     std::shared_ptr<ast::Expression> Parser::ParseVariableAndCall(){
         std::string id = text_;
         int ch;
@@ -96,7 +107,7 @@ namespace pascal2c::parser {
                 Match(']');
                 return std::move(std::make_shared<ast::Variable>(id,expr_list));
             default:
-                return std::move(std::make_shared<ast::Variable>(id));
+                return std::move(std::make_shared<ast::CallOrVar>(id));
         }
     }
 

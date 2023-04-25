@@ -55,7 +55,7 @@ namespace pascal2c
     {
         std::stringstream str_s;
         IndentOutput(str_s, level);
-        str_s << "function:" << func_name_;
+        str_s << "function:" << id_;
 
         for (int i = 0; i < params_.size(); i++)
         {
@@ -141,4 +141,19 @@ namespace pascal2c
         return str_s.str();
     }
 
+    std::string ast::CallOrVar::ToString(int level) const {
+        std::stringstream str_s;
+        IndentOutput(str_s, level);
+        str_s << "CallOrVar: " << id_;
+
+        return str_s.str();
+    }
+
+    std::string ast::StringValue::ToString(int level) const {
+        std::stringstream str_s;
+        IndentOutput(str_s, level);
+        str_s << "string: " << value_;
+
+        return str_s.str();
+    }
 }

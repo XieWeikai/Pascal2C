@@ -4,6 +4,7 @@
 void yyreset(FILE* in) {
     yylineno = 1;
     yycolno = 1;
+    yycolno_next = 1;
     yyerrno = 0;
     yyin = in;
 }
