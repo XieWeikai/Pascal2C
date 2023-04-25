@@ -23,13 +23,13 @@ class ASTPrinter {
 
   private:
     void Visit(const shared_ptr<code_generation::ASTNode> &node);
-    void VisitBinOp(const shared_ptr<code_generation::BinOp> &node);
-    void VisitNum(const shared_ptr<code_generation::Num> &node);
     void VisitProgram(const shared_ptr<code_generation::Program> &node);
     void VisitBlock(const shared_ptr<code_generation::Block> &node);
     void VisitDeclaration(const shared_ptr<Declaration> &node);
     void VisitVarDecl(const shared_ptr<code_generation::VarDecl> &node);
     void VisitCompound(const shared_ptr<code_generation::Compound> &node);
+    void VisitBinOp(const shared_ptr<code_generation::BinOp> &node);
+    void VisitNum(const shared_ptr<code_generation::Num> &node);
     void VisitAssign(const shared_ptr<code_generation::Assign> &node);
     void VisitVar(const shared_ptr<code_generation::Var> &node);
     void VisitType(const shared_ptr<code_generation::Type> &node);

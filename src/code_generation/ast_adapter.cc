@@ -61,6 +61,11 @@ void BinOp::Accept(Visitor &visitor) {
     visitor.VisitBinOp(dynamic_pointer_cast<BinOp>(shared_from_this()));
 }
 
+// Oper
+void Oper::Accept(Visitor &visitor) {
+    visitor.VisitOper(dynamic_pointer_cast<Oper>(shared_from_this()));
+}
+
 // Num
 void Num::Accept(Visitor &visitor) {
     visitor.VisitNum(dynamic_pointer_cast<Num>(shared_from_this()));

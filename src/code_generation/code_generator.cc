@@ -8,6 +8,10 @@
 
 namespace pascal2c {
 namespace code_generation {
+using ::std::dynamic_pointer_cast;
+using ::std::endl;
+using ::std::runtime_error;
+using ::std::shared_ptr;
 
 void CodeGenerator::Interpret() {
     auto program = std::dynamic_pointer_cast<Program>(ast_);
@@ -40,7 +44,19 @@ void CodeGenerator::VisitBlock(
     indent_level_--;
 }
 
-void CodeGenerator::VisitDeclaration()
+void CodeGenerator::VisitDeclaration(const shared_ptr<Declaration> &node) {
+    ostream_ << string(indent_level_, ' ') << "Declaration: " << endl;
+    indent_level_++;
+    for (const auto &it : node->GetDeclarations()) {
+        auto var_decl = dynamic_pointer_cast<VarDecl>(it);
+        if (var_decl == nullptr) {
+            throw runtime_error(
+                "Failed to cast Declaration ASTNode into VarDecl");
+        }
+        VisitVarDecl(var_decl);
+    }
+    indent_level_--;
+}
 
     void CodeGenerator::VisitVarDecl(
         const std::shared_ptr<code_generation::VarDecl> &node) {
@@ -98,9 +114,13 @@ void CodeGenerator::VisitBinOp(
     const std::shared_ptr<code_generation::BinOp> &node) {
     indent_level_++;
     Visit(node->GetLeft());
-    ostream_ << node->GetOper()->GetType().ToString();
+    Visit(node->GetOper());
     Visit(node->GetRight());
     indent_level_--;
+}
+
+void CodeGenerator::VisitOper(const shared_ptr<Oper> &node) {
+    ostream_ << node->GetType().ToString();
 }
 
 void CodeGenerator::VisitNum(

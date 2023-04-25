@@ -22,15 +22,16 @@ class CodeGenerator : Visitor {
   private:
     virtual void Visit(const std::shared_ptr<ASTNode> &node) override;
     virtual void VisitProgram(const std::shared_ptr<Program> &node) override;
-    void virtual VisitBlock(const std::shared_ptr<Block> &node) override;
+    virtual void VisitBlock(const std::shared_ptr<Block> &node) override;
     virtual void
     VisitDeclaration(const std::shared_ptr<Declaration> &node) override;
     virtual void VisitVarDecl(const std::shared_ptr<VarDecl> &node) override;
     virtual void VisitCompound(const std::shared_ptr<Compound> &node) override;
-    void virtual VisitBinOp(const std::shared_ptr<BinOp> &node) override;
+    virtual void VisitBinOp(const std::shared_ptr<BinOp> &node) override;
+    virtual void VisitOper(const std::shared_ptr<Oper> &node) override;
     virtual void VisitNum(const std::shared_ptr<Num> &node) override;
     virtual void VisitType(const std::shared_ptr<Type> &node) override;
-    void virtual VisitAssign(const std::shared_ptr<Assign> &node) override;
+    virtual void VisitAssign(const std::shared_ptr<Assign> &node) override;
     virtual void VisitVar(const std::shared_ptr<Var> &node) override;
     virtual void VisitNoOp(const std::shared_ptr<NoOp> &node) override;
 
