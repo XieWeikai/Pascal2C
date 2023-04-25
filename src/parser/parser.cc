@@ -120,7 +120,6 @@ namespace pascal2c::parser
         catch (const SyntaxErr err)
         {
             err_msg_.push_back(err.what());
-            NextToken();
             while (token_ != token && delimiters.find(token_) == delimiters.end() && token_ != TOK_EOF)
             {
                 NextToken();
@@ -144,7 +143,6 @@ namespace pascal2c::parser
         catch (const SyntaxErr err)
         {
             err_msg_.push_back(err.what());
-            NextToken();
             while (tokens.find(token_) == tokens.end() && delimiters.find(token_) == delimiters.end() && token_ != TOK_EOF)
             {
                 NextToken();

@@ -28,7 +28,7 @@ namespace pascal2c::parser
     {
         INIT_PARSE(line_, column_);
 
-        CheckMatch(TOK_PROGRAM, {TOK_ID, ';'});
+        CheckMatch(TOK_PROGRAM, {TOK_ID, '(', ';'});
         auto name = text_;
 
         // Check if the program has a name
@@ -98,13 +98,13 @@ namespace pascal2c::parser
         INIT_PARSE(line_, column_);
 
         auto name = text_;
-        int ret = CheckMatch(TOK_ID, {TOK_ASSIGNOP, ';'});
+        int ret = CheckMatch(TOK_ID, {'=', ';'});
         if (ret != TOK_ID)
         {
             name = "";
         }
 
-        CheckMatch(TOK_ASSIGNOP, {TOK_INTEGER, TOK_REAL, '-', TOK_STRING, ';'});
+        CheckMatch('=', {TOK_INTEGER, TOK_REAL, '-', TOK_STRING, ';'});
         return MAKE_AND_MOVE_SHARED(ast::ConstDeclaration, name, std::move(ParsePrimary()));
     }
 
@@ -209,7 +209,7 @@ namespace pascal2c::parser
 
             CheckMatch(':', {TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE, ';'});
 
-            int ret = CheckMatch({TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE}, "basic type(integer, real, bool, char)", {';'});
+            ret = CheckMatch({TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE}, "basic type(integer, real, bool, char)", {';'});
             if (ret != ';' && ret != TOK_EOF)
             {
                 subprogram_head->set_return_type(ret);
@@ -263,7 +263,7 @@ namespace pascal2c::parser
         int ret = CheckMatch(TOK_ID, {',', ':', ')', ';'});
         if (ret = TOK_ID)
         {
-            id_list->AddId(text_);
+            id_list->AddId(id);
         }
         else if (ret != ',')
         {
@@ -277,7 +277,7 @@ namespace pascal2c::parser
             int ret = CheckMatch(TOK_ID, {',', ':', ')', ';'});
             if (ret = TOK_ID)
             {
-                id_list->AddId(text_);
+                id_list->AddId(id);
             }
             else if (ret != ',')
             {
@@ -295,12 +295,12 @@ namespace pascal2c::parser
 
         if (ret == TOK_INTEGER_TYPE || ret == TOK_REAL_TYPE || ret == TOK_CHAR_TYPE || ret == TOK_BOOLEAN_TYPE)
         {
-            return MAKE_AND_MOVE_SHARED(ast::Type, false, token_);
+            return MAKE_AND_MOVE_SHARED(ast::Type, false, ret);
         }
         else if (ret == TOK_ARRAY || ret == '[')
         {
             auto type = MAKE_SHARED(ast::Type, true);
-            int ret = CheckMatch('[', {TOK_INTEGER, ']', ';'});
+            ret = CheckMatch('[', {TOK_INTEGER, ']', ';'});
 
             if (token_ != ']')
             {
@@ -321,7 +321,7 @@ namespace pascal2c::parser
 
             CheckMatch(TOK_OF, {TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE, ';'});
 
-            int ret = CheckMatch({TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE}, "basic type(integer, real, bool, char)", {';'});
+            ret = CheckMatch({TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE}, "basic type(integer, real, bool, char)", {';'});
             if (ret != ';' && ret != TOK_EOF)
             {
                 type->set_basic_type(ret);

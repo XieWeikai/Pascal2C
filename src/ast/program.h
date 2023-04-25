@@ -67,7 +67,7 @@ namespace pascal2c::ast
 
         // param:
         //     is_array is true if the type is array type
-        Type(const int line, const int column, const bool is_array) : Ast(line, column), is_array_(is_array) {}
+        Type(const int line, const int column, const bool is_array) : Ast(line, column), is_array_(is_array), basic_type_(-1) {}
 
         // param:
         //     is_array is true if the type is array type
@@ -323,7 +323,7 @@ namespace pascal2c::ast
 
         // param:
         //     id is the program name
-        ProgramHead(const int line, const int column, const string &id) : Ast(line, column), id_(id) {}
+        ProgramHead(const int line, const int column, const string &id) : Ast(line, column), id_(id), id_list_(nullptr) {}
 
         inline const string &id() const { return id_; }
 

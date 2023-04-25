@@ -30,6 +30,8 @@ namespace pascal2c::ast
             return "char";
         case TOK_BOOLEAN_TYPE:
             return "boolean";
+        default:
+            return "unknown";
         }
     }
     const string IdList::ToString(const int level) const
@@ -137,26 +139,17 @@ namespace pascal2c::ast
         INIT_TOSTRING(str_s, level);
 
         str_s << "SubprogramBody: " << std::endl;
-        if (const_declarations_.size() > 0)
+        for (int i = 0; i < const_declarations_.size(); i++)
         {
-            str_s << const_declarations_[0]->ToString(level + 1);
-            for (int i = 1; i < const_declarations_.size(); i++)
-            {
-                str_s << std::endl
-                      << const_declarations_[i]->ToString(level + 1);
-            }
-        }
-        if (var_declarations_.size() > 0)
-        {
-            str_s << var_declarations_[0]->ToString(level + 1);
-            for (int i = 1; i < var_declarations_.size(); i++)
-            {
-                str_s << std::endl
-                      << var_declarations_[i]->ToString(level + 1);
-            }
+            str_s << const_declarations_[i]->ToString(level + 1) << std::endl;
         }
 
-        str_s << statements_->ToString(level + 1);
+        for (int i = 0; i < var_declarations_.size(); i++)
+        {
+            str_s << var_declarations_[i]->ToString(level + 1) << std::endl;
+        }
+
+        str_s << statements_->ToString(level + 1) << std::endl;
 
         return str_s.str();
     }
@@ -188,35 +181,22 @@ namespace pascal2c::ast
         INIT_TOSTRING(str_s, level);
 
         str_s << "ProgramBody: " << std::endl;
-        if (const_declarations_.size() > 0)
+        for (int i = 0; i < const_declarations_.size(); i++)
         {
-            str_s << const_declarations_[0]->ToString(level + 1);
-            for (int i = 1; i < const_declarations_.size(); i++)
-            {
-                str_s << std::endl
-                      << const_declarations_[i]->ToString(level + 1);
-            }
-        }
-        if (var_declarations_.size() > 0)
-        {
-            str_s << var_declarations_[0]->ToString(level + 1);
-            for (int i = 1; i < var_declarations_.size(); i++)
-            {
-                str_s << std::endl
-                      << var_declarations_[i]->ToString(level + 1);
-            }
-        }
-        if (subprogram_declarations_.size() > 0)
-        {
-            str_s << subprogram_declarations_[0]->ToString(level + 1);
-            for (int i = 1; i < subprogram_declarations_.size(); i++)
-            {
-                str_s << std::endl
-                      << subprogram_declarations_[i]->ToString(level + 1);
-            }
+            str_s << const_declarations_[i]->ToString(level + 1) << std::endl;
         }
 
-        str_s << statements_->ToString(level + 1);
+        for (int i = 0; i < var_declarations_.size(); i++)
+        {
+            str_s << var_declarations_[i]->ToString(level + 1) << std::endl;
+        }
+
+        for (int i = 0; i < subprogram_declarations_.size(); i++)
+        {
+            str_s << subprogram_declarations_[i]->ToString(level + 1) << std::endl;
+        }
+
+        str_s << statements_->ToString(level + 1) << std::endl;
 
         return str_s.str();
     }
