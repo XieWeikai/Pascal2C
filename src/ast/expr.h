@@ -156,7 +156,7 @@ namespace pascal2c::ast
     protected:
         // id_ is the name of the variable or function
         // in the example of var1 := A;
-        // id_ is "var1"
+        // id_ is "A"
         // and we do not need an expression list since no matter
         // it is a variable or a function call, it has no parameters
         std::string id_;

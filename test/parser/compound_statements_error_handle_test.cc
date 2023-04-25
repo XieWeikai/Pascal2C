@@ -125,10 +125,11 @@ namespace pascal2c::parser{
                 "11:19 syntax error: unclosed parentheses\n"
                 "12:18: parse expression error: no expected token\n"
                 "16:5 syntax error: missing ';' at the end of statement\n"
-                "16:21 syntax err:expected TOK_) got TOK_THEN\n"
+                "16:21 syntax err:expected TOK_) before TOK_THEN\n"
                 "19:5 syntax error: missing ';' at the end of statement\n"
                 "22:5 syntax error: missing ';' at the end of statement\n"
                 "22:13 syntax error: unclosed brackets\n";
+
 //        std::cout << output.str() << std::endl;
         EXPECT_EQ(output.str(), res);
     }
