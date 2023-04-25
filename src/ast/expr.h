@@ -23,7 +23,7 @@ namespace pascal2c::ast
         REAL = 1,
         CHAR = 2,
         BOOLEAN = 3,
-        CALL_OR_VAR = 4, // TODO: not implemented
+        CALL_OR_VAR = 4,
         VARIABLE = 5,
         CALL = 6,
         BINARY = 7,

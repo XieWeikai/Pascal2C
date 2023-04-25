@@ -46,7 +46,7 @@ namespace pascal2c::parser {
                     sprintf(buff,"%d:%d: not expected token to parse statement",line_,column_);
                 throw SyntaxErr(buff);
         }
-        statement->SetLineAndColumn(begin_column,begin_line);
+        statement->SetLineAndColumn(begin_line,begin_column);
         return std::move(statement);
     }
 
@@ -111,6 +111,7 @@ namespace pascal2c::parser {
 
     std::shared_ptr<ast::Statement> Parser::ParseAssignAndCallStatement(){
         std::string id = text_;
+        INIT_PARSE(line_, column_);
         Match(TOK_ID);
         vector<std::shared_ptr<ast::Expression> > expr_list;
         auto var = std::make_shared<ast::Variable>(id);
@@ -139,8 +140,7 @@ namespace pascal2c::parser {
 
         Match(TOK_ASSIGNOP,"syntax error: lost ':=' when parsing assign statement");
         auto expr = ParseExpr();
+        var->SetLineAndColumn(begin_line,begin_column);
         return std::make_shared<ast::AssignStatement>(var,expr);
     }
-
-    // TODO: add line and column information to AST
 }
