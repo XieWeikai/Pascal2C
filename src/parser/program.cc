@@ -240,6 +240,10 @@ namespace pascal2c::parser
             {
                 subprogram_head->set_return_type(ret);
             }
+            else
+            {
+                subprogram_head->set_return_type(0);
+            }
 
             return std::move(subprogram_head);
         }
@@ -287,7 +291,7 @@ namespace pascal2c::parser
 
         std::string id = text_;
         int ret = CheckMatch(TOK_ID, {',', ':', ')', ';'});
-        if (ret = TOK_ID)
+        if (ret == TOK_ID)
         {
             id_list->AddId(id);
         }
@@ -301,7 +305,7 @@ namespace pascal2c::parser
             NextToken();
             std::string id = text_;
             int ret = CheckMatch(TOK_ID, {',', ':', ')', ';'});
-            if (ret = TOK_ID)
+            if (ret == TOK_ID)
             {
                 id_list->AddId(id);
             }
@@ -326,7 +330,7 @@ namespace pascal2c::parser
         else if (ret == TOK_ARRAY || ret == '[')
         {
             auto type = MAKE_SHARED(ast::Type, true);
-            ret = CheckMatch('[', {TOK_INTEGER, ']', ';'});
+            CheckMatch('[', {TOK_INTEGER, ']', ';'});
 
             if (token_ != ']')
             {

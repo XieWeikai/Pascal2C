@@ -40,7 +40,10 @@ namespace pascal2c::ast
 
         str_s << "IdList: ";
 
-        str_s << id_list_[0];
+        if (id_list_.size() > 0)
+        {
+            str_s << id_list_[0];
+        }
         for (int i = 1; i < id_list_.size(); i++)
         {
             str_s << ", " << id_list_[i];

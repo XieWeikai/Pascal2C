@@ -175,15 +175,15 @@ namespace pascal2c::parser
             "function f : integer",
             "function",
             "function (a : integer) : integer",
-            "function p(a : integer; b : integer",
-            "function p(a : integer; b : integer : integer",
-            "function p(a : integer, b : integer",
-            "function (a : integer) ",
-            "function (a : integer) integer",
-            "function (a : integer) real",
-            "function (a : integer) boolean",
-            "function (a : integer) char",
-            "function (a : integer) :",
+            "function f(a : integer; b : integer",
+            "function f(a : integer; b : integer : integer",
+            "function f(a : integer, b : integer",
+            "function f(a : integer) ",
+            "function f(a : integer) integer",
+            "function f(a : integer) real",
+            "function f(a : integer) boolean",
+            "function f(a : integer) char",
+            "function f(a : integer) :",
         };
         const vector<string> results = {};
         const vector<vector<string>> errs = {};
@@ -195,7 +195,7 @@ namespace pascal2c::parser
     TEST(ProgramParserTest, TestParseSubProgramBody)
     {
         const vector<string> input_strs = {
-            "const a = 1; b = 2; var c, d : integer;  begin end; begin end",
+            "const a = 1; b = 2; var c, d : integer;  begin end",
             "const a = 1 b = 2; begin end",
             "const a = 1 var a : integer; begin end",
             "const a = 1 begin end",
