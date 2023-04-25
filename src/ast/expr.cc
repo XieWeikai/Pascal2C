@@ -14,6 +14,13 @@ extern "C"
 #include "lexer.h"
 }
 
+#define INIT_TOSTRING(str_s, level) \
+    std::stringstream str_s;\
+    do{ \
+        IndentOutput(str_s, level);     \
+        str_s << line() << ":" << column() <<" "; \
+    }while(0)
+
 namespace pascal2c
 {
 
@@ -53,8 +60,7 @@ namespace pascal2c
 
     std::string ast::CallValue::ToString(int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
         str_s << "function:" << id_;
 
         for (int i = 0; i < params_.size(); i++)
@@ -69,8 +75,7 @@ namespace pascal2c
 
     std::string ast::Variable::ToString(int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
         str_s << "variable:" << id_;
 
         for (int i = 0; i < expr_list_.size(); i++)
@@ -85,15 +90,14 @@ namespace pascal2c
 
     std::string ast::IntegerValue::ToString(int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
         str_s << value_;
         return str_s.str();
     }
 
     std::string ast::RealValue::ToString(int level) const
     {
-        std::stringstream str_s;
+        INIT_TOSTRING(str_s, level);
         IndentOutput(str_s, level);
         str_s << std::fixed << std::setprecision(4) << value_ << std::defaultfloat;
         return str_s.str();
@@ -102,24 +106,24 @@ namespace pascal2c
     std::string ast::CharValue::ToString(int level) const
     {
         char ch = (char)ch_;
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
         str_s << '\'' << ch << '\'';
         return str_s.str();
     }
 
     std::string ast::BooleanValue::ToString(int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
-        str_s << value_;
+        INIT_TOSTRING(str_s, level);
+        if(value_)
+            str_s << "true";
+        else
+            str_s << "false";
         return str_s.str();
     }
 
     std::string ast::BinaryExpr::ToString(int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
         str_s << "binary_op:" << '\'' << (char)Op(op_) << '\'' << "\n";
         IndentOutput(str_s, level);
         str_s << "lhs :\n";
@@ -132,8 +136,7 @@ namespace pascal2c
 
     std::string ast::UnaryExpr::ToString(int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
         str_s << "unary_op:" << '\'' << (char)Op(op_) << '\'' << "\n";
         IndentOutput(str_s, level);
         str_s << "expr :\n"
@@ -142,16 +145,14 @@ namespace pascal2c
     }
 
     std::string ast::CallOrVar::ToString(int level) const {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
         str_s << "CallOrVar: " << id_;
 
         return str_s.str();
     }
 
     std::string ast::StringValue::ToString(int level) const {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
         str_s << "string: " << value_;
 
         return str_s.str();

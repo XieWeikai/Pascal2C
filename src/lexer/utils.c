@@ -1,6 +1,8 @@
 #include "lexer.h"
 #include <stdio.h>
 
+#define TOK_EOF 0
+
 void yyreset(FILE* in) {
     yylineno = 1;
     yycolno = 1;
@@ -10,7 +12,7 @@ void yyreset(FILE* in) {
 }
 
 char* TokenToString(int token) {
-    static char* tokenNames[] = {
+    static char *tokenNames[] = {
         [TOK_ID] = "TOK_ID",
         [TOK_INTEGER] = "TOK_INTEGER",
         [TOK_REAL] = "TOK_REAL",
@@ -74,6 +76,7 @@ char* TokenToString(int token) {
         ['^'] = "TOK_^",
         ['('] = "TOK_(",
         [')'] = "TOK_)",
+        [TOK_EOF] = "end of input",
         [TOK_NEQOP] = "TOK_NEQOP",
         [TOK_LEOP] = "TOK_LEOP",
         [TOK_GEOP] = "TOK_GEOP",
