@@ -3,13 +3,13 @@
 #include "../ast/ast.h"
 
 namespace symbol_table{
-    class SymbolTableItem;
 	enum ItemType{
-		INT,
-		REAL,
-		CHAR,
-		BOOL,
+        ERROR,
         VOID,
+        BOOL,
+        CHAR,
+		INT,
+		REAL
 	};
 	
 	class SymbolTablePara{
@@ -31,6 +31,7 @@ namespace symbol_table{
 			type_(type), name_(name), is_var_(is_var), is_func_(is_func), para_(para){}
 		
         std::string name(){return name_;}
+        ItemType type(){return type_;}
 		bool operator==(const SymbolTableItem &x);
     private:
 		ItemType type_;
@@ -47,6 +48,7 @@ namespace symbol_table{
         int AddItem(const SymbolTableItem &x);
         
         //find identify with format SymbolTableItem
+        //do not care about para.info_
         //return if exist
         bool Query(SymbolTableItem &x);
         

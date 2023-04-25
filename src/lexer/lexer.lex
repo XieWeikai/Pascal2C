@@ -130,7 +130,7 @@ false              {return TOK_FALSE;}
     yylval.intval = n;
     return TOK_INTEGER;
 }
-{real}               {
+{real}/[^\.]         {
     yylval.realval = strtod(yytext, NULL);
     return TOK_REAL;
 }
