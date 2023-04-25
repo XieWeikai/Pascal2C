@@ -1,9 +1,10 @@
 #include "type_adaper.h"
+#include <cstdlib>
 #include <stdexcept>
 
 namespace pascal2c {
 namespace code_generation {
-const string TypeToolKit::TypeToC(string pascal_type) const {
+const string TypeToolKit::TypeToC(const string &pascal_type) const {
     auto it = PascalToCTypeMap.find(pascal_type);
     if (it != PascalToCTypeMap.end()) {
         return it->second;

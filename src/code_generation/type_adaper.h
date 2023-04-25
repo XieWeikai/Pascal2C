@@ -10,7 +10,7 @@ using string = ::std::string;
 
 class TypeToolKit {
   public:
-    const string TypeToC(const string pascal_type) const;
+    const string TypeToC(const string &pascal_type) const;
 
   private:
     const hashmap<string, string> PascalToCTypeMap = {
