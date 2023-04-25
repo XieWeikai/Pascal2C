@@ -104,8 +104,34 @@ namespace pascal2c::parser
             name = "";
         }
 
-        CheckMatch('=', {TOK_INTEGER, TOK_REAL, '-', TOK_STRING, ';'});
-        return MAKE_AND_MOVE_SHARED(ast::ConstDeclaration, name, std::move(ParsePrimary()));
+        CheckMatch('=', {TOK_INTEGER, TOK_REAL, '+', '-', TOK_STRING, ';'});
+
+        std::shared_ptr<ast::Expression> const_value;
+        while (true)
+        {
+            try
+            {
+                const_value = std::move(ParsePrimary());
+                break;
+            }
+            catch (const SyntaxErr err)
+            {
+                err_msg_.push_back(err.what());
+                std::set<int> tokens({TOK_INTEGER, TOK_REAL, '-', '+', TOK_STRING});
+                int delimiter = ';';
+
+                while (tokens.find(token_) == tokens.end() && delimiter != token_ && token_ != TOK_EOF)
+                {
+                    NextToken();
+                }
+                if (tokens.find(token_) == tokens.end())
+                {
+                    break;
+                }
+            }
+        }
+
+        return MAKE_AND_MOVE_SHARED(ast::ConstDeclaration, name, std::move(const_value));
     }
 
     std::shared_ptr<ast::VarDeclaration> Parser::ParseVarDeclaration()

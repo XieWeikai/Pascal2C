@@ -95,7 +95,15 @@ namespace pascal2c::ast
         INIT_TOSTRING(str_s, level);
 
         str_s << "ConstDeclaration: " << id_ << std::endl;
-        str_s << const_value_->ToString(level + 1);
+        if (const_value_)
+        {
+            str_s << const_value_->ToString(level + 1);
+        }
+        else
+        {
+            IndentOutput(str_s, level + 1);
+            str_s << "unknown value" << std::endl;
+        }
         return str_s.str();
     }
 
