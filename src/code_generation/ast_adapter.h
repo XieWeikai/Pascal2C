@@ -1,15 +1,16 @@
 #ifndef PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
-#include <utility>
 #pragma once
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "token_adapter.h"
 
 namespace pascal2c {
 namespace code_generation {
+using ::std::shared_ptr;
 using ::std::string;
 template <typename Tp> using vector = ::std::vector<Tp>;
 
@@ -28,63 +29,48 @@ typedef ASTNode ASTRoot;
 class Compound : public ASTNode {
   public:
     Compound(){};
-    explicit Compound(const std::vector<std::shared_ptr<ASTNode>> &children);
+    explicit Compound(const std::vector<shared_ptr<ASTNode>> &children);
     void Accept(Visitor &visitor) override;
-    void AddChild(std::shared_ptr<ASTNode> node);
-    const vector<std::shared_ptr<ASTNode>> &GetChildren() const {
-        return children_;
-    }
+    void AddChild(shared_ptr<ASTNode> node);
+    const vector<shared_ptr<ASTNode>> &GetChildren() const { return children_; }
 
   private:
-    vector<std::shared_ptr<ASTNode>> children_;
+    vector<shared_ptr<ASTNode>> children_;
 };
 
 class Declaration : public ASTNode {
   public:
-    Declaration(const vector<std::shared_ptr<ASTNode>> &declarations)
+    Declaration(const vector<shared_ptr<ASTNode>> &declarations)
         : declaration_(std::move(declarations)) {}
     void Accept(Visitor &visitor) override;
-    const vector<std::shared_ptr<ASTNode>> &GetDeclarations() const {
+    const vector<shared_ptr<ASTNode>> &GetDeclarations() const {
         return declaration_;
     }
 
   private:
-    vector<std::shared_ptr<ASTNode>> declaration_;
+    vector<shared_ptr<ASTNode>> declaration_;
 };
 
 class Block : public ASTNode {
   public:
-    Block(const std::shared_ptr<Declaration> &declarations,
-          const std::shared_ptr<Compound> &compound_statement);
+    Block(const shared_ptr<Declaration> &declarations,
+          const shared_ptr<Compound> &compound_statement);
     void Accept(Visitor &visitor) override;
-    const std::shared_ptr<Declaration> &GetDeclatation() const {
+    const shared_ptr<Declaration> &GetDeclatation() const {
         return declarations_;
     }
-    const std::shared_ptr<Compound> &GetCompoundStatement() const {
+    const shared_ptr<Compound> &GetCompoundStatement() const {
         return compound_statement_;
     }
 
   private:
-    std::shared_ptr<Declaration> declarations_;
-    std::shared_ptr<Compound> compound_statement_;
-};
-
-class Program : public ASTNode {
-  public:
-    Program(const string &name, const std::shared_ptr<Block> &block)
-        : name_(name), block_(block){};
-    void Accept(Visitor &visitor) override;
-    string GetName() const { return name_; }
-    const std::shared_ptr<Block> &GetBlock() const { return block_; }
-
-  private:
-    string name_;
-    std::shared_ptr<Block> block_;
+    shared_ptr<Declaration> declarations_;
+    shared_ptr<Compound> compound_statement_;
 };
 
 class Var : public ASTNode {
   public:
-    Var(const std::shared_ptr<Token> &token) : value_(token->GetValue()) {}
+    Var(const shared_ptr<Token> &token) : value_(token->GetValue()) {}
     virtual ~Var();
     void Accept(Visitor &visitor) override;
     const string GetValue() const { return value_; }
@@ -95,7 +81,7 @@ class Var : public ASTNode {
 
 class Type : public ASTNode {
   public:
-    Type(const std::shared_ptr<Token> &token) : type_(token->GetValue()){};
+    Type(const shared_ptr<Token> &token) : type_(token->GetValue()){};
     virtual ~Type();
     void Accept(Visitor &visitor) override;
     const string GetType() const { return type_; }
@@ -106,22 +92,22 @@ class Type : public ASTNode {
 
 class VarDeclaration : public ASTNode {
   public:
-    VarDeclaration(const std::shared_ptr<Var> &var_node,
-                   const std::shared_ptr<Type> &type_node)
+    VarDeclaration(const shared_ptr<Var> &var_node,
+                   const shared_ptr<Type> &type_node)
         : var_node_(var_node), type_node_(type_node){};
     void Accept(Visitor &visitor) override;
     virtual ~VarDeclaration();
-    const std::shared_ptr<Var> &GetVarNode() const { return var_node_; }
-    const std::shared_ptr<Type> &GetTypeNode() const { return type_node_; }
+    const shared_ptr<Var> &GetVarNode() const { return var_node_; }
+    const shared_ptr<Type> &GetTypeNode() const { return type_node_; }
 
   private:
-    std::shared_ptr<Var> var_node_;
-    std::shared_ptr<Type> type_node_;
+    shared_ptr<Var> var_node_;
+    shared_ptr<Type> type_node_;
 };
 
 class Const : public ASTNode {
   public:
-    Const(const std::shared_ptr<Token> &token) : value_(token->GetValue()) {}
+    Const(const shared_ptr<Token> &token) : value_(token->GetValue()) {}
     virtual ~Const();
     void Accept(Visitor &visitor) override;
     const string GetValue() const { return value_; }
@@ -132,51 +118,98 @@ class Const : public ASTNode {
 
 class ConstDeclaration : public ASTNode {
   public:
-    ConstDeclaration(const std::shared_ptr<Const> &const_node,
-                     const std::shared_ptr<Type> &type_node)
+    ConstDeclaration(const shared_ptr<Const> &const_node,
+                     const shared_ptr<Type> &type_node)
         : const_node_(const_node), type_node_(type_node) {}
     void Accept(Visitor &visitor) override;
     virtual ~ConstDeclaration();
-    const std::shared_ptr<Const> &GetConstNode() const { return const_node_; }
-    const std::shared_ptr<Type> &GetTypeNode() const { return type_node_; }
+    const shared_ptr<Const> &GetConstNode() const { return const_node_; }
+    const shared_ptr<Type> &GetTypeNode() const { return type_node_; }
 
   private:
-    std::shared_ptr<Const> const_node_;
-    std::shared_ptr<Type> type_node_;
+    shared_ptr<Const> const_node_;
+    shared_ptr<Type> type_node_;
 };
 
 class ArrayDeclaration : public ASTNode {
   public:
-    ArrayDeclaration(const std::shared_ptr<Var> &var_node,
-                     const std::shared_ptr<Type> &type_node,
+    ArrayDeclaration(const shared_ptr<Var> &var_node,
+                     const shared_ptr<Type> &type_node,
                      const std::vector<std::pair<int, int>> &bounds)
         : var_node_(var_node), type_node_(type_node), bounds_(bounds) {}
     void Accept(Visitor &visitor) override;
     virtual ~ArrayDeclaration();
-    const std::shared_ptr<Var> &GetVarNode() const { return var_node_; }
-    const std::shared_ptr<Type> &GetTypeNode() const { return type_node_; }
+    const shared_ptr<Var> &GetVarNode() const { return var_node_; }
+    const shared_ptr<Type> &GetTypeNode() const { return type_node_; }
     const std::vector<std::pair<int, int>> &GetBounds() const {
         return bounds_;
     }
 
   private:
-    std::shared_ptr<Var> var_node_;
-    std::shared_ptr<Type> type_node_;
+    shared_ptr<Var> var_node_;
+    shared_ptr<Type> type_node_;
     std::vector<std::pair<int, int>> bounds_;
+};
+
+class SubprogramDeclaration : public ASTNode {
+  public:
+    SubprogramDeclaration(const string &name, const shared_ptr<Block> &block)
+        : name_(name), block_(block) {}
+    void Accept(Visitor &visitor) override;
+    const string GetName() const { return name_; }
+    const shared_ptr<Block> &GetBlock() const { return block_; }
+
+  private:
+    string name_;
+    shared_ptr<Block> block_;
+};
+
+class FunctionDeclaration : public ASTNode {
+  public:
+    FunctionDeclaration(const string &name, const shared_ptr<Type> &return_type,
+                        const vector<shared_ptr<VarDeclaration>> &params,
+                        const shared_ptr<Block> &block)
+        : name_(name), return_type_(return_type), params_(params),
+          block_(block) {}
+    void Accept(Visitor &visitor) override;
+    const string GetName() const { return name_; }
+    const shared_ptr<Type> GetReturnType() const { return return_type_; }
+    const vector<shared_ptr<VarDeclaration>> &GetParams() const {
+        return params_;
+    }
+    const shared_ptr<Block> &GetBlock() const { return block_; }
+
+  private:
+    string name_;
+    shared_ptr<Type> return_type_;
+    vector<shared_ptr<VarDeclaration>> params_;
+    shared_ptr<Block> block_;
+};
+
+class Program : public ASTNode {
+  public:
+    Program(const string &name, const shared_ptr<Block> &block)
+        : name_(name), block_(block){};
+    void Accept(Visitor &visitor) override;
+    const string GetName() const { return name_; }
+    const shared_ptr<Block> &GetBlock() const { return block_; }
+
+  private:
+    string name_;
+    shared_ptr<Block> block_;
 };
 
 class Assign : public ASTNode {
   public:
-    Assign(const std::shared_ptr<ASTNode> &left,
-           const std::shared_ptr<ASTNode> &right)
+    Assign(const shared_ptr<ASTNode> &left, const shared_ptr<ASTNode> &right)
         : left_(left), right_(right){};
     void Accept(Visitor &visitor) override;
-    const std::shared_ptr<ASTNode> &GetLeft() const { return left_; }
-    const std::shared_ptr<ASTNode> &GetRight() const { return right_; }
+    const shared_ptr<ASTNode> &GetLeft() const { return left_; }
+    const shared_ptr<ASTNode> &GetRight() const { return right_; }
 
   private:
-    std::shared_ptr<ASTNode> left_;
-    std::shared_ptr<ASTNode> right_;
+    shared_ptr<ASTNode> left_;
+    shared_ptr<ASTNode> right_;
 };
 
 class Term : public ASTNode {
@@ -203,16 +236,16 @@ class Statement : public ASTNode {
     void Accept(Visitor &visitor) override;
 
   private:
-    std::shared_ptr<ASTNode> left_hand_;
-    std::shared_ptr<ASTNode> right_hand_;
-    vector<std::shared_ptr<ASTNode>> children_;
+    shared_ptr<ASTNode> left_hand_;
+    shared_ptr<ASTNode> right_hand_;
+    vector<shared_ptr<ASTNode>> children_;
 };
 
 class IfStatement : public ASTNode {};
 
 class Num : public ASTNode {
   public:
-    Num(const std::shared_ptr<Token> &token)
+    Num(const shared_ptr<Token> &token)
         : value_(std::stoi(token->GetValue())) {}
     ~Num();
     void Accept(Visitor &visitor) override;
@@ -225,7 +258,7 @@ class Num : public ASTNode {
 // Operators, like '+', '-', etc.
 class Oper : public ASTNode {
   public:
-    Oper(const std::shared_ptr<Token> &oper)
+    Oper(const shared_ptr<Token> &oper)
         : type_(oper->GetType()), value_(oper->GetValue()) {}
     virtual ~Oper();
     void Accept(Visitor &visitor) override;
@@ -238,19 +271,19 @@ class Oper : public ASTNode {
 
 class BinOp : public ASTNode {
   public:
-    explicit BinOp(const std::shared_ptr<ASTNode> &left,
-                   const std::shared_ptr<Oper> &oper,
-                   const std::shared_ptr<ASTNode> &right)
+    explicit BinOp(const shared_ptr<ASTNode> &left,
+                   const shared_ptr<Oper> &oper,
+                   const shared_ptr<ASTNode> &right)
         : left_(left), oper_(oper), right_(right) {}
     void Accept(Visitor &visitor) override;
-    const std::shared_ptr<ASTNode> &GetLeft() { return left_; }
-    const std::shared_ptr<Oper> &GetOper() { return oper_; }
-    const std::shared_ptr<ASTNode> &GetRight() { return right_; }
+    const shared_ptr<ASTNode> &GetLeft() { return left_; }
+    const shared_ptr<Oper> &GetOper() { return oper_; }
+    const shared_ptr<ASTNode> &GetRight() { return right_; }
 
   private:
-    std::shared_ptr<ASTNode> left_;
-    std::shared_ptr<Oper> oper_;
-    std::shared_ptr<ASTNode> right_;
+    shared_ptr<ASTNode> left_;
+    shared_ptr<Oper> oper_;
+    shared_ptr<ASTNode> right_;
 };
 
 class NoOp : public ASTNode {
