@@ -28,7 +28,8 @@ class ASTPrinter : Visitor {
     virtual void VisitBlock(const std::shared_ptr<Block> &node) override;
     virtual void
     VisitDeclaration(const std::shared_ptr<Declaration> &node) override;
-    virtual void VisitVarDecl(const std::shared_ptr<VarDecl> &node) override;
+    virtual void
+    VisitVarDecl(const std::shared_ptr<VarDeclaration> &node) override;
     virtual void VisitCompound(const std::shared_ptr<Compound> &node) override;
     virtual void VisitBinOp(const std::shared_ptr<BinOp> &node) override;
     virtual void VisitOper(const std::shared_ptr<Oper> &node) override;

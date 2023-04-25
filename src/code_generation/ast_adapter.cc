@@ -7,7 +7,7 @@ namespace code_generation {
 using ::std::dynamic_pointer_cast;
 
 ASTNode::~ASTNode() {}
-VarDecl::~VarDecl() {
+VarDeclaration::~VarDeclaration() {
     var_node_.reset();
     type_node_.reset();
 }
@@ -36,8 +36,9 @@ void Declaration::Accept(Visitor &visitor) {
 }
 
 // VarDecl
-void VarDecl::Accept(Visitor &visitor) {
-    visitor.VisitVarDecl(dynamic_pointer_cast<VarDecl>(shared_from_this()));
+void VarDeclaration::Accept(Visitor &visitor) {
+    visitor.VisitVarDecl(
+        dynamic_pointer_cast<VarDeclaration>(shared_from_this()));
 }
 
 // Compound

@@ -51,7 +51,7 @@ void CodeGenerator::VisitBlock(
 
 void CodeGenerator::VisitDeclaration(const shared_ptr<Declaration> &node) {
     for (const auto &it : node->GetDeclarations()) {
-        auto var_decl = dynamic_pointer_cast<VarDecl>(it);
+        auto var_decl = dynamic_pointer_cast<VarDeclaration>(it);
         if (var_decl == nullptr) {
             throw runtime_error(
                 "Failed to cast Declaration ASTNode into VarDecl");
@@ -61,7 +61,7 @@ void CodeGenerator::VisitDeclaration(const shared_ptr<Declaration> &node) {
 }
 
 void CodeGenerator::VisitVarDecl(
-    const std::shared_ptr<code_generation::VarDecl> &node) {
+    const std::shared_ptr<code_generation::VarDeclaration> &node) {
     Visit(node->GetTypeNode());
     ostream_ << " ";
     Visit(node->GetVarNode());
