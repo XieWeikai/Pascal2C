@@ -21,7 +21,8 @@ class CodeGenerator : Visitor {
     const string GetCCode() const;
 
   private:
-    virtual void Visit(const std::shared_ptr<ASTNode> &node) override;
+    virtual void Visit(const std::shared_ptr<ASTNode> &node,
+                       bool indent = false) override;
     virtual void VisitProgram(const std::shared_ptr<Program> &node) override;
     virtual void VisitBlock(const std::shared_ptr<Block> &node) override;
     virtual void
@@ -38,6 +39,7 @@ class CodeGenerator : Visitor {
 
     const string Indent() const;
     const string TypeToC(const string &pascal_type) const;
+    const string eol_ = ";\n";
 
     // AST root node
     std::shared_ptr<ASTRoot> ast_;

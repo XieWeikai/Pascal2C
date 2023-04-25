@@ -3,6 +3,7 @@
 #include <string>
 
 #include "code_generation/ast_adapter.h"
+#include "code_generation/visitor.h"
 #include "code_generator.h"
 #include "token_adapter.h"
 
@@ -20,8 +21,10 @@ void CodeGenerator::Interpret() {
 
 const string CodeGenerator::GetCCode() const { return ostream_.str(); }
 
-void CodeGenerator::Visit(
-    const std::shared_ptr<code_generation::ASTNode> &node) {
+void CodeGenerator::Visit(const std::shared_ptr<code_generation::ASTNode> &node,
+                          bool indent) {
+    if (indent)
+        ostream_ << Indent();
     node->Accept(*this);
 }
 
@@ -34,7 +37,7 @@ void CodeGenerator::VisitProgram(
     ostream_ << "int main(int argc, char* argv[]) {" << endl;
 
     indent_level_++;
-    Visit(node->GetBlock());
+    Visit(node->GetBlock(), true);
     ostream_ << Indent() << "return 0;" << endl;
     indent_level_--;
     ostream_ << "}" << endl << "// " << node->GetName() << endl;
@@ -42,8 +45,8 @@ void CodeGenerator::VisitProgram(
 
 void CodeGenerator::VisitBlock(
     const std::shared_ptr<code_generation::Block> &node) {
-    Visit(node->GetDeclatation());
-    Visit(node->GetCompoundStatement());
+    Visit(node->GetDeclatation(), true);
+    Visit(node->GetCompoundStatement(), true);
 }
 
 void CodeGenerator::VisitDeclaration(const shared_ptr<Declaration> &node) {
@@ -53,59 +56,45 @@ void CodeGenerator::VisitDeclaration(const shared_ptr<Declaration> &node) {
             throw runtime_error(
                 "Failed to cast Declaration ASTNode into VarDecl");
         }
-        VisitVarDecl(var_decl);
+        Visit(var_decl, true);
     }
 }
 
 void CodeGenerator::VisitVarDecl(
     const std::shared_ptr<code_generation::VarDecl> &node) {
-    ostream_ << Indent() << TypeToC(node->GetTypeNode()->GetType()) << ' '
-             << node->GetVarNode()->GetValue() << ';' << endl;
+    Visit(node->GetTypeNode(), true);
+    Visit(node->GetVarNode());
+    ostream_ << eol_;
 }
 
 void CodeGenerator::VisitCompound(
     const std::shared_ptr<code_generation::Compound> &node) {
-    ostream_ << string(indent_level_, ' ') << "Compound" << std::endl;
-    indent_level_++;
     for (const auto &child : node->GetChildren()) {
-        Visit(child);
+        Visit(child, true);
     }
-    indent_level_--;
 }
 
 void CodeGenerator::VisitAssign(
     const std::shared_ptr<code_generation::Assign> &node) {
-    ostream_ << string(indent_level_, ' ') << "Assign" << std::endl;
-    indent_level_++;
-
-    ostream_ << string(indent_level_, ' ') << "Left:" << std::endl;
-    indent_level_++;
-    Visit(node->GetLeft());
-    indent_level_--;
-
-    ostream_ << string(indent_level_, ' ') << "Right:" << std::endl;
-    indent_level_++;
+    Visit(node->GetLeft(), true);
+    ostream_ << " = ";
     Visit(node->GetRight());
-    indent_level_--;
-
-    indent_level_--;
+    ostream_ << eol_;
 }
 
 void CodeGenerator::VisitVar(
     const std::shared_ptr<code_generation::Var> &node) {
-    ostream_ << string(indent_level_, ' ') << "Var: " << node->GetValue()
-             << std::endl;
+    ostream_ << node->GetValue();
 }
 
 void CodeGenerator::VisitType(
     const std::shared_ptr<code_generation::Type> &node) {
-    ostream_ << string(indent_level_, ' ') << "Type: " << node->GetType()
-             << std::endl;
+    ostream_ << node->GetType();
 }
 
 void CodeGenerator::VisitNoOp(
     const std::shared_ptr<code_generation::NoOp> &node) {
-    ostream_ << string(indent_level_, ' ') << "NoOp" << std::endl;
+    ostream_ << ";" << endl;
 }
 
 void CodeGenerator::VisitBinOp(
@@ -123,8 +112,7 @@ void CodeGenerator::VisitOper(const shared_ptr<Oper> &node) {
 
 void CodeGenerator::VisitNum(
     const std::shared_ptr<code_generation::Num> &node) {
-    ostream_ << string(indent_level_, ' ') << "Num: " << node->GetValue()
-             << std::endl;
+    ostream_ << node->GetValue();
 }
 
 const string CodeGenerator::Indent() const {
