@@ -12,7 +12,7 @@ class Visitor {
     virtual void VisitProgram(const std::shared_ptr<Program> &node) = 0;
     virtual void VisitBlock(const std::shared_ptr<Block> &node) = 0;
     virtual void VisitDeclaration(const std::shared_ptr<Declaration> &node) = 0;
-    virtual void VisitVarDecl(const std::shared_ptr<VarDecl> &node) = 0;
+    virtual void VisitVarDecl(const std::shared_ptr<VarDeclaration> &node) = 0;
     virtual void VisitCompound(const std::shared_ptr<Compound> &node) = 0;
     virtual void VisitBinOp(const std::shared_ptr<BinOp> &node) = 0;
     virtual void VisitOper(const std::shared_ptr<Oper> &node) = 0;

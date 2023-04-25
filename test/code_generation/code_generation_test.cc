@@ -29,12 +29,12 @@ std::shared_ptr<Program> SimpleProgramAST() {
     const auto token_x = std::make_shared<Token>(TokenType::INTEGER, "x");
     const auto var_x = std::make_shared<Var>(std::move(token_x));
     const auto var_decl_x =
-        std::make_shared<VarDecl>(std::move(var_x), std::move(type_int));
+        std::make_shared<VarDeclaration>(std::move(var_x), std::move(type_int));
 
     const auto token_y = std::make_shared<Token>(TokenType::INTEGER, "y");
     const auto var_y = std::make_shared<Var>(std::move(token_y));
     const auto var_decl_y =
-        std::make_shared<VarDecl>(std::move(var_y), std::move(type_int));
+        std::make_shared<VarDeclaration>(std::move(var_y), std::move(type_int));
 
     declarations->push_back(std::move(var_decl_x));
     declarations->push_back(std::move(var_decl_y));

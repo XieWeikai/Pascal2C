@@ -1,5 +1,6 @@
 #ifndef PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
+#include <utility>
 #pragma once
 #include <memory>
 #include <string>
@@ -51,6 +52,7 @@ class Declaration : public ASTNode {
   private:
     vector<std::shared_ptr<ASTNode>> declaration_;
 };
+
 class Block : public ASTNode {
   public:
     Block(const std::shared_ptr<Declaration> &declarations,
@@ -70,19 +72,55 @@ class Block : public ASTNode {
 
 class Var;
 class Type;
-class VarDecl : public ASTNode {
+class VarDeclaration : public ASTNode {
   public:
-    VarDecl(const std::shared_ptr<Var> &var_node,
-            const std::shared_ptr<Type> &type_node)
+    VarDeclaration(const std::shared_ptr<Var> &var_node,
+                   const std::shared_ptr<Type> &type_node)
         : var_node_(var_node), type_node_(type_node){};
     void Accept(Visitor &visitor) override;
-    virtual ~VarDecl();
+    virtual ~VarDeclaration();
     const std::shared_ptr<Var> &GetVarNode() const { return var_node_; }
     const std::shared_ptr<Type> &GetTypeNode() const { return type_node_; }
 
   private:
     std::shared_ptr<Var> var_node_;
     std::shared_ptr<Type> type_node_;
+};
+
+class Const;
+class ConstDeclaration : public ASTNode {
+  public:
+    ConstDeclaration(const std::shared_ptr<Const> &const_node,
+                     const std::shared_ptr<Type> &type_node)
+        : const_node_(const_node), type_node_(type_node) {}
+    void Accept(Visitor &visitor) override;
+    virtual ~ConstDeclaration();
+    const std::shared_ptr<Const> &GetConstNode() const { return const_node_; }
+    const std::shared_ptr<Type> &GetTypeNode() const { return type_node_; }
+
+  private:
+    std::shared_ptr<Const> const_node_;
+    std::shared_ptr<Type> type_node_;
+};
+
+class ArrayDeclaration : public ASTNode {
+  public:
+    ArrayDeclaration(const std::shared_ptr<Var> &var_node,
+                     const std::shared_ptr<Type> &type_node,
+                     const std::vector<std::pair<int, int>> &bounds)
+        : var_node_(var_node), type_node_(type_node), bounds_(bounds) {}
+    void Accept(Visitor &visitor) override;
+    virtual ~ArrayDeclaration();
+    const std::shared_ptr<Var> &GetVarNode() const { return var_node_; }
+    const std::shared_ptr<Type> &GetTypeNode() const { return type_node_; }
+    const std::vector<std::pair<int, int>> &GetBounds() const {
+        return bounds_;
+    }
+
+  private:
+    std::shared_ptr<Var> var_node_;
+    std::shared_ptr<Type> type_node_;
+    std::vector<std::pair<int, int>> bounds_;
 };
 
 class Type : public ASTNode {
@@ -126,8 +164,19 @@ class Assign : public ASTNode {
 
 class Var : public ASTNode {
   public:
-    Var(const std::shared_ptr<Token> &token) : value_(token->GetValue()){};
+    Var(const std::shared_ptr<Token> &token) : value_(token->GetValue()) {}
     virtual ~Var();
+    void Accept(Visitor &visitor) override;
+    const string GetValue() const { return value_; }
+
+  private:
+    string value_;
+};
+
+class Const : public ASTNode {
+  public:
+    Const(const std::shared_ptr<Token> &token) : value_(token->GetValue()) {}
+    virtual ~Const();
     void Accept(Visitor &visitor) override;
     const string GetValue() const { return value_; }
 

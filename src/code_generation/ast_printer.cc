@@ -43,7 +43,7 @@ void ASTPrinter::VisitDeclaration(const shared_ptr<Declaration> &node) {
     ostream_ << string(indent_level_, ' ') << "Declaration: " << endl;
     indent_level_++;
     for (const auto &it : node->GetDeclarations()) {
-        auto var_decl = dynamic_pointer_cast<VarDecl>(it);
+        auto var_decl = dynamic_pointer_cast<VarDeclaration>(it);
         if (var_decl == nullptr) {
             throw runtime_error(
                 "Failed to cast Declaration ASTNode into VarDecl");
@@ -53,7 +53,7 @@ void ASTPrinter::VisitDeclaration(const shared_ptr<Declaration> &node) {
     indent_level_--;
 }
 
-void ASTPrinter::VisitVarDecl(const shared_ptr<VarDecl> &node) {
+void ASTPrinter::VisitVarDecl(const shared_ptr<VarDeclaration> &node) {
     ostream_ << string(indent_level_, ' ')
              << "VarDecl: " << node->GetVarNode()->GetValue() << ": "
              << node->GetTypeNode()->GetType() << endl;
