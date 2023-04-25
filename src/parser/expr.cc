@@ -37,9 +37,9 @@ namespace pascal2c::parser {
             sprintf(buff,"%d:%d: parse expression error: no expected token",line_,column_);
             throw SyntaxErr(buff);
         }
-        auto statement = std::move((this->*prefix_parser_[token_])());
-        statement->SetLineAndColumn(begin_column,begin_line);
-        return std::move(statement);
+        auto expr = std::move((this->*prefix_parser_[token_])());
+        expr->SetLineAndColumn(begin_line,begin_column);
+        return std::move(expr);
     }
 
     std::shared_ptr<ast::Expression> Parser::ParseParen(){
@@ -140,7 +140,7 @@ namespace pascal2c::parser {
             op = token_;
             precedence = binary_prec[op];
         }
-        lhs->SetLineAndColumn(begin_column,begin_line);
+        lhs->SetLineAndColumn(begin_line,begin_column);
         return std::move(lhs);
     }
 
