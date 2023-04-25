@@ -16,8 +16,6 @@ void CodeGenerator::Interpret() {
 
 const string CodeGenerator::GetCCode() const { return ostream_.str(); }
 
-// TODO: Re-implement this method. Now it just visits BinOp and Num
-// And lead its output into ostream_
 void CodeGenerator::Visit(
     const std::shared_ptr<code_generation::ASTNode> &node) {
     node->Accept(*this);
@@ -42,8 +40,10 @@ void CodeGenerator::VisitBlock(
     indent_level_--;
 }
 
-void CodeGenerator::VisitVarDecl(
-    const std::shared_ptr<code_generation::VarDecl> &node) {
+void CodeGenerator::VisitDeclaration()
+
+    void CodeGenerator::VisitVarDecl(
+        const std::shared_ptr<code_generation::VarDecl> &node) {
     ostream_ << string(indent_level_, ' ')
              << "VarDecl: " << node->GetVarNode()->GetValue() << ": "
              << node->GetTypeNode()->GetType() << std::endl;
