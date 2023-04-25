@@ -254,6 +254,8 @@ namespace pascal2c::parser
 
         std::shared_ptr<ast::Expression> ParseStringAndChar();
 
+        std::shared_ptr<ast::Expression> ParseBoolean();
+
         std::shared_ptr<ast::Statement> ParseStatement();
 
         std::shared_ptr<ast::Statement> ParseIFStatement();

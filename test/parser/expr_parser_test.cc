@@ -112,7 +112,10 @@ namespace pascal2c::parser {
                                 "-(1 + 2) * 3  ;\n"
                                 "(-(1 + 2) * 3 <= 5) and (3 > 4) or (4 < 3) ;\n"
                                 "(-(1 + 2) * 3 <= 5) or (3 > 4) and (4 < 3) ;\n"
-                                "1 + 'a' + 'abc' + a + b \n";
+                                "1 + 'a' + 'abc' + a + b \n"
+                                "true or false and true ;\n"
+                                "(true or false) and true ;\n"
+                                "true or (false and true) ;\n";
         FILE *input = fmemopen((void *)input_str, strlen(input_str),"r");
         Parser par(input);
 
@@ -243,7 +246,37 @@ namespace pascal2c::parser {
                 "    rhs :\n"
                 "        CallOrVar: a\n"
                 "rhs :\n"
-                "    CallOrVar: b\n\n";
+                "    CallOrVar: b\n"
+                "\n"
+                "binary_op:'o'\n"
+                "lhs :\n"
+                "    true\n"
+                "rhs :\n"
+                "    binary_op:'a'\n"
+                "    lhs :\n"
+                "        false\n"
+                "    rhs :\n"
+                "        true\n"
+                "\n"
+                "binary_op:'a'\n"
+                "lhs :\n"
+                "    binary_op:'o'\n"
+                "    lhs :\n"
+                "        true\n"
+                "    rhs :\n"
+                "        false\n"
+                "rhs :\n"
+                "    true\n"
+                "\n"
+                "binary_op:'o'\n"
+                "lhs :\n"
+                "    true\n"
+                "rhs :\n"
+                "    binary_op:'a'\n"
+                "    lhs :\n"
+                "        false\n"
+                "    rhs :\n"
+                "        true\n\n";
         std::stringstream str_s;
         while(par.token_ != 0){
             auto expr = par.ParseExpr();

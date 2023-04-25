@@ -112,7 +112,10 @@ namespace pascal2c
     {
         std::stringstream str_s;
         IndentOutput(str_s, level);
-        str_s << value_;
+        if(value_)
+            str_s << "true";
+        else
+            str_s << "false";
         return str_s.str();
     }
 

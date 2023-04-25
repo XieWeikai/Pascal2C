@@ -85,6 +85,16 @@ namespace pascal2c::parser {
         return std::move(res);
     }
 
+    std::shared_ptr<ast::Expression> Parser::ParseBoolean() {
+        std::shared_ptr<ast::Expression> res;
+        if(token_ == TOK_TRUE)
+            res = std::move(std::make_shared<ast::BooleanValue>(true));
+        else
+            res = std::move(std::make_shared<ast::BooleanValue>(false));
+        NextToken();
+        return std::move(res);
+    }
+
     std::shared_ptr<ast::Expression> Parser::ParseVariableAndCall(){
         std::string id = text_;
         int ch;
