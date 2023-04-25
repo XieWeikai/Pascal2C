@@ -16,33 +16,28 @@ class CodeGenerator : Visitor {
   public:
     explicit CodeGenerator(std::shared_ptr<code_generation::ASTRoot> ast)
         : ast_(ast) {}
-    // TODO: Output of Visit save into ostream
     void Interpret();
     const string GetCCode() const;
 
   private:
-    void Visit(const std::shared_ptr<code_generation::ASTNode> &node) override;
-    void
-    VisitBinOp(const std::shared_ptr<code_generation::BinOp> &node) override;
-    void VisitNum(const std::shared_ptr<code_generation::Num> &node) override;
-    void VisitType(const std::shared_ptr<code_generation::Type> &node) override;
-    void VisitProgram(
-        const std::shared_ptr<code_generation::Program> &node) override;
-    void
-    VisitBlock(const std::shared_ptr<code_generation::Block> &node) override;
-    void VisitVarDecl(
-        const std::shared_ptr<code_generation::VarDecl> &node) override;
-    void VisitCompound(
-        const std::shared_ptr<code_generation::Compound> &node) override;
-    void
-    VisitAssign(const std::shared_ptr<code_generation::Assign> &node) override;
-    void VisitVar(const std::shared_ptr<code_generation::Var> &node) override;
-    void VisitNoOp(const std::shared_ptr<code_generation::NoOp> &node) override;
+    virtual void Visit(const std::shared_ptr<ASTNode> &node) override;
+    virtual void VisitProgram(const std::shared_ptr<Program> &node) override;
+    void virtual VisitBlock(const std::shared_ptr<Block> &node) override;
+    virtual void
+    VisitDeclaration(const std::shared_ptr<Declaration> &node) override;
+    virtual void VisitVarDecl(const std::shared_ptr<VarDecl> &node) override;
+    virtual void VisitCompound(const std::shared_ptr<Compound> &node) override;
+    void virtual VisitBinOp(const std::shared_ptr<BinOp> &node) override;
+    virtual void VisitNum(const std::shared_ptr<Num> &node) override;
+    virtual void VisitType(const std::shared_ptr<Type> &node) override;
+    void virtual VisitAssign(const std::shared_ptr<Assign> &node) override;
+    virtual void VisitVar(const std::shared_ptr<Var> &node) override;
+    virtual void VisitNoOp(const std::shared_ptr<NoOp> &node) override;
 
     // AST root node
-    std::shared_ptr<code_generation::ASTRoot> ast_;
+    std::shared_ptr<ASTRoot> ast_;
     // Global Scope symbols
-    vector<code_generation::ASTNode> global_scope_;
+    vector<ASTNode> global_scope_;
     // ostream
     std::stringstream ostream_;
     // Current indent level

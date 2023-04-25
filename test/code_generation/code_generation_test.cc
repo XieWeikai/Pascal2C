@@ -105,8 +105,9 @@ end.
 
     string expected_ast = R"(Program: Simple
  Block
-  VarDecl: x: integer
-  VarDecl: y: integer
+  Declaration: 
+   VarDecl: x: integer
+   VarDecl: y: integer
   Compound
    Assign
     Left:
