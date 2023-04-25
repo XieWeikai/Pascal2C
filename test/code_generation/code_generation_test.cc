@@ -147,14 +147,17 @@ end.
     auto generated_ccode = code_generator->GetCCode();
 
     string expected_c_code = "#include <stdio.h>\n"
+                             "#include <stdlib.h>\n"
                              "\n"
-                             "int main() {\n"
+                             "// Simple\n"
+                             "int main(int argc, char* argv[]) {\n"
                              "    int x;\n"
                              "    int y;\n"
                              "    x = (2 + 3);\n"
                              "    y = (x - 1);\n"
                              "    return 0;\n"
-                             "}\n";
+                             "}\n"
+                             "// Simple\n";
     EXPECT_EQ(generated_ccode, expected_c_code);
 }
 } // namespace code_generation

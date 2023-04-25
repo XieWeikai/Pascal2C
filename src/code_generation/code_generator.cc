@@ -27,24 +27,26 @@ void CodeGenerator::Visit(
 
 void CodeGenerator::VisitProgram(
     const std::shared_ptr<code_generation::Program> &node) {
-    ostream_ << "Program: " << node->GetName() << std::endl;
+    ostream_ << "#include <stdio.h>" << endl
+             << "#include <stdlib.h>" << endl
+             << endl;
+    ostream_ << "// " << node->GetName() << endl;
+    ostream_ << "int main(int argc, char* argv[]) {" << endl;
+
     indent_level_++;
     Visit(node->GetBlock());
+    ostream_ << Indent() << "return 0;" << endl;
     indent_level_--;
+    ostream_ << "}" << endl << "// " << node->GetName() << endl;
 }
 
 void CodeGenerator::VisitBlock(
     const std::shared_ptr<code_generation::Block> &node) {
-    ostream_ << string(indent_level_, ' ') << "Block" << std::endl;
-    indent_level_++;
     Visit(node->GetDeclatation());
     Visit(node->GetCompoundStatement());
-    indent_level_--;
 }
 
 void CodeGenerator::VisitDeclaration(const shared_ptr<Declaration> &node) {
-    ostream_ << string(indent_level_, ' ') << "Declaration: " << endl;
-    indent_level_++;
     for (const auto &it : node->GetDeclarations()) {
         auto var_decl = dynamic_pointer_cast<VarDecl>(it);
         if (var_decl == nullptr) {
@@ -53,14 +55,12 @@ void CodeGenerator::VisitDeclaration(const shared_ptr<Declaration> &node) {
         }
         VisitVarDecl(var_decl);
     }
-    indent_level_--;
 }
 
-    void CodeGenerator::VisitVarDecl(
-        const std::shared_ptr<code_generation::VarDecl> &node) {
-    ostream_ << string(indent_level_, ' ')
-             << "VarDecl: " << node->GetVarNode()->GetValue() << ": "
-             << node->GetTypeNode()->GetType() << std::endl;
+void CodeGenerator::VisitVarDecl(
+    const std::shared_ptr<code_generation::VarDecl> &node) {
+    ostream_ << Indent() << node->GetTypeNode()->GetType() << ' '
+             << node->GetVarNode()->GetValue() << ';' << endl;
 }
 
 void CodeGenerator::VisitCompound(
@@ -127,5 +127,8 @@ void CodeGenerator::VisitNum(
              << std::endl;
 }
 
+const string CodeGenerator::Indent() const {
+    return string(indent_level_ * 4, ' ');
+}
 } // namespace code_generation
 } // namespace pascal2c
