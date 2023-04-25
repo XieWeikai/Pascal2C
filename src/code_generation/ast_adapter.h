@@ -25,21 +25,20 @@ class ASTNode : public std::enable_shared_from_this<ASTNode> {
 // ASTRoot is an alias of ASTNode, represents root node of the AST.
 typedef ASTNode ASTRoot;
 
-class Block;
-class Program : public ASTNode {
+class Compound : public ASTNode {
   public:
-    Program(const string &name, const std::shared_ptr<Block> &block)
-        : name_(name), block_(block){};
+    Compound(){};
+    explicit Compound(const std::vector<std::shared_ptr<ASTNode>> &children);
     void Accept(Visitor &visitor) override;
-    string GetName() const { return name_; }
-    const std::shared_ptr<Block> &GetBlock() const { return block_; }
+    void AddChild(std::shared_ptr<ASTNode> node);
+    const vector<std::shared_ptr<ASTNode>> &GetChildren() const {
+        return children_;
+    }
 
   private:
-    string name_;
-    std::shared_ptr<Block> block_;
+    vector<std::shared_ptr<ASTNode>> children_;
 };
 
-class Compound;
 class Declaration : public ASTNode {
   public:
     Declaration(const vector<std::shared_ptr<ASTNode>> &declarations)
@@ -70,8 +69,41 @@ class Block : public ASTNode {
     std::shared_ptr<Compound> compound_statement_;
 };
 
-class Var;
-class Type;
+class Program : public ASTNode {
+  public:
+    Program(const string &name, const std::shared_ptr<Block> &block)
+        : name_(name), block_(block){};
+    void Accept(Visitor &visitor) override;
+    string GetName() const { return name_; }
+    const std::shared_ptr<Block> &GetBlock() const { return block_; }
+
+  private:
+    string name_;
+    std::shared_ptr<Block> block_;
+};
+
+class Var : public ASTNode {
+  public:
+    Var(const std::shared_ptr<Token> &token) : value_(token->GetValue()) {}
+    virtual ~Var();
+    void Accept(Visitor &visitor) override;
+    const string GetValue() const { return value_; }
+
+  private:
+    string value_;
+};
+
+class Type : public ASTNode {
+  public:
+    Type(const std::shared_ptr<Token> &token) : type_(token->GetValue()){};
+    virtual ~Type();
+    void Accept(Visitor &visitor) override;
+    const string GetType() const { return type_; }
+
+  private:
+    string type_;
+};
+
 class VarDeclaration : public ASTNode {
   public:
     VarDeclaration(const std::shared_ptr<Var> &var_node,
@@ -87,7 +119,17 @@ class VarDeclaration : public ASTNode {
     std::shared_ptr<Type> type_node_;
 };
 
-class Const;
+class Const : public ASTNode {
+  public:
+    Const(const std::shared_ptr<Token> &token) : value_(token->GetValue()) {}
+    virtual ~Const();
+    void Accept(Visitor &visitor) override;
+    const string GetValue() const { return value_; }
+
+  private:
+    string value_;
+};
+
 class ConstDeclaration : public ASTNode {
   public:
     ConstDeclaration(const std::shared_ptr<Const> &const_node,
@@ -123,31 +165,6 @@ class ArrayDeclaration : public ASTNode {
     std::vector<std::pair<int, int>> bounds_;
 };
 
-class Type : public ASTNode {
-  public:
-    Type(const std::shared_ptr<Token> &token) : type_(token->GetValue()){};
-    virtual ~Type();
-    void Accept(Visitor &visitor) override;
-    const string GetType() const { return type_; }
-
-  private:
-    string type_;
-};
-
-class Compound : public ASTNode {
-  public:
-    Compound(){};
-    explicit Compound(const std::vector<std::shared_ptr<ASTNode>> &children);
-    void Accept(Visitor &visitor) override;
-    void AddChild(std::shared_ptr<ASTNode> node);
-    const vector<std::shared_ptr<ASTNode>> &GetChildren() const {
-        return children_;
-    }
-
-  private:
-    vector<std::shared_ptr<ASTNode>> children_;
-};
-
 class Assign : public ASTNode {
   public:
     Assign(const std::shared_ptr<ASTNode> &left,
@@ -160,28 +177,6 @@ class Assign : public ASTNode {
   private:
     std::shared_ptr<ASTNode> left_;
     std::shared_ptr<ASTNode> right_;
-};
-
-class Var : public ASTNode {
-  public:
-    Var(const std::shared_ptr<Token> &token) : value_(token->GetValue()) {}
-    virtual ~Var();
-    void Accept(Visitor &visitor) override;
-    const string GetValue() const { return value_; }
-
-  private:
-    string value_;
-};
-
-class Const : public ASTNode {
-  public:
-    Const(const std::shared_ptr<Token> &token) : value_(token->GetValue()) {}
-    virtual ~Const();
-    void Accept(Visitor &visitor) override;
-    const string GetValue() const { return value_; }
-
-  private:
-    string value_;
 };
 
 class Term : public ASTNode {
