@@ -29,6 +29,7 @@ char* TokenToString(int token);
 void yyreset(FILE *in);
 extern int yylineno;
 extern int yycolno;
+extern int yycolno_next;
 extern int yyerrno;
 extern char* YYERRMSG[];
 extern char* yytext;
