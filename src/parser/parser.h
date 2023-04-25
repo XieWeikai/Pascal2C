@@ -78,6 +78,7 @@ namespace pascal2c::parser
 
     private:
         FRIEND_TEST(TokenTest, TestNextToken);
+        FRIEND_TEST(ProgramParserTest, TestParse);
         FRIEND_TEST(ProgramParserTest, TestParseProgram);
         FRIEND_TEST(ProgramParserTest, TestParseProgramHead);
         FRIEND_TEST(ProgramParserTest, TestParseProgramBody);

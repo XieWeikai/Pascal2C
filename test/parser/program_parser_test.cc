@@ -43,6 +43,22 @@ namespace pascal2c::parser
     using vector = ::std::vector<Tp>;
     using string = ::std::string;
 
+    TEST(ProgramParserTest, TestParse)
+    {
+        FILE *input = fopen("../example/example2.pas", "r");
+        Parser par(input);
+        auto expr = par.Parse();
+        const vector<std::string> &err_messages = par.err_msg();
+        for (std::string err_message : err_messages)
+        {
+            std::cout << err_message << std::endl;
+        }
+        std::cout << expr->ToString(0) << std::endl
+                  << std::endl;
+        //EXPECT_EQ(par.err_msg(), errs[i]);                                        \
+        EXPECT_EQ(expr->ToString(0), results[i]);
+    }
+
     TEST(ProgramParserTest, TestParseProgram)
     {
         const vector<string> input_strs = {
