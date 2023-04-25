@@ -9,7 +9,7 @@
 
 namespace pascal2c {
 namespace code_generation {
-using string = ::std::string;
+using ::std::string;
 template <typename Tp> using vector = ::std::vector<Tp>;
 
 class Visitor;
