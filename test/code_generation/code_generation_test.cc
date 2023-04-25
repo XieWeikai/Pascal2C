@@ -98,7 +98,8 @@ end.
 
     auto program = SimpleProgramAST();
     EXPECT_EQ(program->GetName(), "Simple");
-    EXPECT_EQ(program->GetBlock()->GetDeclarations().size(), 2);
+    EXPECT_EQ(program->GetBlock()->GetDeclatation()->GetDeclarations().size(),
+              2);
     auto ast_printer = std::make_shared<ASTPrinter>(program);
     ast_printer->Visit();
     string printed_ast = ast_printer->ToString();
@@ -113,15 +114,17 @@ end.
     Left:
      Var: x
     Right:
-     BinOp: PLUS
+     BinOp:
       Num: 2
+      Oper: PLUS
       Num: 3
    Assign
     Left:
      Var: y
     Right:
-     BinOp: MINUS
+     BinOp:
       Var: x
+      Oper: MINUS
       Num: 1
 )";
 

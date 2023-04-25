@@ -56,8 +56,8 @@ class Block : public ASTNode {
     Block(const std::shared_ptr<Declaration> &declarations,
           const std::shared_ptr<Compound> &compound_statement);
     void Accept(Visitor &visitor) override;
-    const vector<std::shared_ptr<ASTNode>> &GetDeclarations() const {
-        return declarations_->GetDeclarations();
+    const std::shared_ptr<Declaration> &GetDeclatation() const {
+        return declarations_;
     }
     const std::shared_ptr<Compound> &GetCompoundStatement() const {
         return compound_statement_;

@@ -37,9 +37,7 @@ void CodeGenerator::VisitBlock(
     const std::shared_ptr<code_generation::Block> &node) {
     ostream_ << string(indent_level_, ' ') << "Block" << std::endl;
     indent_level_++;
-    for (auto decl : node->GetDeclarations()) {
-        Visit(decl);
-    }
+    Visit(node->GetDeclatation());
     Visit(node->GetCompoundStatement());
     indent_level_--;
 }

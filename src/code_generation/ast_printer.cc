@@ -19,31 +19,8 @@ void ASTPrinter::Visit() {
     auto program = dynamic_pointer_cast<Program>(ast_);
     Visit(program);
 }
-void ASTPrinter::Visit(const shared_ptr<ASTNode> &node) {
-    if (dynamic_pointer_cast<Program>(node)) {
-        VisitProgram(dynamic_pointer_cast<Program>(node));
-    } else if (dynamic_pointer_cast<Block>(node)) {
-        VisitBlock(dynamic_pointer_cast<Block>(node));
-    } else if (dynamic_pointer_cast<VarDecl>(node)) {
-        VisitVarDecl(dynamic_pointer_cast<VarDecl>(node));
-    } else if (dynamic_pointer_cast<Type>(node)) {
-        VisitType(dynamic_pointer_cast<Type>(node));
-    } else if (dynamic_pointer_cast<Compound>(node)) {
-        VisitCompound(dynamic_pointer_cast<Compound>(node));
-    } else if (dynamic_pointer_cast<Assign>(node)) {
-        VisitAssign(dynamic_pointer_cast<Assign>(node));
-    } else if (dynamic_pointer_cast<Var>(node)) {
-        VisitVar(dynamic_pointer_cast<Var>(node));
-    } else if (dynamic_pointer_cast<NoOp>(node)) {
-        VisitNoOp(dynamic_pointer_cast<NoOp>(node));
-    } else if (dynamic_pointer_cast<BinOp>(node)) {
-        VisitBinOp(dynamic_pointer_cast<BinOp>(node));
-    } else if (dynamic_pointer_cast<Num>(node)) {
-        VisitNum(dynamic_pointer_cast<Num>(node));
-    } else {
-        throw runtime_error("Invalid node type");
-    }
-}
+
+void ASTPrinter::Visit(const shared_ptr<ASTNode> &node) { node->Accept(*this); }
 
 void ASTPrinter::VisitProgram(const shared_ptr<Program> &node) {
     ostream_ << "Program: " << node->GetName() << endl;
@@ -55,9 +32,7 @@ void ASTPrinter::VisitProgram(const shared_ptr<Program> &node) {
 void ASTPrinter::VisitBlock(const shared_ptr<Block> &node) {
     ostream_ << string(indent_level_, ' ') << "Block" << endl;
     indent_level_++;
-    for (auto decl : node->GetDeclarations()) {
-        Visit(decl);
-    }
+    Visit(node->GetDeclatation());
     Visit(node->GetCompoundStatement());
     indent_level_--;
 }
@@ -123,12 +98,17 @@ void ASTPrinter::VisitNoOp(const shared_ptr<NoOp> &node) {
 }
 
 void ASTPrinter::VisitBinOp(const shared_ptr<BinOp> &node) {
-    ostream_ << string(indent_level_, ' ')
-             << "BinOp: " << node->GetOper()->GetType().ToString() << endl;
+    ostream_ << string(indent_level_, ' ') << "BinOp:" << endl;
     indent_level_++;
     Visit(node->GetLeft());
+    Visit(node->GetOper());
     Visit(node->GetRight());
     indent_level_--;
+}
+
+void ASTPrinter::VisitOper(const shared_ptr<Oper> &node) {
+    ostream_ << string(indent_level_, ' ')
+             << "Oper: " << node->GetType().ToString() << endl;
 }
 
 void ASTPrinter::VisitNum(const shared_ptr<Num> &node) {
