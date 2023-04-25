@@ -71,7 +71,7 @@ void Num::Accept(Visitor &visitor) {
 }
 
 // Type
-// Type::~Type() { token_.reset(); }
+Type::~Type() {}
 void Type::Accept(Visitor &visitor) {
     visitor.VisitType(dynamic_pointer_cast<Type>(shared_from_this()));
 }
