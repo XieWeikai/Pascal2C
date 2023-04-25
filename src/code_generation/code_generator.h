@@ -38,6 +38,8 @@ class CodeGenerator : Visitor {
     virtual void VisitNoOp(const std::shared_ptr<NoOp> &node) override;
 
     const string Indent() const;
+    void IncIndent();
+    void DecIndent();
     const string TypeToC(const string &pascal_type) const;
     const string eol_ = ";\n";
 

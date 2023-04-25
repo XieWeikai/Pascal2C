@@ -36,17 +36,17 @@ void CodeGenerator::VisitProgram(
     ostream_ << "// " << node->GetName() << endl;
     ostream_ << "int main(int argc, char* argv[]) {" << endl;
 
-    indent_level_++;
-    Visit(node->GetBlock(), true);
+    IncIndent();
+    Visit(node->GetBlock());
     ostream_ << Indent() << "return 0;" << endl;
-    indent_level_--;
+    DecIndent();
     ostream_ << "}" << endl << "// " << node->GetName() << endl;
 }
 
 void CodeGenerator::VisitBlock(
     const std::shared_ptr<code_generation::Block> &node) {
-    Visit(node->GetDeclatation(), true);
-    Visit(node->GetCompoundStatement(), true);
+    Visit(node->GetDeclatation());
+    Visit(node->GetCompoundStatement());
 }
 
 void CodeGenerator::VisitDeclaration(const shared_ptr<Declaration> &node) {
@@ -62,7 +62,8 @@ void CodeGenerator::VisitDeclaration(const shared_ptr<Declaration> &node) {
 
 void CodeGenerator::VisitVarDecl(
     const std::shared_ptr<code_generation::VarDecl> &node) {
-    Visit(node->GetTypeNode(), true);
+    Visit(node->GetTypeNode());
+    ostream_ << " ";
     Visit(node->GetVarNode());
     ostream_ << eol_;
 }
@@ -70,7 +71,7 @@ void CodeGenerator::VisitVarDecl(
 void CodeGenerator::VisitCompound(
     const std::shared_ptr<code_generation::Compound> &node) {
     for (const auto &child : node->GetChildren()) {
-        Visit(child, true);
+        Visit(child);
     }
 }
 
@@ -89,7 +90,7 @@ void CodeGenerator::VisitVar(
 
 void CodeGenerator::VisitType(
     const std::shared_ptr<code_generation::Type> &node) {
-    ostream_ << node->GetType();
+    ostream_ << TypeToC(node->GetType());
 }
 
 void CodeGenerator::VisitNoOp(
@@ -99,15 +100,19 @@ void CodeGenerator::VisitNoOp(
 
 void CodeGenerator::VisitBinOp(
     const std::shared_ptr<code_generation::BinOp> &node) {
-    indent_level_++;
+    IncIndent();
+    ostream_ << '(';
     Visit(node->GetLeft());
+    ostream_ << ' ';
     Visit(node->GetOper());
+    ostream_ << ' ';
     Visit(node->GetRight());
-    indent_level_--;
+    ostream_ << ')';
+    DecIndent();
 }
 
 void CodeGenerator::VisitOper(const shared_ptr<Oper> &node) {
-    ostream_ << node->GetType().ToString();
+    ostream_ << TypeToC(node->GetType().ToString());
 }
 
 void CodeGenerator::VisitNum(
@@ -118,6 +123,10 @@ void CodeGenerator::VisitNum(
 const string CodeGenerator::Indent() const {
     return string(indent_level_ * 4, ' ');
 }
+
+void CodeGenerator::IncIndent() { indent_level_++; }
+
+void CodeGenerator::DecIndent() { indent_level_--; }
 
 const string CodeGenerator::TypeToC(const string &pascal_type) const {
     return type_tool_kit_.TypeToC(pascal_type);

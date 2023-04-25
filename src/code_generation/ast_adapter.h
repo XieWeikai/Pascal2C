@@ -126,14 +126,12 @@ class Assign : public ASTNode {
 
 class Var : public ASTNode {
   public:
-    Var(const std::shared_ptr<Token> &token)
-        : token_(token), value_(token->GetValue()){};
+    Var(const std::shared_ptr<Token> &token) : value_(token->GetValue()){};
     virtual ~Var();
     void Accept(Visitor &visitor) override;
     const string GetValue() const { return value_; }
 
   private:
-    std::shared_ptr<Token> token_;
     string value_;
 };
 
@@ -155,25 +153,28 @@ class Factor : public ASTNode {
  * Expr e1 = Expr(2, +, 3);
  * Expr e2 = Expr(e1, -, 1);
  */
-class Expr : public ASTNode {
+class Statement : public ASTNode {
   public:
-    Expr() {}
+    Statement() {}
     void Accept(Visitor &visitor) override;
 
   private:
+    std::shared_ptr<ASTNode> left_hand_;
+    std::shared_ptr<ASTNode> right_hand_;
     vector<std::shared_ptr<ASTNode>> children_;
 };
+
+class IfStatement : public ASTNode {};
 
 class Num : public ASTNode {
   public:
     Num(const std::shared_ptr<Token> &token)
-        : token_(token), value_(std::stoi(token->GetValue())) {}
+        : value_(std::stoi(token->GetValue())) {}
     ~Num();
     void Accept(Visitor &visitor) override;
     int GetValue() const { return (value_); }
 
   private:
-    std::shared_ptr<Token> token_;
     int value_;
 };
 
@@ -181,13 +182,12 @@ class Num : public ASTNode {
 class Oper : public ASTNode {
   public:
     Oper(const std::shared_ptr<Token> &oper)
-        : oper_(oper), type_(oper->GetType()), value_(oper->GetValue()) {}
+        : type_(oper->GetType()), value_(oper->GetValue()) {}
     virtual ~Oper();
     void Accept(Visitor &visitor) override;
     const TokenType GetType() { return type_; };
 
   private:
-    std::shared_ptr<Token> oper_;
     TokenType type_;
     string value_;
 };

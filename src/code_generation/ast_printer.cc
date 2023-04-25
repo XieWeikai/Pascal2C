@@ -20,7 +20,9 @@ void ASTPrinter::Visit() {
     Visit(program);
 }
 
-void ASTPrinter::Visit(const shared_ptr<ASTNode> &node) { node->Accept(*this); }
+void ASTPrinter::Visit(const shared_ptr<ASTNode> &node, bool indent) {
+    node->Accept(*this);
+}
 
 void ASTPrinter::VisitProgram(const shared_ptr<Program> &node) {
     ostream_ << "Program: " << node->GetName() << endl;

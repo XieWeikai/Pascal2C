@@ -12,9 +12,9 @@ VarDecl::~VarDecl() {
     type_node_.reset();
 }
 
-Var::~Var() { token_.reset(); }
-Oper::~Oper() { oper_.reset(); }
-Num::~Num() { token_.reset(); }
+Var::~Var() {}
+Oper::~Oper() {}
+Num::~Num() {}
 
 // Program
 void Program::Accept(Visitor &visitor) {

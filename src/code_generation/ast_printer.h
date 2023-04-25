@@ -22,7 +22,8 @@ class ASTPrinter : Visitor {
     string ToString() const;
 
   private:
-    virtual void Visit(const std::shared_ptr<ASTNode> &node) override;
+    virtual void Visit(const std::shared_ptr<ASTNode> &node,
+                       bool indent = false) override;
     virtual void VisitProgram(const std::shared_ptr<Program> &node) override;
     virtual void VisitBlock(const std::shared_ptr<Block> &node) override;
     virtual void
