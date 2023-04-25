@@ -5,6 +5,7 @@
 #include <string>
 
 #include "ast_adapter.h"
+#include "code_generation/type_adaper.h"
 #include "visitor.h"
 
 namespace pascal2c {
@@ -15,7 +16,7 @@ template <typename T> using vector = ::std::vector<T>;
 class CodeGenerator : Visitor {
   public:
     explicit CodeGenerator(std::shared_ptr<code_generation::ASTRoot> ast)
-        : ast_(ast) {}
+        : ast_(ast), type_tool_kit_() {}
     void Interpret();
     const string GetCCode() const;
 
@@ -34,9 +35,10 @@ class CodeGenerator : Visitor {
     virtual void VisitAssign(const std::shared_ptr<Assign> &node) override;
     virtual void VisitVar(const std::shared_ptr<Var> &node) override;
     virtual void VisitNoOp(const std::shared_ptr<NoOp> &node) override;
-    const string Indent() const;
 
-    const string INDENTER = "  ";
+    const string Indent() const;
+    const string TypeToC(const string &pascal_type) const;
+
     // AST root node
     std::shared_ptr<ASTRoot> ast_;
     // Global Scope symbols
@@ -45,7 +47,11 @@ class CodeGenerator : Visitor {
     std::stringstream ostream_;
     // Current indent level
     int indent_level_;
+
+    // TypeToolKit for type conversion
+    const TypeToolKit type_tool_kit_;
 };
+
 } // namespace code_generation
 } // namespace pascal2c
 #endif // !PASCAL2C_SRC_CODE_GENERATION_CODE_GENERATION_H_

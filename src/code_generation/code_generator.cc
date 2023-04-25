@@ -59,7 +59,7 @@ void CodeGenerator::VisitDeclaration(const shared_ptr<Declaration> &node) {
 
 void CodeGenerator::VisitVarDecl(
     const std::shared_ptr<code_generation::VarDecl> &node) {
-    ostream_ << Indent() << node->GetTypeNode()->GetType() << ' '
+    ostream_ << Indent() << TypeToC(node->GetTypeNode()->GetType()) << ' '
              << node->GetVarNode()->GetValue() << ';' << endl;
 }
 
@@ -129,6 +129,10 @@ void CodeGenerator::VisitNum(
 
 const string CodeGenerator::Indent() const {
     return string(indent_level_ * 4, ' ');
+}
+
+const string CodeGenerator::TypeToC(const string &pascal_type) const {
+    return type_tool_kit_.TypeToC(pascal_type);
 }
 } // namespace code_generation
 } // namespace pascal2c
