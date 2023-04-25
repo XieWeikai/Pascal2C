@@ -23,15 +23,21 @@ namespace pascal2c::parser {
 
     std::shared_ptr<ast::Statement> Parser::ParseStatement(){
         static char buff[1024];
+        INIT_PARSE(line_,column_);
+        std::shared_ptr<ast::Statement> statement;
         switch (token_) {
             case TOK_IF:
-                return std::move(ParseIFStatement());
+                statement = std::move(ParseIFStatement());
+                break;
             case TOK_FOR:
-                return std::move(ParseForStatement());
+                statement =  std::move(ParseForStatement());
+                break;
             case TOK_BEGIN:
-                return std::move(ParseCompoundStatement());
+                statement = std::move(ParseCompoundStatement());
+                break;
             case TOK_ID:
-                return std::move(ParseAssignAndCallStatement());
+                statement = std::move(ParseAssignAndCallStatement());
+                break;
 
             default:
                 if(token_ == TOK_PROCEDURE || token_ == TOK_FUNCTION || token_ == TOK_VAR || token_ == TOK_CONST)
@@ -40,6 +46,8 @@ namespace pascal2c::parser {
                     sprintf(buff,"%d:%d: not expected token to parse statement",line_,column_);
                 throw SyntaxErr(buff);
         }
+        statement->SetLineAndColumn(begin_line,begin_column);
+        return std::move(statement);
     }
 
     std::shared_ptr<ast::Statement> Parser::ParseIFStatement(){
@@ -69,6 +77,7 @@ namespace pascal2c::parser {
     }
 
     std::shared_ptr<ast::Statement> Parser::ParseCompoundStatement() noexcept{
+        INIT_PARSE(line_,column_);
         try {
             Match(TOK_BEGIN, "syntax error: missing begin when parsing compound statement");
         }catch (SyntaxErr &e){
@@ -97,11 +106,12 @@ namespace pascal2c::parser {
         }catch (SyntaxErr &e){
             err_msg_.push_back(std::string(e.what()));
         }
-        return std::move(std::make_shared<ast::CompoundStatement>(statements));
+        return MAKE_AND_MOVE_SHARED(ast::CompoundStatement,statements);
     }
 
     std::shared_ptr<ast::Statement> Parser::ParseAssignAndCallStatement(){
         std::string id = text_;
+        INIT_PARSE(line_, column_);
         Match(TOK_ID);
         vector<std::shared_ptr<ast::Expression> > expr_list;
         auto var = std::make_shared<ast::Variable>(id);
@@ -130,8 +140,7 @@ namespace pascal2c::parser {
 
         Match(TOK_ASSIGNOP,"syntax error: lost ':=' when parsing assign statement");
         auto expr = ParseExpr();
+        var->SetLineAndColumn(begin_line,begin_column);
         return std::make_shared<ast::AssignStatement>(var,expr);
     }
-
-    // TODO: add line and column information to AST
 }

@@ -32,11 +32,14 @@ namespace pascal2c::parser {
 
     std::shared_ptr<ast::Expression> Parser::ParsePrimary(){
         char buff[1024];
+        INIT_PARSE(line_, column_);
         if(prefix_parser_[token_] == nullptr) {
             sprintf(buff,"%d:%d: parse expression error: no expected token",line_,column_);
             throw SyntaxErr(buff);
         }
-        return std::move((this->*prefix_parser_[token_])());
+        auto expr = std::move((this->*prefix_parser_[token_])());
+        expr->SetLineAndColumn(begin_line,begin_column);
+        return std::move(expr);
     }
 
     std::shared_ptr<ast::Expression> Parser::ParseParen(){
@@ -85,6 +88,16 @@ namespace pascal2c::parser {
         return std::move(res);
     }
 
+    std::shared_ptr<ast::Expression> Parser::ParseBoolean() {
+        std::shared_ptr<ast::Expression> res;
+        if(token_ == TOK_TRUE)
+            res = std::move(std::make_shared<ast::BooleanValue>(true));
+        else
+            res = std::move(std::make_shared<ast::BooleanValue>(false));
+        NextToken();
+        return std::move(res);
+    }
+
     std::shared_ptr<ast::Expression> Parser::ParseVariableAndCall(){
         std::string id = text_;
         int ch;
@@ -116,6 +129,7 @@ namespace pascal2c::parser {
     }
 
     std::shared_ptr<ast::Expression> Parser::ParseExpr(int prec) {
+        INIT_PARSE(line_,column_);
         auto lhs = ParsePrimary();
         int op = token_;
         int precedence = binary_prec[op];
@@ -126,7 +140,8 @@ namespace pascal2c::parser {
             op = token_;
             precedence = binary_prec[op];
         }
-        return lhs;
+        lhs->SetLineAndColumn(begin_line,begin_column);
+        return std::move(lhs);
     }
 
     vector<std::shared_ptr<ast::Expression> > Parser::ParseExprList() {
@@ -142,13 +157,4 @@ namespace pascal2c::parser {
         }
         return std::move(res);
     }
-
-    // TODO:
-    //      parse boolean value, string value , char value
-    // TODO:
-    //      add a new class CallOrVariable to represent call or variable, this can be the base type of CallValue and Variable
-    //      we use CallOrVariable in case that we can't distinguish call and variable in the grammar, such as a := add;
-    //      we don't know whether add is a variable or a function call, so we use CallOrVariable to represent it
-    // TODO:
-    //     add line and column information to the ast node
 }

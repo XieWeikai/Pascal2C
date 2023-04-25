@@ -37,6 +37,12 @@ cmake_install.cmake
 Makefile
 _deps/
 CMakeFiles/
+# Clangd cache
+.cache/
+compile_commands.json
+
+# build
+build/
 build/**/*
 .cache/clangd/index
 compile_commands.json

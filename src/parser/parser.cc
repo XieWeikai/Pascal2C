@@ -11,7 +11,6 @@
 
 extern "C" {
     #include "lexer.h"
-    extern int yycolno_next;
 }
 
 namespace pascal2c::parser
@@ -32,9 +31,10 @@ namespace pascal2c::parser
 
         prefix_parser_['('] = &Parser::ParseParen;
         prefix_parser_[TOK_STRING] = &Parser::ParseStringAndChar;
+        prefix_parser_[TOK_TRUE] = &Parser::ParseBoolean;
+        prefix_parser_[TOK_FALSE] = &Parser::ParseBoolean;
 
         yyreset(in);  // reset input file
-        yycolno_next = 1;  // reset token position marker
 
         next_token_ = yylex();
         next_tok_value_ = yylval;
