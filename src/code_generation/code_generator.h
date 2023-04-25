@@ -34,7 +34,9 @@ class CodeGenerator : Visitor {
     virtual void VisitAssign(const std::shared_ptr<Assign> &node) override;
     virtual void VisitVar(const std::shared_ptr<Var> &node) override;
     virtual void VisitNoOp(const std::shared_ptr<NoOp> &node) override;
+    const string Indent() const;
 
+    const string INDENTER = "  ";
     // AST root node
     std::shared_ptr<ASTRoot> ast_;
     // Global Scope symbols

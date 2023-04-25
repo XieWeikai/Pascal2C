@@ -87,14 +87,12 @@ class VarDecl : public ASTNode {
 
 class Type : public ASTNode {
   public:
-    Type(const std::shared_ptr<Token> token)
-        : token_(token), type_(token->GetValue()){};
+    Type(const std::shared_ptr<Token> &token) : type_(token->GetValue()){};
     virtual ~Type();
     void Accept(Visitor &visitor) override;
     const string GetType() const { return type_; }
 
   private:
-    std::shared_ptr<Token> token_;
     string type_;
 };
 

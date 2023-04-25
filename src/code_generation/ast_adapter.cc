@@ -12,7 +12,6 @@ VarDecl::~VarDecl() {
     type_node_.reset();
 }
 
-Type::~Type() { token_.reset(); }
 Var::~Var() { token_.reset(); }
 Oper::~Oper() { oper_.reset(); }
 Num::~Num() { token_.reset(); }
@@ -72,6 +71,7 @@ void Num::Accept(Visitor &visitor) {
 }
 
 // Type
+// Type::~Type() { token_.reset(); }
 void Type::Accept(Visitor &visitor) {
     visitor.VisitType(dynamic_pointer_cast<Type>(shared_from_this()));
 }
