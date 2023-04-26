@@ -36,6 +36,7 @@ void Function::Accept(Visitor &visitor) {
 void Block::Accept(Visitor &visitor) {
     visitor.VisitBlock(dynamic_pointer_cast<Block>(shared_from_this()));
 }
+
 Block::Block(const std::shared_ptr<Declaration> &declarations,
              const std::shared_ptr<Compound> &compound_statement)
     : declarations_(declarations), compound_statement_(compound_statement){};
@@ -113,6 +114,15 @@ void Var::Accept(Visitor &visitor) {
 // NoOp
 void NoOp::Accept(Visitor &visitor) {
     visitor.VisitNoOp(dynamic_pointer_cast<NoOp>(shared_from_this()));
+}
+
+void Statement::Accept(Visitor &visitor) {
+    visitor.VisitStatement(dynamic_pointer_cast<Statement>(shared_from_this()));
+}
+
+void IfStatement::Accept(Visitor &visitor) {
+    visitor.VisitIfStatement(
+        dynamic_pointer_cast<IfStatement>(shared_from_this()));
 }
 
 } // namespace code_generation

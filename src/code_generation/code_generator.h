@@ -42,6 +42,8 @@ class CodeGenerator : Visitor {
     virtual void VisitAssign(const shared_ptr<Assign> &node) override;
     virtual void VisitVar(const shared_ptr<Var> &node) override;
     virtual void VisitNoOp(const shared_ptr<NoOp> &node) override;
+    virtual void VisitStatement(const shared_ptr<Statement> &node) override;
+    virtual void VisitIfStatement(const shared_ptr<IfStatement> &node) override;
 
     const string Indent() const;
     void IncIndent();
