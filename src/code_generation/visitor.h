@@ -19,6 +19,7 @@ class Visitor {
     virtual void VisitConst(const shared_ptr<Var> &node) = 0;
     virtual void
     VisitConstDeclaration(const shared_ptr<ConstDeclaration> &node) = 0;
+    virtual void VisitArray(const shared_ptr<Array> &node) = 0;
     virtual void
     VisitArrayDeclaration(const shared_ptr<ArrayDeclaration> &node) = 0;
     virtual void VisitVarDecl(const shared_ptr<VarDeclaration> &node) = 0;

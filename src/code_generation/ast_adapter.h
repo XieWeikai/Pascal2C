@@ -70,13 +70,13 @@ class Block : public ASTNode {
 
 class Var : public ASTNode {
   public:
-    Var(const shared_ptr<Token> &token) : value_(token->GetValue()) {}
+    Var(const shared_ptr<Token> &token) : name_(token->GetValue()) {}
     virtual ~Var();
     void Accept(Visitor &visitor) override;
-    const string GetValue() const { return value_; }
+    const string GetValue() const { return name_; }
 
   private:
-    string value_;
+    string name_;
 };
 
 class Type : public ASTNode {
@@ -123,24 +123,37 @@ class ConstDeclaration : public ASTNode {
     shared_ptr<Type> type_node_;
 };
 
-class ArrayDeclaration : public ASTNode {
+class Array : public ASTNode {
   public:
-    ArrayDeclaration(const shared_ptr<Var> &var_node,
-                     const shared_ptr<Type> &type_node,
-                     const std::vector<std::pair<int, int>> &bounds)
-        : var_node_(var_node), type_node_(type_node), bounds_(bounds) {}
+    Array(const string &name, const shared_ptr<Type> &type,
+          std::vector<std::pair<int, int>> &bounds)
+        : name_(name), type_(type) {}
     void Accept(Visitor &visitor) override;
-    virtual ~ArrayDeclaration();
-    const shared_ptr<Var> &GetVarNode() const { return var_node_; }
-    const shared_ptr<Type> &GetTypeNode() const { return type_node_; }
+    virtual ~Array();
+    const string GetName() const { return name_; }
     const std::vector<std::pair<int, int>> &GetBounds() const {
         return bounds_;
     }
 
   private:
-    shared_ptr<Var> var_node_;
+    string name_;
+    shared_ptr<Type> type_;
+    vector<std::pair<int, int>> bounds_;
+};
+
+class ArrayDeclaration : public ASTNode {
+  public:
+    ArrayDeclaration(const shared_ptr<Array> &array_node,
+                     const shared_ptr<Type> &type_node)
+        : array_node_(array_node), type_node_(type_node) {}
+    void Accept(Visitor &visitor) override;
+    virtual ~ArrayDeclaration();
+    const shared_ptr<Array> &GetArrayNode() const { return array_node_; }
+    const shared_ptr<Type> &GetTypeNode() const { return type_node_; }
+
+  private:
+    shared_ptr<Array> array_node_;
     shared_ptr<Type> type_node_;
-    std::vector<std::pair<int, int>> bounds_;
 };
 
 class Argument : public ASTNode {
