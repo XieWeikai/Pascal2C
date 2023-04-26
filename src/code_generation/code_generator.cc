@@ -1,4 +1,5 @@
 #include <memory>
+#include <ostream>
 #include <stdexcept>
 #include <string>
 
@@ -21,7 +22,7 @@ void CodeGenerator::Interpret() {
 
 const string CodeGenerator::GetCCode() const { return ostream_.str(); }
 
-void CodeGenerator::Visit(const std::shared_ptr<code_generation::ASTNode> &node,
+void CodeGenerator::Visit(const shared_ptr<code_generation::ASTNode> &node,
                           bool indent) {
     if (indent)
         ostream_ << Indent();
@@ -29,7 +30,7 @@ void CodeGenerator::Visit(const std::shared_ptr<code_generation::ASTNode> &node,
 }
 
 void CodeGenerator::VisitProgram(
-    const std::shared_ptr<code_generation::Program> &node) {
+    const shared_ptr<code_generation::Program> &node) {
     ostream_ << "#include <stdio.h>" << endl
              << "#include <stdlib.h>" << endl
              << endl;
@@ -40,11 +41,34 @@ void CodeGenerator::VisitProgram(
     Visit(node->GetBlock());
     ostream_ << Indent() << "return 0;" << endl;
     DecIndent();
-    ostream_ << "}" << endl << "// " << node->GetName() << endl;
+    ostream_ << "}\n";
 }
 
-void CodeGenerator::VisitBlock(
-    const std::shared_ptr<code_generation::Block> &node) {
+void CodeGenerator::VisitSubprogram(const shared_ptr<Subprogram> &node) {
+    ostream_ << "void " << node->GetName() << "() {\n";
+    IncIndent();
+    Visit(node->GetBlock());
+    DecIndent();
+    ostream_ << Indent() << "}\n";
+}
+
+void CodeGenerator::VisitFunction(const shared_ptr<Function> &node) {
+    ostream_ << node->GetReturnType() << ' ' << node->GetName() << '(';
+    for (int i = 0; i < node->GetParams().size(); i++) {
+        const auto &param = node->GetParams().at(i);
+        Visit(param);
+        if (i < node->GetParams().size() - 1) {
+            ostream_ << ',';
+        }
+    }
+    ostream_ << ") {\n";
+    IncIndent();
+    Visit(node->GetBlock());
+    DecIndent();
+    ostream_ << Indent() << "}\n";
+}
+
+void CodeGenerator::VisitBlock(const shared_ptr<code_generation::Block> &node) {
     Visit(node->GetDeclatation());
     Visit(node->GetCompoundStatement());
 }
@@ -60,46 +84,61 @@ void CodeGenerator::VisitDeclaration(const shared_ptr<Declaration> &node) {
     }
 }
 
-void CodeGenerator::VisitVarDecl(
-    const std::shared_ptr<code_generation::VarDeclaration> &node) {
+void CodeGenerator::VisitConstDeclaration(
+    const shared_ptr<ConstDeclaration> &node) {
     Visit(node->GetTypeNode());
-    ostream_ << " ";
+    ostream_ << ' ';
+    Visit(node->GetConstNode());
+    ostream_ << eol_;
+}
+
+void CodeGenerator::VisitVarDecl(
+    const shared_ptr<code_generation::VarDeclaration> &node) {
+    Visit(node->GetTypeNode());
+    ostream_ << ' ';
     Visit(node->GetVarNode());
     ostream_ << eol_;
 }
 
+void CodeGenerator::VisitArrayDeclaration(
+    const shared_ptr<ArrayDeclaration> &node) {
+    Visit(node->GetTypeNode());
+    ostream_ << ' ';
+    Visit(node->GetVarNode());
+    for (const auto &bound : node->GetBounds()) {
+        ostream_ << '[' << bound.second - bound.first << ']';
+    }
+    ostream_ << eol_;
+}
+
 void CodeGenerator::VisitCompound(
-    const std::shared_ptr<code_generation::Compound> &node) {
+    const shared_ptr<code_generation::Compound> &node) {
     for (const auto &child : node->GetChildren()) {
         Visit(child);
     }
 }
 
 void CodeGenerator::VisitAssign(
-    const std::shared_ptr<code_generation::Assign> &node) {
+    const shared_ptr<code_generation::Assign> &node) {
     Visit(node->GetLeft(), true);
     ostream_ << " = ";
     Visit(node->GetRight());
     ostream_ << eol_;
 }
 
-void CodeGenerator::VisitVar(
-    const std::shared_ptr<code_generation::Var> &node) {
+void CodeGenerator::VisitVar(const shared_ptr<code_generation::Var> &node) {
     ostream_ << node->GetValue();
 }
 
-void CodeGenerator::VisitType(
-    const std::shared_ptr<code_generation::Type> &node) {
+void CodeGenerator::VisitType(const shared_ptr<code_generation::Type> &node) {
     ostream_ << TypeToC(node->GetType());
 }
 
-void CodeGenerator::VisitNoOp(
-    const std::shared_ptr<code_generation::NoOp> &node) {
+void CodeGenerator::VisitNoOp(const shared_ptr<code_generation::NoOp> &node) {
     ostream_ << ";" << endl;
 }
 
-void CodeGenerator::VisitBinOp(
-    const std::shared_ptr<code_generation::BinOp> &node) {
+void CodeGenerator::VisitBinOp(const shared_ptr<code_generation::BinOp> &node) {
     IncIndent();
     ostream_ << '(';
     Visit(node->GetLeft());
@@ -115,8 +154,7 @@ void CodeGenerator::VisitOper(const shared_ptr<Oper> &node) {
     ostream_ << TypeToC(node->GetType().ToString());
 }
 
-void CodeGenerator::VisitNum(
-    const std::shared_ptr<code_generation::Num> &node) {
+void CodeGenerator::VisitNum(const shared_ptr<code_generation::Num> &node) {
     ostream_ << node->GetValue();
 }
 

@@ -84,9 +84,12 @@ class Type : public ASTNode {
     Type(const shared_ptr<Token> &token) : type_(token->GetValue()){};
     virtual ~Type();
     void Accept(Visitor &visitor) override;
-    const string GetType() const { return type_; }
+    const string GetType() const {
+        return (is_const_) ? (string("const ") + type_) : type_;
+    }
 
   private:
+    bool is_const_;
     string type_;
 };
 
@@ -105,29 +108,18 @@ class VarDeclaration : public ASTNode {
     shared_ptr<Type> type_node_;
 };
 
-class Const : public ASTNode {
-  public:
-    Const(const shared_ptr<Token> &token) : value_(token->GetValue()) {}
-    virtual ~Const();
-    void Accept(Visitor &visitor) override;
-    const string GetValue() const { return value_; }
-
-  private:
-    string value_;
-};
-
 class ConstDeclaration : public ASTNode {
   public:
-    ConstDeclaration(const shared_ptr<Const> &const_node,
+    ConstDeclaration(const shared_ptr<Var> &var_node,
                      const shared_ptr<Type> &type_node)
-        : const_node_(const_node), type_node_(type_node) {}
+        : var_node_(var_node), type_node_(type_node) {}
     void Accept(Visitor &visitor) override;
     virtual ~ConstDeclaration();
-    const shared_ptr<Const> &GetConstNode() const { return const_node_; }
+    const shared_ptr<Var> &GetConstNode() const { return var_node_; }
     const shared_ptr<Type> &GetTypeNode() const { return type_node_; }
 
   private:
-    shared_ptr<Const> const_node_;
+    shared_ptr<Var> var_node_;
     shared_ptr<Type> type_node_;
 };
 
@@ -151,9 +143,9 @@ class ArrayDeclaration : public ASTNode {
     std::vector<std::pair<int, int>> bounds_;
 };
 
-class SubprogramDeclaration : public ASTNode {
+class Subprogram : public ASTNode {
   public:
-    SubprogramDeclaration(const string &name, const shared_ptr<Block> &block)
+    Subprogram(const string &name, const shared_ptr<Block> &block)
         : name_(name), block_(block) {}
     void Accept(Visitor &visitor) override;
     const string GetName() const { return name_; }
@@ -164,11 +156,11 @@ class SubprogramDeclaration : public ASTNode {
     shared_ptr<Block> block_;
 };
 
-class FunctionDeclaration : public ASTNode {
+class Function : public ASTNode {
   public:
-    FunctionDeclaration(const string &name, const shared_ptr<Type> &return_type,
-                        const vector<shared_ptr<VarDeclaration>> &params,
-                        const shared_ptr<Block> &block)
+    Function(const string &name, const shared_ptr<Type> &return_type,
+             const vector<shared_ptr<VarDeclaration>> &params,
+             const shared_ptr<Block> &block)
         : name_(name), return_type_(return_type), params_(params),
           block_(block) {}
     void Accept(Visitor &visitor) override;
