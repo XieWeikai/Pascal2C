@@ -29,6 +29,18 @@ void CodeGenerator::Visit(const shared_ptr<code_generation::ASTNode> &node,
     node->Accept(*this);
 }
 
+void CodeGenerator::VisitArgument(const shared_ptr<Argument> &node) {
+    if (node->IsReference()) {
+        ostream_ << "/* Is Reference */";
+    }
+    Visit(node->GetType());
+    if (node->IsReference()) {
+        ostream_ << "*";
+    }
+    ostream_ << " ";
+    Visit(node->GetVariable());
+}
+
 void CodeGenerator::VisitProgram(
     const shared_ptr<code_generation::Program> &node) {
     ostream_ << "#include <stdio.h>" << endl
@@ -45,7 +57,15 @@ void CodeGenerator::VisitProgram(
 }
 
 void CodeGenerator::VisitSubprogram(const shared_ptr<Subprogram> &node) {
-    ostream_ << "void " << node->GetName() << "() {\n";
+    ostream_ << Indent() << "void " << node->GetName() << "(";
+    for (auto i = 0; i < node->GetArgs().size(); i++) {
+        const auto &arg = node->GetArgs().at(i);
+        Visit(arg);
+        if (i < node->GetArgs().size() - 1) {
+            ostream_ << ",";
+        }
+    }
+    ostream_ << ") {\n";
     IncIndent();
     Visit(node->GetBlock());
     DecIndent();
@@ -54,10 +74,10 @@ void CodeGenerator::VisitSubprogram(const shared_ptr<Subprogram> &node) {
 
 void CodeGenerator::VisitFunction(const shared_ptr<Function> &node) {
     ostream_ << node->GetReturnType() << ' ' << node->GetName() << '(';
-    for (int i = 0; i < node->GetParams().size(); i++) {
-        const auto &param = node->GetParams().at(i);
-        Visit(param);
-        if (i < node->GetParams().size() - 1) {
+    for (int i = 0; i < node->GetArgs().size(); i++) {
+        const auto &arg = node->GetArgs().at(i);
+        Visit(arg);
+        if (i < node->GetArgs().size() - 1) {
             ostream_ << ',';
         }
     }
