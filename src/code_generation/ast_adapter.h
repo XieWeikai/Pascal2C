@@ -254,6 +254,26 @@ class IfStatement : public ASTNode {
     shared_ptr<ASTNode> else_branch_;
 };
 
+class ForStatement : public ASTNode {
+  public:
+    ForStatement(const shared_ptr<ASTNode> &variable,
+                 const shared_ptr<ASTNode> &start,
+                 const shared_ptr<ASTNode> &end,
+                 const shared_ptr<ASTNode> &body)
+        : variable_(variable), start_(start), end_(end), body_(body) {}
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<ASTNode> &GetVariable() const { return variable_; }
+    const shared_ptr<ASTNode> &GetStart() const { return start_; }
+    const shared_ptr<ASTNode> &GetEnd() const { return end_; }
+    const shared_ptr<ASTNode> &GetBody() const { return body_; }
+
+  private:
+    shared_ptr<ASTNode> variable_;
+    shared_ptr<ASTNode> start_;
+    shared_ptr<ASTNode> end_;
+    shared_ptr<ASTNode> body_;
+};
+
 class Num : public ASTNode {
   public:
     Num(const shared_ptr<Token> &token)

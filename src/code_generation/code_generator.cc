@@ -176,6 +176,24 @@ void CodeGenerator::VisitIfStatement(const shared_ptr<IfStatement> &node) {
     ostream_ << "\n";
 }
 
+void CodeGenerator::VisitForStatement(const shared_ptr<ForStatement> &node) {
+    ostream_ << Indent() << "for (";
+    Visit(node->GetVariable());
+    ostream_ << " = ";
+    Visit(node->GetStart());
+    ostream_ << "; ";
+    Visit(node->GetVariable());
+    ostream_ << " <= ";
+    Visit(node->GetEnd());
+    ostream_ << "; ";
+    Visit(node->GetVariable());
+    ostream_ << "++) {\n";
+    IncIndent();
+    Visit(node->GetBody());
+    DecIndent();
+    ostream_ << Indent() << "}\n";
+}
+
 const string CodeGenerator::Indent() const {
     return string(indent_level_ * 4, ' ');
 }
