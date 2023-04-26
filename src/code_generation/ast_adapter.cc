@@ -125,5 +125,10 @@ void IfStatement::Accept(Visitor &visitor) {
         dynamic_pointer_cast<IfStatement>(shared_from_this()));
 }
 
+void ForStatement::Accept(Visitor &visitor) {
+    visitor.VisitForStatement(
+        dynamic_pointer_cast<ForStatement>(shared_from_this()));
+}
+
 } // namespace code_generation
 } // namespace pascal2c
