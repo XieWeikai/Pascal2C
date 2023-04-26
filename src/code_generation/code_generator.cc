@@ -158,6 +158,24 @@ void CodeGenerator::VisitNum(const shared_ptr<code_generation::Num> &node) {
     ostream_ << node->GetValue();
 }
 
+void CodeGenerator::VisitIfStatement(const shared_ptr<IfStatement> &node) {
+    ostream_ << Indent() << "if (";
+    Visit(node->GetCondition());
+    ostream_ << ") {\n";
+    IncIndent();
+    Visit(node->GetThenBranch());
+    DecIndent();
+    ostream_ << Indent() << "}";
+    if (node->GetElseBranch()) {
+        IncIndent();
+        ostream_ << " else {\n";
+        Visit(node->GetElseBranch());
+        DecIndent();
+        ostream_ << Indent() << "}";
+    }
+    ostream_ << "\n";
+}
+
 const string CodeGenerator::Indent() const {
     return string(indent_level_ * 4, ' ');
 }
