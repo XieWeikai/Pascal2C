@@ -10,6 +10,7 @@ class Visitor {
   public:
     virtual void Visit(const shared_ptr<ASTNode> &node,
                        bool indent = false) = 0;
+    virtual void VisitArgument(const shared_ptr<Argument> &node) = 0;
     virtual void VisitProgram(const shared_ptr<Program> &node) = 0;
     virtual void VisitSubprogram(const shared_ptr<Subprogram> &node) = 0;
     virtual void VisitFunction(const shared_ptr<Function> &node) = 0;

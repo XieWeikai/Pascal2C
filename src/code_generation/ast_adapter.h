@@ -143,38 +143,54 @@ class ArrayDeclaration : public ASTNode {
     std::vector<std::pair<int, int>> bounds_;
 };
 
+class Argument : public ASTNode {
+  public:
+    Argument(const shared_ptr<Var> &variable, const shared_ptr<Type> &type,
+             bool is_reference = false)
+        : variable_(variable), type_(type), is_reference_(is_reference) {}
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<Var> &GetVariable() const { return variable_; }
+    const shared_ptr<Type> &GetType() const { return type_; }
+    const bool IsReference() const { return is_reference_; }
+
+  private:
+    shared_ptr<Var> variable_;
+    shared_ptr<Type> type_;
+    bool is_reference_;
+};
+
 class Subprogram : public ASTNode {
   public:
-    Subprogram(const string &name, const shared_ptr<Block> &block)
-        : name_(name), block_(block) {}
+    Subprogram(const string &name, const vector<shared_ptr<Argument>> &args,
+               const shared_ptr<Block> &block)
+        : name_(name), args_(args), block_(block) {}
     void Accept(Visitor &visitor) override;
     const string GetName() const { return name_; }
+    const vector<shared_ptr<Argument>> &GetArgs() const { return args_; }
     const shared_ptr<Block> &GetBlock() const { return block_; }
 
   private:
     string name_;
+    vector<shared_ptr<Argument>> args_;
     shared_ptr<Block> block_;
 };
 
 class Function : public ASTNode {
   public:
     Function(const string &name, const shared_ptr<Type> &return_type,
-             const vector<shared_ptr<VarDeclaration>> &params,
+             const vector<shared_ptr<Argument>> &args,
              const shared_ptr<Block> &block)
-        : name_(name), return_type_(return_type), params_(params),
-          block_(block) {}
+        : name_(name), return_type_(return_type), args_(args), block_(block) {}
     void Accept(Visitor &visitor) override;
     const string GetName() const { return name_; }
     const shared_ptr<Type> GetReturnType() const { return return_type_; }
-    const vector<shared_ptr<VarDeclaration>> &GetParams() const {
-        return params_;
-    }
+    const vector<shared_ptr<Argument>> &GetArgs() const { return args_; }
     const shared_ptr<Block> &GetBlock() const { return block_; }
 
   private:
     string name_;
     shared_ptr<Type> return_type_;
-    vector<shared_ptr<VarDeclaration>> params_;
+    vector<shared_ptr<Argument>> args_;
     shared_ptr<Block> block_;
 };
 

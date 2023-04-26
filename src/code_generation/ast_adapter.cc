@@ -16,6 +16,10 @@ Var::~Var() {}
 Oper::~Oper() {}
 Num::~Num() {}
 
+void Argument::Accept(Visitor &visitor) {
+    visitor.VisitArgument(dynamic_pointer_cast<Argument>(shared_from_this()));
+}
+
 // Program
 void Program::Accept(Visitor &visitor) {
     visitor.VisitProgram(dynamic_pointer_cast<Program>(shared_from_this()));
