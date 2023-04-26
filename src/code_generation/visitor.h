@@ -29,6 +29,8 @@ class Visitor {
     virtual void VisitAssign(const shared_ptr<Assign> &node) = 0;
     virtual void VisitVar(const shared_ptr<Var> &node) = 0;
     virtual void VisitNoOp(const shared_ptr<NoOp> &node) = 0;
+    virtual void VisitStatement(const shared_ptr<Statement> &node) = 0;
+    virtual void VisitIfStatement(const shared_ptr<IfStatement> &node) = 0;
 };
 } // namespace code_generation
 } // namespace pascal2c

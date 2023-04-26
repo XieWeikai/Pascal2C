@@ -224,7 +224,10 @@ class Factor : public ASTNode {
  */
 class Statement : public ASTNode {
   public:
-    Statement() {}
+    Statement(const shared_ptr<ASTNode> &left_hand,
+              const shared_ptr<ASTNode> &right_hand,
+              const vector<shared_ptr<ASTNode>> &children)
+        : left_hand_(left_hand), right_hand_(right_hand), children_(children) {}
     void Accept(Visitor &visitor) override;
 
   private:
@@ -233,7 +236,23 @@ class Statement : public ASTNode {
     vector<shared_ptr<ASTNode>> children_;
 };
 
-class IfStatement : public ASTNode {};
+class IfStatement : public ASTNode {
+  public:
+    IfStatement(const shared_ptr<ASTNode> &condition,
+                const shared_ptr<ASTNode> &then_branch,
+                const shared_ptr<ASTNode> &else_branch = nullptr)
+        : condition_(condition), then_branch_(then_branch),
+          else_branch_(else_branch) {}
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<ASTNode> &GetCondition() const { return condition_; }
+    const shared_ptr<ASTNode> &GetThenBranch() const { return then_branch_; }
+    const shared_ptr<ASTNode> &GetElseBranch() const { return else_branch_; }
+
+  private:
+    shared_ptr<ASTNode> condition_;
+    shared_ptr<ASTNode> then_branch_;
+    shared_ptr<ASTNode> else_branch_;
+};
 
 class Num : public ASTNode {
   public:
