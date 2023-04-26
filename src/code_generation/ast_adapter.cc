@@ -21,6 +21,17 @@ void Program::Accept(Visitor &visitor) {
     visitor.VisitProgram(dynamic_pointer_cast<Program>(shared_from_this()));
 }
 
+// Subprogram
+void Subprogram::Accept(Visitor &visitor) {
+    visitor.VisitSubprogram(
+        dynamic_pointer_cast<Subprogram>(shared_from_this()));
+}
+
+// Function
+void Function::Accept(Visitor &visitor) {
+    visitor.VisitFunction(dynamic_pointer_cast<Function>(shared_from_this()));
+}
+
 // Block
 void Block::Accept(Visitor &visitor) {
     visitor.VisitBlock(dynamic_pointer_cast<Block>(shared_from_this()));
@@ -35,10 +46,22 @@ void Declaration::Accept(Visitor &visitor) {
         dynamic_pointer_cast<Declaration>(shared_from_this()));
 }
 
-// VarDecl
+// VarDeclaration
 void VarDeclaration::Accept(Visitor &visitor) {
     visitor.VisitVarDecl(
         dynamic_pointer_cast<VarDeclaration>(shared_from_this()));
+}
+
+// ConstDeclaration
+void ConstDeclaration::Accept(Visitor &visitor) {
+    visitor.VisitConstDeclaration(
+        dynamic_pointer_cast<ConstDeclaration>(shared_from_this()));
+}
+
+// ArrayDeclaration
+void ArrayDeclaration::Accept(Visitor &visitor) {
+    visitor.VisitArrayDeclaration(
+        dynamic_pointer_cast<ArrayDeclaration>(shared_from_this()));
 }
 
 // Compound
