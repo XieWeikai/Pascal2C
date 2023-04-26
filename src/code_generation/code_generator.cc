@@ -120,15 +120,20 @@ void CodeGenerator::VisitVarDecl(
     ostream_ << eol_;
 }
 
+void CodeGenerator::VisitArray(const shared_ptr<Array> &node) {
+    ostream_ << ' ';
+    ostream_ << node->GetName();
+    for (const auto &bound : node->GetBounds()) {
+        ostream_ << "[" << bound.second - bound.first + 1 << ']';
+    }
+    ostream_ << eol_;
+}
+
 void CodeGenerator::VisitArrayDeclaration(
     const shared_ptr<ArrayDeclaration> &node) {
     Visit(node->GetTypeNode());
     ostream_ << ' ';
-    Visit(node->GetVarNode());
-    for (const auto &bound : node->GetBounds()) {
-        ostream_ << '[' << bound.second - bound.first << ']';
-    }
-    ostream_ << eol_;
+    Visit(node->GetArrayNode());
 }
 
 void CodeGenerator::VisitCompound(
