@@ -24,32 +24,32 @@ class ASTPrinter : Visitor {
 
   private:
     virtual void Visit(const shared_ptr<ASTNode> &node,
-                       bool indent = false) = 0;
-    virtual void VisitArgument(const shared_ptr<Argument> &node) = 0;
-    virtual void VisitProgram(const shared_ptr<Program> &node) = 0;
-    virtual void VisitSubprogram(const shared_ptr<Subprogram> &node) = 0;
-    virtual void VisitFunction(const shared_ptr<Function> &node) = 0;
-    virtual void VisitBlock(const shared_ptr<Block> &node) = 0;
-    virtual void VisitDeclaration(const shared_ptr<Declaration> &node) = 0;
-    virtual void VisitConst(const shared_ptr<Var> &node) = 0;
+                       bool indent = false) override;
+    virtual void VisitArgument(const shared_ptr<Argument> &node) override;
+    virtual void VisitProgram(const shared_ptr<Program> &node) override;
+    virtual void VisitSubprogram(const shared_ptr<Subprogram> &node) override;
+    virtual void VisitFunction(const shared_ptr<Function> &node) override;
+    virtual void VisitBlock(const shared_ptr<Block> &node) override;
+    virtual void VisitDeclaration(const shared_ptr<Declaration> &node) override;
     virtual void
-    VisitConstDeclaration(const shared_ptr<ConstDeclaration> &node) = 0;
-    virtual void VisitArrayType(const shared_ptr<ArrayType> &node) = 0;
-    virtual void VisitArray(const shared_ptr<Array> &node) = 0;
+    VisitConstDeclaration(const shared_ptr<ConstDeclaration> &node) override;
+    virtual void VisitArrayType(const shared_ptr<ArrayType> &node) override;
+    virtual void VisitArray(const shared_ptr<Array> &node) override;
     virtual void
-    VisitArrayDeclaration(const shared_ptr<ArrayDeclaration> &node) = 0;
-    virtual void VisitVarDecl(const shared_ptr<VarDeclaration> &node) = 0;
-    virtual void VisitCompound(const shared_ptr<Compound> &node) = 0;
-    virtual void VisitBinOp(const shared_ptr<BinOp> &node) = 0;
-    virtual void VisitOper(const shared_ptr<Oper> &node) = 0;
-    virtual void VisitNum(const shared_ptr<Num> &node) = 0;
-    virtual void VisitType(const shared_ptr<Type> &node) = 0;
-    virtual void VisitAssign(const shared_ptr<Assign> &node) = 0;
-    virtual void VisitVar(const shared_ptr<Var> &node) = 0;
-    virtual void VisitNoOp(const shared_ptr<NoOp> &node) = 0;
-    virtual void VisitStatement(const shared_ptr<Statement> &node) = 0;
-    virtual void VisitIfStatement(const shared_ptr<IfStatement> &node) = 0;
-    virtual void VisitForStatement(const shared_ptr<ForStatement> &node) = 0;
+    VisitArrayDeclaration(const shared_ptr<ArrayDeclaration> &node) override;
+    virtual void VisitVarDecl(const shared_ptr<VarDeclaration> &node) override;
+    virtual void VisitCompound(const shared_ptr<Compound> &node) override;
+    virtual void VisitBinOp(const shared_ptr<BinOp> &node) override;
+    virtual void VisitOper(const shared_ptr<Oper> &node) override;
+    virtual void VisitNum(const shared_ptr<Num> &node) override;
+    virtual void VisitType(const shared_ptr<Type> &node) override;
+    virtual void VisitAssign(const shared_ptr<Assign> &node) override;
+    virtual void VisitVar(const shared_ptr<Var> &node) override;
+    virtual void VisitNoOp(const shared_ptr<NoOp> &node) override;
+    virtual void VisitStatement(const shared_ptr<Statement> &node) override;
+    virtual void VisitIfStatement(const shared_ptr<IfStatement> &node) override;
+    virtual void
+    VisitForStatement(const shared_ptr<ForStatement> &node) override;
 
     void ErrNotImplemented() const {
         throw std::runtime_error("Not implemented");
