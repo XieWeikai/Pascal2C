@@ -1,7 +1,9 @@
 #ifndef PASCAL2C_SRC_CODE_GENERATION_AST_PRINTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_AST_PRINTER_H_
+#pragma once
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 #include "ast_adapter.h"
@@ -15,32 +17,44 @@ using ::std::stringstream;
 
 class ASTPrinter : Visitor {
   public:
-    explicit ASTPrinter(const shared_ptr<code_generation::ASTRoot> ast)
-        : ast_(ast){};
-    // TODO: Output of Visit save into ostream
-    void Visit();
+    ASTPrinter(){};
+
+    void Traverse(const shared_ptr<ASTNode> &node);
     string ToString() const;
 
   private:
-    virtual void Visit(const std::shared_ptr<ASTNode> &node,
-                       bool indent = false) override;
-    virtual void VisitProgram(const std::shared_ptr<Program> &node) override;
-    virtual void VisitBlock(const std::shared_ptr<Block> &node) override;
+    virtual void Visit(const shared_ptr<ASTNode> &node,
+                       bool indent = false) = 0;
+    virtual void VisitArgument(const shared_ptr<Argument> &node) = 0;
+    virtual void VisitProgram(const shared_ptr<Program> &node) = 0;
+    virtual void VisitSubprogram(const shared_ptr<Subprogram> &node) = 0;
+    virtual void VisitFunction(const shared_ptr<Function> &node) = 0;
+    virtual void VisitBlock(const shared_ptr<Block> &node) = 0;
+    virtual void VisitDeclaration(const shared_ptr<Declaration> &node) = 0;
+    virtual void VisitConst(const shared_ptr<Var> &node) = 0;
     virtual void
-    VisitDeclaration(const std::shared_ptr<Declaration> &node) override;
+    VisitConstDeclaration(const shared_ptr<ConstDeclaration> &node) = 0;
+    virtual void VisitArrayType(const shared_ptr<ArrayType> &node) = 0;
+    virtual void VisitArray(const shared_ptr<Array> &node) = 0;
     virtual void
-    VisitVarDecl(const std::shared_ptr<VarDeclaration> &node) override;
-    virtual void VisitCompound(const std::shared_ptr<Compound> &node) override;
-    virtual void VisitBinOp(const std::shared_ptr<BinOp> &node) override;
-    virtual void VisitOper(const std::shared_ptr<Oper> &node) override;
-    virtual void VisitNum(const std::shared_ptr<Num> &node) override;
-    virtual void VisitType(const std::shared_ptr<Type> &node) override;
-    virtual void VisitAssign(const std::shared_ptr<Assign> &node) override;
-    virtual void VisitVar(const std::shared_ptr<Var> &node) override;
-    virtual void VisitNoOp(const std::shared_ptr<NoOp> &node) override;
+    VisitArrayDeclaration(const shared_ptr<ArrayDeclaration> &node) = 0;
+    virtual void VisitVarDecl(const shared_ptr<VarDeclaration> &node) = 0;
+    virtual void VisitCompound(const shared_ptr<Compound> &node) = 0;
+    virtual void VisitBinOp(const shared_ptr<BinOp> &node) = 0;
+    virtual void VisitOper(const shared_ptr<Oper> &node) = 0;
+    virtual void VisitNum(const shared_ptr<Num> &node) = 0;
+    virtual void VisitType(const shared_ptr<Type> &node) = 0;
+    virtual void VisitAssign(const shared_ptr<Assign> &node) = 0;
+    virtual void VisitVar(const shared_ptr<Var> &node) = 0;
+    virtual void VisitNoOp(const shared_ptr<NoOp> &node) = 0;
+    virtual void VisitStatement(const shared_ptr<Statement> &node) = 0;
+    virtual void VisitIfStatement(const shared_ptr<IfStatement> &node) = 0;
+    virtual void VisitForStatement(const shared_ptr<ForStatement> &node) = 0;
 
-    // ast
-    const shared_ptr<code_generation::ASTRoot> ast_;
+    void ErrNotImplemented() const {
+        throw std::runtime_error("Not implemented");
+    }
+
     // ostream
     stringstream ostream_;
     // Current indent level

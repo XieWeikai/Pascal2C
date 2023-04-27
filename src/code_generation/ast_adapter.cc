@@ -1,5 +1,5 @@
 #include "ast_adapter.h"
-#include "code_generation/token_adapter.h"
+#include "token_adapter.h"
 #include <memory>
 
 namespace pascal2c {
@@ -43,7 +43,7 @@ void Block::Accept(Visitor &visitor) {
 
 Block::Block(const std::shared_ptr<Declaration> &declarations,
              const std::shared_ptr<Compound> &compound_statement)
-    : declarations_(declarations), compound_statement_(compound_statement){};
+    : declarations_(declarations), compound_statement_(compound_statement) {}
 
 // Declaration
 void Declaration::Accept(Visitor &visitor) {
@@ -80,9 +80,6 @@ void ArrayDeclaration::Accept(Visitor &visitor) {
 }
 
 // Compound
-Compound::Compound(const std::vector<std::shared_ptr<ASTNode>> &children)
-    : children_(
-          const_cast<std::vector<std::shared_ptr<ASTNode>> &>(children)){};
 void Compound::Accept(Visitor &visitor) {
     visitor.VisitCompound(dynamic_pointer_cast<Compound>(shared_from_this()));
 }

@@ -3,6 +3,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
+#include <sys/errno.h>
 
 #include "ast_adapter.h"
 #include "ast_printer.h"
@@ -15,10 +16,7 @@ using ::std::endl;
 using ::std::runtime_error;
 using ::std::shared_ptr;
 
-void ASTPrinter::Visit() {
-    auto program = dynamic_pointer_cast<Program>(ast_);
-    Visit(program);
-}
+void ASTPrinter::Traverse(const shared_ptr<ASTNode> &node) { Visit(node); }
 
 void ASTPrinter::Visit(const shared_ptr<ASTNode> &node, bool indent) {
     node->Accept(*this);
@@ -29,6 +27,14 @@ void ASTPrinter::VisitProgram(const shared_ptr<Program> &node) {
     indent_level_++;
     Visit(node->GetBlock());
     indent_level_--;
+}
+
+void ASTPrinter::VisitSubprogram(const shared_ptr<Subprogram> &node) {
+    ErrNotImplemented();
+}
+
+void ASTPrinter::VisitFunction(const shared_ptr<Function> &node) {
+    ErrNotImplemented();
 }
 
 void ASTPrinter::VisitBlock(const shared_ptr<Block> &node) {
@@ -51,6 +57,24 @@ void ASTPrinter::VisitDeclaration(const shared_ptr<Declaration> &node) {
         VisitVarDecl(var_decl);
     }
     indent_level_--;
+}
+
+void ASTPrinter::VisitConst(const shared_ptr<Var> &node) {
+    ErrNotImplemented();
+}
+void ASTPrinter::VisitConstDeclaration(
+    const shared_ptr<ConstDeclaration> &node) {
+    ErrNotImplemented();
+}
+void ASTPrinter::VisitArrayType(const shared_ptr<ArrayType> &node) {
+    ErrNotImplemented();
+}
+void ASTPrinter::VisitArray(const shared_ptr<Array> &node) {
+    ErrNotImplemented();
+}
+void ASTPrinter::VisitArrayDeclaration(
+    const shared_ptr<ArrayDeclaration> &node) {
+    ErrNotImplemented();
 }
 
 void ASTPrinter::VisitVarDecl(const shared_ptr<VarDeclaration> &node) {
@@ -117,6 +141,17 @@ void ASTPrinter::VisitNum(const shared_ptr<Num> &node) {
     ostream_ << string(indent_level_, ' ') << "Num: " << node->GetValue()
              << endl;
 }
+
+void ASTPrinter::VisitStatement(const shared_ptr<Statement> &node) {
+    ErrNotImplemented();
+}
+void ASTPrinter::VisitIfStatement(const shared_ptr<IfStatement> &node) {
+    ErrNotImplemented();
+}
+void ASTPrinter::VisitForStatement(const shared_ptr<ForStatement> &node) {
+    ErrNotImplemented();
+}
+
 string ASTPrinter::ToString() const { return ostream_.str(); }
 } // namespace code_generation
 } // namespace pascal2c

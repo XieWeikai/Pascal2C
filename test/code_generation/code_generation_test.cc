@@ -100,8 +100,8 @@ end.
     EXPECT_EQ(program->GetName(), "Simple");
     EXPECT_EQ(program->GetBlock()->GetDeclatation()->GetDeclarations().size(),
               2);
-    auto ast_printer = std::make_shared<ASTPrinter>(program);
-    ast_printer->Visit();
+    ASTPrinter ast_printer;
+    ast_printer->Traverse(program);
     string printed_ast = ast_printer->ToString();
 
     string expected_ast = R"(Program: Simple
