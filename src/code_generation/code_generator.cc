@@ -157,11 +157,11 @@ void CodeGenerator::VisitVar(const shared_ptr<code_generation::Var> &node) {
 }
 
 void CodeGenerator::VisitType(const shared_ptr<code_generation::Type> &node) {
-    ostream_ << TypeToC(node->GetType());
+    ostream_ << SymbolToC(node->GetType());
 }
 
 void CodeGenerator::VisitConstType(const shared_ptr<ConstType> &node) {
-    ostream_ << "const " << TypeToC(node->GetType());
+    ostream_ << "const " << SymbolToC(node->GetType());
 }
 
 void CodeGenerator::VisitNoOp(const shared_ptr<code_generation::NoOp> &node) {
@@ -182,7 +182,7 @@ void CodeGenerator::VisitBinOp(
 }
 
 void CodeGenerator::VisitOper(const shared_ptr<Oper> &node) {
-    ostream_ << node->GetOper();
+    ostream_ << SymbolToC(node->GetOper());
 }
 
 void CodeGenerator::VisitNum(const shared_ptr<code_generation::Num> &node) {
@@ -239,8 +239,8 @@ void CodeGenerator::IncIndent() { indent_level_++; }
 
 void CodeGenerator::DecIndent() { indent_level_--; }
 
-const string CodeGenerator::TypeToC(const string &pascal_type) const {
-    return type_tool_kit_.TypeToC(pascal_type);
+const string CodeGenerator::SymbolToC(const string &pascal_type) const {
+    return type_tool_kit_.SymbolToC(pascal_type);
 }
 } // namespace code_generation
 } // namespace pascal2c

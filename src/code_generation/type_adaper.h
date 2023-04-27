@@ -10,14 +10,13 @@ using string = ::std::string;
 
 class TypeToolKit {
   public:
-    const string TypeToC(const string &pascal_type) const;
+    const string SymbolToC(const string &pascal_symbol) const;
 
   private:
     const hashmap<string, string> PascalToCTypeMap = {
         {"integer", "int"}, {"real", "double"}, {"char", "char"},
         {"string", "char"}, {"boolean", "int"}, {"record", "struct"},
-        {":=", "="},
-    };
+        {":=", "="},        {"=", "=="}};
 };
 } // namespace code_generation
 } // namespace pascal2c

@@ -55,7 +55,7 @@ class CodeGenerator : Visitor {
     const string Indent() const;
     void IncIndent();
     void DecIndent();
-    const string TypeToC(const string &pascal_type) const;
+    const string SymbolToC(const string &pascal_type) const;
     const string eol_ = ";\n";
 
     // Symbol table
