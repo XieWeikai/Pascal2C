@@ -70,7 +70,8 @@ class Block : public ASTNode {
 
 class Var : public ASTNode {
   public:
-    Var(const shared_ptr<Token> &token) : name_(token->GetValue()) {}
+    explicit Var(const shared_ptr<Token> &token) : name_(token->GetValue()) {}
+    explicit Var(const string &name) : name_(name) {}
     virtual ~Var();
     void Accept(Visitor &visitor) override;
     const string GetValue() const { return name_; }
@@ -81,7 +82,8 @@ class Var : public ASTNode {
 
 class Type : public ASTNode {
   public:
-    Type(const shared_ptr<Token> &token) : type_(token->GetValue()){};
+    Type(const shared_ptr<Token> &token, bool is_const = false)
+        : type_(token->GetValue()), is_const_(is_const){};
     virtual ~Type();
     void Accept(Visitor &visitor) override;
     const string GetType() const {
@@ -123,37 +125,48 @@ class ConstDeclaration : public ASTNode {
     shared_ptr<Type> type_node_;
 };
 
-class Array : public ASTNode {
+class ArrayType : public ASTNode {
   public:
-    Array(const string &name, const shared_ptr<Type> &type,
-          std::vector<std::pair<int, int>> &bounds)
-        : name_(name), type_(type) {}
+    ArrayType(const shared_ptr<Type> &type,
+              vector<std::pair<int, int>> const bounds)
+        : type_(type), bounds_(bounds) {}
+    virtual ~ArrayType();
     void Accept(Visitor &visitor) override;
-    virtual ~Array();
-    const string GetName() const { return name_; }
+    const shared_ptr<Type> &GetType() const { return type_; }
     const std::vector<std::pair<int, int>> &GetBounds() const {
         return bounds_;
     }
 
   private:
-    string name_;
     shared_ptr<Type> type_;
     vector<std::pair<int, int>> bounds_;
+};
+
+class Array : public ASTNode {
+  public:
+    Array(const shared_ptr<Var> &var) : var_(var) {}
+    void Accept(Visitor &visitor) override;
+    virtual ~Array();
+    const string GetName() const { return var_->GetValue(); }
+    const shared_ptr<Var> &GetVarNode() const { return var_; }
+
+  private:
+    shared_ptr<Var> var_;
 };
 
 class ArrayDeclaration : public ASTNode {
   public:
     ArrayDeclaration(const shared_ptr<Array> &array_node,
-                     const shared_ptr<Type> &type_node)
+                     const shared_ptr<ArrayType> &type_node)
         : array_node_(array_node), type_node_(type_node) {}
     void Accept(Visitor &visitor) override;
     virtual ~ArrayDeclaration();
     const shared_ptr<Array> &GetArrayNode() const { return array_node_; }
-    const shared_ptr<Type> &GetTypeNode() const { return type_node_; }
+    const shared_ptr<ArrayType> &GetTypeNode() const { return type_node_; }
 
   private:
     shared_ptr<Array> array_node_;
-    shared_ptr<Type> type_node_;
+    shared_ptr<ArrayType> type_node_;
 };
 
 class Argument : public ASTNode {

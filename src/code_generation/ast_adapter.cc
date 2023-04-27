@@ -63,6 +63,11 @@ void ConstDeclaration::Accept(Visitor &visitor) {
         dynamic_pointer_cast<ConstDeclaration>(shared_from_this()));
 }
 
+// ArrayType
+void ArrayType::Accept(Visitor &visitor) {
+    visitor.VisitArrayType(dynamic_pointer_cast<ArrayType>(shared_from_this()));
+}
+
 // Array
 void Array::Accept(Visitor &visitor) {
     visitor.VisitArray(dynamic_pointer_cast<Array>(shared_from_this()));
