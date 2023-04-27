@@ -59,9 +59,6 @@ void ASTPrinter::VisitDeclaration(const shared_ptr<Declaration> &node) {
     indent_level_--;
 }
 
-void ASTPrinter::VisitConst(const shared_ptr<Var> &node) {
-    ErrNotImplemented();
-}
 void ASTPrinter::VisitConstDeclaration(
     const shared_ptr<ConstDeclaration> &node) {
     ErrNotImplemented();

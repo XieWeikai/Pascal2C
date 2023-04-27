@@ -101,8 +101,8 @@ end.
     EXPECT_EQ(program->GetBlock()->GetDeclatation()->GetDeclarations().size(),
               2);
     ASTPrinter ast_printer;
-    ast_printer->Traverse(program);
-    string printed_ast = ast_printer->ToString();
+    ast_printer.Traverse(program);
+    string printed_ast = ast_printer.ToString();
 
     string expected_ast = R"(Program: Simple
  Block
