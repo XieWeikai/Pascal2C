@@ -153,7 +153,7 @@ void CodeGenerator::VisitAssign(
 }
 
 void CodeGenerator::VisitVar(const shared_ptr<code_generation::Var> &node) {
-    ostream_ << node->GetValue();
+    ostream_ << node->GetName();
 }
 
 void CodeGenerator::VisitType(const shared_ptr<code_generation::Type> &node) {
