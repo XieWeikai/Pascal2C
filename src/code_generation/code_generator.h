@@ -18,9 +18,8 @@ using ::std::shared_ptr;
 
 class CodeGenerator : Visitor {
   public:
-    explicit CodeGenerator(shared_ptr<code_generation::ASTRoot> ast)
-        : ast_(ast), type_tool_kit_() {}
-    void Interpret();
+    CodeGenerator() : type_tool_kit_() {}
+    void Interpret(const shared_ptr<ASTRoot> &node);
     const string GetCCode() const;
 
   private:
@@ -58,8 +57,6 @@ class CodeGenerator : Visitor {
     const string TypeToC(const string &pascal_type) const;
     const string eol_ = ";\n";
 
-    // AST root node
-    shared_ptr<ASTRoot> ast_;
     // Symbol table
     shared_ptr<ISymbolTable> symbol_table_;
     // ostream

@@ -142,8 +142,8 @@ end.
 )";
 
     auto program = SimpleProgramAST();
-    auto code_generator = std::make_shared<CodeGenerator>(program);
-    code_generator->Interpret();
+    auto code_generator = std::make_shared<CodeGenerator>();
+    code_generator->Interpret(program);
     auto generated_ccode = code_generator->GetCCode();
 
     string expected_c_code = "#include <stdio.h>\n"
