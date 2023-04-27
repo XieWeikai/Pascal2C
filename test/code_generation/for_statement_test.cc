@@ -6,12 +6,12 @@
 using namespace pascal2c::code_generation;
 using namespace std;
 
-class ForStatementTest : ::testing::Test {
+class ForStatementTest : public ::testing::Test {
   protected:
     void SetUp() override {
-        expected_ccode_ = R"(for(int i = 1; i <= 10; i++) {
-                a = a + i;
-            }
+        expected_ccode_ = R"(for (i = 1; i <= 10; i++) {
+    a = (a + i);
+}
 )";
 
         auto a_ =

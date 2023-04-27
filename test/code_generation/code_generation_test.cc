@@ -27,8 +27,8 @@ std::shared_ptr<Program> SimpleProgramAST() {
     // VarDecl part
     const auto type_int = std::make_shared<Type>(
         make_shared<Token>(TokenType::RESERVED, "integer"));
-    const auto var_x = std::make_shared<Var>(
-        make_shared<Token>(TokenType::IDENTIFIER, "integer"));
+    const auto var_x =
+        std::make_shared<Var>(make_shared<Token>(TokenType::IDENTIFIER, "x"));
     const auto var_decl_x =
         std::make_shared<VarDeclaration>(std::move(var_x), std::move(type_int));
 
