@@ -1,7 +1,7 @@
 #ifndef PASCAL2C_SRC_CODE_GENERATION_VISITOR_H_
 #define PASCAL2C_SRC_CODE_GENERATION_VISITOR_H_
 #pragma once
-#include "code_generation/ast_adapter.h"
+#include "ast_adapter.h"
 #include <memory>
 namespace pascal2c {
 namespace code_generation {
@@ -16,7 +16,6 @@ class Visitor {
     virtual void VisitFunction(const shared_ptr<Function> &node) = 0;
     virtual void VisitBlock(const shared_ptr<Block> &node) = 0;
     virtual void VisitDeclaration(const shared_ptr<Declaration> &node) = 0;
-    virtual void VisitConst(const shared_ptr<Var> &node) = 0;
     virtual void
     VisitConstDeclaration(const shared_ptr<ConstDeclaration> &node) = 0;
     virtual void VisitArrayType(const shared_ptr<ArrayType> &node) = 0;

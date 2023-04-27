@@ -29,7 +29,8 @@ typedef ASTNode ASTRoot;
 class Compound : public ASTNode {
   public:
     Compound(){};
-    explicit Compound(const std::vector<shared_ptr<ASTNode>> &children);
+    explicit Compound(const std::vector<std::shared_ptr<ASTNode>> &children)
+        : children_(children) {}
     void Accept(Visitor &visitor) override;
     void AddChild(shared_ptr<ASTNode> node);
     const vector<shared_ptr<ASTNode>> &GetChildren() const { return children_; }
