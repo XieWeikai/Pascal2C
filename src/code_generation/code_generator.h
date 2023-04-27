@@ -5,6 +5,7 @@
 #include <string>
 
 #include "ast_adapter.h"
+#include "code_generation/abstract_symbol_table_adapter.h"
 #include "code_generation/symbol_table_adapter.h"
 #include "code_generation/type_adaper.h"
 #include "visitor.h"
@@ -60,7 +61,7 @@ class CodeGenerator : Visitor {
     // AST root node
     shared_ptr<ASTRoot> ast_;
     // Symbol table
-    SymbolTable symbol_table_;
+    shared_ptr<ISymbolTable> symbol_table_;
     // ostream
     std::stringstream ostream_;
     // Current indent level
