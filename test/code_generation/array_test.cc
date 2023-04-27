@@ -13,7 +13,7 @@ class ArrayTest : public ::testing::Test {
     void SetUp() override {
         name_ = "arr";
         type_ = make_shared<Type>(
-            make_shared<Token>(TokenType::INTEGER, "integer"));
+            make_shared<Token>(TokenType::RESERVED, "integer"));
         std::vector<pair<int, int>> bounds = {{1, 100}};
         array_type_ = make_shared<ArrayType>(type_, bounds);
         array_var_ =
