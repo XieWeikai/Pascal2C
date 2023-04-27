@@ -6,16 +6,6 @@ namespace pascal2c {
 namespace code_generation {
 using ::std::dynamic_pointer_cast;
 
-ASTNode::~ASTNode() {}
-VarDeclaration::~VarDeclaration() {
-    var_node_.reset();
-    type_node_.reset();
-}
-
-Var::~Var() {}
-Oper::~Oper() {}
-Num::~Num() {}
-
 void Argument::Accept(Visitor &visitor) {
     visitor.VisitArgument(dynamic_pointer_cast<Argument>(shared_from_this()));
 }
@@ -107,7 +97,6 @@ void Num::Accept(Visitor &visitor) {
 }
 
 // Type
-Type::~Type() {}
 void Type::Accept(Visitor &visitor) {
     visitor.VisitType(dynamic_pointer_cast<Type>(shared_from_this()));
 }
