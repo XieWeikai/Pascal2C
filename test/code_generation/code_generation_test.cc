@@ -55,19 +55,19 @@ std::shared_ptr<Program> SimpleProgramAST() {
         std::make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "2"));
     const auto num_3 =
         std::make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "3"));
-    const auto bin_plus_op = std::make_shared<BinOp>(
+    const auto bin_plus_op = std::make_shared<BinaryOperation>(
         std::move(num_2), std::move(plus_op), std::move(num_3));
 
     // x - 1
     const auto num_1 =
         std::make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "1"));
-    const auto bin_minus_op = std::make_shared<BinOp>(
+    const auto bin_minus_op = std::make_shared<BinaryOperation>(
         std::move(var_x), std::move(minus_op), std::move(num_1));
 
     const auto assign_x =
-        std::make_shared<Assign>(std::move(var_x), std::move(bin_plus_op));
+        std::make_shared<Assignment>(std::move(var_x), std::move(bin_plus_op));
     const auto assign_y =
-        std::make_shared<Assign>(std::move(var_y), std::move(bin_minus_op));
+        std::make_shared<Assignment>(std::move(var_y), std::move(bin_minus_op));
 
     // Construct compound
     children->push_back(std::move(assign_x));

@@ -145,7 +145,7 @@ void CodeGenerator::VisitCompound(
 }
 
 void CodeGenerator::VisitAssign(
-    const shared_ptr<code_generation::Assign> &node) {
+    const shared_ptr<code_generation::Assignment> &node) {
     Visit(node->GetLeft(), true);
     ostream_ << " = ";
     Visit(node->GetRight());
@@ -168,7 +168,8 @@ void CodeGenerator::VisitNoOp(const shared_ptr<code_generation::NoOp> &node) {
     ostream_ << ";" << endl;
 }
 
-void CodeGenerator::VisitBinOp(const shared_ptr<code_generation::BinOp> &node) {
+void CodeGenerator::VisitBinOp(
+    const shared_ptr<code_generation::BinaryOperation> &node) {
     IncIndent();
     ostream_ << '(';
     Visit(node->GetLeft());

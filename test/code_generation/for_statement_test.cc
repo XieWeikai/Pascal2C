@@ -25,8 +25,8 @@ class ForStatementTest : public ::testing::Test {
         auto end_ =
             make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "10"));
 
-        auto bin_op_ = make_shared<BinOp>(a_, plus_, for_var_);
-        auto assign_ = make_shared<Assign>(a_, bin_op_);
+        auto bin_op_ = make_shared<BinaryOperation>(a_, plus_, for_var_);
+        auto assign_ = make_shared<Assignment>(a_, bin_op_);
         auto body_ =
             make_shared<Compound>(std::vector<shared_ptr<ASTNode>>{assign_});
 

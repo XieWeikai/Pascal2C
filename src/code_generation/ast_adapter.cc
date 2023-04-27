@@ -82,8 +82,9 @@ void Compound::AddChild(std::shared_ptr<ASTNode> node) {
 }
 
 // BinOp
-void BinOp::Accept(Visitor &visitor) {
-    visitor.VisitBinOp(dynamic_pointer_cast<BinOp>(shared_from_this()));
+void BinaryOperation::Accept(Visitor &visitor) {
+    visitor.VisitBinOp(
+        dynamic_pointer_cast<BinaryOperation>(shared_from_this()));
 }
 
 // Oper
@@ -107,8 +108,8 @@ void ConstType::Accept(Visitor &visitor) {
 }
 
 // Assign
-void Assign::Accept(Visitor &visitor) {
-    visitor.VisitAssign(dynamic_pointer_cast<Assign>(shared_from_this()));
+void Assignment::Accept(Visitor &visitor) {
+    visitor.VisitAssign(dynamic_pointer_cast<Assignment>(shared_from_this()));
 }
 
 // Var

@@ -248,11 +248,12 @@ class Program : public ASTNode {
     shared_ptr<Block> block_;
 };
 
-class Assign : public ASTNode {
+class Assignment : public ASTNode {
   public:
-    Assign(const shared_ptr<ASTNode> &left, const shared_ptr<ASTNode> &right)
+    Assignment(const shared_ptr<ASTNode> &left,
+               const shared_ptr<ASTNode> &right)
         : left_(left), right_(right){};
-    virtual ~Assign() = default;
+    virtual ~Assignment() = default;
     void Accept(Visitor &visitor) override;
     const shared_ptr<ASTNode> &GetLeft() const { return left_; }
     const shared_ptr<ASTNode> &GetRight() const { return right_; }
@@ -286,13 +287,13 @@ class Oper : public ASTNode {
     string oper_;
 };
 
-class BinOp : public ASTNode {
+class BinaryOperation : public ASTNode {
   public:
-    explicit BinOp(const shared_ptr<ASTNode> &left,
-                   const shared_ptr<Oper> &oper,
-                   const shared_ptr<ASTNode> &right)
+    explicit BinaryOperation(const shared_ptr<ASTNode> &left,
+                             const shared_ptr<Oper> &oper,
+                             const shared_ptr<ASTNode> &right)
         : left_(left), oper_(oper), right_(right) {}
-    virtual ~BinOp() = default;
+    virtual ~BinaryOperation() = default;
     void Accept(Visitor &visitor) override;
     const shared_ptr<ASTNode> &GetLeft() { return left_; }
     const shared_ptr<Oper> &GetOper() { return oper_; }
@@ -335,20 +336,20 @@ class Statement : public ASTNode {
 class IfStatement : public ASTNode {
   public:
     IfStatement(const shared_ptr<ASTNode> &condition,
-                const shared_ptr<ASTNode> &then_branch,
-                const shared_ptr<ASTNode> &else_branch = nullptr)
+                const shared_ptr<Compound> &then_branch,
+                const shared_ptr<Compound> &else_branch = nullptr)
         : condition_(condition), then_branch_(then_branch),
           else_branch_(else_branch) {}
     virtual ~IfStatement() = default;
     void Accept(Visitor &visitor) override;
     const shared_ptr<ASTNode> &GetCondition() const { return condition_; }
-    const shared_ptr<ASTNode> &GetThenBranch() const { return then_branch_; }
-    const shared_ptr<ASTNode> &GetElseBranch() const { return else_branch_; }
+    const shared_ptr<Compound> &GetThenBranch() const { return then_branch_; }
+    const shared_ptr<Compound> &GetElseBranch() const { return else_branch_; }
 
   private:
     shared_ptr<ASTNode> condition_;
-    shared_ptr<ASTNode> then_branch_;
-    shared_ptr<ASTNode> else_branch_;
+    shared_ptr<Compound> then_branch_;
+    shared_ptr<Compound> else_branch_;
 };
 
 class ForStatement : public ASTNode {
