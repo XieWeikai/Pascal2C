@@ -18,7 +18,7 @@ TEST(SymbolTableTest, MockSymbolTableTest) {
     auto symbol_table_mock = std::make_shared<SymbolTableMock>();
     auto symbol_scope_mock = std::make_shared<SymbolScopeMock>();
 
-    EXPECT_CALL(*symbol_table_mock, IsReference(x->GetValue()))
+    EXPECT_CALL(*symbol_table_mock, IsReference(x->GetName()))
         .WillOnce(Return(false));
     EXPECT_CALL(*symbol_table_mock, Lookup("x"))
         .WillOnce(Return(std::make_shared<SymbolItem>("x", x)));
@@ -26,9 +26,9 @@ TEST(SymbolTableTest, MockSymbolTableTest) {
         .WillOnce(Return(std::make_shared<SymbolItem>("x", x)));
 
     symbol_table_mock->AddVariable(x, false);
-    symbol_scope_mock->Lookup(x->GetValue());
-    auto item_x = symbol_table_mock->Lookup(x->GetValue());
-    EXPECT_FALSE(symbol_table_mock->IsReference(x->GetValue()));
+    symbol_scope_mock->Lookup(x->GetName());
+    auto item_x = symbol_table_mock->Lookup(x->GetName());
+    EXPECT_FALSE(symbol_table_mock->IsReference(x->GetName()));
     EXPECT_FALSE(item_x->IsReference());
 }
 } // namespace code_generation

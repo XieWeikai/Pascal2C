@@ -25,15 +25,16 @@ std::shared_ptr<Program> SimpleProgramAST() {
         std::make_shared<std::vector<std::shared_ptr<ASTNode>>>();
 
     // VarDecl part
-    const auto token_int = std::make_shared<Token>(TokenType::TYPE, "integer");
+    const auto token_int =
+        std::make_shared<Token>(TokenType::RESERVED, "integer");
     const auto type_int = std::make_shared<Type>(std::move(token_int));
 
-    const auto token_x = std::make_shared<Token>(TokenType::INTEGER, "x");
+    const auto token_x = std::make_shared<Token>(TokenType::IDENTIFIER, "x");
     const auto var_x = std::make_shared<Var>(std::move(token_x));
     const auto var_decl_x =
         std::make_shared<VarDeclaration>(std::move(var_x), std::move(type_int));
 
-    const auto token_y = std::make_shared<Token>(TokenType::INTEGER, "y");
+    const auto token_y = std::make_shared<Token>(TokenType::IDENTIFIER, "y");
     const auto var_y = std::make_shared<Var>(std::move(token_y));
     const auto var_decl_y =
         std::make_shared<VarDeclaration>(std::move(var_y), std::move(type_int));
@@ -45,25 +46,27 @@ std::shared_ptr<Program> SimpleProgramAST() {
     auto children = std::make_shared<std::vector<std::shared_ptr<ASTNode>>>();
     // :=
     const auto token_assign_op =
-        std::make_shared<Token>(TokenType::ASSIGN, ":=");
+        std::make_shared<Token>(TokenType::OPERATOR, ":=");
     const auto assign_op = std::make_shared<Oper>(std::move(token_assign_op));
     // +
-    const auto token_plus_op = std::make_shared<Token>(TokenType::PLUS, "+");
+    const auto token_plus_op =
+        std::make_shared<Token>(TokenType::OPERATOR, "+");
     const auto plus_op = std::make_shared<Oper>(std::move(token_plus_op));
     // -
-    const auto token_minus_op = std::make_shared<Token>(TokenType::MINUS, "-");
+    const auto token_minus_op =
+        std::make_shared<Token>(TokenType::OPERATOR, "-");
     const auto minus_op = std::make_shared<Oper>(std::move(token_minus_op));
 
     // 2 + 3
-    const auto token_2 = std::make_shared<Token>(TokenType::INTEGER, "2");
+    const auto token_2 = std::make_shared<Token>(TokenType::NUMBER, "2");
     const auto num_2 = std::make_shared<Num>(std::move(token_2));
-    const auto token_3 = std::make_shared<Token>(TokenType::INTEGER, "3");
+    const auto token_3 = std::make_shared<Token>(TokenType::NUMBER, "3");
     const auto num_3 = std::make_shared<Num>(std::move(token_3));
     const auto bin_plus_op = std::make_shared<BinOp>(
         std::move(num_2), std::move(plus_op), std::move(num_3));
 
     // x - 1
-    const auto token_1 = std::make_shared<Token>(TokenType::INTEGER, "1");
+    const auto token_1 = std::make_shared<Token>(TokenType::NUMBER, "1");
     const auto num_1 = std::make_shared<Num>(std::move(token_1));
     const auto bin_minus_op = std::make_shared<BinOp>(
         std::move(var_x), std::move(minus_op), std::move(num_1));
