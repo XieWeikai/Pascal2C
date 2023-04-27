@@ -101,6 +101,11 @@ void Type::Accept(Visitor &visitor) {
     visitor.VisitType(dynamic_pointer_cast<Type>(shared_from_this()));
 }
 
+// ConstType
+void ConstType::Accept(Visitor &visitor) {
+    visitor.VisitConstType(dynamic_pointer_cast<ConstType>(shared_from_this()));
+}
+
 // Assign
 void Assign::Accept(Visitor &visitor) {
     visitor.VisitAssign(dynamic_pointer_cast<Assign>(shared_from_this()));

@@ -160,6 +160,10 @@ void CodeGenerator::VisitType(const shared_ptr<code_generation::Type> &node) {
     ostream_ << TypeToC(node->GetType());
 }
 
+void CodeGenerator::VisitConstType(const shared_ptr<ConstType> &node) {
+    ostream_ << "const " << TypeToC(node->GetType());
+}
+
 void CodeGenerator::VisitNoOp(const shared_ptr<code_generation::NoOp> &node) {
     ostream_ << ";" << endl;
 }
@@ -177,7 +181,7 @@ void CodeGenerator::VisitBinOp(const shared_ptr<code_generation::BinOp> &node) {
 }
 
 void CodeGenerator::VisitOper(const shared_ptr<Oper> &node) {
-    ostream_ << TypeToC(node->GetType().ToString());
+    ostream_ << node->GetOper();
 }
 
 void CodeGenerator::VisitNum(const shared_ptr<code_generation::Num> &node) {

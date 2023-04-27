@@ -11,8 +11,8 @@ using namespace std;
 class ConstDeclarationTest : public ::testing::Test {
   protected:
     void SetUp() override {
-        const_type_ = make_shared<Type>(
-            make_shared<Token>(TokenType::RESERVED, "char"), true);
+        const_type_ = make_shared<ConstType>(
+            make_shared<Token>(TokenType::RESERVED, "character"));
         var_ =
             make_shared<Var>(make_shared<Token>(TokenType::IDENTIFIER, "K_A"));
         const_decl_ = make_shared<ConstDeclaration>(var_, const_type_);
@@ -21,7 +21,7 @@ class ConstDeclarationTest : public ::testing::Test {
 
     string expected_ccode_ = "const char K_A;\n";
     shared_ptr<ConstDeclaration> const_decl_;
-    shared_ptr<Type> const_type_;
+    shared_ptr<ConstType> const_type_;
     shared_ptr<Var> var_;
 };
 
