@@ -262,67 +262,6 @@ class Assign : public ASTNode {
     shared_ptr<ASTNode> right_;
 };
 
-/**
- * @brief Expression node
- * Pseudo-code example:
- * Expr e1 = Expr(2, +, 3);
- * Expr e2 = Expr(e1, -, 1);
- */
-class Statement : public ASTNode {
-  public:
-    Statement(const shared_ptr<ASTNode> &left_hand,
-              const shared_ptr<ASTNode> &right_hand)
-        : left_hand_(left_hand), right_hand_(right_hand) {}
-    virtual ~Statement() = default;
-    void Accept(Visitor &visitor) override;
-    const shared_ptr<ASTNode> &GetLeftHand() const { return left_hand_; }
-    const shared_ptr<ASTNode> &GetRightHand() const { return right_hand_; }
-
-  private:
-    shared_ptr<ASTNode> left_hand_;
-    shared_ptr<ASTNode> right_hand_;
-};
-
-class IfStatement : public ASTNode {
-  public:
-    IfStatement(const shared_ptr<ASTNode> &condition,
-                const shared_ptr<ASTNode> &then_branch,
-                const shared_ptr<ASTNode> &else_branch = nullptr)
-        : condition_(condition), then_branch_(then_branch),
-          else_branch_(else_branch) {}
-    virtual ~IfStatement() = default;
-    void Accept(Visitor &visitor) override;
-    const shared_ptr<ASTNode> &GetCondition() const { return condition_; }
-    const shared_ptr<ASTNode> &GetThenBranch() const { return then_branch_; }
-    const shared_ptr<ASTNode> &GetElseBranch() const { return else_branch_; }
-
-  private:
-    shared_ptr<ASTNode> condition_;
-    shared_ptr<ASTNode> then_branch_;
-    shared_ptr<ASTNode> else_branch_;
-};
-
-class ForStatement : public ASTNode {
-  public:
-    ForStatement(const shared_ptr<ASTNode> &variable,
-                 const shared_ptr<ASTNode> &start,
-                 const shared_ptr<ASTNode> &end,
-                 const shared_ptr<ASTNode> &body)
-        : variable_(variable), start_(start), end_(end), body_(body) {}
-    virtual ~ForStatement() = default;
-    void Accept(Visitor &visitor) override;
-    const shared_ptr<ASTNode> &GetVariable() const { return variable_; }
-    const shared_ptr<ASTNode> &GetStart() const { return start_; }
-    const shared_ptr<ASTNode> &GetEnd() const { return end_; }
-    const shared_ptr<ASTNode> &GetBody() const { return body_; }
-
-  private:
-    shared_ptr<ASTNode> variable_;
-    shared_ptr<ASTNode> start_;
-    shared_ptr<ASTNode> end_;
-    shared_ptr<ASTNode> body_;
-};
-
 class Num : public ASTNode {
   public:
     Num(const shared_ptr<Token> &token)
@@ -370,6 +309,65 @@ class NoOp : public ASTNode {
     NoOp(){};
     virtual ~NoOp() = default;
     void Accept(Visitor &visitor) override;
+};
+
+/**
+ * @brief Expression node
+ * Pseudo-code example:
+ * Expr e1 = Expr(2, +, 3);
+ * Expr e2 = Expr(e1, -, 1);
+ */
+class Statement : public ASTNode {
+  public:
+    Statement(const shared_ptr<ASTNode> &left_hand,
+              const shared_ptr<ASTNode> &right_hand)
+        : left_hand_(left_hand), right_hand_(right_hand) {}
+    virtual ~Statement() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<ASTNode> &GetLeftHand() const { return left_hand_; }
+    const shared_ptr<ASTNode> &GetRightHand() const { return right_hand_; }
+
+  private:
+    shared_ptr<ASTNode> left_hand_;
+    shared_ptr<ASTNode> right_hand_;
+};
+
+class IfStatement : public ASTNode {
+  public:
+    IfStatement(const shared_ptr<ASTNode> &condition,
+                const shared_ptr<ASTNode> &then_branch,
+                const shared_ptr<ASTNode> &else_branch = nullptr)
+        : condition_(condition), then_branch_(then_branch),
+          else_branch_(else_branch) {}
+    virtual ~IfStatement() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<ASTNode> &GetCondition() const { return condition_; }
+    const shared_ptr<ASTNode> &GetThenBranch() const { return then_branch_; }
+    const shared_ptr<ASTNode> &GetElseBranch() const { return else_branch_; }
+
+  private:
+    shared_ptr<ASTNode> condition_;
+    shared_ptr<ASTNode> then_branch_;
+    shared_ptr<ASTNode> else_branch_;
+};
+
+class ForStatement : public ASTNode {
+  public:
+    ForStatement(const shared_ptr<Var> &variable, const shared_ptr<Num> &start,
+                 const shared_ptr<Num> &end, const shared_ptr<Compound> &body)
+        : variable_(variable), start_(start), end_(end), body_(body) {}
+    virtual ~ForStatement() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<Var> &GetVariable() const { return variable_; }
+    const shared_ptr<Num> &GetStart() const { return start_; }
+    const shared_ptr<Num> &GetEnd() const { return end_; }
+    const shared_ptr<Compound> &GetBody() const { return body_; }
+
+  private:
+    shared_ptr<Var> variable_;
+    shared_ptr<Num> start_;
+    shared_ptr<Num> end_;
+    shared_ptr<Compound> body_;
 };
 
 } // namespace code_generation
