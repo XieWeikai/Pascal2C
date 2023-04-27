@@ -15,15 +15,17 @@ class IfStatementTest : public ::testing::Test {
         auto var_b =
             make_shared<Var>(make_shared<Token>(TokenType::IDENTIFIER, "b"));
         auto eq =
-            make_shared<Oper>(make_shared<Token>(TokenType::OPERATOR, ":="));
+            make_shared<Oper>(make_shared<Token>(TokenType::OPERATOR, "="));
         auto a_eq_b = make_shared<BinaryOperation>(var_a, eq, var_b);
         auto condition = a_eq_b;
         auto then_branch = make_shared<Compound>();
         auto else_branch = make_shared<Compound>();
 
         // a = 1 + 2;
-        auto num_1 = make_shared<Num>(TokenType::NUMBER, "1");
-        auto num_2 = make_shared<Num>(TokenType::NUMBER, "2");
+        auto num_1 =
+            make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "1"));
+        auto num_2 =
+            make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "2"));
         auto plus =
             make_shared<Oper>(make_shared<Token>(TokenType::OPERATOR, "+"));
         auto then_binop = make_shared<BinaryOperation>(num_1, plus, num_2);
@@ -31,8 +33,10 @@ class IfStatementTest : public ::testing::Test {
         then_branch->AddChild(then_assign);
 
         // a = 2 * 3;
-        auto num_3 = make_shared<Num>(TokenType::NUMBER, "3");
-        auto mul = make_shared<Oper>(TokenType::OPERATOR, "*");
+        auto num_3 =
+            make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "3"));
+        auto mul =
+            make_shared<Oper>(make_shared<Token>(TokenType::OPERATOR, "*"));
         auto else_binop = make_shared<BinaryOperation>(num_2, mul, num_3);
         auto else_assign = make_shared<Assignment>(var_a, else_binop);
         else_branch->AddChild(else_assign);
@@ -41,10 +45,10 @@ class IfStatementTest : public ::testing::Test {
             make_shared<IfStatement>(condition, then_branch, else_branch);
     }
 
-    string expected_ccode_ = R"(if (a == b) {
-    a = 1 + 2;
+    string expected_ccode_ = R"(if ((a == b)) {
+    a = (1 + 2);
 } else {
-    a = 2 * 3;
+    a = (2 * 3);
 }
 )";
     shared_ptr<IfStatement> if_statement_;

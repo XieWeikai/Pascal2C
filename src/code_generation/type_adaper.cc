@@ -4,13 +4,12 @@
 
 namespace pascal2c {
 namespace code_generation {
-const string TypeToolKit::TypeToC(const string &pascal_type) const {
-    auto it = PascalToCTypeMap.find(pascal_type);
+const string TypeToolKit::SymbolToC(const string &pascal_symbol) const {
+    auto it = PascalToCTypeMap.find(pascal_symbol);
     if (it != PascalToCTypeMap.end()) {
         return it->second;
     } else {
-        throw std::runtime_error("Pascal type with no corresponding c type: " +
-                                 pascal_type);
+        return pascal_symbol;
     }
 }
 } // namespace code_generation
