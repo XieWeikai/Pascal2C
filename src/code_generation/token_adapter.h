@@ -12,27 +12,12 @@ using hashmap = ::std::unordered_map<Key, Tp>;
 class TokenType {
   public:
     enum Value {
-        BEGIN,
-        END,
-        INTEGER,
-        PLUS,
-        MINUS,
-        MUL,
-        DIV,
-        LPAREN,
-        RPAREN,
-        PROGRAM,
-        BLOCK,
+        OPERATOR,
+        DELIMITER,
+        RESERVED,
         IDENTIFIER,
-        DECLARATION,
-        TYPE,
-        COMPOUND,
-        ASSIGN,
-        VAR,
-        SEMICOLON, // ; End of line
-        COLON,     // : Identifier separator
-        COMMA,     // ,
-        DOT,       // . End of Program
+        STRING,
+        NUMBER,
         EOF_
     };
 
@@ -46,14 +31,9 @@ class TokenType {
     Value value_;
 
     const hashmap<int, string> TokenTypeStringMap = {
-        {0, "BEGIN"},        {1, "END"},    {2, "INTEGER"},
-        {3, "PLUS"},         {4, "MINUS"},  {5, "MUL"},
-        {6, "DIV"},          {7, "LPAREN"}, {8, "RPAREN"},
-        {9, "PROGRAM"},      {10, "BLOCK"}, {11, "IDENTIFIER"},
-        {12, "DECLARATION"}, {13, "TYPE"},  {14, "COMPOUND"},
-        {15, "ASSIGN"},      {16, "VAR"},   {17, "SEMICOLON"},
-        {18, "COLON"},       {19, "COMMA"}, {20, "DOT"},
-        {21, "EOF_"}};
+        {0, "OPERATOR"}, {1, "DELIMITER"}, {2, "RESERVED"}, {3, "IDENTIFIER"},
+        {4, "STRING"},   {5, "NUMBER"},    {6, "EOF_"},
+    };
 };
 
 const string TokenTypeToString(const TokenType &token_type);

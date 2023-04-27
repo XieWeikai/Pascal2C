@@ -80,7 +80,7 @@ void ASTPrinter::VisitArrayDeclaration(
 
 void ASTPrinter::VisitVarDecl(const shared_ptr<VarDeclaration> &node) {
     ostream_ << string(indent_level_, ' ')
-             << "VarDecl: " << node->GetVarNode()->GetValue() << ": "
+             << "VarDecl: " << node->GetVarNode()->GetName() << ": "
              << node->GetTypeNode()->GetType() << endl;
 }
 
@@ -111,7 +111,7 @@ void ASTPrinter::VisitAssign(const shared_ptr<Assign> &node) {
 }
 
 void ASTPrinter::VisitVar(const shared_ptr<Var> &node) {
-    ostream_ << string(indent_level_, ' ') << "Var: " << node->GetValue()
+    ostream_ << string(indent_level_, ' ') << "Var: " << node->GetName()
              << endl;
 }
 

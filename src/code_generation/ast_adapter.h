@@ -78,7 +78,7 @@ class Var : public ASTNode {
     explicit Var(const string &name) : name_(name) {}
     virtual ~Var() = default;
     void Accept(Visitor &visitor) override;
-    const string GetValue() const { return name_; }
+    const string GetName() const { return name_; }
 
   private:
     string name_;
@@ -151,7 +151,7 @@ class Array : public ASTNode {
     Array(const shared_ptr<Var> &var) : var_(var) {}
     virtual ~Array() = default;
     void Accept(Visitor &visitor) override;
-    const string GetName() const { return var_->GetValue(); }
+    const string GetName() const { return var_->GetName(); }
     const shared_ptr<Var> &GetVarNode() const { return var_; }
 
   private:
