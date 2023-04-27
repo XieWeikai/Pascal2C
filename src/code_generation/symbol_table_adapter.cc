@@ -1,3 +1,4 @@
+#ifdef testing
 #include "symbol_table_adapter.h"
 #include "code_generation/ast_adapter.h"
 #include "semantic_analysis/symbol_table.h"
@@ -79,3 +80,4 @@ bool SymbolTable::IsReference(const string &name) const {
 
 } // namespace code_generation
 } // namespace pascal2c
+#endif
