@@ -14,7 +14,7 @@ class TypeToolKit {
 
   private:
     const hashmap<string, string> PascalToCTypeMap = {
-        {"integer", "int"}, {"real", "double"}, {"character", "char"},
+        {"integer", "int"}, {"real", "double"}, {"char", "char"},
         {"string", "char"}, {"boolean", "int"}, {"record", "struct"},
         {":=", "="},
     };

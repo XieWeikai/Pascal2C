@@ -12,7 +12,7 @@ class ConstDeclarationTest : public ::testing::Test {
   protected:
     void SetUp() override {
         const_type_ = make_shared<ConstType>(
-            make_shared<Token>(TokenType::RESERVED, "character"));
+            make_shared<Token>(TokenType::RESERVED, "char"));
         var_ =
             make_shared<Var>(make_shared<Token>(TokenType::IDENTIFIER, "K_A"));
         const_decl_ = make_shared<ConstDeclaration>(var_, const_type_);
