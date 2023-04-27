@@ -1,3 +1,5 @@
+#pragma once
+
 #include <map>
 #include <set>
 #include "../ast/ast.h"
