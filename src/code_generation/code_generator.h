@@ -18,7 +18,7 @@ using ::std::shared_ptr;
 
 class CodeGenerator : Visitor {
   public:
-    CodeGenerator() : type_tool_kit_() {}
+    CodeGenerator() : indent_level_(0), type_tool_kit_() {}
     void Interpret(const shared_ptr<ASTRoot> &node);
     const string GetCCode() const;
 
