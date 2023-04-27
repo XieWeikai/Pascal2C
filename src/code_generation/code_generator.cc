@@ -15,10 +15,7 @@ using ::std::endl;
 using ::std::runtime_error;
 using ::std::shared_ptr;
 
-void CodeGenerator::Interpret() {
-    auto program = std::dynamic_pointer_cast<Program>(ast_);
-    Visit(ast_);
-}
+void CodeGenerator::Interpret(const shared_ptr<ASTNode> &node) { Visit(node); }
 
 const string CodeGenerator::GetCCode() const { return ostream_.str(); }
 
