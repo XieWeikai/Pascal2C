@@ -1,6 +1,7 @@
 #include "symbol_table_adapter.h"
 #include "code_generation/ast_adapter.h"
 #include "semantic_analysis/symbol_table.h"
+#include <cstddef>
 #include <memory>
 #include <stdexcept>
 
@@ -38,11 +39,9 @@ SymbolScope::StringTypeToSymbolTable(const string &type) const {
     return symbol_type_converter_->StringTypeToSymbolTableType(type);
 }
 
-const shared_ptr<SymbolItem> SymbolScope::Lookup(const string &name,
-                                                 const string &type) const {
-    auto symbol_table_type = StringTypeToSymbolTable(type);
-    auto symbol_table_item = make_shared<symbol_table::SymbolTableItem>(
-        symbol_table_type, name, false, false);
+const shared_ptr<SymbolItem> SymbolScope::Lookup(const string &name) const {
+    auto symbol_table_item =
+        make_shared<symbol_table::SymbolTableItem>(NULL, name, false, false);
 
     if (!symbol_table_block_->Query(*symbol_table_item)) {
         throw std::runtime_error("Unknown symbol table item name " + name);
@@ -69,12 +68,12 @@ void SymbolTable::SetCurrentScope(const string &scope_name) {
 void SymbolTable::AddVariable(const string &name, bool is_reference) {}
 
 const std::shared_ptr<SymbolItem>
-SymbolTable::Lookup(const string &name, const string &type) const {
-    return current_scope_->Lookup(name, type);
+SymbolTable::Lookup(const string &name) const {
+    return current_scope_->Lookup(name);
 }
 
-bool SymbolTable::IsReference(const string &name, const string &type) const {
-    const auto &item = current_scope_->Lookup(name, type);
+bool SymbolTable::IsReference(const string &name) const {
+    const auto &item = current_scope_->Lookup(name);
     return item->IsReference();
 }
 

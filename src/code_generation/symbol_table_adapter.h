@@ -14,6 +14,7 @@ namespace code_generation {
 using ::std::shared_ptr;
 using ::std::string;
 using ::std::unordered_map;
+
 class SymbolTableConverter {
   public:
     const symbol_table::ItemType
@@ -43,6 +44,32 @@ class SymbolItem {
     shared_ptr<ASTNode> node_;
 };
 
+/**
+ * @brief Abstract base class for SymbolScope for implementing a Mock Class for
+ * testing before the real SymbolScope is implemented
+ *
+ */
+class ISymbolScope {
+  public:
+    virtual ~ISymbolScope() = default;
+    virtual const shared_ptr<SymbolItem> Lookup(const string &name,
+                                                const string &type) const = 0;
+    virtual void AddVariable(const string &name, bool is_reference) = 0;
+};
+
+/**
+ * @brief Abstract base class for SymbolTable.
+ *
+ */
+class ISymbolTable {
+  public:
+    virtual ~ISymbolTable() = default;
+    virtual void AddVariable(const string &name, bool is_reference) = 0;
+    virtual bool IsReference(const string &name, const string &type) const = 0;
+    virtual void SetCurrentScope(const string &scope_name);
+    virtual const shared_ptr<SymbolItem> Lookup(const string &name) const;
+};
+
 class SymbolScope {
   public:
     SymbolScope(
@@ -50,8 +77,7 @@ class SymbolScope {
         shared_ptr<SymbolTableConverter> &symbol_table_converter)
         : symbol_table_block_(symbol_table_block),
           symbol_type_converter_(symbol_table_converter) {}
-    const shared_ptr<SymbolItem> Lookup(const string &name,
-                                        const string &type) const;
+    const shared_ptr<SymbolItem> Lookup(const string &name) const;
     void AddVariable(const string &name, bool is_reference);
 
   private:
@@ -65,10 +91,9 @@ class SymbolTable {
   public:
     SymbolTable() {}
     void AddVariable(const string &name, bool is_reference);
-    bool IsReference(const string &name, const string &type) const;
+    bool IsReference(const string &name) const;
     void SetCurrentScope(const string &scope_name);
-    const shared_ptr<SymbolItem> Lookup(const string &name,
-                                        const string &type) const;
+    const shared_ptr<SymbolItem> Lookup(const string &name) const;
 
   private:
     shared_ptr<SymbolScope> current_scope_;
