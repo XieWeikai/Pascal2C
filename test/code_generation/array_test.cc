@@ -19,9 +19,9 @@ class ArrayTest : public ::testing::Test {
         array_var_ =
             make_shared<Var>(make_shared<Token>(TokenType::IDENTIFIER, name_));
         array_ = make_shared<Array>(array_var_);
-        array_declaration_ = make_shared<ArrayDeclaration>(array_, type_);
+        array_declaration_ = make_shared<ArrayDeclaration>(array_, array_type_);
         // Expected C array declaration statement
-        expected_array_declaration_statement_ = "int arr[100];";
+        expected_array_declaration_statement_ = "int arr[100];\n";
 
         ASSERT_NE(array_var_, nullptr);
         ASSERT_NE(array_, nullptr);
@@ -46,5 +46,6 @@ TEST_F(ArrayTest, ArrayCreation) {
     CodeGenerator code_generator;
     code_generator.Interpret(array_declaration_root);
     auto generated_ccode = code_generator.GetCCode();
+    cout << generated_ccode << endl;
     ASSERT_EQ(generated_ccode, expected_array_declaration_statement_);
 }

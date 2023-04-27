@@ -7,20 +7,22 @@
 #include <algorithm>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
-namespace pascal2c {
-namespace code_generation {
+using namespace std;
+using namespace pascal2c::code_generation;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using string = ::std::string;
 
 std::shared_ptr<Program> SimpleProgramAST() {
     // vector<std::shared_ptr<ASTNode>> declarations;
-    auto declarations = std::make_shared<vector<std::shared_ptr<ASTNode>>>();
+    auto declarations =
+        std::make_shared<std::vector<std::shared_ptr<ASTNode>>>();
 
     // VarDecl part
     const auto token_int = std::make_shared<Token>(TokenType::TYPE, "integer");
@@ -40,7 +42,7 @@ std::shared_ptr<Program> SimpleProgramAST() {
     declarations->push_back(std::move(var_decl_y));
 
     // Compound statement part
-    auto children = std::make_shared<vector<std::shared_ptr<ASTNode>>>();
+    auto children = std::make_shared<std::vector<std::shared_ptr<ASTNode>>>();
     // :=
     const auto token_assign_op =
         std::make_shared<Token>(TokenType::ASSIGN, ":=");
@@ -157,7 +159,6 @@ end.
                              "    y = (x - 1);\n"
                              "    return 0;\n"
                              "}\n";
+    std::cout << generated_ccode << endl;
     EXPECT_EQ(generated_ccode, expected_c_code);
 }
-} // namespace code_generation
-} // namespace pascal2c
