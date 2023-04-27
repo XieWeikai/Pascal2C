@@ -93,7 +93,7 @@ void ASTPrinter::VisitCompound(const shared_ptr<Compound> &node) {
     indent_level_--;
 }
 
-void ASTPrinter::VisitAssign(const shared_ptr<Assign> &node) {
+void ASTPrinter::VisitAssign(const shared_ptr<Assignment> &node) {
     ostream_ << string(indent_level_, ' ') << "Assign" << endl;
     indent_level_++;
 
@@ -128,7 +128,7 @@ void ASTPrinter::VisitNoOp(const shared_ptr<NoOp> &node) {
     ostream_ << string(indent_level_, ' ') << "NoOp" << endl;
 }
 
-void ASTPrinter::VisitBinOp(const shared_ptr<BinOp> &node) {
+void ASTPrinter::VisitBinOp(const shared_ptr<BinaryOperation> &node) {
     ostream_ << string(indent_level_, ' ') << "BinOp:" << endl;
     indent_level_++;
     Visit(node->GetLeft());

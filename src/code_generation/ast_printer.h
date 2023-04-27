@@ -39,12 +39,12 @@ class ASTPrinter : Visitor {
     VisitArrayDeclaration(const shared_ptr<ArrayDeclaration> &node) override;
     virtual void VisitVarDecl(const shared_ptr<VarDeclaration> &node) override;
     virtual void VisitCompound(const shared_ptr<Compound> &node) override;
-    virtual void VisitBinOp(const shared_ptr<BinOp> &node) override;
+    virtual void VisitBinOp(const shared_ptr<BinaryOperation> &node) override;
     virtual void VisitOper(const shared_ptr<Oper> &node) override;
     virtual void VisitNum(const shared_ptr<Num> &node) override;
     virtual void VisitType(const shared_ptr<Type> &node) override;
     virtual void VisitConstType(const shared_ptr<ConstType> &node) override;
-    virtual void VisitAssign(const shared_ptr<Assign> &node) override;
+    virtual void VisitAssign(const shared_ptr<Assignment> &node) override;
     virtual void VisitVar(const shared_ptr<Var> &node) override;
     virtual void VisitNoOp(const shared_ptr<NoOp> &node) override;
     virtual void VisitStatement(const shared_ptr<Statement> &node) override;
