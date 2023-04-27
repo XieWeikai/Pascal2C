@@ -268,15 +268,15 @@ class Factor : public ASTNode {
 class Statement : public ASTNode {
   public:
     Statement(const shared_ptr<ASTNode> &left_hand,
-              const shared_ptr<ASTNode> &right_hand,
-              const vector<shared_ptr<ASTNode>> &children)
-        : left_hand_(left_hand), right_hand_(right_hand), children_(children) {}
+              const shared_ptr<ASTNode> &right_hand)
+        : left_hand_(left_hand), right_hand_(right_hand) {}
     void Accept(Visitor &visitor) override;
+    const shared_ptr<ASTNode> &GetLeftHand() const { return left_hand_; }
+    const shared_ptr<ASTNode> &GetRightHand() const { return right_hand_; }
 
   private:
     shared_ptr<ASTNode> left_hand_;
     shared_ptr<ASTNode> right_hand_;
-    vector<shared_ptr<ASTNode>> children_;
 };
 
 class IfStatement : public ASTNode {

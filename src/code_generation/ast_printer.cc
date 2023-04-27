@@ -22,6 +22,10 @@ void ASTPrinter::Visit(const shared_ptr<ASTNode> &node, bool indent) {
     node->Accept(*this);
 }
 
+void ASTPrinter::VisitArgument(const shared_ptr<Argument> &node) {
+    ErrNotImplemented();
+}
+
 void ASTPrinter::VisitProgram(const shared_ptr<Program> &node) {
     ostream_ << "Program: " << node->GetName() << endl;
     indent_level_++;

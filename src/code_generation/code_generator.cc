@@ -187,6 +187,12 @@ void CodeGenerator::VisitNum(const shared_ptr<code_generation::Num> &node) {
     ostream_ << node->GetValue();
 }
 
+void CodeGenerator::VisitStatement(const shared_ptr<Statement> &node) {
+    Visit(node->GetLeftHand(), true);
+    ostream_ << " = ";
+    Visit(node->GetRightHand());
+}
+
 void CodeGenerator::VisitIfStatement(const shared_ptr<IfStatement> &node) {
     ostream_ << Indent() << "if (";
     Visit(node->GetCondition());
