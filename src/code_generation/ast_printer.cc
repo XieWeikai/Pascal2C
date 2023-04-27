@@ -120,6 +120,10 @@ void ASTPrinter::VisitType(const shared_ptr<Type> &node) {
              << endl;
 }
 
+void ASTPrinter::VisitConstType(const shared_ptr<ConstType> &node) {
+    ErrNotImplemented();
+}
+
 void ASTPrinter::VisitNoOp(const shared_ptr<NoOp> &node) {
     ostream_ << string(indent_level_, ' ') << "NoOp" << endl;
 }
@@ -134,8 +138,8 @@ void ASTPrinter::VisitBinOp(const shared_ptr<BinOp> &node) {
 }
 
 void ASTPrinter::VisitOper(const shared_ptr<Oper> &node) {
-    ostream_ << string(indent_level_, ' ')
-             << "Oper: " << node->GetType().ToString() << endl;
+    ostream_ << string(indent_level_, ' ') << "Oper: " << node->GetOper()
+             << endl;
 }
 
 void ASTPrinter::VisitNum(const shared_ptr<Num> &node) {

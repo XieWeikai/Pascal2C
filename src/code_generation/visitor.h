@@ -28,6 +28,7 @@ class Visitor {
     virtual void VisitOper(const shared_ptr<Oper> &node) = 0;
     virtual void VisitNum(const shared_ptr<Num> &node) = 0;
     virtual void VisitType(const shared_ptr<Type> &node) = 0;
+    virtual void VisitConstType(const shared_ptr<ConstType> &node) = 0;
     virtual void VisitAssign(const shared_ptr<Assign> &node) = 0;
     virtual void VisitVar(const shared_ptr<Var> &node) = 0;
     virtual void VisitNoOp(const shared_ptr<NoOp> &node) = 0;

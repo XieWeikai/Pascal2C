@@ -86,16 +86,23 @@ class Var : public ASTNode {
 
 class Type : public ASTNode {
   public:
-    Type(const shared_ptr<Token> &token, bool is_const = false)
-        : type_(token->GetValue()), is_const_(is_const){};
+    Type(const shared_ptr<Token> &token) : type_(token->GetValue()) {}
     virtual ~Type() = default;
     void Accept(Visitor &visitor) override;
-    const string GetType() const {
-        return (is_const_) ? (string("const ") + type_) : type_;
-    }
+    const string GetType() const { return type_; }
 
   private:
-    bool is_const_;
+    string type_;
+};
+
+class ConstType : public ASTNode {
+  public:
+    ConstType(const shared_ptr<Token> &token) : type_(token->GetValue()) {}
+    virtual ~ConstType() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetType() const { return type_; }
+
+  private:
     string type_;
 };
 
@@ -117,16 +124,16 @@ class VarDeclaration : public ASTNode {
 class ConstDeclaration : public ASTNode {
   public:
     ConstDeclaration(const shared_ptr<Var> &var_node,
-                     const shared_ptr<Type> &type_node)
+                     const shared_ptr<ConstType> &type_node)
         : var_node_(var_node), type_node_(type_node) {}
     virtual ~ConstDeclaration() = default;
     void Accept(Visitor &visitor) override;
     const shared_ptr<Var> &GetConstNode() const { return var_node_; }
-    const shared_ptr<Type> &GetTypeNode() const { return type_node_; }
+    const shared_ptr<ConstType> &GetTypeNode() const { return type_node_; }
 
   private:
     shared_ptr<Var> var_node_;
-    shared_ptr<Type> type_node_;
+    shared_ptr<ConstType> type_node_;
 };
 
 class ArrayType : public ASTNode {
@@ -331,15 +338,13 @@ class Num : public ASTNode {
 // Operators, like '+', '-', etc.
 class Oper : public ASTNode {
   public:
-    Oper(const shared_ptr<Token> &oper)
-        : type_(oper->GetType()), value_(oper->GetValue()) {}
+    Oper(const shared_ptr<Token> &oper) : oper_(oper->GetValue()) {}
     virtual ~Oper() = default;
     void Accept(Visitor &visitor) override;
-    const TokenType GetType() { return type_; };
+    const string GetOper() { return oper_; };
 
   private:
-    TokenType type_;
-    string value_;
+    string oper_;
 };
 
 class BinOp : public ASTNode {
