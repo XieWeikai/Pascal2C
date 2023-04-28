@@ -84,6 +84,13 @@ class Var : public ASTNode {
     string name_;
 };
 
+class IType {
+  public:
+    virtual ~IType() = default;
+    virtual void Accept(Visitor &visitor) = 0;
+    virtual const string GetType() const = 0;
+};
+
 class Type : public ASTNode {
   public:
     Type(const shared_ptr<Token> &token) : type_(token->GetValue()) {}
@@ -182,9 +189,13 @@ class ArrayDeclaration : public ASTNode {
 
 class Argument : public ASTNode {
   public:
-    Argument(const shared_ptr<Var> &variable, const shared_ptr<Type> &type,
-             bool is_reference = false)
+    explicit Argument(const shared_ptr<Var> &variable,
+                      const shared_ptr<Type> &type, bool is_reference = false)
         : variable_(variable), type_(type), is_reference_(is_reference) {}
+    explicit Argument(const shared_ptr<Var> &variable,
+                      const shared_ptr<ConstType> &const_type,
+                      bool is_reference = false)
+        : variable_(variable), type_(const_type), is_reference_(is_reference) {}
     virtual ~Argument() = default;
     void Accept(Visitor &visitor) override;
     const shared_ptr<Var> &GetVariable() const { return variable_; }
@@ -193,7 +204,7 @@ class Argument : public ASTNode {
 
   private:
     shared_ptr<Var> variable_;
-    shared_ptr<Type> type_;
+    shared_ptr<ASTNode> type_;
     bool is_reference_;
 };
 

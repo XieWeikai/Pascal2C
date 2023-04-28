@@ -15,8 +15,6 @@
 
 using namespace std;
 using namespace pascal2c::code_generation;
-using ::testing::Return;
-using ::testing::ReturnRef;
 using string = ::std::string;
 
 std::shared_ptr<Program> SimpleProgramAST() {
