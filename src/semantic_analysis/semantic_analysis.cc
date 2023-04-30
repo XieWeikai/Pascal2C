@@ -2,7 +2,10 @@
 #include "semantic_analysis.h"
 #include "../ast/program.h"
 
-#define LOG(message) do{printf("ERROR in line(%d),column(%d):%s\n",x.line(),x.column(),message);}while(0)
+#define LOG(message) \
+    do{\
+        errors.push_back("ERROR in line("+std::to_string(x.line())+"),column("+std::to_string(x.column())+"):"+message);\
+    }while(0)
 namespace analysiser{
     bool nameTable::Add(std::string name)
     {
@@ -259,7 +262,9 @@ namespace analysiser{
         {
             DoSubprogram(*i);
         }
-        DoAllStatement(x.statement_list());
+        std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
+        inp.push_back(x.statements());
+        DoAllStatement(inp);
         BlockExit();
     }
     void DoConstDeclaration(pascal2c::ast::ConstDeclaration x)
@@ -311,7 +316,9 @@ namespace analysiser{
         {
             DoVarDeclaration(*i);
         }
-        DoAllStatement(x.statement_list());
+        std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
+        inp.push_back(x.statement_list());
+        DoAllStatement(inp);
         BlockExit();
     }
     void DoAllStatement(std::vector<std::shared_ptr<pascal2c::ast::Statement>> x)
