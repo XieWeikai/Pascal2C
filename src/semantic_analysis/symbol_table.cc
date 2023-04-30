@@ -1,5 +1,6 @@
 #include <map>
 #include <set>
+#include <assert.h>
 #include "../ast/ast.h"
 #include"symbol_table.h"
 
@@ -7,12 +8,12 @@ using namespace symbol_table;
 
 bool operator<(const SymbolTablePara &A,const SymbolTablePara &B)
 {
-    return A.type()==B.type() ? A.is_var()<B.is_var() : A.type()<B.type();
+    return A.type()<B.type();
 }
 
 bool operator==(const SymbolTablePara &A,const SymbolTablePara &B)
 {
-    return A.type()==B.type() && A.is_var()==B.is_var();
+    return A.type()==B.type();
 }
 
 bool operator<(const SymbolTableItem &A,const SymbolTableItem &B)
@@ -34,14 +35,21 @@ int SymbolTableBlock::AddItem(const SymbolTableItem &x)
 	this->table.insert(x);return 0;
 }
 
+bool isadapt(const std::vector<SymbolTablePara> &A,const std::vector<SymbolTablePara> &B)
+{
+	assert(A.size()==B.size());
+	for (int i=0;i<A.size();i++) if (A[i].is_var() && !B[i].is_var()) return false;
+	return true;
+}
 //find identify with format SymbolTableItem
 //do not care about para.info_
 //return if exist
 bool SymbolTableBlock::Query(SymbolTableItem &x)
 {
-	auto temp=this->table.find(x);
-	if (temp!=this->table.end())
+	auto temp=table.find(x);
+	if (temp!=table.end())
 	{
+		if (!isadapt(x.para(),(*temp).para())) return false;
 		x=*temp;
 		return true;
 	}
