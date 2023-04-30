@@ -8,13 +8,19 @@
 
 #include "statement.h"
 
+#define INIT_TOSTRING(str_s, level) \
+    std::stringstream str_s;\
+    do{ \
+        IndentOutput(str_s, level);     \
+        str_s << line() << ":" << column() <<" "; \
+    }while(0)
+
 namespace pascal2c::ast
 {
 
     std::string AssignStatement::ToString(int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
         str_s << "AssignStatement :\n";
         IndentOutput(str_s, level);
         str_s << "Variable:\n"
@@ -27,8 +33,7 @@ namespace pascal2c::ast
 
     std::string CallStatement::ToString(int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
         str_s << "CallStatement :\n";
         IndentOutput(str_s, level);
         str_s << "name:" << name_;
@@ -46,8 +51,7 @@ namespace pascal2c::ast
 
     std::string CompoundStatement::ToString(int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
         str_s << "CompoundStatement :" << statements_.size();
         for (int i = 0; i < statements_.size(); i++)
         {
@@ -61,8 +65,7 @@ namespace pascal2c::ast
 
     std::string IfStatement::ToString(int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
         str_s << "IfStatement :\n";
         IndentOutput(str_s, level);
         str_s << "condition:\n"
@@ -82,8 +85,7 @@ namespace pascal2c::ast
 
     std::string ForStatement::ToString(int level) const
     {
-        std::stringstream str_s;
-        IndentOutput(str_s, level);
+        INIT_TOSTRING(str_s, level);
         str_s << "ForStatement:\n";
         IndentOutput(str_s, level);
         str_s << "id: " << id_ << "\n";

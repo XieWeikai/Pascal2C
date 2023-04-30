@@ -1,5 +1,9 @@
+#pragma once
+
 #include <map>
 #include <set>
+#include <vector>
+#include <memory>
 #include "../ast/ast.h"
 
 namespace symbol_table{
@@ -17,7 +21,11 @@ namespace symbol_table{
 		SymbolTablePara(ItemType type, bool is_var,std::string info=""):
 			type_(type), is_var_(is_var), info_(info){}
 			
-		bool operator==(const SymbolTablePara &x);
+		ItemType type()const{return type_;}
+        bool is_var()const{return is_var_;}
+        std::string info()const{return info_;}
+        friend bool operator<(const SymbolTablePara &A,const SymbolTablePara &B);
+        friend bool operator==(const SymbolTablePara &A,const SymbolTablePara &B);
 	private:
 		ItemType type_;
         bool is_var_;
@@ -30,9 +38,13 @@ namespace symbol_table{
 		SymbolTableItem(ItemType type, std::string name, bool is_var, bool is_func, std::vector<SymbolTablePara> para):
 			type_(type), name_(name), is_var_(is_var), is_func_(is_func), para_(para){}
 		
-        std::string name(){return name_;}
-        ItemType type(){return type_;}
-		bool operator==(const SymbolTableItem &x);
+        std::string name()const{return name_;}
+        ItemType type()const{return type_;}
+        bool is_var()const{return is_var_;}
+        bool is_func()const{return is_func_;}
+		std::vector<SymbolTablePara> para()const{return para_;}
+        friend bool operator<(const SymbolTableItem &A,const SymbolTableItem &B);
+        friend bool operator==(const SymbolTableItem &A,const SymbolTableItem &B);
     private:
 		ItemType type_;
         std::string name_;
@@ -52,10 +64,11 @@ namespace symbol_table{
         //return if exist
         bool Query(SymbolTableItem &x);
         
+        std::shared_ptr<SymbolTableBlock> getfather();
+        void linktofather(std::shared_ptr<SymbolTableBlock> x);
     private:
         std::shared_ptr<SymbolTableBlock> father;
-        std::map<std::string,int> idlist;
-        std::set<SymbolTableBlock> table;
+        std::set<SymbolTableItem> table;
     };
 
     //create a new block of SymbolTable from father block; return the new block

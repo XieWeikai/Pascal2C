@@ -1,26 +1,26 @@
-#ifndef PASCAL2C_SRC_CODE_GENERATION_CODE_GENERATOR_H_
-#define PASCAL2C_SRC_CODE_GENERATION_CODE_GENERATOR_H_
+#ifndef PASCAL2C_SRC_CODE_GENERATION_AST_PRINTER_H_
+#define PASCAL2C_SRC_CODE_GENERATION_AST_PRINTER_H_
+#pragma once
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 #include "ast_adapter.h"
-#include "code_generation/abstract_symbol_table_adapter.h"
-#include "code_generation/symbol_table_adapter.h"
-#include "code_generation/type_adaper.h"
-#include "visitor.h"
 
 namespace pascal2c {
 namespace code_generation {
-using string = ::std::string;
+using ::std::string;
 template <typename T> using vector = ::std::vector<T>;
 using ::std::shared_ptr;
+using ::std::stringstream;
 
-class CodeGenerator : Visitor {
+class ASTPrinter : Visitor {
   public:
-    CodeGenerator() : indent_level_(0), type_tool_kit_() {}
-    void Interpret(const shared_ptr<ASTRoot> &node);
-    const string GetCCode() const;
+    ASTPrinter(){};
+
+    void Traverse(const shared_ptr<ASTNode> &node);
+    string ToString() const;
 
   private:
     virtual void Visit(const shared_ptr<ASTNode> &node,
@@ -31,13 +31,13 @@ class CodeGenerator : Visitor {
     virtual void VisitFunction(const shared_ptr<Function> &node) override;
     virtual void VisitBlock(const shared_ptr<Block> &node) override;
     virtual void VisitDeclaration(const shared_ptr<Declaration> &node) override;
-    virtual void VisitVarDecl(const shared_ptr<VarDeclaration> &node) override;
     virtual void
     VisitConstDeclaration(const shared_ptr<ConstDeclaration> &node) override;
     virtual void VisitArrayType(const shared_ptr<ArrayType> &node) override;
     virtual void VisitArray(const shared_ptr<Array> &node) override;
     virtual void
     VisitArrayDeclaration(const shared_ptr<ArrayDeclaration> &node) override;
+    virtual void VisitVarDecl(const shared_ptr<VarDeclaration> &node) override;
     virtual void VisitCompound(const shared_ptr<Compound> &node) override;
     virtual void VisitBinOp(const shared_ptr<BinaryOperation> &node) override;
     virtual void VisitOper(const shared_ptr<Oper> &node) override;
@@ -52,23 +52,15 @@ class CodeGenerator : Visitor {
     virtual void
     VisitForStatement(const shared_ptr<ForStatement> &node) override;
 
-    const string Indent() const;
-    void IncIndent();
-    void DecIndent();
-    const string SymbolToC(const string &pascal_type) const;
-    const string eol_ = ";\n";
+    void ErrNotImplemented() const {
+        throw std::runtime_error("Not implemented");
+    }
 
-    // Symbol table
-    shared_ptr<ISymbolTable> symbol_table_;
     // ostream
-    std::stringstream ostream_;
+    stringstream ostream_;
     // Current indent level
     int indent_level_;
-
-    // TypeToolKit for type conversion
-    const TypeToolKit type_tool_kit_;
 };
-
 } // namespace code_generation
 } // namespace pascal2c
-#endif // !PASCAL2C_SRC_CODE_GENERATION_CODE_GENERATION_H_
+#endif // !PASCAL2C_SRC_CODE_GENERATION_AST_PRINTER_H_

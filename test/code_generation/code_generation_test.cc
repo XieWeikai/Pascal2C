@@ -1,61 +1,160 @@
-#include <string>
-
-#include <gtest/gtest.h>
-
-#include "code_generation/ast_interface.h"
+#include "ast_adapter_test.cc"
+#include "code_generation/ast_adapter.h"
+#include "code_generation/ast_printer.h"
 #include "code_generation/code_generator.h"
-#include "lexer/lexer.h"
-#include "parser/parser.h"
+#include "code_generation/token_adapter.h"
+#include "gmock/gmock.h"
+#include <algorithm>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
-TEST(CodeGenerationVanillaTest, ConvertASTToC) {
-    using string = ::std::string;
-    string source_code = R"(
-    program Simple;
-    var
-        x, y: integer;
-    begin
-        x := 2 + 3;
-        y := x - 1;
-    end.
-    )";
-    string expected_ast = R"(
-    Program: Simple
-     Block
-      VarDecl: x : integer
-      VarDecl: y : integer
-      Compound
-       Assign
-        Left:
-         Var: x
-        Right:
-         BinOp: PLUS
-          Num: 2
-          Num: 3
-       Assign
-        Left:
-         Var: y
-        Right:
-         BinOp: MINUS
-          Var: x
-          Num: 1
-    )";
+using namespace std;
+using namespace pascal2c::code_generation;
+using ::testing::Return;
+using ::testing::ReturnRef;
+using string = ::std::string;
+
+std::shared_ptr<Program> SimpleProgramAST() {
+    // vector<std::shared_ptr<ASTNode>> declarations;
+    auto declarations =
+        std::make_shared<std::vector<std::shared_ptr<ASTNode>>>();
+
+    // VarDecl part
+    const auto type_int = std::make_shared<Type>(
+        make_shared<Token>(TokenType::RESERVED, "integer"));
+    const auto var_x =
+        std::make_shared<Var>(make_shared<Token>(TokenType::IDENTIFIER, "x"));
+    const auto var_decl_x =
+        std::make_shared<VarDeclaration>(std::move(var_x), std::move(type_int));
+
+    const auto var_y =
+        std::make_shared<Var>(make_shared<Token>(TokenType::IDENTIFIER, "y"));
+    const auto var_decl_y =
+        std::make_shared<VarDeclaration>(std::move(var_y), std::move(type_int));
+
+    declarations->push_back(std::move(var_decl_x));
+    declarations->push_back(std::move(var_decl_y));
+
+    // Compound statement part
+    auto children = std::make_shared<std::vector<std::shared_ptr<ASTNode>>>();
+
+    // +
+    const auto plus_op =
+        std::make_shared<Oper>(make_shared<Token>(TokenType::OPERATOR, "+"));
+    // -
+    const auto minus_op =
+        std::make_shared<Oper>(make_shared<Token>(TokenType::OPERATOR, "-"));
+
+    // 2 + 3
+    const auto num_2 =
+        std::make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "2"));
+    const auto num_3 =
+        std::make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "3"));
+    const auto bin_plus_op = std::make_shared<BinaryOperation>(
+        std::move(num_2), std::move(plus_op), std::move(num_3));
+
+    // x - 1
+    const auto num_1 =
+        std::make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "1"));
+    const auto bin_minus_op = std::make_shared<BinaryOperation>(
+        std::move(var_x), std::move(minus_op), std::move(num_1));
+
+    const auto assign_x =
+        std::make_shared<Assignment>(std::move(var_x), std::move(bin_plus_op));
+    const auto assign_y =
+        std::make_shared<Assignment>(std::move(var_y), std::move(bin_minus_op));
+
+    // Construct compound
+    children->push_back(std::move(assign_x));
+    children->push_back(std::move(assign_y));
+    const auto compound = std::make_shared<Compound>(std::move(*children));
+
+    const auto declaration =
+        std::make_shared<Declaration>(std::move(*declarations));
+
+    auto block =
+        std::make_shared<Block>(std::move(declaration), std::move(compound));
+    auto program = std::make_shared<Program>("Simple", std::move(block));
+
+    return program;
+}
+
+TEST(GeneratorTest, DISABLED_ASTPrinterTest) {
+    string source_code = R"(program Simple;
+var
+    x, y: integer;
+begin
+    x := 2 + 3;
+    y := x - 1;
+end.
+)";
+
+    auto program = SimpleProgramAST();
+    EXPECT_EQ(program->GetName(), "Simple");
+    EXPECT_EQ(program->GetBlock()->GetDeclatation()->GetDeclarations().size(),
+              2);
+    ASTPrinter ast_printer;
+    ast_printer.Traverse(program);
+    string printed_ast = ast_printer.ToString();
+
+    string expected_ast = R"(Program: Simple
+ Block
+  Declaration: 
+   VarDecl: x: integer
+   VarDecl: y: integer
+  Compound
+   Assign
+    Left:
+     Var: x
+    Right:
+     BinOp:
+      Num: 2
+      Oper: PLUS
+      Num: 3
+   Assign
+    Left:
+     Var: y
+    Right:
+     BinOp:
+      Var: x
+      Oper: MINUS
+      Num: 1
+)";
+
+    EXPECT_EQ(printed_ast, expected_ast);
+}
+
+TEST(GeneratorTest, CodeGeneratorTest) {
+    string source_code = R"(program Simple;
+var
+    x, y: integer;
+begin
+    x := 2 + 3;
+    y := x - 1;
+end.
+)";
+
+    auto program = SimpleProgramAST();
+    auto code_generator = std::make_shared<CodeGenerator>();
+    code_generator->Interpret(program);
+    auto generated_ccode = code_generator->GetCCode();
+
     string expected_c_code = "#include <stdio.h>\n"
+                             "#include <stdlib.h>\n"
                              "\n"
-                             "int main() {\n"
+                             "// Simple\n"
+                             "int main(int argc, char* argv[]) {\n"
                              "    int x;\n"
                              "    int y;\n"
                              "    x = (2 + 3);\n"
                              "    y = (x - 1);\n"
                              "    return 0;\n"
                              "}\n";
-
-    pascal2c::lexer::Lexer lexer(source_code);
-    pascal2c::parser::Parser parser(&lexer);
-    auto ast_program = parser.Program();
-
-    pascal2c::code_generation::CodeGenerator code_generator(&parser);
-    code_generator.Visit(ast_program);
-    string c_code = code_generator.GetCCode();
-
-    ASSERT_EQ(expected_c_code, c_code);
+    std::cout << generated_ccode << endl;
+    EXPECT_EQ(generated_ccode, expected_c_code);
 }

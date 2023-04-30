@@ -3,6 +3,7 @@
 #include <sstream>
 #include <memory>
 #include <vector>
+#include <set>
 #include <cstdio>
 #include <exception>
 
@@ -10,7 +11,6 @@
 
 extern "C" {
     #include "lexer.h"
-    extern int yycolno_next;
 }
 
 namespace pascal2c::parser
@@ -31,9 +31,10 @@ namespace pascal2c::parser
 
         prefix_parser_['('] = &Parser::ParseParen;
         prefix_parser_[TOK_STRING] = &Parser::ParseStringAndChar;
+        prefix_parser_[TOK_TRUE] = &Parser::ParseBoolean;
+        prefix_parser_[TOK_FALSE] = &Parser::ParseBoolean;
 
         yyreset(in);  // reset input file
-        yycolno_next = 1;  // reset token position marker
 
         next_token_ = yylex();
         next_tok_value_ = yylval;
@@ -76,28 +77,83 @@ namespace pascal2c::parser
 
     void Parser::Match(int token)
     {
-        int tok = token_;
-        int line = line_;
-        int column = column_;
-        if (tok != token)
+        if (token_ != token)
         {
             std::ostringstream err;
-            err << line << ":" << column << " syntax err:expected " << TokenToString(token) << " got " << TokenToString(tok);
+            err << line_ << ":" << column_ << " syntax err:expected " << TokenToString(token) << " before " << TokenToString(token_);
             throw SyntaxErr(err.str());
         }
         NextToken(); // only skip current token if it matches
     }
 
-    void Parser::Match(int token, const std::string& err_msg) {
+    const int Parser::Match(const std::set<int> &tokens, const std::string &expected_token)
+    {
         int tok = token_;
-        int line = line_;
-        int column = column_;
+        if (tokens.find(token_) == tokens.end())
+        {
+            std::ostringstream err;
+            err << line_ << ":" << column_ << " syntax err:expected " << expected_token << " before " << TokenToString(token_);
+            throw SyntaxErr(err.str());
+        }
+        NextToken(); // only skip current token if it matches
+        return tok;
+    }
+
+    void Parser::Match(int token, const std::string &err_msg)
+    {
         static char buff[1024];
-        if(tok != token) {
-            sprintf(buff,"%d:%d %s",line,column, err_msg.c_str());
+        if (token_ != token)
+        {
+            sprintf(buff, "%d:%d %s", line_, column_, err_msg.c_str());
             throw SyntaxErr(std::string(buff));
         }
         NextToken(); // only skip current token if it matches
     }
 
+    const int Parser::CheckMatch(const int token, const std::set<int> &delimiters)
+    {
+        try
+        {
+            Match(token);
+            return token;
+        }
+        catch (const SyntaxErr err)
+        {
+            err_msg_.push_back(err.what());
+            while (token_ != token && delimiters.find(token_) == delimiters.end() && token_ != TOK_EOF)
+            {
+                NextToken();
+            }
+            if (token_ == token)
+            {
+                NextToken(); // skip to the next token when the expected token is met
+                return token;
+            }
+            return token_;
+        }
+    }
+
+    const int Parser::CheckMatch(const std::set<int> &tokens, const std::string &expected_token, const std::set<int> &delimiters)
+    {
+        try
+        {
+            int ret = Match(tokens, expected_token);
+            return ret;
+        }
+        catch (const SyntaxErr err)
+        {
+            err_msg_.push_back(err.what());
+            while (tokens.find(token_) == tokens.end() && delimiters.find(token_) == delimiters.end() && token_ != TOK_EOF)
+            {
+                NextToken();
+            }
+            if (tokens.find(token_) != tokens.end())
+            {
+                int tok = token_;
+                NextToken(); // skip to the next token when the expected token is met
+                return tok;
+            }
+            return token_;
+        }
+    }
 }

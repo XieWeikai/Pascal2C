@@ -57,3 +57,4 @@ lex.yy.c
 lexer
 lexer_exe
 lexer_test
+Testing/Temporary

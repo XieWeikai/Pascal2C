@@ -23,7 +23,7 @@ namespace pascal2c::ast
         REAL = 1,
         CHAR = 2,
         BOOLEAN = 3,
-        CALL_OR_VAR = 4, // TODO: not implemented
+        CALL_OR_VAR = 4,
         VARIABLE = 5,
         CALL = 6,
         BINARY = 7,
@@ -156,7 +156,7 @@ namespace pascal2c::ast
     protected:
         // id_ is the name of the variable or function
         // in the example of var1 := A;
-        // id_ is "var1"
+        // id_ is "A"
         // and we do not need an expression list since no matter
         // it is a variable or a function call, it has no parameters
         std::string id_;
