@@ -1,9 +1,8 @@
-#pragma once
+#ifndef TEST_H
+#define TEST_H
 #include "symbol_table.h"
 #include "../ast/program.h"
 namespace analysiser{
-    std::vector<std::string> blockNames;//memary name of the latest block
-    std::string nowblockName; 
     //manage SymbolTableBlock
     class nameTable{
     public:
@@ -16,9 +15,8 @@ namespace analysiser{
     private:
         std::map<std::string, std::shared_ptr<symbol_table::SymbolTableBlock> > table_;
    };
-    nameTable table;
-    std::vector<std::string> errors;
-
+    
+    std::vector<std::string> GetErrors();
     bool Find(symbol_table::SymbolTableItem &x);
     bool Insert(const symbol_table::SymbolTableItem &x);
     void init();
@@ -47,3 +45,4 @@ namespace analysiser{
     void DoIfStatement(pascal2c::ast::IfStatement x);
     void DoForStatement(pascal2c::ast::ForStatement x);
 }//end namespace analysiser
+#endif

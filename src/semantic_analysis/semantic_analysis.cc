@@ -1,15 +1,18 @@
 #include <memory>
 #include "semantic_analysis.h"
-
 #define LOG(message) \
     do{\
         errors.push_back("ERROR in line("+std::to_string(x.line())+"),column("+std::to_string(x.column())+"):"+message);\
     }while(0)
 namespace analysiser{
+    std::vector<std::string> blockNames;//memary name of the latest block
+    std::string nowblockName; 
+    nameTable table;
+    std::vector<std::string> errors;
+    std::vector<std::string> GetErrors()    {return errors;}
     bool nameTable::Add(std::string name)
     {
-        std::shared_ptr<symbol_table::SymbolTableBlock> block;
-        table_[name]=block;
+        table_[name]=std::make_shared<symbol_table::SymbolTableBlock>(symbol_table::SymbolTableBlock());
         if(table_.find(name)!=table_.end())
             return true;
         else 
@@ -260,14 +263,18 @@ namespace analysiser{
         {
             DoSubprogram(*i);
         }
-        std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
-        inp.push_back(x.statements());
-        DoAllStatement(inp);
+        if(x.statements())
+        {
+            std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
+            inp.push_back(x.statements());
+            DoAllStatement(inp);
+        }
         BlockExit();
     }
     void DoConstDeclaration(pascal2c::ast::ConstDeclaration x)
     {
         symbol_table::SymbolTableItem itemA = ExprToItem(x.id(),x.const_value());
+        std::cout<<itemA.type()<<std::endl;
         if(!Insert(itemA))
         {
             LOG("Const Declaration failure");
@@ -314,9 +321,12 @@ namespace analysiser{
         {
             DoVarDeclaration(*i);
         }
-        std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
-        inp.push_back(x.statement_list());
-        DoAllStatement(inp);
+        if(x.statement_list())
+        {
+            std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
+            inp.push_back(x.statement_list());
+            DoAllStatement(inp);
+        }
         BlockExit();
     }
     void DoAllStatement(std::vector<std::shared_ptr<pascal2c::ast::Statement>> x)
@@ -389,11 +399,17 @@ namespace analysiser{
             return;
         }
         std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
-        inp.push_back(x.then());
-        DoAllStatement(inp);//then_
-        inp.pop_back();
-        inp.push_back(x.else_part());
-        DoAllStatement(inp);//else_
+        if(x.then())
+        {
+            inp.push_back(x.then());
+            DoAllStatement(inp);//then_
+            inp.pop_back();
+        }
+        if(x.else_part())
+        {
+            inp.push_back(x.else_part());
+            DoAllStatement(inp);//else_
+        }
     }
     void DoForStatement(pascal2c::ast::ForStatement x)
     {
@@ -409,8 +425,11 @@ namespace analysiser{
             LOG("For Statement failure(type not match in id from to)");
             return;
         }
-        std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
-        inp.push_back(x.statement());
-        DoAllStatement(inp);
+        if(x.statement())
+        {
+            std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
+            inp.push_back(x.statement());
+            DoAllStatement(inp);
+        }
     }
 }//end namespace analysiser

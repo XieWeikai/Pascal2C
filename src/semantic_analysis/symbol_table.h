@@ -24,8 +24,8 @@ namespace symbol_table{
 		ItemType type()const{return type_;}
         bool is_var()const{return is_var_;}
         std::string info()const{return info_;}
-        friend bool operator<(const SymbolTablePara &A,const SymbolTablePara &B);
-        friend bool operator==(const SymbolTablePara &A,const SymbolTablePara &B);
+        friend bool operator<(const SymbolTablePara &A,const SymbolTablePara &B){return A.type()<B.type();};
+        friend bool operator==(const SymbolTablePara &A,const SymbolTablePara &B){return A.type()==B.type();};
 	private:
 		ItemType type_;
         bool is_var_;
@@ -43,8 +43,8 @@ namespace symbol_table{
         bool is_var()const{return is_var_;}
         bool is_func()const{return is_func_;}
 		std::vector<SymbolTablePara> para()const{return para_;}
-        friend bool operator<(const SymbolTableItem &A,const SymbolTableItem &B);
-        friend bool operator==(const SymbolTableItem &A,const SymbolTableItem &B);
+        friend bool operator<(const SymbolTableItem &A,const SymbolTableItem &B){return A.name()==B.name() ? A.para()<B.para() : A.name()<B.name();};
+        friend bool operator==(const SymbolTableItem &A,const SymbolTableItem &B){return A.name()==B.name() && A.para()==B.para();};
     private:
 		ItemType type_;
         std::string name_;
