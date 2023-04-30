@@ -262,7 +262,9 @@ namespace analysiser{
         {
             DoSubprogram(*i);
         }
-        DoAllStatement(x.statement_list());
+        std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
+        inp.push_back(x.statements());
+        DoAllStatement(inp);
         BlockExit();
     }
     void DoConstDeclaration(pascal2c::ast::ConstDeclaration x)
@@ -314,7 +316,9 @@ namespace analysiser{
         {
             DoVarDeclaration(*i);
         }
-        DoAllStatement(x.statement_list());
+        std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
+        inp.push_back(x.statement_list());
+        DoAllStatement(inp);
         BlockExit();
     }
     void DoAllStatement(std::vector<std::shared_ptr<pascal2c::ast::Statement>> x)
