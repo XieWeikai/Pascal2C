@@ -187,7 +187,14 @@ namespace analysiser{
     }
     symbol_table::ItemType BasicToType(int basic_type)
     {
-        //Todo 
+        if(basic_type==297)
+            return symbol_table::INT;
+        else if(basic_type==298)
+            return symbol_table::REAL;
+        else if(basic_type==299)
+            return symbol_table::BOOL;
+        else if(basic_type==300)
+            return symbol_table::CHAR;
         return symbol_table::ERROR;
     }
     symbol_table::SymbolTableItem ExprToItem(std::string name, std::shared_ptr<pascal2c::ast::Expression> x)
