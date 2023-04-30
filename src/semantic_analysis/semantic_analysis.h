@@ -1,9 +1,9 @@
+#pragma once
 #include "symbol_table.h"
-#include <vector>
+#include "../ast/program.h"
 namespace analysiser{
     std::vector<std::string> blockNames;//memary name of the latest block
     std::string nowblockName; 
-    bool Insert(const symbol_table::SymbolTableItem &x);
     //manage SymbolTableBlock
     class nameTable{
     public:
@@ -18,4 +18,32 @@ namespace analysiser{
    };
     nameTable table;
     std::vector<std::string> errors;
+
+    bool Find(symbol_table::SymbolTableItem &x);
+    bool Insert(const symbol_table::SymbolTableItem &x);
+    void init();
+    void BlockExit();
+    void BlockIn(std::string name);
+    void DoProgram(pascal2c::ast::Program x);
+    symbol_table::ItemType MaxType(symbol_table::ItemType x, symbol_table::ItemType y);
+    symbol_table::ItemType GetExprType(std::shared_ptr<pascal2c::ast::Expression> x);
+    symbol_table::ItemType BasicToType(int basic_type);
+    symbol_table::SymbolTableItem ExprToItem(std::string name, std::shared_ptr<pascal2c::ast::Expression> x);
+    std::vector<symbol_table::SymbolTablePara> TypeToPara(pascal2c::ast::Type type);
+    bool ParameterToPara(std::vector<symbol_table::SymbolTablePara> ret,pascal2c::ast::Parameter inpara);
+    symbol_table::SymbolTableItem SubprogramToItem(pascal2c::ast::SubprogramHead x);
+    symbol_table::SymbolTableItem VarToItem(pascal2c::ast::Variable x);
+    void DoProgramHead(pascal2c::ast::ProgramHead x);
+    void DoProgramBody(pascal2c::ast::ProgramBody x);
+    void DoConstDeclaration(pascal2c::ast::ConstDeclaration x);
+    void DoVarDeclaration(pascal2c::ast::VarDeclaration x);
+    void DoSubprogram(pascal2c::ast::Subprogram x);
+    symbol_table::SymbolTableItem DoSubprogramHead(pascal2c::ast::SubprogramHead x);
+    void DoSubprogramBody(pascal2c::ast::SubprogramBody x);
+    void DoAllStatement(std::vector<std::shared_ptr<pascal2c::ast::Statement>> x);
+    void DoAssignStatement(pascal2c::ast::AssignStatement x);
+    void DoCallStatement(pascal2c::ast::CallStatement x);
+    void DoCompoundStatement(pascal2c::ast::CompoundStatement x);
+    void DoIfStatement(pascal2c::ast::IfStatement x);
+    void DoForStatement(pascal2c::ast::ForStatement x);
 }//end namespace analysiser

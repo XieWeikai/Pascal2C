@@ -1,6 +1,5 @@
 #include <memory>
 #include "semantic_analysis.h"
-#include "../ast/program.h"
 
 #define LOG(message) \
     do{\
@@ -32,7 +31,7 @@ namespace analysiser{
         table.Query(nowblockName,ans);
         return ans->Query(x);
     }
-    bool Insert(symbol_table::SymbolTableItem &x)
+    bool Insert(const symbol_table::SymbolTableItem &x)
     {
         if(x.type()==symbol_table::ERROR)
         {
@@ -59,8 +58,6 @@ namespace analysiser{
         table.Add(name);
         nowblockName = name;
     }
-    //TODO:
-    //change class in ast to ItemType
     symbol_table::ItemType MaxType(symbol_table::ItemType x, symbol_table::ItemType y)
     {
         if(x==symbol_table::ERROR||y==symbol_table::ERROR)
@@ -105,6 +102,7 @@ namespace analysiser{
                 return ExprIsVar(std::static_pointer_cast<pascal2c::ast::UnaryExpr>(x)->factor());
             }
         }
+        return false;
     }
     symbol_table::ItemType GetExprType(std::shared_ptr<pascal2c::ast::Expression> x)
     {
@@ -390,8 +388,6 @@ namespace analysiser{
             LOG("If Statement failure(condition error)");
             return;
         }
-        //TODO:get condition from ast
-        //     ExprToItem(condition) check type(condition)==boolean
         std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
         inp.push_back(x.then());
         DoAllStatement(inp);//then_
