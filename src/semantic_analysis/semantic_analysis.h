@@ -17,4 +17,5 @@ namespace analysiser{
         std::map<std::string, std::shared_ptr<symbol_table::SymbolTableBlock> > table_;
    };
     nameTable table;
+    std::vector<std::string> errors;
 }//end namespace analysiser

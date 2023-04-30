@@ -2,7 +2,10 @@
 #include "semantic_analysis.h"
 #include "../ast/program.h"
 
-#define LOG(message) do{printf("ERROR in line(%d),column(%d):%s\n",x.line(),x.column(),message);}while(0)
+#define LOG(message) \
+    do{\
+        errors.push_back("ERROR in line("+std::to_string(x.line())+"),column("+std::to_string(x.column())+"):"+message);\
+    }while(0)
 namespace analysiser{
     bool nameTable::Add(std::string name)
     {
