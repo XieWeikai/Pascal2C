@@ -27,7 +27,7 @@ bool isadapt(const std::vector<SymbolTablePara> &A,const std::vector<SymbolTable
 //return if exist
 bool SymbolTableBlock::Query(SymbolTableItem &x)
 {
-	for (std::shared_ptr<SymbolTableBlock> nw(this);nw;nw=nw->father)
+	for (std::shared_ptr<SymbolTableBlock> nw=std::make_shared<SymbolTableBlock>(*this);nw;nw=nw->father)
 	{
 		auto temp=nw->table.find(x);
 		if (temp!=nw->table.end())

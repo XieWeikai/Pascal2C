@@ -17,7 +17,7 @@ namespace symbol_table{
 		INT,
 		REAL
 	};
-	istream& operator>>(istream& IN,ItemType& x)
+	static istream& operator>>(istream& IN,ItemType& x)
     {
         std::string s;IN>>s;
         if (s=="VOID") x=ItemType::VOID;
@@ -28,7 +28,7 @@ namespace symbol_table{
         else x=ItemType::ERROR;
         return IN;
     }
-	ostream& operator<<(ostream& OUT,const ItemType& x)
+	static ostream& operator<<(ostream& OUT,const ItemType& x)
     {
         switch (x)
         {
