@@ -8,42 +8,6 @@ using namespace symbol_table;
 
 
 
-istream& operator>>(istream& IN,ItemType& x)
-{
-	std::string s;IN>>s;
-	if (s=="VOID") x=ItemType::VOID;
-	else if (s=="BOOL") x=ItemType::BOOL;
-	else if (s=="CHAR") x=ItemType::CHAR;
-	else if (s=="INT") x=ItemType::INT;
-	else if (s=="REAL") x=ItemType::REAL;
-	else x=ItemType::ERROR;
-	return IN;
-}
-ostream& operator<<(ostream& OUT,const ItemType& x)
-{
-	switch (x)
-	{
-	case ItemType::VOID:
-		OUT<<"VOID";
-		break;
-	case ItemType::BOOL:
-		OUT<<"BOOL";
-		break;
-	case ItemType::CHAR:
-		OUT<<"CHAR";
-		break;
-	case ItemType::INT:
-		OUT<<"INT";
-		break;
-	case ItemType::REAL:
-		OUT<<"REAL";
-		break;
-	default:
-		OUT<<"ERROR";
-		break;
-	}
-	return OUT;
-}
 //add identify with format SymbolTableItem
 //return 0 if success; otherwise failure
 int SymbolTableBlock::AddItem(const SymbolTableItem &x)
@@ -68,6 +32,7 @@ bool SymbolTableBlock::Query(SymbolTableItem &x)
 		auto temp=nw->table.find(x);
 		if (temp!=nw->table.end())
 		{
+			if (temp->get_if_any_para_is_ok()) return true;
 			if (!isadapt(x.para(),temp->para())) continue;
 			x=*temp;
 			return true;
@@ -82,7 +47,20 @@ void SymbolTableBlock::linktofather(std::shared_ptr<SymbolTableBlock> tp){father
 std::shared_ptr<SymbolTableBlock>  Locate(std::shared_ptr<SymbolTableBlock> father)
 {
 	std::shared_ptr<SymbolTableBlock> res(new SymbolTableBlock());
-	res->linktofather(father);return res;
+	res->linktofather(father);
+	if (!father)
+	{
+		std::vector<SymbolTablePara> emp;
+		SymbolTableItem func1(1,VOID,"read",0,1,emp);
+		SymbolTableItem func2(1,VOID,"readln",0,1,emp);
+		SymbolTableItem func3(1,VOID,"write",0,1,emp);
+		SymbolTableItem func4(1,VOID,"writeln",0,1,emp);
+		res->AddItem(func1);
+		res->AddItem(func2);
+		res->AddItem(func3);
+		res->AddItem(func4);
+	}
+	return res;
 }
 
 //delete the block of SymbolTable and return the father block

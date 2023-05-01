@@ -93,16 +93,21 @@ namespace symbol_table{
     //item of symbol table
     class SymbolTableItem{
     public:
+        SymbolTableItem(){}
 		SymbolTableItem(ItemType type, std::string name, bool is_var, bool is_func, std::vector<SymbolTablePara> para):
 			type_(type), name_(name), is_var_(is_var), is_func_(is_func), para_(para){}
+		SymbolTableItem(bool special,ItemType type, std::string name, bool is_var, bool is_func, std::vector<SymbolTablePara> para):
+			if_any_para_is_ok(special),type_(type), name_(name), is_var_(is_var), is_func_(is_func), para_(para){}
 		
         std::string name()const{return name_;}
         ItemType type()const{return type_;}
         bool is_var()const{return is_var_;}
         bool is_func()const{return is_func_;}
+        bool get_if_any_para_is_ok()const{return if_any_para_is_ok;}
 		std::vector<SymbolTablePara> para()const{return para_;}
         friend bool operator<(const SymbolTableItem &A,const SymbolTableItem &B){return A.name_==B.name_ ? A.para_<B.para_ : A.name_<B.name_;};
         friend bool operator==(const SymbolTableItem &A,const SymbolTableItem &B){return A.name_==B.name_ && A.para_==B.para_;};
+        void set_if_any_para_is_ok(){if_any_para_is_ok=1;}
         /*
 		input format:
 			is_var is_func type name num_of_paras para1 para2 ... 
@@ -120,6 +125,7 @@ namespace symbol_table{
         */
         friend ostream& operator<<(ostream& OUT,const SymbolTableItem& x)
         {
+            if (x.if_any_para_is_ok) OUT<<"<special func>";
             OUT<<(x.is_var_?"var ":"const ")<<(x.is_func_?"func ":"num ")<<x.type_<<" "<<x.name_;
             for (auto &temp:x.para_) OUT<<temp;
             return OUT;
@@ -129,6 +135,7 @@ namespace symbol_table{
         std::string name_;
         bool is_var_;
         bool is_func_;
+        bool if_any_para_is_ok=0;//only for read,readln,write,writeln
 		std::vector<SymbolTablePara> para_;
     };
 	
