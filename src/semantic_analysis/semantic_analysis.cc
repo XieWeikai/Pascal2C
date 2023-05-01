@@ -195,6 +195,8 @@ namespace analysiser{
             return symbol_table::BOOL;
         else if(basic_type==300)
             return symbol_table::CHAR;
+        else if(basic_type==-1)
+            return symbol_table::VOID;
         return symbol_table::ERROR;
     }
     symbol_table::SymbolTableItem ExprToItem(std::string name, std::shared_ptr<pascal2c::ast::Expression> x)
@@ -281,7 +283,6 @@ namespace analysiser{
     void DoConstDeclaration(pascal2c::ast::ConstDeclaration x)
     {
         symbol_table::SymbolTableItem itemA = ExprToItem(x.id(),x.const_value());
-        std::cout<<itemA.type()<<std::endl;
         if(!Insert(itemA))
         {
             LOG("Const Declaration failure");

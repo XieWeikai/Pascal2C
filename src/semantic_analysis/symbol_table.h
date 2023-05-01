@@ -17,8 +17,42 @@ namespace symbol_table{
 		INT,
 		REAL
 	};
-    istream& operator>>(istream& IN,ItemType& x);
-    ostream& operator<<(ostream& OUT,const ItemType& x);
+	static istream& operator>>(istream& IN,ItemType& x)
+    {
+        std::string s;IN>>s;
+        if (s=="VOID") x=ItemType::VOID;
+        else if (s=="BOOL") x=ItemType::BOOL;
+        else if (s=="CHAR") x=ItemType::CHAR;
+        else if (s=="INT") x=ItemType::INT;
+        else if (s=="REAL") x=ItemType::REAL;
+        else x=ItemType::ERROR;
+        return IN;
+    }
+	static ostream& operator<<(ostream& OUT,const ItemType& x)
+    {
+        switch (x)
+        {
+        case ItemType::VOID:
+            OUT<<"VOID";
+            break;
+        case ItemType::BOOL:
+            OUT<<"BOOL";
+            break;
+        case ItemType::CHAR:
+            OUT<<"CHAR";
+            break;
+        case ItemType::INT:
+            OUT<<"INT";
+            break;
+        case ItemType::REAL:
+            OUT<<"REAL";
+            break;
+        default:
+            OUT<<"ERROR";
+            break;
+        }
+        return OUT;
+    }
 	class SymbolTablePara{
 	public:
 		SymbolTablePara(){}
