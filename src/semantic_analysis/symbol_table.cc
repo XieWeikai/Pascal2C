@@ -6,25 +6,6 @@
 
 using namespace symbol_table;
 
-bool operator<(const SymbolTablePara &A,const SymbolTablePara &B)
-{
-    return A.type()<B.type();
-}
-
-bool operator==(const SymbolTablePara &A,const SymbolTablePara &B)
-{
-    return A.type()==B.type();
-}
-
-bool operator<(const SymbolTableItem &A,const SymbolTableItem &B)
-{
-    return A.name()==B.name() ? A.para()<B.para() : A.name()<B.name();
-}
-
-bool operator==(const SymbolTableItem &A,const SymbolTableItem &B)
-{
-    return A.name()==B.name() && A.para()==B.para();
-}
 
 
 //add identify with format SymbolTableItem
