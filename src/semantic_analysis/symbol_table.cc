@@ -12,6 +12,10 @@ using namespace symbol_table;
 //return 0 if success; otherwise failure
 int SymbolTableBlock::AddItem(const SymbolTableItem &x)
 {
+	if (x.name()=="read") return -2;
+	if (x.name()=="readln") return -2;
+	if (x.name()=="write") return -2;
+	if (x.name()=="writeln") return -2;
 	if (this->table.find(x)!=this->table.end()) return -1;
 	this->table.insert(x);return 0;
 }
@@ -27,12 +31,24 @@ bool isadapt(const std::vector<SymbolTablePara> &A,const std::vector<SymbolTable
 //return if exist
 bool SymbolTableBlock::Query(SymbolTableItem &x)
 {
+	if (x.name()=="read" || x.name()=="readln")
+	{
+		if (!x.para().size()) return false;
+		for (auto &temp:x.para()) if (!temp.is_var() || temp.type()==ERROR || temp.type()==VOID) return false;
+		return true;
+	}
+	
+	if (x.name()=="write" || x.name()=="writeln")
+	{
+		if (!x.para().size()) return false;
+		for (auto &temp:x.para()) if (temp.type()==ERROR || temp.type()==VOID) return false;
+		return true;
+	}
 	for (std::shared_ptr<SymbolTableBlock> nw=std::make_shared<SymbolTableBlock>(*this);nw;nw=nw->father)
 	{
 		auto temp=nw->table.find(x);
 		if (temp!=nw->table.end())
 		{
-			if (temp->get_if_any_para_is_ok()) return true;
 			if (!isadapt(x.para(),temp->para())) continue;
 			x=*temp;
 			return true;
@@ -48,18 +64,6 @@ std::shared_ptr<SymbolTableBlock>  Locate(std::shared_ptr<SymbolTableBlock> fath
 {
 	std::shared_ptr<SymbolTableBlock> res(new SymbolTableBlock());
 	res->linktofather(father);
-	if (!father)
-	{
-		std::vector<SymbolTablePara> emp;
-		SymbolTableItem func1(1,VOID,"read",0,1,emp);
-		SymbolTableItem func2(1,VOID,"readln",0,1,emp);
-		SymbolTableItem func3(1,VOID,"write",0,1,emp);
-		SymbolTableItem func4(1,VOID,"writeln",0,1,emp);
-		res->AddItem(func1);
-		res->AddItem(func2);
-		res->AddItem(func3);
-		res->AddItem(func4);
-	}
 	return res;
 }
 
