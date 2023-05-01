@@ -9,14 +9,14 @@
 using std::ostream;
 using std::istream;
 namespace symbol_table{
-	enum ItemType{
+	typedef enum class ITEMTYPE{
         ERROR,
         VOID,
         BOOL,
         CHAR,
 		INT,
 		REAL
-	};
+	}ItemType;
 	istream& operator>>(istream& IN,ItemType& x)
     {
         std::string s;IN>>s;
