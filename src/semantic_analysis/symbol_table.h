@@ -17,6 +17,8 @@ namespace symbol_table{
 		INT,
 		REAL
 	};
+    istream& operator>>(istream& IN,ItemType& x);
+    ostream& operator<<(ostream& OUT,const ItemType& x);
 	class SymbolTablePara{
 	public:
 		SymbolTablePara(){}
