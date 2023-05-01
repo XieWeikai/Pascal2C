@@ -9,50 +9,14 @@
 using std::ostream;
 using std::istream;
 namespace symbol_table{
-	typedef enum class ITEMTYPE{
+	enum ItemType{
         ERROR,
         VOID,
         BOOL,
         CHAR,
 		INT,
 		REAL
-	}ItemType;
-	istream& operator>>(istream& IN,ItemType& x)
-    {
-        std::string s;IN>>s;
-        if (s=="VOID") x=ItemType::VOID;
-        else if (s=="BOOL") x=ItemType::BOOL;
-        else if (s=="CHAR") x=ItemType::CHAR;
-        else if (s=="INT") x=ItemType::INT;
-        else if (s=="REAL") x=ItemType::REAL;
-        else x=ItemType::ERROR;
-        return IN;
-    }
-	ostream& operator<<(ostream& OUT,const ItemType& x)
-    {
-        switch (x)
-        {
-        case ItemType::VOID:
-            OUT<<"VOID";
-            break;
-        case ItemType::BOOL:
-            OUT<<"BOOL";
-            break;
-        case ItemType::CHAR:
-            OUT<<"CHAR";
-            break;
-        case ItemType::INT:
-            OUT<<"INT";
-            break;
-        case ItemType::REAL:
-            OUT<<"REAL";
-            break;
-        default:
-            OUT<<"ERROR";
-            break;
-        }
-        return OUT;
-    }
+	};
 	class SymbolTablePara{
 	public:
 		SymbolTablePara(){}
