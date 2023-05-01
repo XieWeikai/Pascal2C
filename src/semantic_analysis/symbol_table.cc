@@ -23,7 +23,7 @@ int SymbolTableBlock::AddItem(const SymbolTableItem &x)
 bool isadapt(const std::vector<SymbolTablePara> &A,const std::vector<SymbolTablePara> &B)
 {
 	assert(A.size()==B.size());
-	for (int i=0;i<A.size();i++) if (A[i].is_var() && !B[i].is_var()) return false;
+	for (int i=0;i<A.size();i++) if (!A[i].is_var() && B[i].is_var()) return false;
 	return true;
 }
 //find identify with format SymbolTableItem
@@ -37,7 +37,6 @@ bool SymbolTableBlock::Query(SymbolTableItem &x)
 		for (auto &temp:x.para()) if (!temp.is_var() || temp.type()==ERROR || temp.type()==VOID) return false;
 		return true;
 	}
-	
 	if (x.name()=="write" || x.name()=="writeln")
 	{
 		if (!x.para().size()) return false;
@@ -49,28 +48,12 @@ bool SymbolTableBlock::Query(SymbolTableItem &x)
 		auto temp=nw->table.find(x);
 		if (temp!=nw->table.end())
 		{
+
 			if (!isadapt(x.para(),temp->para())) continue;
-			x=*temp;
+			x=*temp;	
 			return true;
 		}
-	}
+	}	
 	return false;
 }
 std::shared_ptr<SymbolTableBlock> SymbolTableBlock::getfather(){return father;}
-void SymbolTableBlock::linktofather(std::shared_ptr<SymbolTableBlock> tp){father=tp;}
-
-//create a new block of SymbolTable from father block; return the new block
-std::shared_ptr<SymbolTableBlock>  Locate(std::shared_ptr<SymbolTableBlock> father)
-{
-	std::shared_ptr<SymbolTableBlock> res(new SymbolTableBlock());
-	res->linktofather(father);
-	return res;
-}
-
-//delete the block of SymbolTable and return the father block
-std::shared_ptr<SymbolTableBlock> Relocate(std::shared_ptr<SymbolTableBlock> to_del)
-{
-	std::shared_ptr<SymbolTableBlock> res=to_del->getfather();
-	to_del.reset();return res;
-}
-

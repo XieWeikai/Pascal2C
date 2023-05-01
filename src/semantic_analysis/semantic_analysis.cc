@@ -59,6 +59,11 @@ namespace analysiser{
     {
         blockNames.push_back(nowblockName);
         table.Add(name);
+        std::shared_ptr<symbol_table::SymbolTableBlock> af;
+        std::shared_ptr<symbol_table::SymbolTableBlock> as;
+        table.Query(nowblockName,af);
+        table.Query(name,as);
+        as->Locate(af);
         nowblockName = name;
     }
     symbol_table::ItemType MaxType(symbol_table::ItemType x, symbol_table::ItemType y)
@@ -90,6 +95,7 @@ namespace analysiser{
             case pascal2c::ast::REAL:
             case pascal2c::ast::CHAR:
             case pascal2c::ast::BOOLEAN:
+            case pascal2c::ast::STRING:
                 return false;
             case pascal2c::ast::CALL_OR_VAR:
             case pascal2c::ast::VARIABLE:
@@ -132,15 +138,20 @@ namespace analysiser{
                 ret=symbol_table::BOOL;
                 break;
             }
+            case pascal2c::ast::STRING:
+            {
+                ret=symbol_table::STRING;
+                break;
+            }
             case pascal2c::ast::VARIABLE:
             {
                 std::shared_ptr<pascal2c::ast::Variable> now=std::static_pointer_cast<pascal2c::ast::Variable>(x);
                 std::vector<symbol_table::SymbolTablePara> para;
                 for(auto i:now->expr_list())
                 {
-                    para.push_back(symbol_table::SymbolTablePara(GetExprType(i),true,""));
+                    para.push_back(symbol_table::SymbolTablePara(GetExprType(i),ExprIsVar(i),""));
                 }
-                symbol_table::SymbolTableItem tgt1(symbol_table::ERROR,now->id(),true,false,para);
+                symbol_table::SymbolTableItem tgt1(symbol_table::ERROR,now->id(),false,false,para);
                 if(Find(tgt1))
                 {
                     ret=tgt1.type();
@@ -212,12 +223,12 @@ namespace analysiser{
         {
             for(auto i : type.periods())
             {
-                ret.push_back(symbol_table::SymbolTablePara(BasicToType(type.basic_type()),false,std::to_string(i.digits_1)+"..."+std::to_string(i.digits_2)));
+                ret.push_back(symbol_table::SymbolTablePara(symbol_table::INT,false,std::to_string(i.digits_1)+"..."+std::to_string(i.digits_2)));
             }
         }
         return ret;
     }
-    bool ParameterToPara(std::vector<symbol_table::SymbolTablePara> ret,pascal2c::ast::Parameter inpara)
+    bool ParameterToPara(std::vector<symbol_table::SymbolTablePara> &ret,pascal2c::ast::Parameter inpara)
     {
         for(int i=0;i<inpara.id_list()->Size();i++)
         {
@@ -246,7 +257,7 @@ namespace analysiser{
         {
             para.push_back(symbol_table::SymbolTablePara(GetExprType(i),ExprIsVar(i),""));
         }
-        return symbol_table::SymbolTableItem(symbol_table::ERROR,x.id(),true,false,para);
+        return symbol_table::SymbolTableItem(symbol_table::ERROR,x.id(),false,false,para);
     }
 
     void DoProgram(pascal2c::ast::Program x)
@@ -316,6 +327,14 @@ namespace analysiser{
         if(!Insert(now))
         {
             LOG("SubprogramHead Declaration failure");
+        }
+        else 
+        {
+            symbol_table::SymbolTableItem nownext(BasicToType(x.return_type()),x.id(),true,false,std::vector<symbol_table::SymbolTablePara>());
+            if(!Insert(nownext))
+            {
+                LOG("SubprogramHead Declaration failure");
+            }
         }
         return now;
     }

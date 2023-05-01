@@ -28,7 +28,7 @@ namespace analysiser{
     symbol_table::ItemType BasicToType(int basic_type);
     symbol_table::SymbolTableItem ExprToItem(std::string name, std::shared_ptr<pascal2c::ast::Expression> x);
     std::vector<symbol_table::SymbolTablePara> TypeToPara(pascal2c::ast::Type type);
-    bool ParameterToPara(std::vector<symbol_table::SymbolTablePara> ret,pascal2c::ast::Parameter inpara);
+    bool ParameterToPara(std::vector<symbol_table::SymbolTablePara> &ret,pascal2c::ast::Parameter inpara);
     symbol_table::SymbolTableItem SubprogramToItem(pascal2c::ast::SubprogramHead x);
     symbol_table::SymbolTableItem VarToItem(pascal2c::ast::Variable x);
     void DoProgramHead(pascal2c::ast::ProgramHead x);

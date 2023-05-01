@@ -15,7 +15,8 @@ namespace symbol_table{
         BOOL,
         CHAR,
 		INT,
-		REAL
+		REAL,
+        STRING
 	};
 	static istream& operator>>(istream& IN,ItemType& x)
     {
@@ -25,6 +26,7 @@ namespace symbol_table{
         else if (s=="CHAR") x=ItemType::CHAR;
         else if (s=="INT") x=ItemType::INT;
         else if (s=="REAL") x=ItemType::REAL;
+        else if (s=="STRING") x=ItemType::STRING;
         else x=ItemType::ERROR;
         return IN;
     }
@@ -46,6 +48,9 @@ namespace symbol_table{
             break;
         case ItemType::REAL:
             OUT<<"REAL";
+            break;
+        case ItemType::STRING:
+            OUT<<"STRING";
             break;
         default:
             OUT<<"ERROR";
@@ -145,21 +150,17 @@ namespace symbol_table{
         bool Query(SymbolTableItem &x);
         
         std::shared_ptr<SymbolTableBlock> getfather();
-        void linktofather(std::shared_ptr<SymbolTableBlock> x);
         friend ostream& operator<<(ostream& OUT,const SymbolTableBlock& x)
         {
             for (auto &temp:x.table) OUT<<temp<<std::endl;
             return OUT;
         }
+        void Locate(std::shared_ptr<SymbolTableBlock> nowfather)
+        {
+            father=nowfather;
+        }
     private:
         std::shared_ptr<SymbolTableBlock> father;
         std::set<SymbolTableItem> table;
-    };
-
-    //create a new block of SymbolTable from father block; return the new block
-    std::shared_ptr<SymbolTableBlock>  Locate(std::shared_ptr<SymbolTableBlock> father);
-    
-    //delete the block of SymbolTable and return the father block
-    std::shared_ptr<SymbolTableBlock> Relocate(std::shared_ptr<SymbolTableBlock> to_del);
-    
+    }; 
 }
