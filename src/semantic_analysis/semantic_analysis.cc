@@ -96,11 +96,20 @@ namespace analysiser{
             case pascal2c::ast::CHAR:
             case pascal2c::ast::BOOLEAN:
             case pascal2c::ast::STRING:
-                return false;
-            case pascal2c::ast::CALL_OR_VAR:
-            case pascal2c::ast::VARIABLE:
             case pascal2c::ast::CALL:
+                return false;
+            case pascal2c::ast::VARIABLE:
                 return true;
+            case pascal2c::ast::CALL_OR_VAR:
+            {
+                std::shared_ptr<pascal2c::ast::CallOrVar> now=std::static_pointer_cast<pascal2c::ast::CallOrVar>(x);
+                symbol_table::SymbolTableItem tgt1(symbol_table::ERROR,now->id(),true,false,std::vector<symbol_table::SymbolTablePara>());
+                if(Find(tgt1))
+                {
+                    return true;
+                }
+                return false;
+            }
             case pascal2c::ast::BINARY:
             {
                 std::shared_ptr<pascal2c::ast::BinaryExpr> now=std::static_pointer_cast<pascal2c::ast::BinaryExpr>(x);
@@ -242,7 +251,7 @@ namespace analysiser{
     {
         for(int i=0;i<inpara.id_list()->Size();i++)
         {
-            Insert(symbol_table::SymbolTableItem(BasicToType(inpara.type()),(*inpara.id_list())[i],inpara.is_var(),false,std::vector<symbol_table::SymbolTablePara>()));
+            Insert(symbol_table::SymbolTableItem(BasicToType(inpara.type()),(*inpara.id_list())[i],true,false,std::vector<symbol_table::SymbolTablePara>()));
             ret.push_back(symbol_table::SymbolTablePara(BasicToType(inpara.type()),inpara.is_var(),""));
         }
         return true;
@@ -314,7 +323,7 @@ namespace analysiser{
         std::vector<symbol_table::SymbolTablePara> para = TypeToPara(*x.type());
         for(int i=0;i<x.id_list()->Size();i++)
         {
-            symbol_table::SymbolTableItem now(BasicToType(x.type()->basic_type()),(*x.id_list())[i],false,false,para);
+            symbol_table::SymbolTableItem now(BasicToType(x.type()->basic_type()),(*x.id_list())[i],true,false,para);
             if(!Insert(now))
             {
                 LOG("Var Declaration failure");
@@ -392,6 +401,11 @@ namespace analysiser{
         if(Find(l))
         {
             ltype=l.type();
+            if(l.is_var()==false)
+            {
+                LOG("Assign Statement failure(left is const)");
+                return;
+            }
         }
         else 
         {
