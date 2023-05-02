@@ -189,8 +189,18 @@ namespace analysiser{
                 break;
             }
             case pascal2c::ast::BINARY:
-                ret=MaxType(GetExprType(std::static_pointer_cast<pascal2c::ast::BinaryExpr>(x)->lhs()),
-                            GetExprType(std::static_pointer_cast<pascal2c::ast::BinaryExpr>(x)->rhs()));break;
+            {
+                std::shared_ptr<pascal2c::ast::BinaryExpr> now=std::static_pointer_cast<pascal2c::ast::BinaryExpr>(x);
+                if(now->op()=='=')
+                {
+                    ret=symbol_table::BOOL;
+                }
+                else 
+                {
+                    ret=MaxType(GetExprType(now->lhs()),GetExprType(now->rhs()));
+                }
+                break;
+            }
             case pascal2c::ast::UNARY: 
                 ret=GetExprType(std::static_pointer_cast<pascal2c::ast::UnaryExpr>(x)->factor());break;
         }
@@ -422,7 +432,7 @@ namespace analysiser{
     {
         if(GetExprType(x.condition())!=symbol_table::BOOL)
         {
-            LOG("If Statement failure(condition error)");
+            LOG("If Statement failure(condition error) "+std::to_string(GetExprType(x.condition())));
             return;
         }
         std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
