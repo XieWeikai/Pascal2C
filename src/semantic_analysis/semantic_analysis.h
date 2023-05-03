@@ -19,7 +19,7 @@ namespace analysiser{
     
     std::vector<std::string> GetErrors();
     saERRORS::ERROR_TYPE Find(symbol_table::SymbolTableItem &x);
-    bool Insert(const symbol_table::SymbolTableItem &x);
+    saERRORS::ERROR_TYPE Insert(const symbol_table::SymbolTableItem &x);
     void init();
     void BlockExit();
     void BlockIn(std::string name);

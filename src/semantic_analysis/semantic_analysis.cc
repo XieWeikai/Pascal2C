@@ -35,16 +35,15 @@ namespace analysiser{
         table.Query(nowblockName,ans);
         return ans->Query(x);
     }
-    bool Insert(const symbol_table::SymbolTableItem &x)
+    saERRORS::ERROR_TYPE Insert(const symbol_table::SymbolTableItem &x)
     {
         if(x.type()==symbol_table::ERROR)
         {
-            return false;
+            return saERRORS::ITEM_ERROR;
         }
         std::shared_ptr<symbol_table::SymbolTableBlock> nowBlock;
         table.Query(nowblockName,nowBlock);
-        nowBlock->AddItem(x);
-        return true;
+        return nowBlock->AddItem(x);
     }
     void init()
     {
@@ -249,7 +248,7 @@ namespace analysiser{
                             std::string mes="";
                             ss<<ty;
                             mes=ss.str();
-                            LOG("illegal type between boolean expression,got"+mes);
+                            LOG("illegal type between boolean expression,got "+mes);
                             break;
                         }
                         ty=GetExprType(now->rhs());
@@ -260,7 +259,7 @@ namespace analysiser{
                             std::string mes="";
                             ss<<ty;
                             mes=ss.str();
-                            LOG("illegal type between boolean expression,got"+mes);
+                            LOG("illegal type between boolean expression,got "+mes);
                             break;
                         }
                         ret=symbol_table::BOOL;
@@ -433,9 +432,10 @@ namespace analysiser{
     void DoConstDeclaration(pascal2c::ast::ConstDeclaration x)
     {
         symbol_table::SymbolTableItem itemA = ExprToItem(x.id(),x.const_value());
-        if(!Insert(itemA))
+        saERRORS::ERROR_TYPE err=Insert(itemA);
+        if(err!=saERRORS::NO_ERROR)
         {
-            LOG("Const Declaration failure");
+            LOG("Const Declaration failure("+saERRORS::toString(err)+")");
         }
     }
     void DoVarDeclaration(pascal2c::ast::VarDeclaration x)
@@ -444,9 +444,10 @@ namespace analysiser{
         for(int i=0;i<x.id_list()->Size();i++)
         {
             symbol_table::SymbolTableItem now(BasicToType(x.type()->basic_type()),(*x.id_list())[i],true,false,para);
-            if(!Insert(now))
+            saERRORS::ERROR_TYPE err=Insert(now);
+            if(err!=saERRORS::NO_ERROR)
             {
-                LOG("Var Declaration failure");
+                LOG("Var Declaration failure("+saERRORS::toString(err)+")");
             }
         }
     }
@@ -454,25 +455,28 @@ namespace analysiser{
     {
         symbol_table::SymbolTableItem now=DoSubprogramHead(*x.subprogram_head());
         DoSubprogramBody(*x.subprogram_body());
-        if(!Insert(now))
+        saERRORS::ERROR_TYPE err=Insert(now);
+        if(err!=saERRORS::NO_ERROR)
         {
-            LOG("Subprogram Declaration failure");
+            LOG("Subprogram Declaration failure("+saERRORS::toString(err)+")");
         }
     }
     symbol_table::SymbolTableItem DoSubprogramHead(pascal2c::ast::SubprogramHead x)
     {
         BlockIn(x.id());
         symbol_table::SymbolTableItem now=SubprogramToItem(x);
-        if(!Insert(now))
+        saERRORS::ERROR_TYPE err=Insert(now);
+        if(err!=saERRORS::NO_ERROR)
         {
-            LOG("SubprogramHead Declaration failure");
+            LOG("SubprogramHead Declaration failure("+saERRORS::toString(err)+")");
         }
-        else 
+        else if(now.type()!=symbol_table::VOID)
         {
             symbol_table::SymbolTableItem nownext(BasicToType(x.return_type()),x.id(),true,false,std::vector<symbol_table::SymbolTablePara>());
-            if(!Insert(nownext))
+            saERRORS::ERROR_TYPE err=Insert(nownext);
+            if(err!=saERRORS::NO_ERROR)
             {
-                LOG("SubprogramHead Declaration failure");
+                LOG("SubprogramHead Declaration failure("+saERRORS::toString(err)+")");
             }
         }
         return now;
@@ -557,7 +561,9 @@ namespace analysiser{
         saERRORS::ERROR_TYPE err = Find(tgt1);
         if(err!=saERRORS::NO_ERROR)
         {
-            LOG("Call Statement failure("+saERRORS::toString(err)+")");
+            std::stringstream ss;
+            ss<<tgt1;
+            LOG("Call Statement failure("+saERRORS::toString(err)+",asking for "+ss.str()+")");
             return;
         }
     }

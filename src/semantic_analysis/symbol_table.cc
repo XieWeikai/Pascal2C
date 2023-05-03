@@ -10,11 +10,12 @@ using namespace symbol_table;
 
 //add identify with format SymbolTableItem
 //return 0 if success; otherwise failure
-int SymbolTableBlock::AddItem(const SymbolTableItem &x)
+saERRORS::ERROR_TYPE SymbolTableBlock::AddItem(const SymbolTableItem &x)
 {
 	std::string name=x.name();
-	if (this->table[name].find(x)!=this->table[name].end()) return -1;
-	this->table[name].insert(x);return 0;
+	if (this->table[name].find(x)!=this->table[name].end()) return saERRORS::ITEM_EXIST;
+	this->table[name].insert(x);
+	return saERRORS::NO_ERROR;
 }
 
 bool isadapt(const std::vector<SymbolTablePara> &A,const std::vector<SymbolTablePara> &B)
