@@ -137,3 +137,18 @@ gtest_discover_tests(generator_test)
 # add_test(NAME GeneratorTest COMMAND generator_test)
 
 # <<< generator test <<<
+
+# main executable
+add_executable(
+        pascal2c
+        src/main.cc
+        ${PARSER}
+        ${AST}
+        src/semantic_analysis/semantic_analysis.cc
+        src/semantic_analysis/symbol_table.cc
+        src/semantic_analysis/errors.cc
+        ${CMAKE_CURRENT_BINARY_DIR}/lexer.yy.c
+        src/lexer/utils.c
+)
+target_include_directories(pascal2c PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(pascal2c LibGenerator GTest::gtest_main GTest::gmock_main)
