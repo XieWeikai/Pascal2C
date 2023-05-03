@@ -11,6 +11,10 @@ namespace saERRORS{
                 return "Not found";
             case FOUND_BUT_NOT_MATCH:
                 return "Found but not match";
+            case ITEM_ERROR:
+                return "Item error";
+            case ITEM_EXIST:
+                return "Item exist";
         }
         return "error";
     }

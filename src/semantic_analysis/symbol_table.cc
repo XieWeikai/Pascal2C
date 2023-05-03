@@ -10,21 +10,21 @@ using namespace symbol_table;
 
 //add identify with format SymbolTableItem
 //return 0 if success; otherwise failure
-int SymbolTableBlock::AddItem(const SymbolTableItem &x)
+saERRORS::ERROR_TYPE SymbolTableBlock::AddItem(const SymbolTableItem &x)
 {
 	std::string name=x.name();
 	if (this->name_domain.find(name)==this->name_domain.end())
 	{
 		this->name_domain[name]=x.is_func();
 		this->table[name].insert(x);
-		return 0;
+		return saERRORS::NO_ERROR;
 	}
 	bool A=this->name_domain[name],B=x.is_func();
-	if (A!=B) return -2;//it is a var not func
-	if (!A) return -1;//var redefinition
-	if (this->table[name].find(x)!=this->table[name].end()) return -1;//func redefinition
+	if (A!=B) return saERRORS::ITEM_ERROR;//it is a var not func
+	if (!A) return saERRORS::ITEM_EXIST;//var redefinition
+	if (this->table[name].find(x)!=this->table[name].end()) return saERRORS::ITEM_EXIST;//func redefinition
 	this->table[name].insert(x);
-	return 0;
+	return saERRORS::NO_ERROR;
 }
 
 bool isadapt(const std::vector<SymbolTablePara> &A,const std::vector<SymbolTablePara> &B)

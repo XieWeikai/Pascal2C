@@ -144,7 +144,7 @@ namespace symbol_table{
     public:
         //add identify with format SymbolTableItem
         //return 0 if success; otherwise failure
-        int AddItem(const SymbolTableItem &x);
+        saERRORS::ERROR_TYPE AddItem(const SymbolTableItem &x);
         
         //find identify with format SymbolTableItem
         //do not care about para.info_
