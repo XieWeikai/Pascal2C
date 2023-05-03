@@ -105,6 +105,7 @@ namespace symbol_table{
 		
         std::string name()const{return name_;}
         ItemType type()const{return type_;}
+        void settype(ItemType newtype){type_=newtype;}
         bool is_var()const{return is_var_;}
         bool is_func()const{return is_func_;}
 		std::vector<SymbolTablePara> para()const{return para_;}
@@ -162,6 +163,7 @@ namespace symbol_table{
         }
     private:
         std::shared_ptr<SymbolTableBlock> father;
+        std::map<std::string,bool> name_domain;//mark name belong func or variable;
         std::map<std::string,std::set<SymbolTableItem> > table;
     }; 
 }

@@ -13,8 +13,18 @@ using namespace symbol_table;
 int SymbolTableBlock::AddItem(const SymbolTableItem &x)
 {
 	std::string name=x.name();
-	if (this->table[name].find(x)!=this->table[name].end()) return -1;
-	this->table[name].insert(x);return 0;
+	if (this->name_domain.find(name)==this->name_domain.end())
+	{
+		this->name_domain[name]=x.is_func();
+		this->table[name].insert(x);
+		return 0;
+	}
+	bool A=this->name_domain[name],B=x.is_func();
+	if (A!=B) return -2;//it is a var not func
+	if (!A) return -1;//var redefinition
+	if (this->table[name].find(x)!=this->table[name].end()) return -1;//func redefinition
+	this->table[name].insert(x);
+	return 0;
 }
 
 bool isadapt(const std::vector<SymbolTablePara> &A,const std::vector<SymbolTablePara> &B)
@@ -31,8 +41,19 @@ saERRORS::ERROR_TYPE SymbolTableBlock::Query(SymbolTableItem &x)
 	std::string name=x.name();
 	for (std::shared_ptr<SymbolTableBlock> nw=std::make_shared<SymbolTableBlock>(*this);nw;nw=nw->father)
 	{
-		if (nw->table.find(name)!=nw->table.end())
+		if (nw->name_domain.find(name)!=nw->name_domain.end())
 		{
+			bool A=nw->name_domain[name],B=x.is_func();
+			if (A!=B) return saERRORS::FOUND_BUT_NOT_MATCH;//func and variable dismatch
+			if (!A)//variable
+			{
+				auto temp=nw->table[name].begin();
+				int P=temp->para().size(),Q=x.para().size();
+				if (P<Q) return saERRORS::FOUND_BUT_NOT_MATCH;//variable:too long parameter
+				for (auto &o:x.para()) if (o.type()!=ItemType::INT) return saERRORS::FOUND_BUT_NOT_MATCH;//expect int but other
+				x=SymbolTableItem(temp->type(),temp->name(),temp->is_var(),temp->is_func(),x.para());
+				return saERRORS::NO_ERROR;
+			}
 			auto temp=nw->table[name].find(x);
 			if (temp!=nw->table[name].end())
 			{
@@ -45,14 +66,14 @@ saERRORS::ERROR_TYPE SymbolTableBlock::Query(SymbolTableItem &x)
 	}
 	if (x.name()=="read" || x.name()=="readln")
 	{
-		if (!x.para().size()) return saERRORS::FOUND_BUT_NOT_MATCH;
 		for (auto &temp:x.para()) if (!temp.is_var() || temp.type()==ERROR || temp.type()==VOID) return saERRORS::FOUND_BUT_NOT_MATCH;//found name but parameter dismatch
+		x.settype(ItemType::VOID);
 		return saERRORS::NO_ERROR;
 	}
 	if (x.name()=="write" || x.name()=="writeln")
 	{
-		if (!x.para().size()) return saERRORS::FOUND_BUT_NOT_MATCH;
 		for (auto &temp:x.para()) if (temp.type()==ERROR || temp.type()==VOID) return saERRORS::FOUND_BUT_NOT_MATCH;//found name but parameter dismatch
+		x.settype(ItemType::VOID);
 		return saERRORS::NO_ERROR;
 	}
 	return saERRORS::NOT_FOUND;
