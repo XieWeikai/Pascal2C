@@ -1,4 +1,5 @@
 #include <memory>
+#include <sstream>
 #include "semantic_analysis.h"
 #define LOG(message) \
     do{\
@@ -28,7 +29,7 @@ namespace analysiser{
             return true;
         }
     }
-    bool Find(symbol_table::SymbolTableItem &x)
+    saERRORS::ERROR_TYPE Find(symbol_table::SymbolTableItem &x)
     {
         std::shared_ptr<symbol_table::SymbolTableBlock> ans;
         table.Query(nowblockName,ans);
@@ -104,7 +105,7 @@ namespace analysiser{
             {
                 std::shared_ptr<pascal2c::ast::CallOrVar> now=std::static_pointer_cast<pascal2c::ast::CallOrVar>(x);
                 symbol_table::SymbolTableItem tgt1(symbol_table::ERROR,now->id(),true,false,std::vector<symbol_table::SymbolTablePara>());
-                if(Find(tgt1))
+                if(Find(tgt1)==saERRORS::NO_ERROR)
                 {
                     return true;
                 }
@@ -161,9 +162,14 @@ namespace analysiser{
                     para.push_back(symbol_table::SymbolTablePara(GetExprType(i),ExprIsVar(i),""));
                 }
                 symbol_table::SymbolTableItem tgt1(symbol_table::ERROR,now->id(),false,false,para);
-                if(Find(tgt1))
+                if(Find(tgt1)==saERRORS::NO_ERROR)
                 {
                     ret=tgt1.type();
+                }
+                else 
+                {
+                    pascal2c::ast::Ast x=(*now);
+                    LOG("variable "+now->id()+" not found");
                 }
                 break;
             }
@@ -176,9 +182,14 @@ namespace analysiser{
                     para.push_back(symbol_table::SymbolTablePara(GetExprType(i),ExprIsVar(i),""));
                 }
                 symbol_table::SymbolTableItem tgt1(symbol_table::ERROR,now->id(),false,true,para);
-                if(Find(tgt1))
+                if(Find(tgt1)==saERRORS::NO_ERROR)
                 {
                     ret=tgt1.type();
+                }
+                else 
+                {
+                    pascal2c::ast::Ast x=(*now);
+                    LOG("function "+now->id()+" not found");
                 }
                 break;
             }
@@ -187,31 +198,140 @@ namespace analysiser{
                 std::shared_ptr<pascal2c::ast::CallOrVar> now=std::static_pointer_cast<pascal2c::ast::CallOrVar>(x);
                 symbol_table::SymbolTableItem tgt1(symbol_table::ERROR,now->id(),true,false,std::vector<symbol_table::SymbolTablePara>());
                 symbol_table::SymbolTableItem tgt2(symbol_table::ERROR,now->id(),false,true,std::vector<symbol_table::SymbolTablePara>());
-                if(Find(tgt1))
+                if(Find(tgt1)==saERRORS::NO_ERROR)
                 {
                     ret=tgt1.type();
                 }
-                else if(Find(tgt2))
+                else if(Find(tgt2)==saERRORS::NO_ERROR)
                 {
                     ret=tgt2.type();
+                }
+                else 
+                {
+                    pascal2c::ast::Ast x=(*now);
+                    LOG(now->id()+" not found");
                 }
                 break;
             }
             case pascal2c::ast::BINARY:
             {
                 std::shared_ptr<pascal2c::ast::BinaryExpr> now=std::static_pointer_cast<pascal2c::ast::BinaryExpr>(x);
-                if(now->op()=='=')
+                switch(now->op())
                 {
-                    ret=symbol_table::BOOL;
-                }
-                else 
-                {
-                    ret=MaxType(GetExprType(now->lhs()),GetExprType(now->rhs()));
+                    case '=':case '>':case '<':case 306:case 305:case 304:
+                    {
+                        symbol_table::ItemType tyl=GetExprType(now->lhs());
+                        symbol_table::ItemType tyr=GetExprType(now->rhs());
+                        symbol_table::ItemType ty=MaxType(tyl,tyr);
+                        if(ty!=symbol_table::ERROR)
+                            ret=symbol_table::BOOL;
+                        else 
+                        {
+                            pascal2c::ast::Ast x=(*now);
+                            std::string mes="";
+                            if(tyl!=symbol_table::ERROR&&tyr!=symbol_table::ERROR)
+                            {
+                                std::stringstream ss;
+                                ss<<":left:"<<tyl<<" "<<"right:"<<tyr;
+                                mes=ss.str();
+                            }
+                            LOG("illegal type between comparison expression"+mes);
+                        }
+                        break;
+                    }
+                    case 262:case 283:
+                    {
+                        symbol_table::ItemType ty=GetExprType(now->lhs());
+                        if(ty!=symbol_table::BOOL)
+                        {
+                            pascal2c::ast::Ast x=(*now);
+                            std::stringstream ss;
+                            std::string mes="";
+                            ss<<ty;
+                            mes=ss.str();
+                            LOG("illegal type between boolean expression,got"+mes);
+                            break;
+                        }
+                        ty=GetExprType(now->rhs());
+                        if(ty!=symbol_table::BOOL)
+                        {
+                            pascal2c::ast::Ast x=(*now);
+                            std::stringstream ss;
+                            std::string mes="";
+                            ss<<ty;
+                            mes=ss.str();
+                            LOG("illegal type between boolean expression,got"+mes);
+                            break;
+                        }
+                        ret=symbol_table::BOOL;
+                        break;
+                    }
+                    case '+':case '-':case '*':case 267:
+                    {
+                        symbol_table::ItemType ty=MaxType(GetExprType(now->lhs()),GetExprType(now->rhs()));
+                        if(ty==symbol_table::REAL||ty==symbol_table::INT)
+                        {
+                            ret=ty;
+                        }
+                        else 
+                        {
+                            pascal2c::ast::Ast x=(*now);
+                            std::string mes=":type not match";
+                            if(ty!=symbol_table::ERROR)
+                            {
+                                std::stringstream ss;
+                                ss<<":got "<<ty;
+                                mes=ss.str();
+                            }
+                            LOG("illegal type between compute expression"+mes);
+                        }
+                        break;
+                    }
+                    case 279:
+                    {
+                        if(GetExprType(now->lhs())==symbol_table::INT&&GetExprType(now->rhs())==symbol_table::INT)
+                        {
+                            ret=symbol_table::INT;
+                        }
+                        else 
+                        {
+                            pascal2c::ast::Ast x=(*now);
+                            LOG("illegal type in mod expression");
+                        }
+                        break;
+                    }
+                    case '/':
+                    {
+                        symbol_table::ItemType ty=MaxType(GetExprType(now->lhs()),GetExprType(now->rhs()));
+                        if(ty==symbol_table::REAL||ty==symbol_table::INT)
+                        {
+                            ret=symbol_table::REAL;
+                        }
+                        else 
+                        {
+                            pascal2c::ast::Ast x=(*now);
+                            LOG("illegal type in '/' expression");
+                        }
+                        break;
+                    }
                 }
                 break;
             }
             case pascal2c::ast::UNARY: 
-                ret=GetExprType(std::static_pointer_cast<pascal2c::ast::UnaryExpr>(x)->factor());break;
+            {
+                std::shared_ptr<pascal2c::ast::UnaryExpr> now=std::static_pointer_cast<pascal2c::ast::UnaryExpr>(x);
+                symbol_table::ItemType ty=GetExprType(now->factor());
+                if(ty==symbol_table::REAL||ty==symbol_table::INT)
+                {
+                    ret=ty;
+                }
+                else 
+                {
+                    pascal2c::ast::Ast x=(*now);
+                    LOG("illegal type in unary expression");
+                }
+                break;
+            }
         }
         return ret;
     }
@@ -398,7 +518,7 @@ namespace analysiser{
     {
         symbol_table::SymbolTableItem l=VarToItem(*x.var());
         symbol_table::ItemType ltype;
-        if(Find(l))
+        if(Find(l)==saERRORS::NO_ERROR)
         {
             ltype=l.type();
             if(l.is_var()==false)
@@ -420,7 +540,9 @@ namespace analysiser{
         }
         if(MaxType(ltype,rtype)!=ltype)
         {
-            LOG("Assign Statement failure(type not match)");
+            std::stringstream ss;
+            ss<<": left:"<<ltype<<" right:"<<rtype;
+            LOG("Assign Statement failure(type not match)"+ss.str());
             return;
         }
     }
@@ -432,9 +554,10 @@ namespace analysiser{
             para.push_back(symbol_table::SymbolTablePara(GetExprType(i),ExprIsVar(i),""));
         }
         symbol_table::SymbolTableItem tgt1(symbol_table::ERROR,x.name(),false,true,para);
-        if(!Find(tgt1))
+        saERRORS::ERROR_TYPE err = Find(tgt1);
+        if(err!=saERRORS::NO_ERROR)
         {
-            LOG("Call Statement failure(function not found)");
+            LOG("Call Statement failure("+saERRORS::toString(err)+")");
             return;
         }
     }
@@ -444,9 +567,12 @@ namespace analysiser{
     }
     void DoIfStatement(pascal2c::ast::IfStatement x)
     {
-        if(GetExprType(x.condition())!=symbol_table::BOOL)
+        symbol_table::ItemType ty=GetExprType(x.condition());
+        if(ty!=symbol_table::BOOL)
         {
-            LOG("If Statement failure(condition error) "+std::to_string(GetExprType(x.condition())));
+            std::stringstream ss;
+            ss<<ty;
+            LOG("If Statement failure(condition error:received type "+ss.str()+")");
             return;
         }
         std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
@@ -465,15 +591,23 @@ namespace analysiser{
     void DoForStatement(pascal2c::ast::ForStatement x)
     {
         symbol_table::SymbolTableItem tgt(symbol_table::ERROR,x.id(),true,false,std::vector<symbol_table::SymbolTablePara>());
-        if(!Find(tgt))
+        if(Find(tgt)!=saERRORS::NO_ERROR)
         {
-            LOG("For Statement failure(id not found)");
+            LOG("For Statement failure(id: "+x.id()+" not found)");
+            return;
         }
         symbol_table::ItemType fromtype=GetExprType(x.from());
         symbol_table::ItemType totype=GetExprType(x.to());
-        if(MaxType(MaxType(fromtype,totype),tgt.type())==symbol_table::ERROR)//TODO
+        if(fromtype!=totype||totype!=tgt.type()||(MaxType(MaxType(fromtype,totype),tgt.type())==symbol_table::ERROR))//TODO
         {
-            LOG("For Statement failure(type not match in id from to)");
+            std::string mes="";
+            if(fromtype!=totype||totype!=tgt.type())
+            {
+                std::stringstream ss;
+                ss<<":id:"<<tgt.type()<<" from:"<<fromtype<<" to:"<<totype;
+                mes=ss.str();
+            }
+            LOG("For Statement failure(type not match in id from to)"+mes);
             return;
         }
         if(x.statement())

@@ -29,31 +29,44 @@ bool isadapt(const std::vector<SymbolTablePara> &A,const std::vector<SymbolTable
 //find identify with format SymbolTableItem
 //do not care about para.info_
 //return if exist
-bool SymbolTableBlock::Query(SymbolTableItem &x)
+saERRORS::ERROR_TYPE SymbolTableBlock::Query(SymbolTableItem &x)
 {
-	if (x.name()=="read" || x.name()=="readln")
-	{
-		if (!x.para().size()) return false;
-		for (auto &temp:x.para()) if (!temp.is_var() || temp.type()==ERROR || temp.type()==VOID) return false;
-		return true;
-	}
-	if (x.name()=="write" || x.name()=="writeln")
-	{
-		if (!x.para().size()) return false;
-		for (auto &temp:x.para()) if (temp.type()==ERROR || temp.type()==VOID) return false;
-		return true;
-	}
+	bool isfound=false;
 	for (std::shared_ptr<SymbolTableBlock> nw=std::make_shared<SymbolTableBlock>(*this);nw;nw=nw->father)
 	{
 		auto temp=nw->table.find(x);
 		if (temp!=nw->table.end())
 		{
-
+			isfound=true;
 			if (!isadapt(x.para(),temp->para())) continue;
 			x=*temp;	
-			return true;
+			return saERRORS::NO_ERROR;
 		}
 	}	
-	return false;
+	if(!isfound)
+	{
+		if (x.name()=="read" || x.name()=="readln")
+		{
+			//if (!x.para().size()) return saERRORS::FOUND_BUT_NOT_MATCH;
+			for (auto &temp:x.para()) 
+				if (!temp.is_var() || temp.type()==ERROR || temp.type()==VOID) 
+				{
+					return saERRORS::FOUND_BUT_NOT_MATCH;
+				}
+			return saERRORS::NO_ERROR;
+		}
+		if (x.name()=="write" || x.name()=="writeln")
+		{
+			//if (!x.para().size()) return false;
+			for (auto &temp:x.para()) if (temp.type()==ERROR || temp.type()==VOID)
+			{
+				return saERRORS::FOUND_BUT_NOT_MATCH;
+			}
+			return saERRORS::NO_ERROR;
+		}
+	}
+	else
+		return saERRORS::FOUND_BUT_NOT_MATCH;
+	return saERRORS::NOT_FOUND;
 }
 std::shared_ptr<SymbolTableBlock> SymbolTableBlock::getfather(){return father;}

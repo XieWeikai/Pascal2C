@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include "../ast/ast.h"
+#include "errors.h"
 using std::ostream;
 using std::istream;
 namespace symbol_table{
@@ -147,7 +148,7 @@ namespace symbol_table{
         //find identify with format SymbolTableItem
         //do not care about para.info_
         //return if exist
-        bool Query(SymbolTableItem &x);
+        saERRORS::ERROR_TYPE Query(SymbolTableItem &x);
         
         std::shared_ptr<SymbolTableBlock> getfather();
         friend ostream& operator<<(ostream& OUT,const SymbolTableBlock& x)
