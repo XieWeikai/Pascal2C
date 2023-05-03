@@ -320,6 +320,21 @@ namespace analysiser{
             {
                 std::shared_ptr<pascal2c::ast::UnaryExpr> now=std::static_pointer_cast<pascal2c::ast::UnaryExpr>(x);
                 symbol_table::ItemType ty=GetExprType(now->factor());
+                if(now->op()==281)
+                {
+                    if(ty!=symbol_table::BOOL)
+                    {
+                        pascal2c::ast::Ast x=(*now);
+                        std::stringstream ss;
+                        ss<<ty;
+                        LOG("illegal type in unary expression,got "+ss.str());
+                    }
+                    else
+                    {
+                        ret=symbol_table::BOOL;
+                    }
+                    break;
+                }
                 if(ty==symbol_table::REAL||ty==symbol_table::INT)
                 {
                     ret=ty;
