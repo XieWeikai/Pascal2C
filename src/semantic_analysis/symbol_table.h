@@ -152,7 +152,7 @@ namespace symbol_table{
         std::shared_ptr<SymbolTableBlock> getfather();
         friend ostream& operator<<(ostream& OUT,const SymbolTableBlock& x)
         {
-            for (auto &temp:x.table) OUT<<temp<<std::endl;
+            for (auto &temp:x.table) for(auto &res:temp.second) OUT<<res<<std::endl;
             return OUT;
         }
         void Locate(std::shared_ptr<SymbolTableBlock> nowfather)
@@ -161,6 +161,6 @@ namespace symbol_table{
         }
     private:
         std::shared_ptr<SymbolTableBlock> father;
-        std::set<SymbolTableItem> table;
+        std::map<std::string,std::set<SymbolTableItem> > table;
     }; 
 }

@@ -12,12 +12,9 @@ using namespace symbol_table;
 //return 0 if success; otherwise failure
 int SymbolTableBlock::AddItem(const SymbolTableItem &x)
 {
-	if (x.name()=="read") return -2;
-	if (x.name()=="readln") return -2;
-	if (x.name()=="write") return -2;
-	if (x.name()=="writeln") return -2;
-	if (this->table.find(x)!=this->table.end()) return -1;
-	this->table.insert(x);return 0;
+	std::string name=x.name();
+	if (this->table[name].find(x)!=this->table[name].end()) return -1;
+	this->table[name].insert(x);return 0;
 }
 
 bool isadapt(const std::vector<SymbolTablePara> &A,const std::vector<SymbolTablePara> &B)
@@ -31,29 +28,33 @@ bool isadapt(const std::vector<SymbolTablePara> &A,const std::vector<SymbolTable
 //return if exist
 bool SymbolTableBlock::Query(SymbolTableItem &x)
 {
+	std::string name=x.name();
+	for (std::shared_ptr<SymbolTableBlock> nw=std::make_shared<SymbolTableBlock>(*this);nw;nw=nw->father)
+	{
+		if (nw->table.find(name)!=nw->table.end())
+		{
+			auto temp=nw->table[name].find(x);
+			if (temp!=nw->table[name].end())
+			{
+				if (!isadapt(x.para(),temp->para())) return false;//is_var dismatch
+				x=*temp;
+				return true;
+			}
+			else return false;//found name but parameter dismatch
+		}
+	}
 	if (x.name()=="read" || x.name()=="readln")
 	{
 		if (!x.para().size()) return false;
-		for (auto &temp:x.para()) if (!temp.is_var() || temp.type()==ERROR || temp.type()==VOID) return false;
+		for (auto &temp:x.para()) if (!temp.is_var() || temp.type()==ERROR || temp.type()==VOID) return false;//found name but parameter dismatch
 		return true;
 	}
 	if (x.name()=="write" || x.name()=="writeln")
 	{
 		if (!x.para().size()) return false;
-		for (auto &temp:x.para()) if (temp.type()==ERROR || temp.type()==VOID) return false;
+		for (auto &temp:x.para()) if (temp.type()==ERROR || temp.type()==VOID) return false;//found name but parameter dismatch
 		return true;
 	}
-	for (std::shared_ptr<SymbolTableBlock> nw=std::make_shared<SymbolTableBlock>(*this);nw;nw=nw->father)
-	{
-		auto temp=nw->table.find(x);
-		if (temp!=nw->table.end())
-		{
-
-			if (!isadapt(x.para(),temp->para())) continue;
-			x=*temp;	
-			return true;
-		}
-	}	
-	return false;
+	return false;//not found;
 }
 std::shared_ptr<SymbolTableBlock> SymbolTableBlock::getfather(){return father;}
