@@ -619,16 +619,11 @@ namespace analysiser{
         }
         symbol_table::ItemType fromtype=GetExprType(x.from());
         symbol_table::ItemType totype=GetExprType(x.to());
-        if(fromtype!=totype||totype!=tgt.type()||(MaxType(MaxType(fromtype,totype),tgt.type())==symbol_table::ERROR))//TODO
+        if(fromtype!=totype||totype!=tgt.type()||tgt.type()!=symbol_table::ERROR)//TODO
         {
-            std::string mes="";
-            if(fromtype!=totype||totype!=tgt.type())
-            {
-                std::stringstream ss;
-                ss<<":id:"<<tgt.type()<<" from:"<<fromtype<<" to:"<<totype;
-                mes=ss.str();
-            }
-            LOG("For Statement failure(type not match in id from to)"+mes);
+            std::stringstream ss;
+            ss<<":id:"<<tgt.type()<<" from:"<<fromtype<<" to:"<<totype;
+            LOG("For Statement failure(type error in id from to)"+ss.str());
             return;
         }
         if(x.statement())
