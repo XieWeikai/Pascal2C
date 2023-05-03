@@ -2,6 +2,7 @@
 #define TEST_H
 #include "symbol_table.h"
 #include "../ast/program.h"
+#include "errors.h"
 namespace analysiser{
     //manage SymbolTableBlock
     class nameTable{
@@ -17,7 +18,7 @@ namespace analysiser{
    };
     
     std::vector<std::string> GetErrors();
-    bool Find(symbol_table::SymbolTableItem &x);
+    saERRORS::ERROR_TYPE Find(symbol_table::SymbolTableItem &x);
     bool Insert(const symbol_table::SymbolTableItem &x);
     void init();
     void BlockExit();

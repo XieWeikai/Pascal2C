@@ -26,7 +26,7 @@ bool isadapt(const std::vector<SymbolTablePara> &A,const std::vector<SymbolTable
 //find identify with format SymbolTableItem
 //do not care about para.info_
 //return if exist
-bool SymbolTableBlock::Query(SymbolTableItem &x)
+saERRORS::ERROR_TYPE SymbolTableBlock::Query(SymbolTableItem &x)
 {
 	std::string name=x.name();
 	for (std::shared_ptr<SymbolTableBlock> nw=std::make_shared<SymbolTableBlock>(*this);nw;nw=nw->father)
@@ -36,25 +36,25 @@ bool SymbolTableBlock::Query(SymbolTableItem &x)
 			auto temp=nw->table[name].find(x);
 			if (temp!=nw->table[name].end())
 			{
-				if (!isadapt(x.para(),temp->para())) return false;//is_var dismatch
+				if (!isadapt(x.para(),temp->para())) return saERRORS::FOUND_BUT_NOT_MATCH;
 				x=*temp;
-				return true;
+				return saERRORS::NO_ERROR;
 			}
-			else return false;//found name but parameter dismatch
+			else return saERRORS::FOUND_BUT_NOT_MATCH;
 		}
 	}
 	if (x.name()=="read" || x.name()=="readln")
 	{
-		if (!x.para().size()) return false;
-		for (auto &temp:x.para()) if (!temp.is_var() || temp.type()==ERROR || temp.type()==VOID) return false;//found name but parameter dismatch
-		return true;
+		if (!x.para().size()) return saERRORS::FOUND_BUT_NOT_MATCH;
+		for (auto &temp:x.para()) if (!temp.is_var() || temp.type()==ERROR || temp.type()==VOID) return saERRORS::FOUND_BUT_NOT_MATCH;//found name but parameter dismatch
+		return saERRORS::NO_ERROR;
 	}
 	if (x.name()=="write" || x.name()=="writeln")
 	{
-		if (!x.para().size()) return false;
-		for (auto &temp:x.para()) if (temp.type()==ERROR || temp.type()==VOID) return false;//found name but parameter dismatch
-		return true;
+		if (!x.para().size()) return saERRORS::FOUND_BUT_NOT_MATCH;
+		for (auto &temp:x.para()) if (temp.type()==ERROR || temp.type()==VOID) return saERRORS::FOUND_BUT_NOT_MATCH;//found name but parameter dismatch
+		return saERRORS::NO_ERROR;
 	}
-	return false;//not found;
+	return saERRORS::NOT_FOUND;
 }
 std::shared_ptr<SymbolTableBlock> SymbolTableBlock::getfather(){return father;}
