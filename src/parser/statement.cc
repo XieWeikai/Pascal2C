@@ -85,13 +85,19 @@ namespace pascal2c::parser {
         }
         vector<std::shared_ptr<ast::Statement> > statements;
         std::shared_ptr<ast::Statement> statement;
+        static char buff[1024];
 
         while(token_ != 0 && token_ != TOK_END){
             try {
                 statement = ParseStatement();
                 statements.push_back(std::move(statement));
-                if(token_ != TOK_END)
+                if(token_ != TOK_END) {
                     Match(';', "syntax error: missing ';' at the end of statement");
+                    if(token_ == TOK_END) {
+                        sprintf(buff,"%d:%d: last statement should not end with ;",line_,column_);
+                        throw SyntaxErr(buff);
+                    }
+                }
             }catch (SyntaxErr &e){
                 err_msg_.push_back(std::string(e.what()));
                 while(token_ != 0 && !isStatementStartTok(token_) && token_ != ';' && token_ != TOK_END){
