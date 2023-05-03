@@ -619,7 +619,7 @@ namespace analysiser{
         }
         symbol_table::ItemType fromtype=GetExprType(x.from());
         symbol_table::ItemType totype=GetExprType(x.to());
-        if(fromtype!=totype||totype!=tgt.type()||tgt.type()!=symbol_table::ERROR)//TODO
+        if(fromtype!=totype||totype!=tgt.type()||tgt.type()!=symbol_table::INT)//TODO
         {
             std::stringstream ss;
             ss<<":id:"<<tgt.type()<<" from:"<<fromtype<<" to:"<<totype;
