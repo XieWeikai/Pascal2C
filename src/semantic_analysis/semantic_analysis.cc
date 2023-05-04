@@ -468,30 +468,37 @@ namespace analysiser{
     }
     void DoSubprogram(pascal2c::ast::Subprogram x)
     {
+        std::string nameTmp=nowblockName;
         symbol_table::SymbolTableItem now=DoSubprogramHead(*x.subprogram_head());
-        DoSubprogramBody(*x.subprogram_body());
-        saERRORS::ERROR_TYPE err=Insert(now);
-        if(err!=saERRORS::NO_ERROR)
+        //insert subprogram head
+        if(now.type()==symbol_table::ERROR)
         {
-            LOG("Subprogram Declaration failure("+saERRORS::toString(err)+")");
+            LOG("Subprogram Declaration failure");
         }
+        std::shared_ptr<symbol_table::SymbolTableBlock> tmpBlock;
+        table.Query(nameTmp,tmpBlock);
+        if(tmpBlock->AddItem(now)!=saERRORS::NO_ERROR)
+        {
+            std::stringstream ss;
+            ss<<now;
+            LOG("Subprogram Declaration failure(insert "+ss.str()+" error)");
+        }
+
+        DoSubprogramBody(*x.subprogram_body());
     }
     symbol_table::SymbolTableItem DoSubprogramHead(pascal2c::ast::SubprogramHead x)
     {
         BlockIn(x.id());
         symbol_table::SymbolTableItem now=SubprogramToItem(x);
-        saERRORS::ERROR_TYPE err=Insert(now);
-        if(err!=saERRORS::NO_ERROR)
-        {
-            LOG("SubprogramHead Declaration failure("+saERRORS::toString(err)+")");
-        }
-        else if(now.type()!=symbol_table::VOID)
+        if(now.type()!=symbol_table::VOID)
         {
             symbol_table::SymbolTableItem nownext(BasicToType(x.return_type()),x.id(),true,false,std::vector<symbol_table::SymbolTablePara>());
             saERRORS::ERROR_TYPE err=Insert(nownext);
             if(err!=saERRORS::NO_ERROR)
             {
-                LOG("SubprogramHead Declaration failure("+saERRORS::toString(err)+")");
+                std::stringstream ss;
+                ss<<nownext;
+                LOG("SubprogramHead Declaration failure(insert "+ss.str()+" error)");
             }
         }
         return now;
