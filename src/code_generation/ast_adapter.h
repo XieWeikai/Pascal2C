@@ -268,16 +268,20 @@ class Function : public ASTNode {
     Function(const string &name, const shared_ptr<Type> &return_type,
              const vector<shared_ptr<Argument>> &args,
              const shared_ptr<Block> &block)
-        : name_(name), return_type_(return_type), args_(args), block_(block) {}
+        : name_(name), return_type_(return_type), args_(args), block_(block),
+          return_var_(std::make_shared<Var>(
+              std::make_shared<Token>(TokenType::IDENTIFIER, name))) {}
     virtual ~Function() = default;
     void Accept(Visitor &visitor) override;
     const string GetName() const { return name_; }
+    const shared_ptr<Var> GetReturnVar() const { return return_var_; }
     const string GetReturnType() const { return return_type_->GetType(); }
     const vector<shared_ptr<Argument>> &GetArgs() const { return args_; }
     const shared_ptr<Block> &GetBlock() const { return block_; }
 
   private:
     string name_;
+    shared_ptr<Var> return_var_;
     shared_ptr<Type> return_type_;
     vector<shared_ptr<Argument>> args_;
     shared_ptr<Block> block_;
