@@ -1,6 +1,7 @@
 #include "code_generation/ast_adapter.h"
 #include "code_generation/code_generator.h"
 #include "code_generation/token_adapter.h"
+#include "symbol_table_mock.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include <memory>
@@ -28,7 +29,8 @@ class ConstDeclarationTest : public ::testing::Test {
 TEST_F(ConstDeclarationTest, ConstDeclarationCreation) {
     EXPECT_EQ(const_type_->GetType(), "char");
     EXPECT_EQ(var_->GetName(), "K_A");
-    CodeGenerator code_generator;
+    auto s_table = make_shared<SymbolTableMock>();
+    CodeGenerator code_generator(s_table);
     code_generator.Interpret(const_decl_);
     auto ccode = code_generator.GetCCode();
     cout << ccode;

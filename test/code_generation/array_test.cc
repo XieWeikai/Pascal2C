@@ -1,6 +1,7 @@
 #include "code_generation/ast_adapter.h"
 #include "code_generation/code_generator.h"
 #include "code_generation/token_adapter.h"
+#include "symbol_table_mock.h"
 #include "gtest/gtest.h"
 #include <memory>
 #include <utility>
@@ -43,7 +44,8 @@ class ArrayTest : public ::testing::Test {
 
 TEST_F(ArrayTest, ArrayCreation) {
     auto array_declaration_root = array_declaration_;
-    CodeGenerator code_generator;
+    auto s_table = make_shared<SymbolTableMock>();
+    CodeGenerator code_generator(s_table);
     code_generator.Interpret(array_declaration_root);
     auto generated_ccode = code_generator.GetCCode();
     cout << generated_ccode << endl;

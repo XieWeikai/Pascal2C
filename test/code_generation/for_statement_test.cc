@@ -1,6 +1,7 @@
 #include "code_generation/ast_adapter.h"
 #include "code_generation/code_generator.h"
 #include "code_generation/token_adapter.h"
+#include "symbol_table_mock.h"
 #include "gtest/gtest.h"
 #include <memory>
 using namespace pascal2c::code_generation;
@@ -39,7 +40,8 @@ class ForStatementTest : public ::testing::Test {
 };
 
 TEST_F(ForStatementTest, ForStatementCreation) {
-    CodeGenerator cg;
+    auto s_table = make_shared<SymbolTableMock>();
+    CodeGenerator cg(s_table);
     cg.Interpret(for_statement_);
     cout << cg.GetCCode();
     EXPECT_EQ(cg.GetCCode(), expected_ccode_);

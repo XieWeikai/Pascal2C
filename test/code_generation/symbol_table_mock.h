@@ -27,6 +27,7 @@ class SymbolTableMock : public ISymbolTable {
                 (override));
     MOCK_METHOD(bool, IsReference, (const string &name), (const, override));
     MOCK_METHOD(void, SetCurrentScope, (const string &scope_name), (override));
+    MOCK_METHOD(const string, GetCurrentScope, (), (override));
     MOCK_METHOD(const shared_ptr<SymbolItem>, Lookup, (const string &name),
                 (const, override));
 };

@@ -3,6 +3,7 @@
 #include "code_generation/ast_printer.h"
 #include "code_generation/code_generator.h"
 #include "code_generation/token_adapter.h"
+#include "symbol_table_mock.h"
 #include "gmock/gmock.h"
 #include <algorithm>
 #include <gmock/gmock.h>
@@ -138,7 +139,9 @@ end.
 )";
 
     auto program = SimpleProgramAST();
-    auto code_generator = std::make_shared<CodeGenerator>();
+
+    auto s_table = make_shared<SymbolTableMock>();
+    auto code_generator = std::make_shared<CodeGenerator>(s_table);
     code_generator->Interpret(program);
     auto generated_ccode = code_generator->GetCCode();
 
