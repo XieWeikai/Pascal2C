@@ -272,7 +272,7 @@ class Function : public ASTNode {
     virtual ~Function() = default;
     void Accept(Visitor &visitor) override;
     const string GetName() const { return name_; }
-    const shared_ptr<Type> GetReturnType() const { return return_type_; }
+    const string GetReturnType() const { return return_type_->GetType(); }
     const vector<shared_ptr<Argument>> &GetArgs() const { return args_; }
     const shared_ptr<Block> &GetBlock() const { return block_; }
 

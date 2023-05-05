@@ -78,7 +78,6 @@ class SubprogramTest : public ::testing::Test {
 TEST_F(SubprogramTest, SubprogramDeclaration) {
     // Mock symbol table used for IsReference Lookup
     auto s_table = make_shared<SymbolTableMock>();
-    auto s_scope = make_shared<SymbolScopeMock>();
     EXPECT_CALL(*s_table, GetCurrentScope()).WillOnce(Return("global"));
     EXPECT_CALL(*s_table, SetCurrentScope(subprogram_name_));
     EXPECT_CALL(*s_table, SetCurrentScope("global"));

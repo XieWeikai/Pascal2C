@@ -98,12 +98,18 @@ void CodeGenerator::VisitFunction(const shared_ptr<Function> &node) {
         const auto &arg = node->GetArgs().at(i);
         Visit(arg);
         if (i < node->GetArgs().size() - 1) {
-            ostream_ << ',';
+            ostream_ << ", ";
         }
     }
     ostream_ << ") {\n";
     IncIndent();
+    // Declare return variable
+    ostream_ << Indent() << node->GetReturnType() << ' ' << node->GetName()
+             << ";/* Auto Generated */\n";
     Visit(node->GetBlock());
+    // Return statement
+    ostream_ << Indent() << "return " << node->GetName()
+             << ";/* Auto Generated */\n";
     DecIndent();
     ostream_ << Indent() << "}\n";
     // Return to parent scope
