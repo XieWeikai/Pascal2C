@@ -118,7 +118,7 @@ void CodeGenerator::VisitVarDecl(
 }
 
 void CodeGenerator::VisitArrayType(const shared_ptr<ArrayType> &node) {
-    Visit(node->GetType());
+    ostream_ << SymbolToC(node->GetType());
 }
 
 void CodeGenerator::VisitArray(const shared_ptr<Array> &node) {
@@ -135,6 +135,15 @@ void CodeGenerator::VisitArrayDeclaration(
         ostream_ << '[' << b.second - b.first + 1 << ']';
     }
     ostream_ << eol_;
+}
+
+void CodeGenerator::VisitArrayAccess(const shared_ptr<ArrayAccess> &node) {
+    Visit(node->GetArray());
+    for (auto &index : node->GetIndices()) {
+        ostream_ << '[';
+        Visit(index);
+        ostream_ << ']';
+    }
 }
 
 void CodeGenerator::VisitCompound(

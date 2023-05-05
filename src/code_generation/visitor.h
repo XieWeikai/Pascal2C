@@ -22,6 +22,7 @@ class Visitor {
     virtual void VisitArray(const shared_ptr<Array> &node) = 0;
     virtual void
     VisitArrayDeclaration(const shared_ptr<ArrayDeclaration> &node) = 0;
+    virtual void VisitArrayAccess(const shared_ptr<ArrayAccess> &node) = 0;
     virtual void VisitVarDecl(const shared_ptr<VarDeclaration> &node) = 0;
     virtual void VisitCompound(const shared_ptr<Compound> &node) = 0;
     virtual void VisitBinOp(const shared_ptr<BinaryOperation> &node) = 0;

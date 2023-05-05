@@ -38,6 +38,7 @@ class CodeGenerator : Visitor {
     virtual void VisitArray(const shared_ptr<Array> &node) override;
     virtual void
     VisitArrayDeclaration(const shared_ptr<ArrayDeclaration> &node) override;
+    virtual void VisitArrayAccess(const shared_ptr<ArrayAccess> &node) override;
     virtual void VisitCompound(const shared_ptr<Compound> &node) override;
     virtual void VisitBinOp(const shared_ptr<BinaryOperation> &node) override;
     virtual void VisitOper(const shared_ptr<Oper> &node) override;
