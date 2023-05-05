@@ -77,6 +77,9 @@ void ASTPrinter::VisitArrayDeclaration(
     const shared_ptr<ArrayDeclaration> &node) {
     ErrNotImplemented();
 }
+void ASTPrinter::VisitArrayAccess(const shared_ptr<ArrayAccess> &node) {
+    ErrNotImplemented();
+}
 
 void ASTPrinter::VisitVarDecl(const shared_ptr<VarDeclaration> &node) {
     ostream_ << string(indent_level_, ' ')

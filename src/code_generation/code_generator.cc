@@ -31,10 +31,22 @@ void CodeGenerator::VisitArgument(const shared_ptr<Argument> &node) {
         ostream_ << "/* Is Reference */";
     }
     Visit(node->GetType());
-    if (node->IsReference()) {
-        ostream_ << "*";
+
+    // Generate array bounds code if type is ArrayType
+    auto array_type = dynamic_pointer_cast<ArrayType>(node->GetType());
+    if (array_type) {
+        // Array bounds
+        auto bounds = array_type->GetBounds();
+        auto dims = bounds.size();
+        for (auto i = 0; i < dims; i++) {
+            auto b = bounds.at(i);
+            ostream_ << '[' << (b.second - b.first + 1) << ']';
+        }
     }
+
     ostream_ << " ";
+    // When visiting variable, will lookup variable in Symbol table, and add '*'
+    // if variable is passed-by-reference or is a pointer
     Visit(node->GetVariable());
 }
 
@@ -54,12 +66,17 @@ void CodeGenerator::VisitProgram(
 }
 
 void CodeGenerator::VisitSubprogram(const shared_ptr<Subprogram> &node) {
+    // Store parent scope name, return to this scope after visiting
+    // subprogram.
+    string parent_scope_name = GetCurrentScope();
+    SetCurrentScope(node->GetName());
+
     ostream_ << Indent() << "void " << node->GetName() << "(";
     for (auto i = 0; i < node->GetArgs().size(); i++) {
         const auto &arg = node->GetArgs().at(i);
         Visit(arg);
         if (i < node->GetArgs().size() - 1) {
-            ostream_ << ",";
+            ostream_ << ", ";
         }
     }
     ostream_ << ") {\n";
@@ -67,9 +84,15 @@ void CodeGenerator::VisitSubprogram(const shared_ptr<Subprogram> &node) {
     Visit(node->GetBlock());
     DecIndent();
     ostream_ << Indent() << "}\n";
+    // Return to parent symbol scope
+    SetCurrentScope(parent_scope_name);
 }
 
 void CodeGenerator::VisitFunction(const shared_ptr<Function> &node) {
+    // Get parent symbol scope name for returning after visiting function
+    string parent_scope_name = GetCurrentScope();
+    SetCurrentScope(node->GetName());
+
     ostream_ << node->GetReturnType() << ' ' << node->GetName() << '(';
     for (int i = 0; i < node->GetArgs().size(); i++) {
         const auto &arg = node->GetArgs().at(i);
@@ -83,6 +106,8 @@ void CodeGenerator::VisitFunction(const shared_ptr<Function> &node) {
     Visit(node->GetBlock());
     DecIndent();
     ostream_ << Indent() << "}\n";
+    // Return to parent scope
+    SetCurrentScope(parent_scope_name);
 }
 
 void CodeGenerator::VisitBlock(const shared_ptr<code_generation::Block> &node) {
@@ -118,7 +143,7 @@ void CodeGenerator::VisitVarDecl(
 }
 
 void CodeGenerator::VisitArrayType(const shared_ptr<ArrayType> &node) {
-    Visit(node->GetType());
+    ostream_ << SymbolToC(node->GetType());
 }
 
 void CodeGenerator::VisitArray(const shared_ptr<Array> &node) {
@@ -137,6 +162,15 @@ void CodeGenerator::VisitArrayDeclaration(
     ostream_ << eol_;
 }
 
+void CodeGenerator::VisitArrayAccess(const shared_ptr<ArrayAccess> &node) {
+    Visit(node->GetArray());
+    for (auto &index : node->GetIndices()) {
+        ostream_ << '[';
+        Visit(index);
+        ostream_ << ']';
+    }
+}
+
 void CodeGenerator::VisitCompound(
     const shared_ptr<code_generation::Compound> &node) {
     for (const auto &child : node->GetChildren()) {
@@ -153,6 +187,9 @@ void CodeGenerator::VisitAssign(
 }
 
 void CodeGenerator::VisitVar(const shared_ptr<code_generation::Var> &node) {
+    if (IsReferenceArg(node)) {
+        ostream_ << "*";
+    }
     ostream_ << node->GetName();
 }
 
@@ -229,6 +266,10 @@ void CodeGenerator::VisitForStatement(const shared_ptr<ForStatement> &node) {
     Visit(node->GetBody());
     DecIndent();
     ostream_ << Indent() << "}\n";
+}
+
+bool CodeGenerator::IsReferenceArg(const shared_ptr<Var> &node) const {
+    return symbol_table_->IsReference(node->GetName());
 }
 
 const string CodeGenerator::Indent() const {

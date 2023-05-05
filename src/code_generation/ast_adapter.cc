@@ -31,10 +31,6 @@ void Block::Accept(Visitor &visitor) {
     visitor.VisitBlock(dynamic_pointer_cast<Block>(shared_from_this()));
 }
 
-Block::Block(const std::shared_ptr<Declaration> &declarations,
-             const std::shared_ptr<Compound> &compound_statement)
-    : declarations_(declarations), compound_statement_(compound_statement) {}
-
 // Declaration
 void Declaration::Accept(Visitor &visitor) {
     visitor.VisitDeclaration(
@@ -67,6 +63,12 @@ void Array::Accept(Visitor &visitor) {
 void ArrayDeclaration::Accept(Visitor &visitor) {
     visitor.VisitArrayDeclaration(
         dynamic_pointer_cast<ArrayDeclaration>(shared_from_this()));
+}
+
+// ArrayAccess
+void ArrayAccess::Accept(Visitor &visitor) {
+    visitor.VisitArrayAccess(
+        dynamic_pointer_cast<ArrayAccess>(shared_from_this()));
 }
 
 // Compound

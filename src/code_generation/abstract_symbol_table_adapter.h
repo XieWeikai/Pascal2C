@@ -29,6 +29,7 @@ class ISymbolTable {
                              bool is_reference) = 0;
     virtual bool IsReference(const string &name) const = 0;
     virtual void SetCurrentScope(const string &scope_name) = 0;
+    virtual const string GetCurrentScope() = 0;
     virtual const shared_ptr<SymbolItem> Lookup(const string &name) const = 0;
 };
 } // namespace code_generation

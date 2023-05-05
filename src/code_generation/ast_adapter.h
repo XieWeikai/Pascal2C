@@ -23,7 +23,7 @@ class ASTNode : public std::enable_shared_from_this<ASTNode> {
     virtual void Accept(Visitor &visitor) = 0;
 };
 
-// ASTRoot is an alias of ASTNode, represents root node of the AST.
+// ASTRoot is an alias of ASTNode, representing the root node of an AST.
 typedef ASTNode ASTRoot;
 
 class Compound : public ASTNode {
@@ -42,8 +42,9 @@ class Compound : public ASTNode {
 
 class Declaration : public ASTNode {
   public:
+    Declaration() : declaration_() {}
     Declaration(const vector<shared_ptr<ASTNode>> &declarations)
-        : declaration_(std::move(declarations)) {}
+        : declaration_(declarations) {}
     virtual ~Declaration() = default;
     void Accept(Visitor &visitor) override;
     const vector<shared_ptr<ASTNode>> &GetDeclarations() const {
@@ -56,8 +57,13 @@ class Declaration : public ASTNode {
 
 class Block : public ASTNode {
   public:
+    Block(shared_ptr<Compound> &compound_statement)
+        : declarations_(std::make_shared<Declaration>()),
+          compound_statement_(compound_statement) {}
     Block(const shared_ptr<Declaration> &declarations,
-          const shared_ptr<Compound> &compound_statement);
+          const shared_ptr<Compound> &compound_statement)
+        : declarations_(declarations), compound_statement_(compound_statement) {
+    }
     virtual ~Block() = default;
     void Accept(Visitor &visitor) override;
     const shared_ptr<Declaration> &GetDeclatation() const {
@@ -72,35 +78,61 @@ class Block : public ASTNode {
     shared_ptr<Compound> compound_statement_;
 };
 
-class Var : public ASTNode {
+class Num : public ASTNode {
+  public:
+    Num(const shared_ptr<Token> &token)
+        : value_(std::stoi(token->GetValue())) {}
+    virtual ~Num() = default;
+    void Accept(Visitor &visitor) override;
+    int GetValue() const { return (value_); }
+
+  private:
+    int value_;
+};
+
+class IVar : public ASTNode {
+  public:
+    virtual ~IVar() = default;
+    virtual void Accept(Visitor &visitor) = 0;
+    virtual const string GetName() const = 0;
+};
+
+class Var : public IVar {
   public:
     explicit Var(const shared_ptr<Token> &token) : name_(token->GetValue()) {}
     explicit Var(const string &name) : name_(name) {}
     virtual ~Var() = default;
     void Accept(Visitor &visitor) override;
-    const string GetName() const { return name_; }
+    virtual const string GetName() const override { return name_; }
 
   private:
     string name_;
 };
 
-class Type : public ASTNode {
+class IType : public ASTNode {
+  public:
+    virtual ~IType() = default;
+    virtual void Accept(Visitor &visitor) = 0;
+    virtual const string GetType() const = 0;
+};
+
+class Type : public IType {
   public:
     Type(const shared_ptr<Token> &token) : type_(token->GetValue()) {}
     virtual ~Type() = default;
     void Accept(Visitor &visitor) override;
-    const string GetType() const { return type_; }
+    const string GetType() const override { return type_; }
 
   private:
     string type_;
 };
 
-class ConstType : public ASTNode {
+class ConstType : public IType {
   public:
     ConstType(const shared_ptr<Token> &token) : type_(token->GetValue()) {}
     virtual ~ConstType() = default;
     void Accept(Visitor &visitor) override;
-    const string GetType() const { return type_; }
+    const string GetType() const override { return type_; }
 
   private:
     string type_;
@@ -136,14 +168,14 @@ class ConstDeclaration : public ASTNode {
     shared_ptr<ConstType> type_node_;
 };
 
-class ArrayType : public ASTNode {
+class ArrayType : public IType {
   public:
     ArrayType(const shared_ptr<Type> &type,
               vector<std::pair<int, int>> const bounds)
         : type_(type), bounds_(bounds) {}
     virtual ~ArrayType() = default;
     void Accept(Visitor &visitor) override;
-    const shared_ptr<Type> &GetType() const { return type_; }
+    const string GetType() const override { return type_->GetType(); }
     const std::vector<std::pair<int, int>> &GetBounds() const {
         return bounds_;
     }
@@ -153,12 +185,12 @@ class ArrayType : public ASTNode {
     vector<std::pair<int, int>> bounds_;
 };
 
-class Array : public ASTNode {
+class Array : public IVar {
   public:
     Array(const shared_ptr<Var> &var) : var_(var) {}
     virtual ~Array() = default;
     void Accept(Visitor &visitor) override;
-    const string GetName() const { return var_->GetName(); }
+    const string GetName() const override { return var_->GetName(); }
     const shared_ptr<Var> &GetVarNode() const { return var_; }
 
   private:
@@ -180,20 +212,37 @@ class ArrayDeclaration : public ASTNode {
     shared_ptr<ArrayType> type_node_;
 };
 
+// Access array member values by indes
+class ArrayAccess : public IVar {
+  public:
+    ArrayAccess(const shared_ptr<Array> &array,
+                const vector<shared_ptr<Num>> &indices)
+        : array_(array), indices_(indices) {}
+    virtual ~ArrayAccess() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<Array> &GetArray() const { return array_; }
+    const vector<shared_ptr<Num>> &GetIndices() const { return indices_; }
+    const string GetName() const override { return array_->GetName(); }
+
+  private:
+    shared_ptr<Array> array_;
+    vector<shared_ptr<Num>> indices_;
+};
+
 class Argument : public ASTNode {
   public:
-    Argument(const shared_ptr<Var> &variable, const shared_ptr<Type> &type,
-             bool is_reference = false)
+    explicit Argument(const shared_ptr<IVar> &variable,
+                      const shared_ptr<IType> &type, bool is_reference = false)
         : variable_(variable), type_(type), is_reference_(is_reference) {}
     virtual ~Argument() = default;
     void Accept(Visitor &visitor) override;
-    const shared_ptr<Var> &GetVariable() const { return variable_; }
-    const shared_ptr<Type> &GetType() const { return type_; }
+    const shared_ptr<IVar> &GetVariable() const { return variable_; }
+    const shared_ptr<IType> &GetType() const { return type_; }
     const bool IsReference() const { return is_reference_; }
 
   private:
-    shared_ptr<Var> variable_;
-    shared_ptr<Type> type_;
+    shared_ptr<IVar> variable_;
+    shared_ptr<IType> type_;
     bool is_reference_;
 };
 
@@ -261,18 +310,6 @@ class Assignment : public ASTNode {
   private:
     shared_ptr<ASTNode> left_;
     shared_ptr<ASTNode> right_;
-};
-
-class Num : public ASTNode {
-  public:
-    Num(const shared_ptr<Token> &token)
-        : value_(std::stoi(token->GetValue())) {}
-    virtual ~Num() = default;
-    void Accept(Visitor &visitor) override;
-    int GetValue() const { return (value_); }
-
-  private:
-    int value_;
 };
 
 // Operators, like '+', '-', etc.

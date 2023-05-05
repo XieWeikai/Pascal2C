@@ -8,8 +8,6 @@
 
 namespace pascal2c {
 namespace code_generation {
-using ::testing::_;
-using ::testing::AtLeast;
 using ::testing::Return;
 
 TEST(SymbolTableTest, MockSymbolTableTest) {
