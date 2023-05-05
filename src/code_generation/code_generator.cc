@@ -31,10 +31,9 @@ void CodeGenerator::VisitArgument(const shared_ptr<Argument> &node) {
         ostream_ << "/* Is Reference */";
     }
     Visit(node->GetType());
-    if (node->IsReference()) {
-        ostream_ << "*";
-    }
     ostream_ << " ";
+    // When visiting variable, will lookup variable in Symbol table, and add '*'
+    // if variable is passed-by-reference or is a pointer
     Visit(node->GetVariable());
 }
 
@@ -57,13 +56,14 @@ void CodeGenerator::VisitSubprogram(const shared_ptr<Subprogram> &node) {
     // Store parent scope name, return to this scope after visiting
     // subprogram.
     string parent_scope_name = GetCurrentScope();
+    SetCurrentScope(node->GetName());
 
     ostream_ << Indent() << "void " << node->GetName() << "(";
     for (auto i = 0; i < node->GetArgs().size(); i++) {
         const auto &arg = node->GetArgs().at(i);
         Visit(arg);
         if (i < node->GetArgs().size() - 1) {
-            ostream_ << ",";
+            ostream_ << ", ";
         }
     }
     ostream_ << ") {\n";
@@ -78,6 +78,7 @@ void CodeGenerator::VisitSubprogram(const shared_ptr<Subprogram> &node) {
 void CodeGenerator::VisitFunction(const shared_ptr<Function> &node) {
     // Get parent symbol scope name for returning after visiting function
     string parent_scope_name = GetCurrentScope();
+    SetCurrentScope(node->GetName());
 
     ostream_ << node->GetReturnType() << ' ' << node->GetName() << '(';
     for (int i = 0; i < node->GetArgs().size(); i++) {
@@ -130,6 +131,13 @@ void CodeGenerator::VisitVarDecl(
 
 void CodeGenerator::VisitArrayType(const shared_ptr<ArrayType> &node) {
     ostream_ << SymbolToC(node->GetType());
+    // Array bounds
+    auto bounds = node->GetBounds();
+    auto dims = bounds.size();
+    for (auto i = 0; i < dims; i++) {
+        auto b = bounds.at(i);
+        ostream_ << '[' << (b.second - b.first + 1) << ']';
+    }
 }
 
 void CodeGenerator::VisitArray(const shared_ptr<Array> &node) {
