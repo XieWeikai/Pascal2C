@@ -129,18 +129,18 @@ namespace pascal2c::parser {
     }
 
     std::shared_ptr<ast::Expression> Parser::ParseExpr(int prec) {
-        INIT_PARSE(line_,column_);
         auto lhs = ParsePrimary();
         int op = token_;
         int precedence = binary_prec[op];
         while(precedence >= prec){
             NextToken();
             auto rhs = ParseExpr(precedence + 1);
+            int tmp_line = lhs->line(), tmp_column = lhs->column();
             lhs = std::make_shared<ast::BinaryExpr>(op,lhs,rhs);
+            lhs->SetLineAndColumn(tmp_line, tmp_column);
             op = token_;
             precedence = binary_prec[op];
         }
-        lhs->SetLineAndColumn(begin_line,begin_column);
         return std::move(lhs);
     }
 
