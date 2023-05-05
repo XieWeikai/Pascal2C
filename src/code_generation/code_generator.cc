@@ -54,6 +54,10 @@ void CodeGenerator::VisitProgram(
 }
 
 void CodeGenerator::VisitSubprogram(const shared_ptr<Subprogram> &node) {
+    // Store parent scope name, return to this scope after visiting
+    // subprogram.
+    string parent_scope_name = GetCurrentScope();
+
     ostream_ << Indent() << "void " << node->GetName() << "(";
     for (auto i = 0; i < node->GetArgs().size(); i++) {
         const auto &arg = node->GetArgs().at(i);
@@ -67,9 +71,14 @@ void CodeGenerator::VisitSubprogram(const shared_ptr<Subprogram> &node) {
     Visit(node->GetBlock());
     DecIndent();
     ostream_ << Indent() << "}\n";
+    // Return to parent symbol scope
+    SetCurrentScope(parent_scope_name);
 }
 
 void CodeGenerator::VisitFunction(const shared_ptr<Function> &node) {
+    // Get parent symbol scope name for returning after visiting function
+    string parent_scope_name = GetCurrentScope();
+
     ostream_ << node->GetReturnType() << ' ' << node->GetName() << '(';
     for (int i = 0; i < node->GetArgs().size(); i++) {
         const auto &arg = node->GetArgs().at(i);
@@ -83,6 +92,8 @@ void CodeGenerator::VisitFunction(const shared_ptr<Function> &node) {
     Visit(node->GetBlock());
     DecIndent();
     ostream_ << Indent() << "}\n";
+    // Return to parent scope
+    SetCurrentScope(parent_scope_name);
 }
 
 void CodeGenerator::VisitBlock(const shared_ptr<code_generation::Block> &node) {
@@ -162,6 +173,9 @@ void CodeGenerator::VisitAssign(
 }
 
 void CodeGenerator::VisitVar(const shared_ptr<code_generation::Var> &node) {
+    if (IsReferenceArg(node)) {
+        ostream_ << "*";
+    }
     ostream_ << node->GetName();
 }
 
@@ -238,6 +252,10 @@ void CodeGenerator::VisitForStatement(const shared_ptr<ForStatement> &node) {
     Visit(node->GetBody());
     DecIndent();
     ostream_ << Indent() << "}\n";
+}
+
+bool CodeGenerator::IsReferenceArg(const shared_ptr<Var> &node) const {
+    return symbol_table_->IsReference(node->GetName());
 }
 
 const string CodeGenerator::Indent() const {

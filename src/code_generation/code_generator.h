@@ -18,7 +18,8 @@ using ::std::shared_ptr;
 
 class CodeGenerator : Visitor {
   public:
-    CodeGenerator() : indent_level_(0), type_tool_kit_() {}
+    CodeGenerator(const shared_ptr<ISymbolTable> &symbol_table = nullptr)
+        : indent_level_(0), type_tool_kit_(), symbol_table_(symbol_table) {}
     void Interpret(const shared_ptr<ASTRoot> &node);
     const string GetCCode() const;
 
@@ -53,8 +54,24 @@ class CodeGenerator : Visitor {
     virtual void
     VisitForStatement(const shared_ptr<ForStatement> &node) override;
 
+    // Get Symbol Table's current scope name
+    const string GetCurrentScope() const {
+        return symbol_table_->GetCurrentScope();
+    }
+
+    // Set symbol table's current scope by name
+    void SetCurrentScope(const string &scope_name) const {
+        symbol_table_->SetCurrentScope(scope_name);
+    }
+
+    // Is this var passed-by-reference or passed-by-value in current scope
+    bool IsReferenceArg(const shared_ptr<Var> &node) const;
+
+    // Get current indent blank string based on current indent level
     const string Indent() const;
+    // Increase indent level
     void IncIndent();
+    // Decrease indent level
     void DecIndent();
     const string SymbolToC(const string &pascal_type) const;
     const string eol_ = ";\n";

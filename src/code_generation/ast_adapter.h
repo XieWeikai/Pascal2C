@@ -58,7 +58,8 @@ class Declaration : public ASTNode {
 class Block : public ASTNode {
   public:
     Block(shared_ptr<Compound> &compound_statement)
-        : declarations_(), compound_statement_(compound_statement) {}
+        : declarations_(std::make_shared<Declaration>()),
+          compound_statement_(compound_statement) {}
     Block(const shared_ptr<Declaration> &declarations,
           const shared_ptr<Compound> &compound_statement)
         : declarations_(declarations), compound_statement_(compound_statement) {
