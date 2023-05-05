@@ -31,6 +31,19 @@ void CodeGenerator::VisitArgument(const shared_ptr<Argument> &node) {
         ostream_ << "/* Is Reference */";
     }
     Visit(node->GetType());
+
+    // Generate array bounds code if type is ArrayType
+    auto array_type = dynamic_pointer_cast<ArrayType>(node->GetType());
+    if (array_type) {
+        // Array bounds
+        auto bounds = array_type->GetBounds();
+        auto dims = bounds.size();
+        for (auto i = 0; i < dims; i++) {
+            auto b = bounds.at(i);
+            ostream_ << '[' << (b.second - b.first + 1) << ']';
+        }
+    }
+
     ostream_ << " ";
     // When visiting variable, will lookup variable in Symbol table, and add '*'
     // if variable is passed-by-reference or is a pointer
@@ -131,13 +144,6 @@ void CodeGenerator::VisitVarDecl(
 
 void CodeGenerator::VisitArrayType(const shared_ptr<ArrayType> &node) {
     ostream_ << SymbolToC(node->GetType());
-    // Array bounds
-    auto bounds = node->GetBounds();
-    auto dims = bounds.size();
-    for (auto i = 0; i < dims; i++) {
-        auto b = bounds.at(i);
-        ostream_ << '[' << (b.second - b.first + 1) << ']';
-    }
 }
 
 void CodeGenerator::VisitArray(const shared_ptr<Array> &node) {

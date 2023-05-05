@@ -19,14 +19,14 @@ class SubprogramTest : public ::testing::Test {
         subprogram_name_ = "test_subprogram";
 
         // Set args for subprogram
-        auto var_by_reference = make_shared<Var>(
+        var_by_reference = make_shared<Var>(
             make_shared<Token>(TokenType::IDENTIFIER, "by_reference"));
         auto type_by_reference = make_shared<Type>(
             make_shared<Token>(TokenType::RESERVED, "integer"));
         auto arg_by_reference =
             make_shared<Argument>(var_by_reference, type_by_reference, true);
 
-        auto var_by_value = make_shared<Var>(
+        var_by_value = make_shared<Var>(
             make_shared<Token>(TokenType::IDENTIFIER, "by_value"));
         auto array_by_value = make_shared<Array>(var_by_value);
         auto type_by_value = make_shared<Type>(
@@ -63,11 +63,14 @@ class SubprogramTest : public ::testing::Test {
         subprogram_ = make_shared<Subprogram>(subprogram_name_, args, body);
     }
 
+    shared_ptr<Var> var_by_reference;
+    shared_ptr<Var> var_by_value;
     string expected_ccode_ =
-        R"(void test_subprogram(/* Is Reference */int *by_reference, int[] by_value) {
+        R"(void test_subprogram(/* Is Reference */int *by_reference, int[3] by_value) {
     *by_reference = (by_value * 1);
     by_value[3] = 5;
-})";
+}
+)";
     string subprogram_name_;
     shared_ptr<Subprogram> subprogram_;
 };
@@ -78,7 +81,12 @@ TEST_F(SubprogramTest, SubprogramDeclaration) {
     auto s_scope = make_shared<SymbolScopeMock>();
     EXPECT_CALL(*s_table, GetCurrentScope()).WillOnce(Return("global"));
     EXPECT_CALL(*s_table, SetCurrentScope(subprogram_name_));
+    EXPECT_CALL(*s_table, SetCurrentScope("global"));
     CodeGenerator cg(s_table);
+    EXPECT_CALL(*s_table, IsReference(var_by_reference->GetName()))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*s_table, IsReference(var_by_value->GetName()))
+        .WillRepeatedly(Return(false));
     cg.Interpret(subprogram_);
     auto code = cg.GetCCode();
     cout << code << endl;
