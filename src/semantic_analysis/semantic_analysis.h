@@ -24,8 +24,8 @@ namespace analysiser{
     void BlockExit();
     void BlockIn(std::string name);
     void DoProgram(pascal2c::ast::Program x);
-    symbol_table::ItemType MaxType(symbol_table::ItemType x, symbol_table::ItemType y);
-    symbol_table::ItemType GetExprType(std::shared_ptr<pascal2c::ast::Expression> x);
+    symbol_table::MegaType MaxType(symbol_table::MegaType x,symbol_table::MegaType y);
+    symbol_table::MegaType GetExprType(std::shared_ptr<pascal2c::ast::Expression> x);
     symbol_table::ItemType BasicToType(int basic_type);
     symbol_table::SymbolTableItem ExprToItem(std::string name, std::shared_ptr<pascal2c::ast::Expression> x);
     std::vector<symbol_table::SymbolTablePara> TypeToPara(pascal2c::ast::Type type);

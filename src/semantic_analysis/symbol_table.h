@@ -62,24 +62,33 @@ namespace symbol_table{
     class MegaType
     {
         public:
-        MegaType(){}
+        MegaType():pointer_(std::vector<std::string>()){}
         MegaType(symbol_table::ItemType typein):
-            type_(typein),pointer_(0){}
-        MegaType(symbol_table::ItemType typein,int pointerin):
+            type_(typein),pointer_(std::vector<std::string>()){}
+        MegaType(symbol_table::ItemType typein,std::vector<std::string> pointerin):
             type_(typein),pointer_(pointerin){}
         symbol_table::ItemType type()const{return type_;}
-        int pointer()const{return pointer_;}
+        std::vector<std::string> pointer()const{return pointer_;}
         void settype(symbol_table::ItemType newtype){type_=newtype;}
-        void setpointer(int pointerin){pointer_=pointerin;}
+        void setpointer(std::vector<std::string> pointerin){pointer_=pointerin;}
+        void addpointer(std::string inp){pointer_.push_back(inp);}
         friend istream& operator>>(istream& IN,MegaType& x)
         {
-            IN>>x.type_>>x.pointer_;
+            IN>>x.type_;
+            for(int i=0;i<x.pointer_.size();i++)
+                IN>>x.pointer_[i];
             return IN;
         }
         friend ostream& operator<<(ostream& OUT,const MegaType& x)
         {
             OUT<<x.type_;
-            for (int i=0;i<x.pointer_;i++) OUT<<'*';
+            if(x.pointer_.size()!=0)    OUT<<"[";
+            for (int i=0;i<x.pointer_.size();i++)
+            {
+                if(i!=0)    OUT<<",";
+                OUT<<x.pointer_[i];
+            }
+            if(x.pointer_.size()!=0)    OUT<<"]";
             return OUT;
         }
         MegaType operator=(const ItemType &x){return MegaType(x);}
@@ -87,7 +96,7 @@ namespace symbol_table{
         friend bool operator==(const MegaType &A,const MegaType &B){return A.type_==B.type_ && A.pointer_==B.pointer_;}
         friend bool operator!=(const MegaType &A,const MegaType &B){return !(A==B);}
         private:
-        int pointer_;
+        std::vector<std::string> pointer_;
         symbol_table::ItemType type_;
     };
 	class SymbolTablePara{
@@ -95,7 +104,8 @@ namespace symbol_table{
 		SymbolTablePara(){}
 		SymbolTablePara(ItemType type, bool is_var,std::string info=""):
 			type_(type), is_var_(is_var), info_(info){}
-			
+		SymbolTablePara(MegaType type, bool is_var,std::string info=""):
+			type_(type), is_var_(is_var), info_(info){}	
 		MegaType type()const{return type_;}
         bool is_var()const{return is_var_;}
         std::string info()const{return info_;}

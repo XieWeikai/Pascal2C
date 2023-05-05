@@ -50,8 +50,13 @@ saERRORS::ERROR_TYPE SymbolTableBlock::Query(SymbolTableItem &x)
 				auto temp=nw->table[name].begin();
 				int P=temp->para().size(),Q=x.para().size();
 				if (P<Q) return saERRORS::FOUND_BUT_NOT_MATCH;//variable:too long parameter
-				for (auto &o:x.para()) if (o.type()!=MegaType(ItemType::INT,0)) return saERRORS::FOUND_BUT_NOT_MATCH;//expect int but other
-				x=SymbolTableItem(MegaType(temp->type().type(),P-Q),temp->name(),temp->is_var(),temp->is_func(),temp->para());
+				for (auto &o:x.para()) if (o.type()!=MegaType(ItemType::INT)) return saERRORS::FOUND_BUT_NOT_MATCH;//expect int but other
+				MegaType ty=MegaType(temp->type().type());
+				for(int i=0;i<P-Q;i++)
+				{
+					ty.addpointer(temp->para()[i].info());
+				}
+				x=SymbolTableItem(ty,temp->name(),temp->is_var(),temp->is_func(),temp->para());
 				return saERRORS::NO_ERROR;
 			}
 			auto temp=nw->table[name].find(x);
