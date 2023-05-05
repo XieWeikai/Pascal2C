@@ -91,11 +91,11 @@ class FunctionTest : public ::testing::Test {
 
     string expected_ccode_ =
         R"(char test_function(int[3][10] by_value, /* Is Reference */char *by_reference) {
-    char test_function;/* Auto Generated */
+    char ret_test_function;/* Auto Generated */
     *by_reference = (by_value[5][9] + by_value[0][19]);
     by_value[3][4] = 5;
-    test_function = by_value[3][4];
-    return test_function;/* Auto Generated */
+    ret_test_function = by_value[3][4];
+    return ret_test_function;/* Auto Generated */
 }
 )";
 
@@ -116,6 +116,12 @@ TEST_F(FunctionTest, FunctionDeclarationTest) {
     EXPECT_CALL(*s_table, IsReference(var_by_reference->GetName()))
         .WillRepeatedly(Return(true));
     EXPECT_CALL(*s_table, IsReference(var_by_value->GetName()))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(*s_table, IsReturnVar(function_name_))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*s_table, IsReturnVar(var_by_reference->GetName()))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(*s_table, IsReturnVar(var_by_value->GetName()))
         .WillRepeatedly(Return(false));
     cg.Interpret(function_);
     auto code = cg.GetCCode();
