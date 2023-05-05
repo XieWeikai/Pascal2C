@@ -1,4 +1,5 @@
 #include "code_generation/ast_adapter.h"
+#include "code_generation/code_generator.h"
 #include "code_generation/token_adapter.h"
 #include "gtest/gtest.h"
 #include <memory>
@@ -7,7 +8,7 @@
 using namespace pascal2c::code_generation;
 using namespace std;
 
-class SubprogramTest : ::testing::Test {
+class SubprogramTest : public ::testing::Test {
   protected:
     void SetUp() override {
         // Set name of subprogram
@@ -62,3 +63,11 @@ class SubprogramTest : ::testing::Test {
 })";
     shared_ptr<Subprogram> subprogram_;
 };
+
+TEST_F(SubprogramTest, SubprogramDeclaration) {
+    CodeGenerator cg;
+    cg.Interpret(subprogram_);
+    auto code = cg.GetCCode();
+    cout << code << endl;
+    ASSERT_EQ(code, expected_ccode_);
+}
