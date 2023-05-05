@@ -28,9 +28,9 @@ class FunctionTest : public ::testing::Test {
             make_shared<Token>(TokenType::IDENTIFIER, "by_value"));
         auto array_by_value = make_shared<Array>(var_by_value);
         auto type_by_value =
-            make_shared<Type>(make_shared<Token>(TokenType::RESERVED, "char"));
+            make_shared<Type>(make_shared<Token>(TokenType::RESERVED, "int"));
         auto array_bounds_by_value =
-            std::vector<pair<int, int>>{make_pair(3, 5), make_pair(7, 9)};
+            std::vector<pair<int, int>>{make_pair(3, 5), make_pair(7, 16)};
         auto array_type_by_value =
             make_shared<ArrayType>(type_by_value, array_bounds_by_value);
         auto arg_by_value =
@@ -45,13 +45,14 @@ class FunctionTest : public ::testing::Test {
         // *by_reference = (by_value[5][9] + by_value[0][19]);
         // by_value[5][9]
         auto array_access_by_value_5_9 = make_shared<ArrayAccess>(
-            arg_by_value,
+            array_by_value,
             std::vector<shared_ptr<Num>>{
                 make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "5")),
                 make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "9"))});
         // by_value[0][19]
-        auto array_access_by_value_0_19 =
-            make_shared<ArrayAccess>(std::vector<shared_ptr<Num>>{
+        auto array_access_by_value_0_19 = make_shared<ArrayAccess>(
+            array_by_value,
+            std::vector<shared_ptr<Num>>{
                 make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "0")),
                 make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "19"))});
         // BinaryOperation
@@ -65,7 +66,7 @@ class FunctionTest : public ::testing::Test {
 
         // by_value[3][4] = 5;
         auto array_access_by_value_3_4 = make_shared<ArrayAccess>(
-            arg_by_value,
+            array_by_value,
             std::vector<shared_ptr<Num>>{
                 make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "3")),
                 make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "4"))});
@@ -76,10 +77,16 @@ class FunctionTest : public ::testing::Test {
         // test_function = by_value[3][4];
         auto var_return = make_shared<Var>(
             make_shared<Token>(TokenType::IDENTIFIER, function_name_));
+        auto assign_return =
+            make_shared<Assignment>(var_return, array_access_by_value_3_4);
         compound->AddChild(assign_by_reference);
         compound->AddChild(assign_by_value);
+        compound->AddChild(assign_return);
         auto body = make_shared<Block>(compound);
-        function_ = make_shared<Function>(function_name_, args, body);
+        function_ = make_shared<Function>(
+            function_name_,
+            make_shared<Type>(make_shared<Token>(TokenType::RESERVED, "char")),
+            args, body);
     }
 
     string expected_ccode_ =
@@ -97,3 +104,21 @@ class FunctionTest : public ::testing::Test {
     string function_name_;
     shared_ptr<Function> function_;
 };
+
+TEST_F(FunctionTest, FunctionDeclarationTest) {
+    auto s_table = make_shared<SymbolTableMock>();
+    EXPECT_CALL(*s_table, GetCurrentScope()).WillOnce(Return("global"));
+    EXPECT_CALL(*s_table, SetCurrentScope(function_name_));
+    EXPECT_CALL(*s_table, SetCurrentScope("global"));
+    CodeGenerator cg(s_table);
+    EXPECT_CALL(*s_table, IsReference(function_name_))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(*s_table, IsReference(var_by_reference->GetName()))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*s_table, IsReference(var_by_value->GetName()))
+        .WillRepeatedly(Return(false));
+    cg.Interpret(function_);
+    auto code = cg.GetCCode();
+    cout << code << endl;
+    ASSERT_EQ(code, expected_ccode_);
+}
