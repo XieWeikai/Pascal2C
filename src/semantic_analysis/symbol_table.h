@@ -19,6 +19,20 @@ namespace symbol_table{
 		REAL,
         STRING
 	};
+    class MegaType
+    {
+        public:
+        MegaType(){}
+        MegaType(symbol_table::ItemType typein,int pointerin):
+            type_(typein),pointer_(pointerin){}
+        symbol_table::ItemType type()const{return type_;}
+        int pointer()const{return pointer_;}
+        void settype(symbol_table::ItemType newtype){type_=newtype;}
+        void setpointer(int pointerin){pointer_=pointerin;}
+        private:
+        int pointer_;
+        symbol_table::ItemType type_;
+    };
 	static istream& operator>>(istream& IN,ItemType& x)
     {
         std::string s;IN>>s;
