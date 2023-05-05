@@ -15,11 +15,11 @@ saERRORS::ERROR_TYPE SymbolTableBlock::AddItem(const SymbolTableItem &x)
 	std::string name=x.name();
 	if (this->name_domain.find(name)==this->name_domain.end())
 	{
-		this->name_domain[name]=x.is_func();
+		this->name_domain[name]=x.is_func()&(!x.is_var());
 		this->table[name].insert(x);
 		return saERRORS::NO_ERROR;
 	}
-	bool A=this->name_domain[name],B=x.is_func();
+	bool A=this->name_domain[name],B=x.is_func()&(!x.is_var());
 	if (A!=B) return saERRORS::ITEM_ERROR;//it is a var not func
 	if (!A) return saERRORS::ITEM_EXIST;//var redefinition
 	if (this->table[name].find(x)!=this->table[name].end()) return saERRORS::ITEM_EXIST;//func redefinition
@@ -43,8 +43,16 @@ saERRORS::ERROR_TYPE SymbolTableBlock::Query(SymbolTableItem &x)
 	{
 		if (nw->name_domain.find(name)!=nw->name_domain.end())
 		{
-			bool A=nw->name_domain[name],B=x.is_func();
-			if (A!=B) return saERRORS::FOUND_BUT_NOT_FUNCTION;//func and variable dismatch
+			bool A=nw->name_domain[name],B=x.is_func()&(!x.is_var());
+			if (A!=B)
+			{
+				if(!A&&nw->table[name].begin()->is_func()==true)
+				{
+					continue;
+				}
+					
+				return saERRORS::FOUND_BUT_NOT_FUNCTION;//func and variable dismatch
+			}
 			if (!A)//variable
 			{
 				auto temp=nw->table[name].begin();
@@ -64,6 +72,7 @@ saERRORS::ERROR_TYPE SymbolTableBlock::Query(SymbolTableItem &x)
 			{
 				if (!isadapt(x.para(),temp->para())) return saERRORS::FOUND_BUT_PARA_NOT_MATCH;
 				x=*temp;
+				if(x.is_var())	x.setIsVar();
 				return saERRORS::NO_ERROR;
 			}
 			else return saERRORS::FOUND_BUT_NOT_MATCH;

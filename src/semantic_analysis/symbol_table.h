@@ -149,6 +149,8 @@ namespace symbol_table{
         std::string name()const{return name_;}
         MegaType type()const{return type_;}
         void settype(MegaType newtype){type_=newtype;}
+        void setIsVar(){is_var_=!is_var_;}
+        void setIsFunc(){is_func_=!is_func_;}
         bool is_var()const{return is_var_;}
         bool is_func()const{return is_func_;}
 		std::vector<SymbolTablePara> para()const{return para_;}
