@@ -44,15 +44,15 @@ saERRORS::ERROR_TYPE SymbolTableBlock::Query(SymbolTableItem &x)
 		if (nw->name_domain.find(name)!=nw->name_domain.end())
 		{
 			bool A=nw->name_domain[name],B=x.is_func();
-			if (A!=B) return saERRORS::FOUND_BUT_NOT_MATCH;//func and variable dismatch
+			if (A!=B) return saERRORS::FOUND_BUT_NOT_FUNCTION;//func and variable dismatch
 			if (!A)//variable
 			{
 				auto temp=nw->table[name].begin();
 				int P=temp->para().size(),Q=x.para().size();
-				if (P<Q) return saERRORS::FOUND_BUT_NOT_MATCH;//variable:too long parameter
-				for (auto &o:x.para()) if (o.type()!=MegaType(ItemType::INT)) return saERRORS::FOUND_BUT_NOT_MATCH;//expect int but other
+				if (P<Q) return saERRORS::FOUND_BUT_PARA_NOT_MATCH;//variable:too long parameter
+				for (auto &o:x.para()) if (o.type()!=MegaType(ItemType::INT)) return saERRORS::FOUND_BUT_TYPE_NOT_MATCH;//expect int but other
 				MegaType ty=MegaType(temp->type().type());
-				for(int i=0;i<P-Q;i++)
+				for(int i=Q;i<P;i++)
 				{
 					ty.addpointer(temp->para()[i].info());
 				}
@@ -62,7 +62,7 @@ saERRORS::ERROR_TYPE SymbolTableBlock::Query(SymbolTableItem &x)
 			auto temp=nw->table[name].find(x);
 			if (temp!=nw->table[name].end())
 			{
-				if (!isadapt(x.para(),temp->para())) return saERRORS::FOUND_BUT_NOT_MATCH;
+				if (!isadapt(x.para(),temp->para())) return saERRORS::FOUND_BUT_PARA_NOT_MATCH;
 				x=*temp;
 				return saERRORS::NO_ERROR;
 			}

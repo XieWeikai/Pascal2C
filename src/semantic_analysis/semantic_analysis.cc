@@ -535,7 +535,7 @@ namespace analysiser{
         symbol_table::SymbolTableItem now=SubprogramToItem(x);
         if(now.type()!=symbol_table::VOID)
         {
-            symbol_table::SymbolTableItem nownext(BasicToType(x.return_type()),x.id(),true,false,std::vector<symbol_table::SymbolTablePara>());
+            symbol_table::SymbolTableItem nownext(BasicToType(x.return_type()),x.id(),true,true,std::vector<symbol_table::SymbolTablePara>());
             saERRORS::ERROR_TYPE err=Insert(nownext);
             if(err!=saERRORS::NO_ERROR)
             {
