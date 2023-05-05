@@ -19,20 +19,6 @@ namespace symbol_table{
 		REAL,
         STRING
 	};
-    class MegaType
-    {
-        public:
-        MegaType(){}
-        MegaType(symbol_table::ItemType typein,int pointerin):
-            type_(typein),pointer_(pointerin){}
-        symbol_table::ItemType type()const{return type_;}
-        int pointer()const{return pointer_;}
-        void settype(symbol_table::ItemType newtype){type_=newtype;}
-        void setpointer(int pointerin){pointer_=pointerin;}
-        private:
-        int pointer_;
-        symbol_table::ItemType type_;
-    };
 	static istream& operator>>(istream& IN,ItemType& x)
     {
         std::string s;IN>>s;
@@ -73,13 +59,44 @@ namespace symbol_table{
         }
         return OUT;
     }
+    class MegaType
+    {
+        public:
+        MegaType(){}
+        MegaType(symbol_table::ItemType typein):
+            type_(typein),pointer_(0){}
+        MegaType(symbol_table::ItemType typein,int pointerin):
+            type_(typein),pointer_(pointerin){}
+        symbol_table::ItemType type()const{return type_;}
+        int pointer()const{return pointer_;}
+        void settype(symbol_table::ItemType newtype){type_=newtype;}
+        void setpointer(int pointerin){pointer_=pointerin;}
+        friend istream& operator>>(istream& IN,MegaType& x)
+        {
+            IN>>x.type_>>x.pointer_;
+            return IN;
+        }
+        friend ostream& operator<<(ostream& OUT,const MegaType& x)
+        {
+            OUT<<x.type_;
+            for (int i=0;i<x.pointer_;i++) OUT<<'*';
+            return OUT;
+        }
+        MegaType operator=(const ItemType &x){return MegaType(x);}
+        friend bool operator<(const MegaType &A,const MegaType &B){return A.type_==B.type_ ? A.pointer_<B.pointer_ :A.type_<B.type_;}
+        friend bool operator==(const MegaType &A,const MegaType &B){return A.type_==B.type_ && A.pointer_==B.pointer_;}
+        friend bool operator!=(const MegaType &A,const MegaType &B){return !(A==B);}
+        private:
+        int pointer_;
+        symbol_table::ItemType type_;
+    };
 	class SymbolTablePara{
 	public:
 		SymbolTablePara(){}
 		SymbolTablePara(ItemType type, bool is_var,std::string info=""):
 			type_(type), is_var_(is_var), info_(info){}
 			
-		ItemType type()const{return type_;}
+		MegaType type()const{return type_;}
         bool is_var()const{return is_var_;}
         std::string info()const{return info_;}
         friend bool operator<(const SymbolTablePara &A,const SymbolTablePara &B){return A.type_<B.type_;};
@@ -105,7 +122,7 @@ namespace symbol_table{
             return OUT;
         }
 	private:
-		ItemType type_;
+		MegaType type_;
         bool is_var_;
         std::string info_;
 	};
@@ -114,12 +131,14 @@ namespace symbol_table{
     class SymbolTableItem{
     public:
         SymbolTableItem(){}
+		SymbolTableItem(MegaType type, std::string name, bool is_var, bool is_func, std::vector<SymbolTablePara> para):
+			type_(type), name_(name), is_var_(is_var), is_func_(is_func), para_(para){}
 		SymbolTableItem(ItemType type, std::string name, bool is_var, bool is_func, std::vector<SymbolTablePara> para):
 			type_(type), name_(name), is_var_(is_var), is_func_(is_func), para_(para){}
 		
         std::string name()const{return name_;}
-        ItemType type()const{return type_;}
-        void settype(ItemType newtype){type_=newtype;}
+        MegaType type()const{return type_;}
+        void settype(MegaType newtype){type_=newtype;}
         bool is_var()const{return is_var_;}
         bool is_func()const{return is_func_;}
 		std::vector<SymbolTablePara> para()const{return para_;}
@@ -147,7 +166,7 @@ namespace symbol_table{
             return OUT;
         }
     private:
-		ItemType type_;
+		MegaType type_;
         std::string name_;
         bool is_var_;
         bool is_func_;
