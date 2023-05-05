@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Define project name and version
-project(Pascal2C VERSION 1.1)
+project(Pascal2C VERSION 1.2)
 
 # Specify C++ version to 17
 set(CMAKE_CXX_STANDARD 17)
