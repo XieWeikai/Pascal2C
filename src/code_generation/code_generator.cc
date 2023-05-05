@@ -108,12 +108,14 @@ void CodeGenerator::VisitFunction(const shared_ptr<Function> &node) {
     ostream_ << ") {\n";
     IncIndent();
     // Declare return variable
-    ostream_ << Indent() << node->GetReturnType() << ' ' << node->GetName()
-             << ";/* Auto Generated */\n";
+    ostream_ << Indent() << node->GetReturnType() << ' ';
+    Visit(node->GetReturnVar());
+    ostream_ << ";/* Auto Generated */\n";
     Visit(node->GetBlock());
     // Return statement
-    ostream_ << Indent() << "return " << node->GetName()
-             << ";/* Auto Generated */\n";
+    ostream_ << Indent() << "return ";
+    Visit(node->GetReturnVar());
+    ostream_ << ";/* Auto Generated */\n";
     DecIndent();
     ostream_ << Indent() << "}\n";
     // Return to parent scope
@@ -199,6 +201,9 @@ void CodeGenerator::VisitAssign(
 void CodeGenerator::VisitVar(const shared_ptr<code_generation::Var> &node) {
     if (IsReferenceArg(node)) {
         ostream_ << "*";
+    }
+    if (IsReturnVar(node)) {
+        ostream_ << "ret_";
     }
     ostream_ << node->GetName();
 }
@@ -303,6 +308,10 @@ void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
 
 bool CodeGenerator::IsReferenceArg(const shared_ptr<Var> &node) const {
     return node->IsReference();
+}
+
+bool CodeGenerator::IsReturnVar(const shared_ptr<Var> &node) const {
+    return symbol_table_->IsReturnVar(node->GetName());
 }
 
 const string CodeGenerator::Indent() const {

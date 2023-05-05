@@ -71,6 +71,8 @@ class CodeGenerator : Visitor {
 
     // Is this var passed-by-reference or passed-by-value in current scope
     bool IsReferenceArg(const shared_ptr<Var> &node) const;
+    // Is return variable
+    bool IsReturnVar(const shared_ptr<Var> &node) const;
 
     // Get current indent blank string based on current indent level
     const string Indent() const;
