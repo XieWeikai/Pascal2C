@@ -286,7 +286,7 @@ void CodeGenerator::VisitForStatement(const shared_ptr<ForStatement> &node) {
     ostream_ << Indent() << "}\n";
 }
 
-void CodeGenerator::VisitCallStatement(const shared_ptr<CallStatement> &node) {
+void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
     ostream_ << Indent() << node->GetName() << "(";
     for (int i = 0; i < node->GetParameters().size(); i++) {
         auto p = node->GetParameters().at(i);

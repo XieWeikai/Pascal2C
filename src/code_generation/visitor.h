@@ -39,7 +39,7 @@ class Visitor {
     virtual void VisitStatement(const shared_ptr<Statement> &node) = 0;
     virtual void VisitIfStatement(const shared_ptr<IfStatement> &node) = 0;
     virtual void VisitForStatement(const shared_ptr<ForStatement> &node) = 0;
-    virtual void VisitCallStatement(const shared_ptr<CallStatement> &node) = 0;
+    virtual void VisitFunctionCall(const shared_ptr<FunctionCall> &node) = 0;
 };
 } // namespace code_generation
 } // namespace pascal2c

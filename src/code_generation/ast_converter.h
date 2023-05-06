@@ -49,6 +49,17 @@ class ASTConverter {
     const shared_ptr<Num>
     ConvertIntegerValue(const shared_ptr<ast::IntegerValue>);
     const shared_ptr<Real> ConvertRealValue(const shared_ptr<ast::RealValue>);
+    const shared_ptr<Char> ConvertCharValue(const shared_ptr<ast::CharValue>);
+    const shared_ptr<Num>
+    convertBooleanValue(const shared_ptr<ast::BooleanValue>);
+    const shared_ptr<Var> ConvertCallOrVar(const shared_ptr<ast::CallOrVar>);
+    const shared_ptr<FunctionCall>
+    ConvertCallValue(const shared_ptr<ast::CallValue>);
+    const shared_ptr<Var> ConvertVariable(const shared_ptr<ast::Variable>);
+    const shared_ptr<BinaryOperation>
+    ConvertBinaryExpr(const shared_ptr<ast::BinaryExpr>);
+    const shared_ptr<BinaryOperation>
+    ConvertUnaryExpr(const shared_ptr<ast::UnaryExpr>);
 
     shared_ptr<code_generation::ASTRoot> converted_ast_;
 };

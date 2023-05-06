@@ -445,13 +445,13 @@ class ForStatement : public ASTNode {
     shared_ptr<Compound> body_;
 };
 
-class CallStatement : public ASTNode {
+class FunctionCall : public ASTNode {
   public:
-    CallStatement(const string &name,
-                  const vector<shared_ptr<ASTNode>> parameters)
+    FunctionCall(const string &name,
+                 const vector<shared_ptr<ASTNode>> parameters)
         : name_(name), parameters_(std::move(parameters)) {}
-    CallStatement(const string &name) : name_(name), parameters_() {}
-    virtual ~CallStatement() = default;
+    FunctionCall(const string &name) : name_(name), parameters_() {}
+    virtual ~FunctionCall() = default;
     void Accept(Visitor &visitor) override;
     const string GetName() const { return name_; }
     const vector<shared_ptr<ASTNode>> &GetParameters() { return parameters_; }
