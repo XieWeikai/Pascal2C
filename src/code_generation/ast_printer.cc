@@ -150,6 +150,10 @@ void ASTPrinter::VisitNum(const shared_ptr<Num> &node) {
              << endl;
 }
 
+void ASTPrinter::VisitString(const shared_ptr<String> &node) {
+    ErrNotImplemented();
+}
+
 void ASTPrinter::VisitStatement(const shared_ptr<Statement> &node) {
     ErrNotImplemented();
 }

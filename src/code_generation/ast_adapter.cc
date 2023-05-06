@@ -99,6 +99,11 @@ void Num::Accept(Visitor &visitor) {
     visitor.VisitNum(dynamic_pointer_cast<Num>(shared_from_this()));
 }
 
+// String
+void String::Accept(Visitor &visitor) {
+    visitor.VisitString(dynamic_pointer_cast<String>(shared_from_this()));
+}
+
 // Type
 void Type::Accept(Visitor &visitor) {
     visitor.VisitType(dynamic_pointer_cast<Type>(shared_from_this()));

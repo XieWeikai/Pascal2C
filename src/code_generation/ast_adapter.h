@@ -91,6 +91,18 @@ class Num : public ASTNode {
     int value_;
 };
 
+class String : public ASTNode {
+  public:
+    String(const shared_ptr<Token> &token)
+        : value_(std::move(token->GetValue())) {}
+    virtual ~String() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetValue() const { return value_; };
+
+  private:
+    string value_;
+};
+
 class IVar : public ASTNode {
   public:
     virtual ~IVar() = default;
@@ -415,6 +427,7 @@ class CallStatement : public ASTNode {
                   const vector<shared_ptr<ASTNode>> parameters)
         : name_(name), parameters_(std::move(parameters)) {}
     CallStatement(const string &name) : name_(name), parameters_() {}
+    virtual ~CallStatement() = default;
     void Accept(Visitor &visitor) override;
     const string GetName() const { return name_; }
     const vector<shared_ptr<ASTNode>> &GetParameters() { return parameters_; }

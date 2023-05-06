@@ -28,6 +28,7 @@ class Visitor {
     virtual void VisitBinOp(const shared_ptr<BinaryOperation> &node) = 0;
     virtual void VisitOper(const shared_ptr<Oper> &node) = 0;
     virtual void VisitNum(const shared_ptr<Num> &node) = 0;
+    virtual void VisitString(const shared_ptr<String> &node) = 0;
     virtual void VisitType(const shared_ptr<Type> &node) = 0;
     virtual void VisitConstType(const shared_ptr<ConstType> &node) = 0;
     virtual void VisitAssign(const shared_ptr<Assignment> &node) = 0;

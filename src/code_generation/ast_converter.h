@@ -39,6 +39,12 @@ class ASTConverter {
     ConvertSubprogram(const shared_ptr<ast::Subprogram>);
     const shared_ptr<Assignment>
     ConvertAssignment(const shared_ptr<ast::AssignStatement>);
+    const shared_ptr<Compound>
+    ConvertCompoundStatement(const shared_ptr<ast::CompoundStatement>);
+    const shared_ptr<IfStatement>
+    ConvertIfStatement(const shared_ptr<ast::IfStatement>);
+    const shared_ptr<ForStatement>
+    ConvertForStatement(const shared_ptr<ast::ForStatement>);
 
     shared_ptr<code_generation::ASTRoot> converted_ast_;
 };

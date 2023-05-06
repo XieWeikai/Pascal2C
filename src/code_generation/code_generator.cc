@@ -228,7 +228,11 @@ void CodeGenerator::VisitOper(const shared_ptr<Oper> &node) {
     ostream_ << SymbolToC(node->GetOper());
 }
 
-void CodeGenerator::VisitNum(const shared_ptr<code_generation::Num> &node) {
+void CodeGenerator::VisitNum(const shared_ptr<Num> &node) {
+    ostream_ << node->GetValue();
+}
+
+void CodeGenerator::VisitString(const shared_ptr<String> &node) {
     ostream_ << node->GetValue();
 }
 
