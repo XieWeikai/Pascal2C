@@ -1,7 +1,7 @@
 #ifndef PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
-#include <algorithm>
 #pragma once
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <utility>
