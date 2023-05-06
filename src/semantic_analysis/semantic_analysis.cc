@@ -463,7 +463,7 @@ namespace analysiser{
     }
     void DoProgramHead(pascal2c::ast::ProgramHead x)
     {
-        BlockIn(x.id());
+        BlockIn(std::to_string(x.line()));
     }
     void DoProgramBody(pascal2c::ast::ProgramBody x)
     {
@@ -531,7 +531,7 @@ namespace analysiser{
     }
     symbol_table::SymbolTableItem DoSubprogramHead(pascal2c::ast::SubprogramHead x)
     {
-        BlockIn(x.id());
+        BlockIn(std::to_string(x.line()));
         symbol_table::SymbolTableItem now=SubprogramToItem(x);
         if(now.type()!=symbol_table::VOID)
         {
