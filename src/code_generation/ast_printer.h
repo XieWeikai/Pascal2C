@@ -52,6 +52,8 @@ class ASTPrinter : Visitor {
     virtual void VisitIfStatement(const shared_ptr<IfStatement> &node) override;
     virtual void
     VisitForStatement(const shared_ptr<ForStatement> &node) override;
+    virtual void
+    VisitCallStatement(const shared_ptr<CallStatement> &node) override;
 
     void ErrNotImplemented() const {
         throw std::runtime_error("Not implemented");

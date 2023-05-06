@@ -1,5 +1,6 @@
 #ifndef PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
+#include <algorithm>
 #pragma once
 #include <memory>
 #include <string>
@@ -406,6 +407,21 @@ class ForStatement : public ASTNode {
     shared_ptr<Num> start_;
     shared_ptr<Num> end_;
     shared_ptr<Compound> body_;
+};
+
+class CallStatement : public ASTNode {
+  public:
+    CallStatement(const string &name,
+                  const vector<shared_ptr<ASTNode>> parameters)
+        : name_(name), parameters_(std::move(parameters)) {}
+    CallStatement(const string &name) : name_(name), parameters_() {}
+    void Accept(Visitor &visitor) override;
+    const string GetName() const { return name_; }
+    const vector<shared_ptr<ASTNode>> &GetParameters() { return parameters_; }
+
+  private:
+    string name_;
+    vector<shared_ptr<ASTNode>> parameters_;
 };
 
 } // namespace code_generation

@@ -159,6 +159,9 @@ void ASTPrinter::VisitIfStatement(const shared_ptr<IfStatement> &node) {
 void ASTPrinter::VisitForStatement(const shared_ptr<ForStatement> &node) {
     ErrNotImplemented();
 }
+void ASTPrinter::VisitCallStatement(const shared_ptr<CallStatement> &node) {
+    ErrNotImplemented();
+}
 
 string ASTPrinter::ToString() const { return ostream_.str(); }
 } // namespace code_generation

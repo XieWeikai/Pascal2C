@@ -274,6 +274,18 @@ void CodeGenerator::VisitForStatement(const shared_ptr<ForStatement> &node) {
     ostream_ << Indent() << "}\n";
 }
 
+void CodeGenerator::VisitCallStatement(const shared_ptr<CallStatement> &node) {
+    ostream_ << Indent() << node->GetName() << "(";
+    for (int i = 0; i < node->GetParameters().size(); i++) {
+        auto p = node->GetParameters().at(i);
+        Visit(p);
+        if (i < node->GetParameters().size() - 1) {
+            ostream_ << ", ";
+        }
+        ostream_ << ")\n";
+    }
+}
+
 bool CodeGenerator::IsReferenceArg(const shared_ptr<Var> &node) const {
     return symbol_table_->IsReference(node->GetName());
 }
