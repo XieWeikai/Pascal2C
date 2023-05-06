@@ -103,6 +103,30 @@ class String : public ASTNode {
     string value_;
 };
 
+class Real : public ASTNode {
+  public:
+    Real(const shared_ptr<Token> &token)
+        : value_(std::move(token->GetValue())) {}
+    virtual ~Real() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetValue() const { return value_; }
+
+  private:
+    string value_;
+};
+
+class Char : public ASTNode {
+  public:
+    Char(const shared_ptr<Token> &token)
+        : value_(std::move(token->GetValue())) {}
+    virtual ~Char() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetValue() const { return value_; }
+
+  private:
+    string value_;
+};
+
 class IVar : public ASTNode {
   public:
     virtual ~IVar() = default;

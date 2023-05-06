@@ -236,6 +236,14 @@ void CodeGenerator::VisitString(const shared_ptr<String> &node) {
     ostream_ << node->GetValue();
 }
 
+void CodeGenerator::VisitReal(const shared_ptr<Real> &node) {
+    ostream_ << node->GetValue();
+}
+
+void CodeGenerator::VisitChar(const shared_ptr<Char> &node) {
+    ostream_ << node->GetValue();
+}
+
 void CodeGenerator::VisitStatement(const shared_ptr<Statement> &node) {
     Visit(node->GetLeftHand(), true);
     ostream_ << " = ";

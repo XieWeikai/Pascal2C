@@ -104,6 +104,16 @@ void String::Accept(Visitor &visitor) {
     visitor.VisitString(dynamic_pointer_cast<String>(shared_from_this()));
 }
 
+// Real
+void Real::Accept(Visitor &visitor) {
+    visitor.VisitReal(dynamic_pointer_cast<Real>(shared_from_this()));
+}
+
+// Char
+void Char::Accept(Visitor &visitor) {
+    visitor.VisitChar(dynamic_pointer_cast<Char>(shared_from_this()));
+}
+
 // Type
 void Type::Accept(Visitor &visitor) {
     visitor.VisitType(dynamic_pointer_cast<Type>(shared_from_this()));

@@ -154,6 +154,14 @@ void ASTPrinter::VisitString(const shared_ptr<String> &node) {
     ErrNotImplemented();
 }
 
+void ASTPrinter::VisitReal(const shared_ptr<Real> &node) {
+    ErrNotImplemented();
+}
+
+void ASTPrinter::VisitChar(const shared_ptr<Char> &node) {
+    ErrNotImplemented();
+}
+
 void ASTPrinter::VisitStatement(const shared_ptr<Statement> &node) {
     ErrNotImplemented();
 }

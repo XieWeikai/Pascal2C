@@ -45,6 +45,10 @@ class ASTConverter {
     ConvertIfStatement(const shared_ptr<ast::IfStatement>);
     const shared_ptr<ForStatement>
     ConvertForStatement(const shared_ptr<ast::ForStatement>);
+    const shared_ptr<String> ConvertString(const shared_ptr<ast::StringValue>);
+    const shared_ptr<Num>
+    ConvertIntegerValue(const shared_ptr<ast::IntegerValue>);
+    const shared_ptr<Real> ConvertRealValue(const shared_ptr<ast::RealValue>);
 
     shared_ptr<code_generation::ASTRoot> converted_ast_;
 };
