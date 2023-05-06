@@ -98,12 +98,20 @@ void CodeGenerator::VisitFunction(const shared_ptr<Function> &node) {
         const auto &arg = node->GetArgs().at(i);
         Visit(arg);
         if (i < node->GetArgs().size() - 1) {
-            ostream_ << ',';
+            ostream_ << ", ";
         }
     }
     ostream_ << ") {\n";
     IncIndent();
+    // Declare return variable
+    ostream_ << Indent() << node->GetReturnType() << ' ';
+    Visit(node->GetReturnVar());
+    ostream_ << ";/* Auto Generated */\n";
     Visit(node->GetBlock());
+    // Return statement
+    ostream_ << Indent() << "return ";
+    Visit(node->GetReturnVar());
+    ostream_ << ";/* Auto Generated */\n";
     DecIndent();
     ostream_ << Indent() << "}\n";
     // Return to parent scope
@@ -190,6 +198,9 @@ void CodeGenerator::VisitVar(const shared_ptr<code_generation::Var> &node) {
     if (IsReferenceArg(node)) {
         ostream_ << "*";
     }
+    if (IsReturnVar(node)) {
+        ostream_ << "ret_";
+    }
     ostream_ << node->GetName();
 }
 
@@ -270,6 +281,10 @@ void CodeGenerator::VisitForStatement(const shared_ptr<ForStatement> &node) {
 
 bool CodeGenerator::IsReferenceArg(const shared_ptr<Var> &node) const {
     return symbol_table_->IsReference(node->GetName());
+}
+
+bool CodeGenerator::IsReturnVar(const shared_ptr<Var> &node) const {
+    return symbol_table_->IsReturnVar(node->GetName());
 }
 
 const string CodeGenerator::Indent() const {
