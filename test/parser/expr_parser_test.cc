@@ -47,6 +47,7 @@ namespace pascal2c::parser {
             EXPECT_EQ(par.column_, col[i]);
             par.NextToken();
         }
+        fclose(input);
     }
 
     TEST(ExprParserTest,TestParsePrimary) {
@@ -103,6 +104,8 @@ namespace pascal2c::parser {
         }
 //        std::cout << str_s.str() << std::endl;
         EXPECT_EQ(str_s.str(),res);
+
+        fclose(input);
     }
 
     TEST(ExprParserTest,TestParseExpr) {
@@ -168,11 +171,11 @@ namespace pascal2c::parser {
                 "\n"
                 "5:1 binary_op:'o'\n"
                 "lhs :\n"
-                "    1:1 binary_op:'a'\n"
+                "    5:1 binary_op:'a'\n"
                 "    lhs :\n"
                 "        5:1 binary_op:'L'\n"
                 "        lhs :\n"
-                "            1:1 binary_op:'*'\n"
+                "            5:2 binary_op:'*'\n"
                 "            lhs :\n"
                 "                5:2 unary_op:'-'\n"
                 "                expr :\n"
@@ -202,7 +205,7 @@ namespace pascal2c::parser {
                 "lhs :\n"
                 "    6:1 binary_op:'L'\n"
                 "    lhs :\n"
-                "        1:1 binary_op:'*'\n"
+                "        6:2 binary_op:'*'\n"
                 "        lhs :\n"
                 "            6:2 unary_op:'-'\n"
                 "            expr :\n"
@@ -232,11 +235,11 @@ namespace pascal2c::parser {
                 "\n"
                 "7:1 binary_op:'+'\n"
                 "lhs :\n"
-                "    1:1 binary_op:'+'\n"
+                "    7:1 binary_op:'+'\n"
                 "    lhs :\n"
-                "        1:1 binary_op:'+'\n"
+                "        7:1 binary_op:'+'\n"
                 "        lhs :\n"
-                "            1:1 binary_op:'+'\n"
+                "            7:1 binary_op:'+'\n"
                 "            lhs :\n"
                 "                7:1 1\n"
                 "            rhs :\n"
@@ -287,6 +290,8 @@ namespace pascal2c::parser {
 
 //        std::cout << str_s.str() << std::endl;
         EXPECT_EQ(str_s.str(),res);
+
+        fclose(input);
     }
 
 }

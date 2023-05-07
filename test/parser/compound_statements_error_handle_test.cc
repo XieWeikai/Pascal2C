@@ -51,5 +51,7 @@ namespace pascal2c::parser{
             output << e << std::endl;
 
         std::cout << output.str() << std::endl;
+
+        fclose(input);
     }
 }
