@@ -391,24 +391,20 @@ class NoOp : public ASTNode {
 };
 
 /**
- * @brief Expression node
+ * @brief Statement with a ';'
  * Pseudo-code example:
- * Expr e1 = Expr(2, +, 3);
- * Expr e2 = Expr(e1, -, 1);
+ * a;
+ * add(1, 2);
  */
 class Statement : public ASTNode {
   public:
-    Statement(const shared_ptr<ASTNode> &left_hand,
-              const shared_ptr<ASTNode> &right_hand)
-        : left_hand_(left_hand), right_hand_(right_hand) {}
+    Statement(const shared_ptr<ASTNode> &node) : node_(node) {}
     virtual ~Statement() = default;
     void Accept(Visitor &visitor) override;
-    const shared_ptr<ASTNode> &GetLeftHand() const { return left_hand_; }
-    const shared_ptr<ASTNode> &GetRightHand() const { return right_hand_; }
+    const shared_ptr<ASTNode> &GetNode() const { return node_; }
 
   private:
-    shared_ptr<ASTNode> left_hand_;
-    shared_ptr<ASTNode> right_hand_;
+    shared_ptr<ASTNode> node_;
 };
 
 class IfStatement : public ASTNode {

@@ -250,9 +250,8 @@ void CodeGenerator::VisitChar(const shared_ptr<Char> &node) {
 }
 
 void CodeGenerator::VisitStatement(const shared_ptr<Statement> &node) {
-    Visit(node->GetLeftHand(), true);
-    ostream_ << " = ";
-    Visit(node->GetRightHand());
+    Visit(node->GetNode(), true);
+    ostream_ << ";\n";
 }
 
 void CodeGenerator::VisitIfStatement(const shared_ptr<IfStatement> &node) {
