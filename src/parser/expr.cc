@@ -34,7 +34,7 @@ namespace pascal2c::parser {
         char buff[1024];
         INIT_PARSE(line_, column_);
         if(prefix_parser_[token_] == nullptr) {
-            sprintf(buff,"%d:%d: parse expression error: no expected token",line_,column_);
+            sprintf(buff,"%d:%d parse expression error: no expected token",line_,column_);
             throw SyntaxErr(buff);
         }
         auto expr = std::move((this->*prefix_parser_[token_])());

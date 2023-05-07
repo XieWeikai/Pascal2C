@@ -156,4 +156,16 @@ namespace pascal2c::parser
             return token_;
         }
     }
+
+    SyntaxErr::SyntaxErr(const std::string& err_msg) {
+        std::stringstream ss(err_msg);
+        int line, col;
+        char colon;
+        std::string msg;
+        ss >> line >> colon >> col ;
+        std::getline(ss >> std::ws, msg);
+        err_msg_ = std::move(msg);
+        line_ = line;
+        col_ = col;
+    }
 }

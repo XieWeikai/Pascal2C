@@ -41,9 +41,9 @@ namespace pascal2c::parser {
 
             default:
                 if(token_ == TOK_PROCEDURE || token_ == TOK_FUNCTION || token_ == TOK_VAR || token_ == TOK_CONST)
-                    sprintf(buff,"%d:%d: syntax error: declaration is not part of statement",line_,column_);
+                    sprintf(buff,"%d:%d syntax error: declaration is not part of statement",line_,column_);
                 else
-                    sprintf(buff,"%d:%d: not expected token to parse statement",line_,column_);
+                    sprintf(buff,"%d:%d not expected token to parse statement",line_,column_);
                 throw SyntaxErr(buff);
         }
         statement->SetLineAndColumn(begin_line,begin_column);
@@ -94,7 +94,7 @@ namespace pascal2c::parser {
                 if(token_ != TOK_END) {
                     Match(';', "syntax error: missing ';' at the end of statement");
                     if(token_ == TOK_END) {
-                        sprintf(buff,"%d:%d: last statement should not end with ;",line_,column_);
+                        sprintf(buff,"%d:%d last statement should not end with ;",line_,column_);
                         throw SyntaxErr(buff);
                     }
                 }

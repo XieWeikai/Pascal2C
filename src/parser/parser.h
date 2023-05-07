@@ -45,18 +45,25 @@ namespace pascal2c::parser
     public:
         // param:
         //     err_msg is the error message
-        explicit SyntaxErr(std::string err_msg) : err_msg_(std::move(err_msg)) {}
+        explicit SyntaxErr(const std::string& err_msg);
+        SyntaxErr(std::string err_msg, int line, int col) : err_msg_(std::move(err_msg)), line_(line), col_(col) {}
 
         // get the error message
         // return:
         //     the error message
         inline const char *what() const noexcept override
         {
-            return err_msg_.c_str();
+            static char buff[1024];
+            sprintf(buff, "%d:%d %s", line_, col_, err_msg_.c_str());
+            return buff;
         }
 
+        GETTER(std::string, err_msg);
+        GETTER(int, line);
+        GETTER(int, col);
     private:
         std::string err_msg_; // error message
+        int line_, col_ ;
     };
 
     class Parser
@@ -67,6 +74,7 @@ namespace pascal2c::parser
         explicit Parser(FILE *in);
 
         GETTER(vector<std::string>, err_msg);
+        GETTER(vector<SyntaxErr>, syntax_errs);
 
         // parse the whole program
         // return:
@@ -111,6 +119,7 @@ namespace pascal2c::parser
         std::string text_, next_text_;
 
         vector<std::string> err_msg_; // error massages
+        vector<SyntaxErr>   syntax_errs_; // syntax error
 
         std::shared_ptr<ast::Expression> (Parser::*prefix_parser_[500])();
 
