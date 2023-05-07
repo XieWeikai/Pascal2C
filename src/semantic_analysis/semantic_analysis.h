@@ -5,6 +5,19 @@
 #include "errors.h"
 namespace analysiser{
     //manage SymbolTableBlock
+    class errorMsg
+    {
+        public:
+        errorMsg(int linein,int columnin,std::string msgin):
+            line_(linein),column_(columnin),msg_(msgin){}
+        int line(){return line_;}
+        int column(){return column_;}
+        std::string msg(){return msg_;}
+        private:
+        int line_;
+        int column_;
+        std::string msg_;
+    };
     class nameTable{
     public:
         //add new SymbolTableBlock with name
@@ -17,7 +30,7 @@ namespace analysiser{
         std::map<std::string, std::shared_ptr<symbol_table::SymbolTableBlock> > table_;
    };
     
-    std::vector<std::string> GetErrors();
+    std::vector<errorMsg> GetErrors();
     saERRORS::ERROR_TYPE Find(symbol_table::SymbolTableItem &x);
     saERRORS::ERROR_TYPE Insert(const symbol_table::SymbolTableItem &x);
     void init();

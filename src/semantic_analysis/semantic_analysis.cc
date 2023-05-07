@@ -3,14 +3,14 @@
 #include "semantic_analysis.h"
 #define LOG(message) \
     do{\
-        errors.push_back("ERROR in line("+std::to_string(x.line())+"),column("+std::to_string(x.column())+"):"+message);\
+        errors.push_back(analysiser::errorMsg(x.line(),x.column(),message));\
     }while(0)
 namespace analysiser{
     std::vector<std::string> blockNames;//memary name of the latest block
     std::string nowblockName; 
     nameTable table;
-    std::vector<std::string> errors;
-    std::vector<std::string> GetErrors()    {return errors;}
+    std::vector<errorMsg> errors;
+    std::vector<errorMsg> GetErrors()    {return errors;}
     bool nameTable::Add(std::string name)
     {
         table_[name]=std::make_shared<symbol_table::SymbolTableBlock>(symbol_table::SymbolTableBlock());
