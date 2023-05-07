@@ -64,9 +64,9 @@ int main(int argc, char *argv[]) {
     parser::Parser parser(fp);
     auto program = parser.Parse();
 
-    auto parser_errs = parser.err_msg();
+    auto parser_errs = parser.syntax_errs();
     for (auto &err : parser_errs) {
-        std::cout << err << std::endl;
+        PrintError(lines, "Parser", err.line(), err.col(), err.err_msg());
     }
 
     // >>>>>> semantic analysis <<<<<<
