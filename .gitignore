@@ -37,3 +37,5 @@ compile_commands.json
 
 # build
 build/
+
+**/.DS_Store
