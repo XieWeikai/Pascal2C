@@ -253,17 +253,17 @@ class ArrayDeclaration : public ASTNode {
 class ArrayAccess : public IVar {
   public:
     ArrayAccess(const shared_ptr<Array> &array,
-                const vector<shared_ptr<Num>> &indices)
+                const vector<shared_ptr<ASTNode>> &indices)
         : array_(array), indices_(indices) {}
     virtual ~ArrayAccess() = default;
     void Accept(Visitor &visitor) override;
     const shared_ptr<Array> &GetArray() const { return array_; }
-    const vector<shared_ptr<Num>> &GetIndices() const { return indices_; }
+    const vector<shared_ptr<ASTNode>> &GetIndices() const { return indices_; }
     const string GetName() const override { return array_->GetName(); }
 
   private:
     shared_ptr<Array> array_;
-    vector<shared_ptr<Num>> indices_;
+    vector<shared_ptr<ASTNode>> indices_;
 };
 
 class Argument : public ASTNode {
