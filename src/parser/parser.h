@@ -123,6 +123,8 @@ namespace pascal2c::parser
 
         std::shared_ptr<ast::Expression> (Parser::*prefix_parser_[500])();
 
+        void AddSyntaxErr(SyntaxErr &err);
+
         // get next token
         // return:
         //     the next token
@@ -151,7 +153,7 @@ namespace pascal2c::parser
         //     the matched token or the unexpected token
         // throw:
         //     SyntaxErr if token not match
-        const int Match(const std::set<int> &tokens, const std::string &expected_token);
+        int Match(const std::set<int> &tokens, const std::string &expected_token);
 
         // Check if the token is matched,
         // if not, get next token until either the expected token or the delimiters or the end of the file is found
@@ -163,7 +165,7 @@ namespace pascal2c::parser
         //     delimiters is the end symbols to stop finding the expected token, that is the expected token of the next part
         // return:
         //     the matched token or the delimiters or end of the file
-        const int CheckMatch(const int token, const std::set<int> &delimiters);
+        int CheckMatch(const int token, const std::set<int> &delimiters);
 
         // Check if the token is matched,
         // if not, get next token until either the expected tokens or the delimiters or the end of the file is found
@@ -176,12 +178,12 @@ namespace pascal2c::parser
         //     delimiters is the end symbols to stop finding the expected token, that is the expected token of the next part
         // return:
         //     the matched token or the delimiters or end of the file
-        const int CheckMatch(const std::set<int> &tokens, const std::string &expected_token, const std::set<int> &delimiters);
+        int CheckMatch(const std::set<int> &tokens, const std::string &expected_token, const std::set<int> &delimiters);
 
         // get the error message of lexer
         // return:
         //     the error message
-        std::string GetLexerErrMsg();
+        std::string GetLexerErrMsg() const;
 
         // parse the whole program
         // e.g. program p; const a = 1; var b : integer; function f(a : integer) : integer; begin end; begin end.
@@ -292,22 +294,57 @@ namespace pascal2c::parser
         //     the ast of the prefix
         std::shared_ptr<ast::Expression> ParsePrefix();
 
+        // parse integer or real number
+        // return:
+        //     the integer or real number ast node
         std::shared_ptr<ast::Expression> ParseNumber();
 
+        // parse the variable and call ast node such as a[10] or f(a, b)
+        // return:
+        //  if meet the variable, return the Variable ast node
+        //  if meet the call, return the Call ast node
+        //  if we can't determine whether it is variable or call, return CallOrVar ast node
         std::shared_ptr<ast::Expression> ParseVariableAndCall();
 
+        // parse the string and char when meet something like 'abc' or 'a'
+        // return:
+        //   String ast node if meet 'aaf'
+        //   Char ast node if meet 'a'
         std::shared_ptr<ast::Expression> ParseStringAndChar();
 
+        // parse the boolean value
+        // return:
+        //   Boolean ast node
         std::shared_ptr<ast::Expression> ParseBoolean();
 
+        // parse the statement
+        // include: if statement, for statement, compound statement, assign and call statement
+        // return:
+        //     the ast of the statement
         std::shared_ptr<ast::Statement> ParseStatement();
 
+        // parse the if statement
+        // return:
+        //     the ast of the if statement
         std::shared_ptr<ast::Statement> ParseIFStatement();
 
+        // parse the for statement
+        // return:
+        //     the ast of the for statement
         std::shared_ptr<ast::Statement> ParseForStatement();
 
+        // parse the compound statement
+        // this function will not throw exception
+        // all the exception occur when parsing statement
+        // will be handled in this function
+        // return:
+        //     the ast of the compound statement
         std::shared_ptr<ast::Statement> ParseCompoundStatement() noexcept;
 
+        // parse the assign and call statement
+        // return:
+        //     the ast of the assign statement if meet the assign statement
+        //     the ast of the call statement if meet the call statement
         std::shared_ptr<ast::Statement> ParseAssignAndCallStatement();
     };
 }

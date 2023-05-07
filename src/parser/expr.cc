@@ -31,11 +31,9 @@ namespace pascal2c::parser {
     };
 
     std::shared_ptr<ast::Expression> Parser::ParsePrimary(){
-        char buff[1024];
         INIT_PARSE(line_, column_);
         if(prefix_parser_[token_] == nullptr) {
-            sprintf(buff,"%d:%d parse expression error: no expected token",line_,column_);
-            throw SyntaxErr(buff);
+            throw SyntaxErr("syntax error: parse expression error: no expected token", line_, column_);
         }
         auto expr = std::move((this->*prefix_parser_[token_])());
         expr->SetLineAndColumn(begin_line,begin_column);

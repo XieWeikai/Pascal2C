@@ -53,5 +53,12 @@ namespace pascal2c::parser{
         std::cout << output.str() << std::endl;
 
         fclose(input);
+
+        std::cout << "-----syntax errors------" << std::endl;
+        for(const auto &e: par.syntax_errs()){
+            std::cout << "line:" << e.line() << " col:" << e.col() << " " << e.err_msg() << std::endl;
+        }
+
+        std::cout << input_str;
     }
 }

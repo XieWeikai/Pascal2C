@@ -41,10 +41,9 @@ namespace pascal2c::parser {
 
             default:
                 if(token_ == TOK_PROCEDURE || token_ == TOK_FUNCTION || token_ == TOK_VAR || token_ == TOK_CONST)
-                    sprintf(buff,"%d:%d syntax error: declaration is not part of statement",line_,column_);
+                    throw(SyntaxErr("syntax error: declaration is not part of statement",line_,column_));
                 else
-                    sprintf(buff,"%d:%d not expected token to parse statement",line_,column_);
-                throw SyntaxErr(buff);
+                    throw(SyntaxErr("syntax error: not expected token to parse statement",line_,column_));
         }
         statement->SetLineAndColumn(begin_line,begin_column);
         return std::move(statement);
@@ -81,11 +80,10 @@ namespace pascal2c::parser {
         try {
             Match(TOK_BEGIN, "syntax error: missing begin when parsing compound statement");
         }catch (SyntaxErr &e){
-            err_msg_.push_back(std::string(e.what()));
+            AddSyntaxErr(e);
         }
         vector<std::shared_ptr<ast::Statement> > statements;
         std::shared_ptr<ast::Statement> statement;
-        static char buff[1024];
 
         while(token_ != 0 && token_ != TOK_END){
             try {
@@ -94,12 +92,11 @@ namespace pascal2c::parser {
                 if(token_ != TOK_END) {
                     Match(';', "syntax error: missing ';' at the end of statement");
                     if(token_ == TOK_END) {
-                        sprintf(buff,"%d:%d last statement should not end with ;",line_,column_);
-                        throw SyntaxErr(buff);
+                        throw SyntaxErr("last statement should not end with ;", line_, column_);
                     }
                 }
             }catch (SyntaxErr &e){
-                err_msg_.push_back(std::string(e.what()));
+                AddSyntaxErr(e);
                 while(token_ != 0 && !isStatementStartTok(token_) && token_ != ';' && token_ != TOK_END){
                     NextToken();
                 }
@@ -110,7 +107,7 @@ namespace pascal2c::parser {
         try {
             Match(TOK_END, "syntax error: missing end when parsing compound statement");
         }catch (SyntaxErr &e){
-            err_msg_.push_back(std::string(e.what()));
+            AddSyntaxErr(e);
         }
         return MAKE_AND_MOVE_SHARED(ast::CompoundStatement,statements);
     }

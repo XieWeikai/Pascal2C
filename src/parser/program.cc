@@ -114,9 +114,9 @@ namespace pascal2c::parser
                 const_value = std::move(ParsePrimary());
                 break;
             }
-            catch (const SyntaxErr err)
+            catch (SyntaxErr &err)
             {
-                err_msg_.push_back(err.what());
+                AddSyntaxErr(err);
                 std::set<int> tokens({TOK_INTEGER, TOK_REAL, '-', '+', TOK_STRING});
                 int delimiter = ';';
 
