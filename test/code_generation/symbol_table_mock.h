@@ -15,16 +15,12 @@ class SymbolScopeMock : public ISymbolScope {
   public:
     MOCK_METHOD(const shared_ptr<SymbolItem>, Lookup, (const string &name),
                 (const, override));
-    MOCK_METHOD(void, AddVariable,
-                (const shared_ptr<ASTNode> &node, bool is_reference),
-                (override));
+    MOCK_METHOD(bool, IsReference, (const string &name), (const, override));
+    MOCK_METHOD(bool, IsReturnVar, (const string &name), (const, override));
 };
 
 class SymbolTableMock : public ISymbolTable {
   public:
-    MOCK_METHOD(void, AddVariable,
-                (const shared_ptr<ASTNode> &node, bool is_reference),
-                (override));
     MOCK_METHOD(bool, IsReference, (const string &name), (const, override));
     MOCK_METHOD(bool, IsReturnVar, (const string &name), (const, override));
     MOCK_METHOD(void, SetCurrentScope, (const string &scope_name), (override));
