@@ -42,7 +42,7 @@ namespace pascal2c::parser
                 "Expr :\n"
                 "    2:8 binary_op:'+'\n"
                 "    lhs :\n"
-                "        1:1 binary_op:'+'\n"
+                "        2:8 binary_op:'+'\n"
                 "        lhs :\n"
                 "            2:8 1\n"
                 "        rhs :\n"
@@ -102,6 +102,8 @@ namespace pascal2c::parser
 //        std::cout << input_str << "\n\n";
 //        std::cout << str_s.str();
         EXPECT_EQ(str_s.str(),res);
+
+        fclose(input);
     }
 
 
@@ -176,6 +178,8 @@ namespace pascal2c::parser
 //        std::cout << input_str << "\n\n";
 //        std::cout << str_s.str();
         EXPECT_EQ(str_s.str(),res);
+
+        fclose(input);
     }
 
     TEST(StatementParserTest, TestForStatement)
@@ -256,6 +260,8 @@ namespace pascal2c::parser
 //        std::cout << input_str << "\n\n";
 //        std::cout << str_s.str();
         EXPECT_EQ(str_s.str(),res);
+
+        fclose(input);
     }
 
     TEST(StatementParserTest, TestCompoundStatement)
@@ -342,6 +348,8 @@ namespace pascal2c::parser
 //        std::cout << input_str << "\n\n";
 //        std::cout << str_s.str();
         EXPECT_EQ(str_s.str(),res);
+
+        fclose(input);
     }
 
 }

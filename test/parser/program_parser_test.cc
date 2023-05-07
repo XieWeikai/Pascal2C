@@ -24,6 +24,7 @@
         }                                                                         \
         std::cout << expr->ToString(0) << std::endl                               \
                   << std::endl;                                                   \
+        fclose(input);                                                            \
     }
 
 #define CHECK_RESULT(parse_function, input_strs, results, errs)                   \
@@ -57,6 +58,8 @@ namespace pascal2c::parser
                   << std::endl;
         //EXPECT_EQ(par.err_msg(), errs[i]);                                        \
         EXPECT_EQ(expr->ToString(0), results[i]);
+
+        fclose(input);
     }
 
     TEST(ProgramParserTest, TestParseProgram)
