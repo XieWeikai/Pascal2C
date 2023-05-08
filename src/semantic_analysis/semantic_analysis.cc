@@ -11,6 +11,8 @@ namespace analysiser{
     nameTable table;
     std::vector<errorMsg> errors;
     std::vector<errorMsg> GetErrors()    {return errors;}
+    nameTable* GetTable() {return &table;}
+
     bool nameTable::Add(std::string name)
     {
         table_[name]=std::make_shared<symbol_table::SymbolTableBlock>(symbol_table::SymbolTableBlock());
@@ -424,11 +426,18 @@ namespace analysiser{
         }
         return ret;
     }
-    bool ParameterToPara(std::vector<symbol_table::SymbolTablePara> &ret,pascal2c::ast::Parameter inpara)
+    bool ParameterToPara(
+        std::vector<symbol_table::SymbolTablePara> &ret,
+        pascal2c::ast::Parameter inpara)
     {
         for(int i=0;i<inpara.id_list()->Size();i++)
         {
-            Insert(symbol_table::SymbolTableItem(BasicToType(inpara.type()),(*inpara.id_list())[i],true,false,std::vector<symbol_table::SymbolTablePara>()));
+            Insert(symbol_table::SymbolTableItem(
+                BasicToType(inpara.type()) ,
+                    (*inpara.id_list())[i] ,
+                    true ,false ,
+                    std::vector<symbol_table::SymbolTablePara>
+                    {}));
             ret.push_back(symbol_table::SymbolTablePara(BasicToType(inpara.type()),inpara.is_var(),""));
         }
         return true;

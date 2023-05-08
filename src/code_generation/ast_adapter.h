@@ -136,14 +136,18 @@ class IVar : public ASTNode {
 
 class Var : public IVar {
   public:
-    explicit Var(const shared_ptr<Token> &token) : name_(token->GetValue()) {}
-    explicit Var(const string &name) : name_(name) {}
+    explicit Var(const shared_ptr<Token> &token , bool is_reference = false) : 
+      name_(token->GetValue()) , is_reference_(is_reference) {}
+    explicit Var(const string &name , bool is_reference = false) : 
+      name_(name) , is_reference_(is_reference){}
     virtual ~Var() = default;
     void Accept(Visitor &visitor) override;
     virtual const string GetName() const override { return name_; }
+    const bool IsReference() const { return is_reference_; }
 
   private:
     string name_;
+    bool is_reference_;
 };
 
 class IType : public ASTNode {
@@ -155,7 +159,7 @@ class IType : public ASTNode {
 
 class Type : public IType {
   public:
-    Type(const shared_ptr<Token> &token) : type_(token->GetValue()) {}
+    Type(const shared_ptr<Token> &token , bool is_reference = false) : type_(token->GetValue()) {}
     virtual ~Type() = default;
     void Accept(Visitor &visitor) override;
     const string GetType() const override { return type_; }

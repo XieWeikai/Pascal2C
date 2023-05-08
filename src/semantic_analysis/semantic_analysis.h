@@ -30,6 +30,8 @@ namespace analysiser{
         std::map<std::string, std::shared_ptr<symbol_table::SymbolTableBlock> > table_;
    };
     
+
+    nameTable* GetTable();
     std::vector<errorMsg> GetErrors();
     saERRORS::ERROR_TYPE Find(symbol_table::SymbolTableItem &x);
     saERRORS::ERROR_TYPE Insert(const symbol_table::SymbolTableItem &x);

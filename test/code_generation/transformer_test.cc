@@ -25,7 +25,7 @@ using namespace pascal2c::parser;
 
 TEST(GeneratorTest, TransformerTest) {
 
-    FILE *input = fopen("../example/example1.pas", "r");
+    FILE *input = fopen("../example/adder.pas", "r");
     std::cerr <<"[Parser] Begin\n";
 
 	Parser par{input};
@@ -48,7 +48,7 @@ TEST(GeneratorTest, TransformerTest) {
 	auto program = trans.GetASTRoot();
     printf("[Transformer] Done\n");
 
-    auto s_table = make_shared<SymbolTable>();
+    auto s_table = make_shared<SymbolTableMock>();
     auto code_generator = make_shared<CodeGenerator>(s_table);
     code_generator->Interpret(program);
     auto generated_ccode = code_generator->GetCCode();

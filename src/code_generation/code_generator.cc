@@ -293,12 +293,12 @@ void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
         if (i < node->GetParameters().size() - 1) {
             ostream_ << ", ";
         }
-        ostream_ << ")\n";
     }
+    ostream_ << ")";
 }
 
 bool CodeGenerator::IsReferenceArg(const shared_ptr<Var> &node) const {
-    return symbol_table_->IsReference(node->GetName());
+    return node->IsReference();
 }
 
 const string CodeGenerator::Indent() const {

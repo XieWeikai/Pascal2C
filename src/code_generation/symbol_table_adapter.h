@@ -1,3 +1,4 @@
+#ifdef testing
 #ifndef PASCAL2C_SRC_CODE_GENERATION_SYMBOL_TABLE_ADAPTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_SYMBOL_TABLE_ADAPTER_H_
 #pragma once
@@ -63,4 +64,5 @@ class SymbolTable : ISymbolTable {
 };
 } // namespace code_generation
 } // namespace pascal2c
+#endif
 #endif
