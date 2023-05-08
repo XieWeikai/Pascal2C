@@ -9,6 +9,7 @@
 
 namespace pascal2c::ast
 {
+    // Abstract Syntax Tree
     class Ast
     {
     public:
@@ -46,7 +47,7 @@ namespace pascal2c::ast
         //     str_s is the string stream to output to
         inline void LineColumnOutput(std::stringstream &str_s) const
         {
-            str_s << "line: " << line_ << " column: " << column_ << std::endl;
+            str_s << line_ << ":" << column_ << " ";
         }
 
     private:
