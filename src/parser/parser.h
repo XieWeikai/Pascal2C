@@ -28,6 +28,7 @@ extern "C"
 // make the shared pointer of Ast node
 #define MAKE_SHARED(constructor, ...) std::make_shared<constructor>(begin_line, begin_column, __VA_ARGS__)
 
+// make the shared pointer of Ast node with no argument
 #define MAKE_SHARED_WITH_NO_ARGUMENT(constructor) std::make_shared<constructor>(begin_line, begin_column)
 
 // make and move the shared pointer of Ast node
@@ -63,9 +64,14 @@ namespace pascal2c::parser
         GETTER(int, col);
     private:
         std::string err_msg_; // error message
-        int line_, col_ ;
+        int line_, col_;      // line and column number
     };
 
+    // parser class
+    // parse the pascal program
+    // usage:
+    //     Parser parser = new Parser(file_ptr);
+    //     std::shared_ptr<ast::Program> program = std::move(parser.Parse());
     class Parser
     {
     public:
@@ -198,7 +204,7 @@ namespace pascal2c::parser
         std::shared_ptr<ast::ProgramHead> ParseProgramHead();
 
         // parse the program body
-        // e.g. const a = 1; var b : integer; function f(a : integer) : integer; begin end; begin end.
+        // e.g. const a = 1; var b : integer; function f(a : integer) : integer; begin end; begin end
         // return:
         //     the ast of the program body
         std::shared_ptr<ast::ProgramBody> ParseProgramBody();
@@ -230,7 +236,7 @@ namespace pascal2c::parser
         std::shared_ptr<ast::SubprogramHead> ParseSubprogramHead();
 
         // parse the subprogram body
-        // eg. begin end;
+        // eg. begin end
         // return:
         //     the ast of the subprogram body
         std::shared_ptr<ast::SubprogramBody> ParseSubprogramBody();

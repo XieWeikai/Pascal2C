@@ -32,6 +32,7 @@ namespace pascal2c::ast
         inline virtual const int &column() const { return column_; }
 
     protected:
+        // for test use
         // param:
         //     str_s is the string stream to output to
         //     level is the indentation level
@@ -43,6 +44,7 @@ namespace pascal2c::ast
                 str_s << "    ";
         }
 
+        // for test use
         // param:
         //     str_s is the string stream to output to
         inline void LineColumnOutput(std::stringstream &str_s) const

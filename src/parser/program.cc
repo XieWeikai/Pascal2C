@@ -13,6 +13,7 @@ namespace pascal2c::parser
     template <typename Tp>
     using vector = ::std::vector<Tp>;
 
+    // ProgramHead ; ProgramBody .
     std::shared_ptr<ast::Program> Parser::ParseProgram()
     {
         INIT_PARSE(line_, column_);
@@ -24,6 +25,7 @@ namespace pascal2c::parser
         return MAKE_AND_MOVE_SHARED(ast::Program, std::move(program_head), std::move(program_body));
     }
 
+    // TOK_PROGRAM TOK_ID [(IdList)] ;
     std::shared_ptr<ast::ProgramHead> Parser::ParseProgramHead()
     {
         INIT_PARSE(line_, column_);
@@ -31,7 +33,7 @@ namespace pascal2c::parser
         CheckMatch(TOK_PROGRAM, {TOK_ID, '(', ';'});
         auto name = text_;
 
-        // Check if the program has a name
+        // Parse the program id
         int ret = CheckMatch(TOK_ID, {'(', ';'});
         if (ret == ';' || ret == TOK_EOF)
         {
@@ -42,6 +44,7 @@ namespace pascal2c::parser
             name = "";
         }
 
+        // If the program has a parameter list, parse it
         if (token_ == '(')
         {
             NextToken();
@@ -52,6 +55,10 @@ namespace pascal2c::parser
         return MAKE_AND_MOVE_SHARED(ast::ProgramHead, name);
     }
 
+    // [TOK_CONST {ConstDeclaration;}]
+    // [TOK_VAR {VarDeclaration;}]
+    // {Subprogram;}
+    // CompoundStatement
     std::shared_ptr<ast::ProgramBody> Parser::ParseProgramBody()
     {
         INIT_PARSE(line_, column_);
@@ -93,10 +100,12 @@ namespace pascal2c::parser
         return std::move(program_body);
     }
 
+    // TOK_ID = PrimaryExpression
     std::shared_ptr<ast::ConstDeclaration> Parser::ParseConstDeclaration()
     {
         INIT_PARSE(line_, column_);
 
+        // Parse id
         auto name = text_;
         int ret = CheckMatch(TOK_ID, {'=', ';'});
         if (ret != TOK_ID)
@@ -106,6 +115,7 @@ namespace pascal2c::parser
 
         CheckMatch('=', {TOK_INTEGER, TOK_REAL, '+', '-', TOK_STRING, ';'});
 
+        // Parse const value
         std::shared_ptr<ast::Expression> const_value;
         while (true)
         {
@@ -134,6 +144,7 @@ namespace pascal2c::parser
         return MAKE_AND_MOVE_SHARED(ast::ConstDeclaration, name, std::move(const_value));
     }
 
+    // IdList : Type
     std::shared_ptr<ast::VarDeclaration> Parser::ParseVarDeclaration()
     {
         INIT_PARSE(line_, column_);
@@ -144,6 +155,7 @@ namespace pascal2c::parser
         return MAKE_AND_MOVE_SHARED(ast::VarDeclaration, std::move(id_list), std::move(type));
     }
 
+    // SubprogramHead ; SubprogramBody
     std::shared_ptr<ast::Subprogram> Parser::ParseSubprogram()
     {
         INIT_PARSE(line_, column_);
@@ -154,14 +166,18 @@ namespace pascal2c::parser
         return MAKE_AND_MOVE_SHARED(ast::Subprogram, std::move(subprogram_head), std::move(subprogram_body));
     }
 
+    // TOK_PROCEDURE TOK_ID [(Parameter {; Parameter})]
+    // TOK_FUNCTION TOK_ID [(Parameter {; Parameter})] : TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_CHAR_TYPE | TOK_BOOLEAN_TYPE
     std::shared_ptr<ast::SubprogramHead> Parser::ParseSubprogramHead()
     {
         INIT_PARSE(line_, column_);
 
         if (token_ == TOK_PROCEDURE)
         {
+            // Parse procedure head
             NextToken();
 
+            // Parse procedure id
             auto name = text_;
             int ret = CheckMatch(TOK_ID, {'(', ';'});
             if (ret == ';' || ret == TOK_EOF)
@@ -173,6 +189,7 @@ namespace pascal2c::parser
                 name = "";
             }
 
+            // If the procedure has a parameter list, parse it
             auto subprogram_head = MAKE_SHARED(ast::SubprogramHead, name);
             if (token_ == '(')
             {
@@ -198,8 +215,10 @@ namespace pascal2c::parser
         }
         else
         {
+            // Parse function head
             NextToken();
 
+            // Parse function id
             auto name = text_;
             int ret = CheckMatch(TOK_ID, {'(', ';'});
             if (ret == ';' || ret == TOK_EOF)
@@ -211,6 +230,7 @@ namespace pascal2c::parser
                 name = "";
             }
 
+            // If the function has a parameter list, parse it
             auto subprogram_head = MAKE_SHARED(ast::SubprogramHead, name);
             if (token_ == '(')
             {
@@ -235,6 +255,7 @@ namespace pascal2c::parser
 
             CheckMatch(':', {TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE, ';'});
 
+            // Parse return type
             ret = CheckMatch({TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE}, "basic type(integer, real, bool, char)", {';'});
             if (ret != ';' && ret != TOK_EOF)
             {
@@ -249,6 +270,9 @@ namespace pascal2c::parser
         }
     }
 
+    // [TOK_CONST {ConstDeclaration;}]
+    // [TOK_VAR {VarDeclaration;}]
+    // CompoundStatement
     std::shared_ptr<ast::SubprogramBody> Parser::ParseSubprogramBody()
     {
         INIT_PARSE(line_, column_);
@@ -283,12 +307,14 @@ namespace pascal2c::parser
         return std::move(subprogram_body);
     }
 
+    // TOK_ID {, TOK_ID}
     std::shared_ptr<ast::IdList> Parser::ParseIdList()
     {
         INIT_PARSE(line_, column_);
 
         auto id_list = MAKE_SHARED_WITH_NO_ARGUMENT(ast::IdList);
 
+        // Parse the first id
         std::string id = text_;
         int ret = CheckMatch(TOK_ID, {',', ':', ')', ';'});
         if (ret == TOK_ID)
@@ -300,6 +326,7 @@ namespace pascal2c::parser
             return std::move(id_list);
         }
 
+        // Parse the following ids, like , id2, id3, ...
         while (token_ == ',')
         {
             NextToken();
@@ -317,6 +344,8 @@ namespace pascal2c::parser
         return std::move(id_list);
     }
 
+    // TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_CHAR_TYPE | TOK_BOOLEAN_TYPE
+    // TOK_ARRAY \[ Period {, Period} \] TOK_OF TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_CHAR_TYPE | TOK_BOOLEAN_TYPE
     std::shared_ptr<ast::Type> Parser::ParseType()
     {
         INIT_PARSE(line_, column_);
@@ -332,6 +361,7 @@ namespace pascal2c::parser
             auto type = MAKE_SHARED(ast::Type, true);
             CheckMatch('[', {TOK_INTEGER, ']', ';'});
 
+            // If the array has a period list, parse it
             if (token_ != ']')
             {
                 while (true)
@@ -365,6 +395,7 @@ namespace pascal2c::parser
         }
     }
 
+    // TOK_INTEGER TOK_DOTDOT TOK_INTEGER
     ast::Type::Period Parser::ParsePeriod()
     {
         int value1 = tok_value_.intval;
@@ -384,10 +415,12 @@ namespace pascal2c::parser
         return {value1, value2};
     }
 
+    // [TOK_VAR] IdList : TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_CHAR_TYPE | TOK_BOOLEAN_TYPE
     std::shared_ptr<ast::Parameter> Parser::ParseParameter()
     {
         INIT_PARSE(line_, column_);
 
+        // Check if the parameter is a var parameter
         bool is_var;
         if (token_ == TOK_VAR)
         {
@@ -401,6 +434,7 @@ namespace pascal2c::parser
 
         auto id_list = ParseIdList();
 
+        // Parse the type of the parameter
         int type = -1;
         CheckMatch(':', {TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE, ';'});
         int ret = CheckMatch({TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE}, "basic type(integer, real, bool, char)", {';'});

@@ -115,6 +115,7 @@ namespace pascal2c::parser
         catch (SyntaxErr &err)
         {
             AddSyntaxErr(err);
+            // skip to the next token until the expected token or delimiters or EOF is met
             while (token_ != token && delimiters.find(token_) == delimiters.end() && token_ != TOK_EOF)
             {
                 NextToken();
@@ -138,6 +139,7 @@ namespace pascal2c::parser
         catch (SyntaxErr &err)
         {
             AddSyntaxErr(err);
+            // skip to the next token until the expected tokens or delimiters or EOF is met
             while (tokens.find(token_) == tokens.end() && delimiters.find(token_) == delimiters.end() && token_ != TOK_EOF)
             {
                 NextToken();
@@ -145,7 +147,7 @@ namespace pascal2c::parser
             if (tokens.find(token_) != tokens.end())
             {
                 int tok = token_;
-                NextToken(); // skip to the next token when the expected token is met
+                NextToken(); // skip to the next token when the token is one of the expected tokens
                 return tok;
             }
             return token_;
