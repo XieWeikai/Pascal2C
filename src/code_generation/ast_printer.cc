@@ -44,7 +44,7 @@ void ASTPrinter::VisitFunction(const shared_ptr<Function> &node) {
 void ASTPrinter::VisitBlock(const shared_ptr<Block> &node) {
     ostream_ << string(indent_level_, ' ') << "Block" << endl;
     indent_level_++;
-    Visit(node->GetDeclatation());
+    Visit(node->GetDeclaration());
     Visit(node->GetCompoundStatement());
     indent_level_--;
 }

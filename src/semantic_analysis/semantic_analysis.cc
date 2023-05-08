@@ -436,8 +436,7 @@ namespace analysiser{
                 BasicToType(inpara.type()) ,
                     (*inpara.id_list())[i] ,
                     true ,false ,
-                    std::vector<symbol_table::SymbolTablePara>
-                    {}));
+                    std::vector<symbol_table::SymbolTablePara>{}));
             ret.push_back(symbol_table::SymbolTablePara(BasicToType(inpara.type()),inpara.is_var(),""));
         }
         return true;

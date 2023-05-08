@@ -67,7 +67,7 @@ class Block : public ASTNode {
     }
     virtual ~Block() = default;
     void Accept(Visitor &visitor) override;
-    const shared_ptr<Declaration> &GetDeclatation() const {
+    const shared_ptr<Declaration> &GetDeclaration() const {
         return declarations_;
     }
     const shared_ptr<Compound> &GetCompoundStatement() const {
@@ -328,13 +328,21 @@ class Program : public ASTNode {
   public:
     Program(const string &name, const shared_ptr<Block> &block)
         : name_(name), block_(block){};
+    Program(const string &name, const shared_ptr<Block> &block,
+            vector<shared_ptr<ASTNode>> &global_declarations)
+        : name_(name), block_(block),
+          global_declarations_(global_declarations){};
     virtual ~Program() = default;
     void Accept(Visitor &visitor) override;
     const string GetName() const { return name_; }
     const shared_ptr<Block> &GetBlock() const { return block_; }
+    const vector<shared_ptr<ASTNode>> &GetGlobalDeclarations() const {
+        return global_declarations_;
+    }
 
   private:
     string name_;
+    vector<shared_ptr<ASTNode>> global_declarations_;
     shared_ptr<Block> block_;
 };
 

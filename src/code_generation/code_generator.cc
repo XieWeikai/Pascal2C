@@ -55,11 +55,15 @@ void CodeGenerator::VisitProgram(
     ostream_ << "#include <stdio.h>" << endl
              << "#include <stdlib.h>" << endl
              << endl;
+    
+    auto program_block = node->GetBlock(); 
+    Visit(program_block->GetDeclaration());
+
     ostream_ << "// " << node->GetName() << endl;
     ostream_ << "int main(int argc, char* argv[]) {" << endl;
 
     IncIndent();
-    Visit(node->GetBlock());
+    Visit(program_block->GetCompoundStatement());
     ostream_ << Indent() << "return 0;" << endl;
     DecIndent();
     ostream_ << "}\n";
@@ -117,18 +121,18 @@ void CodeGenerator::VisitFunction(const shared_ptr<Function> &node) {
 }
 
 void CodeGenerator::VisitBlock(const shared_ptr<code_generation::Block> &node) {
-    Visit(node->GetDeclatation());
+    Visit(node->GetDeclaration());
     Visit(node->GetCompoundStatement());
 }
 
 void CodeGenerator::VisitDeclaration(const shared_ptr<Declaration> &node) {
     for (const auto &it : node->GetDeclarations()) {
-        auto var_decl = dynamic_pointer_cast<VarDeclaration>(it);
-        if (var_decl == nullptr) {
-            throw runtime_error(
-                "Failed to cast Declaration ASTNode into VarDecl");
-        }
-        Visit(var_decl, true);
+        // auto var_decl = dynamic_pointer_cast<VarDeclaration>(it);
+        // if (var_decl == nullptr) {
+        //     throw runtime_error(
+        //         "Failed to cast Declaration ASTNode into VarDecl");
+        // }
+        Visit(it, true);
     }
 }
 
@@ -137,7 +141,7 @@ void CodeGenerator::VisitConstDeclaration(
     Visit(node->GetTypeNode());
     ostream_ << ' ';
     Visit(node->GetConstNode());
-    ostream_ << eol_;
+    // ostream_ << eol_;
 }
 
 void CodeGenerator::VisitVarDecl(
@@ -233,7 +237,7 @@ void CodeGenerator::VisitNum(const shared_ptr<Num> &node) {
 }
 
 void CodeGenerator::VisitString(const shared_ptr<String> &node) {
-    ostream_ << node->GetValue();
+    ostream_ << "\"" << node->GetValue() << "\"";
 }
 
 void CodeGenerator::VisitReal(const shared_ptr<Real> &node) {

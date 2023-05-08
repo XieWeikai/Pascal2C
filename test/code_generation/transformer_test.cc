@@ -17,7 +17,8 @@
 #include <string>
 #include <utility>
 #include <vector>
-
+#include <iostream>
+#include <fstream>
 using std::string;
 using std::make_shared;
 using namespace pascal2c::code_generation;
@@ -25,14 +26,14 @@ using namespace pascal2c::parser;
 
 TEST(GeneratorTest, TransformerTest) {
 
-    FILE *input = fopen("../example/adder.pas", "r");
+    FILE *input = fopen("../example/example1.pas", "r");
     std::cerr <<"[Parser] Begin\n";
 
 	Parser par{input};
 	auto ast = par.Parse();
-    // for (const auto& it : par.err_msg()) {
-    //     std::cerr << it << "\n";
-    // }
+    for (const auto& it : par.err_msg()) {
+        std::cerr << it << "\n";
+    }
     printf("[Parser] Done\n");
 
     analysiser::init();
@@ -64,6 +65,11 @@ TEST(GeneratorTest, TransformerTest) {
                              "    y = (x - 1);\n"
                              "    return 0;\n"
                              "}\n";
+
+    std::ofstream output;
+    output.open("../example/out1.c" , std::ios::out);
+    output << generated_ccode;
     std::cout << generated_ccode << "\n";
+    output.close();
     EXPECT_EQ(generated_ccode, expected_c_code);
 }

@@ -14,7 +14,7 @@ using ::std::make_shared;
  *  TOK_CHAR_TYPE 		300
  *  TOK_STRING_TYPE 	301
 */
-static const string TOKToCString(int tk) {
+static const string ToCString(int tk) {
 	switch (tk) {
 	
 	case '=' : return "=";
@@ -22,10 +22,19 @@ static const string TOKToCString(int tk) {
 	case '-' : return "-";
 	case '*' : return "*";
 	case '/' : return "/";
+	case symbol_table::ItemType::INT :
 	case 297 : return "int";
+
+	case symbol_table::ItemType::REAL :
 	case 298 : return "double";
+
+	case symbol_table::ItemType::BOOL :
 	case 299 : return "bool";
+
+	case symbol_table::ItemType::CHAR :
 	case 300 : return "char";
+
+	case symbol_table::ItemType::STRING :
 	case 301 : return "string";
 	}
 	
@@ -48,15 +57,26 @@ static string las_func_line;
 static string las_func_name;
 static string now_func_line;
 static string now_func_name;
+static shared_ptr<ast::Subprogram> las_func_node , now_func_node;
 
+static size_t getParamIndex(const string& id) {
+	auto id_list = now_func_node->subprogram_head()->parameters();
+
+	size_t idx = -1;
+	for(const auto& elem : id_list) 
+	for(size_t j = 0 ; j < elem->id_list()->Size() ; j++) {
+		idx++;
+		if ((*elem->id_list())[j] == id)
+			return idx;
+	}
+	return -1ULL;
+}
 
 static std::tuple<bool , bool , bool , bool>
 checkIdType(const string& id) {
-	std::cerr << "start check " << now_func_line << "\n";
 	std::shared_ptr<symbol_table::SymbolTableBlock> sym_block;
 	auto table = analysiser::GetTable();
 	table->Query(now_func_line , sym_block);
-	std::cerr << "end check " << id << "\n";
 
 	symbol_table::SymbolTableItem var_checker{
 		symbol_table::ERROR , 
@@ -65,10 +85,23 @@ checkIdType(const string& id) {
 
 	auto ans = sym_block->Query(var_checker);
 
+
 	auto is_var  = var_checker.is_var();
 	auto is_func = var_checker.is_func();
 	bool is_ref  = false;
 	bool is_ret  = var_checker.is_var() && var_checker.is_func();
+	if (now_func_node != nullptr) {
+		auto func_checker = analysiser::SubprogramToItem(*now_func_node->subprogram_head());
+		table->Query("1" , sym_block);
+		auto func = sym_block->Query(func_checker);
+		std::cerr << "Ref ans " << saERRORS::toString(func) << "\n";
+		const auto& para = func_checker.para();
+		if (para.size() != 0) {
+			auto idx  = getParamIndex(id);
+			is_ref    = idx == -1ULL ? false : para[idx].is_var();
+		}
+	}
+
 	printf("This : Func %s ,Check Id %s:  [%d , %d , %d , %d]\n" ,
 		now_func_name.c_str() ,id.c_str() , is_var , is_func , is_ref , is_ret);
 
@@ -76,17 +109,11 @@ checkIdType(const string& id) {
 }
 
 
-// extern std::string nowblockName;
-
 Transformer::Transformer(shared_ptr<ast::Ast> root) {
 	auto program_handle = std::dynamic_pointer_cast<ast::Program>(root);
 	if (program_handle == nullptr) {
 		throw std::runtime_error{"[Transformer] bad root pointer"};
 	}
-	// if (nowblockName.size() == 0) {
-	// 	throw std::runtime_error{"[Transformer] analysis::init() has not been executed."};
-	// }
-
 	ast_root = transProgram(program_handle);
 }
 
@@ -95,6 +122,8 @@ shared_ptr<Program> Transformer::transProgram(shared_ptr<ast::Program> cur) {
 	las_func_name = now_func_name;
 	now_func_line = std::to_string(cur->program_head()->line());
 	now_func_name = cur->program_head()->id();
+	now_func_node = nullptr;
+
 	auto ret = make_shared<Program>(
 		cur->program_head()->id() ,
 		transBody<ast::ProgramBody>(cur->program_body())
@@ -109,6 +138,7 @@ shared_ptr<ASTNode>
 Transformer::transSubprogram(shared_ptr<ast::Subprogram> cur) {
 	now_func_line = std::to_string(cur->subprogram_head()->line());
 	now_func_name = cur->subprogram_head()->id();
+	now_func_node = cur;
 
 	std::cerr << "Subpro@" << cur->line() <<" : " << cur->column() <<"\n";
 
@@ -121,8 +151,8 @@ Transformer::transSubprogram(shared_ptr<ast::Subprogram> cur) {
 			
 			args.push_back(std::move(make_shared<Argument>(
 				make_shared_token<Var> (TokenType::IDENTIFIER , (*list)[i]) ,
-				make_shared_token<Type>(TokenType::RESERVED	  , TOKToCString(elem->type())),
-				!elem->is_var() //TODO : need_test
+				make_shared_token<Type>(TokenType::RESERVED	  , ToCString(elem->type())),
+				elem->is_var() //TODO : need_test
 			)));
 		}
 	}
@@ -135,7 +165,7 @@ Transformer::transSubprogram(shared_ptr<ast::Subprogram> cur) {
 			cur->subprogram_head()->id() ,
 			make_shared_token<Type>(
 				TokenType::RESERVED , 
-				TOKToCString(cur->subprogram_head()->return_type())
+				ToCString(cur->subprogram_head()->return_type())
 			) , args ,
 			transBody<ast::SubprogramBody>(cur->subprogram_body())
 		);
@@ -151,6 +181,7 @@ Transformer::transSubprogram(shared_ptr<ast::Subprogram> cur) {
 
 	now_func_line = las_func_line;
 	now_func_name = las_func_name;
+	now_func_node = las_func_node;
 	return ret;
 }
 
@@ -190,7 +221,7 @@ Transformer::transDeclaration(shared_ptr<T> body) {
 
 	auto const_decl = body->const_declarations();
 	auto var_decl   = body->var_declarations();
-
+	
 
 	for(const auto& elem : const_decl) {
 		decls.push_back(std::move(transConstDeclaration(elem)));
@@ -200,13 +231,13 @@ Transformer::transDeclaration(shared_ptr<T> body) {
 		auto var_ret = transVarDeclaration(elem);
 		decls.insert(decls.end() ,var_ret.begin() ,var_ret.end() );
 	}
-
-	// >>> check >>>
-	for(const auto& elem : decls) {
-		if (elem == nullptr) {
-			throw std::runtime_error{"[Transformer] bad decl nullptr"};
+	if constexpr(std::is_same_v<T , ast::ProgramBody>) {
+		auto func_decl = body->subprogram_declarations();
+		for(const auto& elem : func_decl) {
+			decls.push_back(std::move(transSubprogram(elem)));
 		}
 	}
+
 	return make_shared<Declaration>(decls);
 
 }
@@ -215,7 +246,12 @@ Transformer::transDeclaration(shared_ptr<T> body) {
 shared_ptr<Assignment>
 Transformer::transConstDeclaration(shared_ptr<ast::ConstDeclaration> cur) {
 	return make_shared<Assignment>(
-		make_shared_token<Var>(TokenType::IDENTIFIER , cur->id() ) ,
+		make_shared<ConstDeclaration>(
+			make_shared_token<Var>(TokenType::IDENTIFIER , cur->id() ) ,
+			make_shared_token<ConstType>(
+				TokenType::RESERVED , ToCString(analysiser::GetExprType(cur->const_value()).type())
+			)
+		),
 		transExpression(cur->const_value())
 	);
 }
@@ -244,7 +280,7 @@ Transformer::transVarDeclaration(shared_ptr<ast::VarDeclaration> cur) {
 				make_shared<ArrayType>(
 					make_shared_token<Type>(
 						TokenType::RESERVED , 
-						TOKToCString(cur->type()->basic_type())
+						ToCString(cur->type()->basic_type())
 					) ,
 					perd
 				)
@@ -259,7 +295,7 @@ Transformer::transVarDeclaration(shared_ptr<ast::VarDeclaration> cur) {
 				make_shared<Var>((*list)[i]) ,
 				make_shared_token<Type>(
 					TokenType::RESERVED , 
-					TOKToCString(cur->type()->basic_type())
+					ToCString(cur->type()->basic_type())
 				)
 			)));
 		}
@@ -370,7 +406,7 @@ passExpr(shared_ptr<ast::Expression> cur) {
 
 		return make_shared<BinaryOperation>(
 			passExpr(bin_expr->lhs()) ,
-			make_shared_token<Oper>(TokenType::OPERATOR , TOKToCString(bin_expr->op())) ,
+			make_shared_token<Oper>(TokenType::OPERATOR , ToCString(bin_expr->op())) ,
 			passExpr(bin_expr->rhs())
 		);
 	}
