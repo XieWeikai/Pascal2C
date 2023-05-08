@@ -45,5 +45,8 @@ namespace analysiser{
     void DoCompoundStatement(pascal2c::ast::CompoundStatement x);
     void DoIfStatement(pascal2c::ast::IfStatement x);
     void DoForStatement(pascal2c::ast::ForStatement x);
+
+    // I want to use the symbol table. Maybe this way is right?
+    extern nameTable table;
 }//end namespace analysiser
 #endif

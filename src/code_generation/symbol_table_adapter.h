@@ -33,7 +33,9 @@ class SymbolScope : ISymbolScope {
 
 class SymbolTable : ISymbolTable {
   public:
-    SymbolTable() {}
+    SymbolTable()
+        : name_table_(
+              std::make_shared<analysiser::nameTable>(analysiser::table)) {}
     bool IsReference(const string &name) const override;
     bool IsReturnVar(const string &name) const override;
     void SetCurrentScope(const string &scope_name) override;
