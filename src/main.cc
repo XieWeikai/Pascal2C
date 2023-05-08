@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdio.h>
+#include <map>
 #include "parser/parser.h"
 #include "semantic_analysis/semantic_analysis.h"
 #include "utils.hpp"
@@ -7,6 +8,9 @@
 using namespace pascal2c;
 
 std::string filename;
+using ErrorMsg = std::variant<pascal2c::parser::SyntaxErr, analysiser::errorMsg>;
+using Location = std::pair<int, int>;
+std::map<Location, ErrorMsg> errors;
 
 void PrintError(const std::vector<std::string> &lines,
                 std::string module_name,
@@ -69,7 +73,7 @@ int main(int argc, char *argv[]) {
 
     auto parser_errs = parser.syntax_errs();
     for (auto &err : parser_errs) {
-        PrintError(lines, "Parser", err.line(), err.col(), err.err_msg());
+        errors.insert({{err.line(), err.col()}, err});
     }
 
     // >>>>>> semantic analysis <<<<<<
@@ -78,7 +82,18 @@ int main(int argc, char *argv[]) {
 
     auto analysis_errs = analysiser::GetErrors();
     for (auto &err : analysis_errs) {
-        PrintError(lines, "Semantic", err.line(), err.column(), err.msg());
+        errors.insert({{err.line(), err.column()}, err});
+    }
+
+    // print errors
+    for (auto &err : errors) {
+        auto [line, col] = err.first;
+        auto msg = err.second;
+        if (auto *p = std::get_if<pascal2c::parser::SyntaxErr>(&msg)) {
+            PrintError(lines, "Parser", line, col, p->err_msg());
+        } else if (auto *p = std::get_if<analysiser::errorMsg>(&msg)) {
+            PrintError(lines, "Semantic", line, col, p->msg());
+        }
     }
 
     return 0;
