@@ -195,156 +195,317 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 
 ## 语法分析
 
+### 概述
+
+语法分析由两部分组成，包括 AST 树部分和语法分析器部分。
+
+* AST 树部分：存储 AST 树，作为语法分析的输出，交给语义分析进一步处理
+* 语法分析器部分：使用递归下降法，根据语法规则，将词法分析器输出的 token 序列转换为 AST 树
+
+下面分别对 AST 树部分和语法分析器部分进行详细描述。
+
 ### AST 树 
 
 #### 功能描述
 
-存储 AST 树，作为语法分析的输出，交给语义分析进一步处理
+存储各类语法结构的信息，包括语法结构的类型、位置、子节点等。 
 
 #### 接口描述
 
+以下接口描述部分将列出提供给其他模块访问 AST 树各节点位置、属性和子节点的接口。
+
+##### class Ast
+
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取行号 | const int line() const                                             | 无   | 行号   | 无   |
+| 获取列号 | const int column() const                                           | 无   | 列号   | 无   |
+
 ##### class Program
 
-  | 描述       | 接口                                                 | 参数 | 返回值 | 异常 |
-  | ---------- | ---------------------------------------------------- | ---- | ------ | ---- |
-  | 获取程序头 | const shared_ptr\<ProgramHead> &program_head() const | 无   | 程序头 | 无   |
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+|  获取指向ProgramHead的指针  |const shared_ptr\<ProgramHead> &program_head() const|无|指向 [ProgramHead](#class-programhead) 的指针|无|
+|  获取指向ProgramBody的指针  |const shared_ptr\<ProgramBody> &program_body() const|无|指向 [ProgramBody](#class-programbody) 的指针|无|
+
+##### class ProgramHead
+
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+|  获取程序名  |const string &id() const|无|程序名|无|
+|  获取参数列表  |const shared_ptr\<IdList> &id_list() const|无|指向 [IdList](#class-idlist) 的指针，若为空则表示无参数|无|
+
+##### class ProgramBody
+
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+|  获取常量声明列表  |const vector\<shared_ptr\<ConstDeclaration>> &const_declarations() const|无|常量声明列表，可以为空，元素为指向 [ConstDeclaration](#class-constdeclaration) 的指针|无|
+|  获取变量声明列表  |const vector\<shared_ptr\<VarDeclaration>> &var_declarations() const|无|变量声明列表，可以为空，元素为指向 [VarDeclaration](#class-vardeclaration) 的指针|无|
+|  获取子程序声明列表  |const vector\<shared_ptr\<Subprogram>> &subprogram_declarations() const|无|子程序声明列表，可以为空，元素为指向 [Subprogram](#class-subprogram) 的指针|无|
+|  获取语句  |const shared_ptr\<Statement> &statements() const|无|指向 [Statement](#class-statement) 的指针|无|
+
+##### class ConstDeclaration
+
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+|  获取常量名  |const string &id() const|无|常量名|无|
+|  获取常量值  |const shared_ptr\<Expression> &const_value() const|无|指向 [Expression](#class-expression) 的指针|无|
+
+##### class VarDeclaration
+
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+|  获取变量名列表  |const shared_ptr\<IdList> &id_list() const|无|指向 [IdList](#class-idlist) 的指针|无|
+| 获取类型  |const shared_ptr\<Type> &type() const|无|指向 [Type](#class-type) 的指针|无|
+
+##### class Subprogram
+
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+|  获取子程序头  |const shared_ptr\<SubprogramHead> &subprogram_head() const|无|指向 [SubprogramHead](#class-subprogramhead) 的指针|无|
+|  获取子程序体  |const shared_ptr\<SubprogramBody> &subprogram_body() const|无|指向 [SubprogramBody](#class-subprogrambody) 的指针|无|
+
+##### class SubprogramHead
+
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+|  获取子程序名  |const string &id() const|无|子程序名|无|
+| 获取返回类型  |const int& return_type() const|无|返回类型，-1表示该子程序为过程，否则为函数，返回值为 TOK_INTEGER_TYPE、 TOK_REAL_TYPE、 TOK_BOOLEAN_TYPE、 TOK_CHAR_TYPE 中的一个|无| 
+|  获取参数列表  |const vector\<shared_ptr\<Parameter>> &parameters() const|无|参数列表，可以为空，元素为指向 [Parameter](#class-parameter) 的指针|无|
+
+##### class SubprogramBody
+
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+|  获取常量声明列表  |const vector\<shared_ptr\<ConstDeclaration>> &const_declarations() const|无|常量声明列表，可以为空，元素为指向 [ConstDeclaration](#class-constdeclaration) 的指针|无|
+|  获取变量声明列表  |const vector\<shared_ptr\<VarDeclaration>> &var_declarations() const|无|变量声明列表，可以为空，元素为指向 [VarDeclaration](#class-vardeclaration) 的指针|无|
+|  获取语句  |const shared_ptr\<Statement> &statements() const|无|指向 [Statement](#class-statement) 的指针|无|
+
+##### class Parameter
+
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 判断是否为引用参数  |const bool &is_var() const|无|是否为引用参数|无|
+| 获取标志符列表 |const shared_ptr\<IdList> &id_list() const|无|指向 [IdList](#class-idlist) 的指针|无|
+| 获取标志符类型  |const int &type() const|无|参数类型，返回值为 TOK_INTEGER_TYPE、 TOK_REAL_TYPE、 TOK_BOOLEAN_TYPE、 TOK_CHAR_TYPE 中的一个|无|
+
+##### class IdList
+
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取标志符 | const string &operator[](const int index) const | index: 标志符下标 | 标志符 | 无 |
+| 获取标志符个数 | const int &Size() const | 无 | 标志符个数 | 无 |
+
+##### class Type
+
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 判断是否为数组类型  |const bool &is_array() const|无|是否为数组类型|无|
+| 获取基础类型  |const int &basic_type() const|无|基础类型，返回值为 TOK_INTEGER_TYPE、 TOK_REAL_TYPE、 TOK_BOOLEAN_TYPE、 TOK_CHAR_TYPE 中的一个|无|
+| 获取数组范围列表 | const vector\<Period> &periods() const | 无 | 数组范围列表，可以为空，元素为 [Period](#struct-typeperiod) | 无 |
+
+##### struct Type::Period
+
+| 描述     | 名称 |
+| -------- | ------------------------------------------------------------ |
+| 起始下标 | digits_1 |
+| 终止下标 | digits_2 |
 
 #### 数据结构定义
 
-为了完整表示源程序的所有信息，我们为pascal各种语法结构设计了相应的AST节点，各个类的定义均放在`pascal2c::ast`命名空间中，具体定义如下文所述
+为了完整表示源程序的所有信息，我们为pascal各种语法结构设计了相应的AST节点，各个类的定义均放在`pascal2c::ast`命名空间中，具体定义如下文所述。
 
-##### class Program
-  AST 树根节点，存有指向 `ProgramHead`、`ProgramBody`的指针
+##### class Ast
+
+所有AST节点的基类，包含了行号和列号信息
 
 ```c++
-    // Program -> ProgramHead; ProgramBody.
-    //
-    // eg. program f(a, b); var a, b; begin a := 1; b := 2; end.
-    class Program
+// Abstract Syntax Tree
+class Ast
+{
+public:
+    // param:
+    //     line is the line number of the first token of the node
+    //     column is the column number of the first token of the node
+    Ast(const int line, const int column)
+        : line_(line), column_(column){};
+
+    Ast() : line_(1), column_(1){};
+
+    inline void SetLineAndColumn(const int line, const int column)
     {
-    public:
-        // param:
-        //     program_head is the shared pointer of ProgramHead
-        //     program_body is the shared pointer of ProgramBody
-        Program(shared_ptr<ProgramHead> program_head, shared_ptr<ProgramBody> program_body)
-            : program_head_(std::move(program_head)), program_body_(std::move(program_body)) {}
+        line_ = line;
+        column_ = column;
+    }
 
-        inline const shared_ptr<ProgramHead> &program_head() const { return program_head_; }
+    inline virtual const int &line() const { return line_; }
 
-        inline const shared_ptr<ProgramBody> &program_body() const { return program_body_; }
+    inline virtual const int &column() const { return column_; }
 
-        // for test use
-        // param:
-        //     level is the level of indentation that should be applied to the returned string
-        // return:
-        //     a string represents the statement
-        const string ToString(const int &level) const;
+protected:
+    // for test use
+    // param:
+    //     str_s is the string stream to output to
+    //     level is the indentation level
+    inline static void
+    IndentOutput(std::stringstream &str_s, const int level)
+    {
+        int temp = level;
+        while (temp-- > 0)
+            str_s << "    ";
+    }
 
-    private:
-        shared_ptr<ProgramHead> program_head_; // eg. program f(a, b)
-        shared_ptr<ProgramBody> program_body_; // eg. var a, b; begin a := 1; b := 2; end.
-    };
+    // for test use
+    // param:
+    //     str_s is the string stream to output to
+    inline void LineColumnOutput(std::stringstream &str_s) const
+    {
+        str_s << line_ << ":" << column_ << " ";
+    }
+
+private:
+    int line_;   // line number of the first token of the node
+    int column_; // column number of the first token of the node
+};
 ```
+
+##### class Program
+
+AST 树根节点，存有指向 `ProgramHead`、`ProgramBody`的指针
+
+```c++
+// Program -> ProgramHead; ProgramBody.
+//
+// eg. program f(a, b); var a, b; begin a := 1; b := 2; end.
+class Program : public Ast
+{
+public:
+    // param:
+    //     program_head is the shared pointer of ProgramHead
+    //     program_body is the shared pointer of ProgramBody
+    Program(const int line, const int column, shared_ptr<ProgramHead> program_head, shared_ptr<ProgramBody> program_body)
+        : Ast(line, column), program_head_(std::move(program_head)), program_body_(std::move(program_body)) {}
+
+    inline const shared_ptr<ProgramHead> &program_head() const { return program_head_; }
+
+    inline const shared_ptr<ProgramBody> &program_body() const { return program_body_; }
+
+    // for test use
+    // param:
+    //     level is the level of indentation that should be applied to the returned string
+    // return:
+    //     a string represents the statement
+    const string ToString(const int level) const;
+
+private:
+    shared_ptr<ProgramHead> program_head_; // eg. program f(a, b)
+    shared_ptr<ProgramBody> program_body_; // eg. var a, b; begin a := 1; b := 2; end.
+};
+```
+
 ##### class ProgramHead
 
 存储程序头部信息，存有程序名和程序输入参数列表
 
 ```c++
-    // ProgramHead -> program id(IdList) | program id
-    //
-    // eg. program f(a, b)
-    // eg. program f
-    class ProgramHead
-    {
-    public:
-        // param:
-        //     id is the program name
-        //     id_list is the parameters of the program
-        ProgramHead(const string &id, shared_ptr<IdList> id_list)
-            : id_(id), id_list_(std::move(id_list)) {}
+// ProgramHead -> program id(IdList) | program id
+//
+// eg. program f(a, b)
+// eg. program f
+class ProgramHead : public Ast
+{
+public:
+    // param:
+    //     id is the program name
+    //     id_list is the parameters of the program
+    ProgramHead(const int line, const int column, const string &id, shared_ptr<IdList> id_list)
+        : Ast(line, column), id_(id), id_list_(std::move(id_list)) {}
 
-        // param:
-        //     id is the program name
-        explicit ProgramHead(const string &id) : id_(id) {}
+    // param:
+    //     id is the program name
+    ProgramHead(const int line, const int column, const string &id) : Ast(line, column), id_(id), id_list_(nullptr) {}
 
-        inline const string &id() const { return id_; }
+    inline const string &id() const { return id_; }
 
-        inline const shared_ptr<IdList> &id_list() const { return id_list_; }
+    inline const shared_ptr<IdList> &id_list() const { return id_list_; }
 
-        // check if the program has parameters   
-        // return:
-        //     true if the program has parameters
-        inline const bool &HasIdList() const { return id_list_ != nullptr; }
+    // check if the program has parameters
+    // return:
+    //     true if the program has parameters
+    inline const bool HasIdList() const { return id_list_ != nullptr; }
 
-        // for test use
-        // param:
-        //     level is the level of indentation that should be applied to the returned string
-        // return:
-        //     a string represents the statement
-        const string ToString(const int &level) const;
+    // for test use
+    // param:
+    //     level is the level of indentation that should be applied to the returned string
+    // return:
+    //     a string represents the statement
+    const string ToString(const int level) const;
 
-    private:
-        string id_;                  // program name, eg. f
-        shared_ptr<IdList> id_list_; // parameters, can be empty, eg. (a, b)
-    };
+private:
+    string id_;                  // program name, eg. f
+    shared_ptr<IdList> id_list_; // parameters, can be empty, eg. (a, b)
+};
 ```
+
 
 ##### class ProgramBody
 
 存储程序体信息，存有常数声明列表，变量声明列表，子程序列表以及程序内容
 
 ```c++
-    // ProgramBody -> (const const_declarations | EMPTY)
-    //                (var var_declarations | EMPTY)
-    //                (subprogram_declarations | EMPTY)
-    //                (statement_list | EMPTY)
-    // const_declarations -> ConstDeclaration | (const_declarations ; ConstDeclaration)
-    // var_declarations -> VarDeclaration | var_declarations ; VarDeclaration
-    // subprogram_declarations -> Subprogram | subprogram_declarations ; Subprogram
-    // statement_list -> statement | statement_list ; statement
-    //
-    // eg. const a = 1; b = 2; var c, d : integer; procedure p; begin end; begin end
-    class ProgramBody
+// ProgramBody -> (const const_declarations | ε)
+//                (var var_declarations | ε)
+//                (subprogram_declarations | ε)
+//                statements
+// const_declarations -> ConstDeclaration | (const_declarations ; ConstDeclaration)
+// var_declarations -> VarDeclaration | var_declarations ; VarDeclaration
+// subprogram_declarations -> Subprogram | subprogram_declarations ; Subprogram
+//
+// eg. const a = 1; b = 2; var c, d : integer; procedure p; begin end; begin end
+class ProgramBody : public Ast
+{
+public:
+    ProgramBody(const int line, const int column)
+        : Ast(line, column) {}
+
+    inline const vector<shared_ptr<ConstDeclaration>> &const_declarations() const { return const_declarations_; }
+
+    inline const vector<shared_ptr<VarDeclaration>> &var_declarations() const { return var_declarations_; }
+
+    inline const vector<shared_ptr<Subprogram>> &subprogram_declarations() const { return subprogram_declarations_; }
+
+    inline const shared_ptr<Statement> &statements() const { return statements_; }
+
+    inline void AddConstDeclaration(shared_ptr<ConstDeclaration> const_declaration)
     {
-    public:
-        inline const vector<shared_ptr<ConstDeclaration>> &const_declarations() const { return const_declarations_; }
+        const_declarations_.push_back(std::move(const_declaration));
+    }
 
-        inline const vector<shared_ptr<VarDeclaration>> &var_declarations() const { return var_declarations_; }
+    inline void AddVarDeclaration(shared_ptr<VarDeclaration> var_declaration)
+    {
+        var_declarations_.push_back(std::move(var_declaration));
+    }
 
-        inline const vector<shared_ptr<Subprogram>> &subprogram_declarations() const { return subprogram_declarations_; }
+    inline void AddSubprogram(shared_ptr<Subprogram> subprogram)
+    {
+        subprogram_declarations_.push_back(std::move(subprogram));
+    }
 
-        inline const vector<shared_ptr<Statement>> &statement_list() const { return statement_list_; }
+    inline void set_statements(shared_ptr<Statement> statements) { statements_ = std::move(statements); }
 
-        inline void AddConstDeclaration(shared_ptr<ConstDeclaration> const_declaration)
-        {
-            const_declarations_.push_back(std::move(const_declaration));
-        }
+    // for test use
+    // param:
+    //     level is the level of indentation that should be applied to the returned string
+    // return:
+    //     a string represents the statement
+    const string ToString(const int level) const;
 
-        inline void AddVarDeclaration(shared_ptr<VarDeclaration> var_declaration)
-        {
-            var_declarations_.push_back(std::move(var_declaration));
-        }
-
-        inline void AddSubprogram(shared_ptr<Subprogram> subprogram)
-        {
-            subprogram_declarations_.push_back(std::move(subprogram));
-        }
-
-        inline void AddStatement(shared_ptr<Statement> statement) { statement_list_.push_back(std::move(statement)); }
-
-        // for test use
-        // param:
-        //     level is the level of indentation that should be applied to the returned string
-        // return:
-        //     a string represents the statement
-        const string ToString(const int &level) const;
-
-    private:
-        vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be empty, eg. const a = 1; b = 2;
-        vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be empty, eg. var c, d : integer;
-        vector<shared_ptr<Subprogram>> subprogram_declarations_;  // can be empty, eg. procedure p; begin end;
-        vector<shared_ptr<Statement>> statement_list_;            // can be empty, eg. begin end
-    };
+private:
+    vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be empty, eg. const a = 1; b = 2;
+    vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be empty, eg. var c, d : integer;
+    vector<shared_ptr<Subprogram>> subprogram_declarations_;  // can be empty, eg. procedure p; begin end;
+    shared_ptr<Statement> statements_;                        // eg. begin end
+};
 ```
 
 ##### class ConstDeclaration
@@ -352,33 +513,33 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 存储常量声明信息， 存有常量名称和值
 
 ```c++
-    // ConstDeclaration -> id= (IntegerValue | RealValue | UnaryExpr | CharValue)
-    //
-    // eg. a=1, b=2.0, c=-1, d='a'
-    class ConstDeclaration
-    {
-    public:
-        // param:
-        //     id is the identifier
-        //     const_value is the value of the identifier
-        ConstDeclaration(const string &id, shared_ptr<Expression> const_value)
-            : id(id), const_value(std::move(const_value)) {}
+// ConstDeclaration -> id= (IntegerValue | RealValue | UnaryExpr | CharValue)
+//
+// eg. a=1, b=2.0, c=-1, d='a'
+class ConstDeclaration : public Ast
+{
+public:
+    // param:
+    //     id is the identifier
+    //     const_value is the value of the identifier
+    ConstDeclaration(const int line, const int column, const string &id, shared_ptr<Expression> const_value)
+        : Ast(line, column), id_(id), const_value_(std::move(const_value)) {}
 
-        inline const string &id() const { return id; }
+    inline const string &id() const { return id_; }
 
-        inline const shared_ptr<Expression> &const_value() const { return const_value; }
+    inline const shared_ptr<Expression> &const_value() const { return const_value_; }
 
-        // for test use
-        // param:
-        //     level is the level of indentation that should be applied to the returned string
-        // return:
-        //     a string represents the statement
-        const string ToString(const int &level) const;
+    // for test use
+    // param:
+    //     level is the level of indentation that should be applied to the returned string
+    // return:
+    //     a string represents the statement
+    const string ToString(const int level) const;
 
-    private:
-        string id;                          // the identifier, eg. a
-        shared_ptr<Expression> const_value; // IntegerValue | RealValue | UnaryExpr | CharValue, eg. 1, 2.0, -1, 'a'
-    };
+private:
+    string id_;                          // the identifier, eg. a
+    shared_ptr<Expression> const_value_; // IntegerValue | RealValue | UnaryExpr | CharValue from expr.h, eg. 1, 2.0, -1, 'a'
+}; 
 ```
 
 ##### class VarDeclaration
@@ -386,34 +547,34 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 存储变量声明信息，存有类型名，变量名。
 
 ```c++
-    // VarDeclaration -> IdList : Type
-    //
-    // eg. a, b, c : integer
-    // eg. d, e : array [1..10] of integer
-    class VarDeclaration
-    {
-    public:
-        // param:
-        //     id_list is a list of identifiers
-        //     type is the type of the identifiers
-        VarDeclaration(shared_ptr<IdList> id_list, shared_ptr<Type> type)
-            : id_list(std::move(id_list)), type(std::move(type)) {}
+// VarDeclaration -> IdList : Type
+//
+// eg. a, b, c : integer
+// eg. d, e : array [1..10] of integer
+class VarDeclaration : public Ast
+{
+public:
+    // param:
+    //     id_list is a list of identifiers
+    //     type is the type of the identifiers
+    VarDeclaration(const int line, const int column, shared_ptr<IdList> id_list, shared_ptr<Type> type)
+        : Ast(line, column), id_list_(std::move(id_list)), type_(std::move(type)) {}
 
-        inline const shared_ptr<IdList> &id_list() const { return id_list; }
+    inline const shared_ptr<IdList> &id_list() const { return id_list_; }
 
-        inline const shared_ptr<Type> &type() const { return type; }
+    inline const shared_ptr<Type> &type() const { return type_; }
 
-        // for test use
-        // param:
-        //     level is the level of indentation that should be applied to the returned string
-        // return:
-        //     a string represents the statement
-        const string ToString(const int &level) const;
+    // for test use
+    // param:
+    //     level is the level of indentation that should be applied to the returned string
+    // return:
+    //     a string represents the statement
+    const string ToString(const int level) const;
 
-    private:
-        shared_ptr<IdList> id_list; // a list of identifiers, eg. a, b, c
-        shared_ptr<Type> type;      // the type of the identifiers, eg. integer
-    };
+private:
+    shared_ptr<IdList> id_list_; // a list of identifiers, eg. a, b, c
+    shared_ptr<Type> type_;      // the type of the identifiers, eg. integer
+}; 
 ```
 
 ##### class Subprogram
@@ -421,34 +582,34 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 存储子程序信息，包含子程序头`SubprogramHead`和子程序体`SubprogramBody`
 
 ```c++
-    // Subprogram -> SubprogramHead ; SubprogramBody
-    //
-    // eg. function f(a, b : integer) : integer;
-    // eg. procedure p(var c, d : real);
-    class Subprogram
-    {
-    public:
-        // param:
-        //     subprogram_head is the head of the subprogram
-        //     subprogram_body is the body of the subprogram
-        Subprogram(shared_ptr<SubprogramHead> subprogram_head, shared_ptr<SubprogramBody> subprogram_body)
-            : subprogram_head(std::move(subprogram_head)), subprogram_body(std::move(subprogram_body)) {}
+// Subprogram -> SubprogramHead ; SubprogramBody
+//
+// eg. function f(a, b : integer) : integer; begin end
+// eg. procedure p(var c, d : real); begin end
+class Subprogram : public Ast
+{
+public:
+    // param:
+    //     subprogram_head is the head of the subprogram
+    //     subprogram_body is the body of the subprogram
+    Subprogram(const int line, const int column, shared_ptr<SubprogramHead> subprogram_head, shared_ptr<SubprogramBody> subprogram_body)
+        : Ast(line, column), subprogram_head_(std::move(subprogram_head)), subprogram_body_(std::move(subprogram_body)) {}
 
-        inline const shared_ptr<SubprogramHead> &subprogram_head() const { return subprogram_head; }
+    inline const shared_ptr<SubprogramHead> &subprogram_head() const { return subprogram_head_; }
 
-        inline const shared_ptr<SubprogramBody> &subprogram_body() const { return subprogram_body; }
+    inline const shared_ptr<SubprogramBody> &subprogram_body() const { return subprogram_body_; }
 
-        // for test use
-        // param:
-        //     level is the level of indentation that should be applied to the returned string
-        // return:
-        //     a string represents the statement
-        const string ToString(const int &level) const;
+    // for test use
+    // param:
+    //     level is the level of indentation that should be applied to the returned string
+    // return:
+    //     a string represents the statement
+    const string ToString(const int level) const;
 
-    private:
-        shared_ptr<SubprogramHead> subprogram_head; // eg. function f(a, b : integer) : integer;
-        shared_ptr<SubprogramBody> subprogram_body; // eg. begin ... end;
-    };
+private:
+    shared_ptr<SubprogramHead> subprogram_head_; // eg. function f(a, b : integer) : integer;
+    shared_ptr<SubprogramBody> subprogram_body_; // eg. begin ... end;
+}; 
 ```
 
 ##### class SubprogramHead
@@ -456,48 +617,48 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 存储子程序头信息，子程序可能为 function 或 procedure。存有子程序名，子程序参数以及返回值类型。
 
 ```c++
-    // SubprogramHead -> function id (EMPTY | parameters) : (TOK_INTEGER | TOK_REAL | TOK_BOOLEAN | TOK_CHAR) | procedure id (EMPTY | parameters)
-    // parameters -> Parameter | parameters ; Parameter
-    //
-    // eg. function f(a, b : integer) : integer
-    // eg. procedure p(var c, d : real)
-    class SubprogramHead
-    {
-    public:
-        // param:
-        //     id is the name of the subprogram
-        //     return_type is the return type of the subprogram, -1 means procedure
-        SubprogramHead(const string &id, const int &return_type = -1)
-            : id_(id), return_type_(return_type) {}
+// SubprogramHead -> function id (ε | parameters) : (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE) | procedure id (ε | parameters)
+// parameters -> Parameter | parameters ; Parameter
+//
+// eg. function f(a, b : integer) : integer
+// eg. procedure p(var c, d : real)
+class SubprogramHead : public Ast
+{
+public:
+    // param:
+    //     id is the name of the subprogram
+    //     return_type is the return type of the subprogram, -1 means procedure
+    SubprogramHead(const int line, const int column, const string &id, const int return_type = -1)
+        : Ast(line, column), id_(id), return_type_(return_type) {}
 
-        inline const string &id() const { return id_; }
+    inline const string &id() const { return id_; }
 
-        // return:
-        //     the return type of the subprogram, -1 means procedure
-        inline const int &return_type() const { return return_type_; }
+    // return:
+    //     the return type of the subprogram, -1 means procedure
+    inline const int &return_type() const { return return_type_; }
 
-        inline const vector<shared_ptr<Parameter>> &parameters() const { return parameters_; }
+    inline const vector<shared_ptr<Parameter>> &parameters() const { return parameters_; }
 
-        inline void AddParameter(shared_ptr<Parameter> parameter) { parameters_.push_back(std::move(parameter)); }
+    inline void AddParameter(shared_ptr<Parameter> parameter) { parameters_.push_back(std::move(parameter)); }
 
-        inline void set_return_type(const int &return_type) { return_type_ = return_type; }
+    inline void set_return_type(const int return_type) { return_type_ = return_type; }
 
-        // return:
-        //     true if the subprogram is a function
-        inline const bool is_function() const { return return_type_ != -1; }
+    // return:
+    //     true if the subprogram is a function
+    inline const bool is_function() const { return return_type_ != -1; }
 
-        // for test use
-        // param:
-        //     level is the level of indentation that should be applied to the returned string
-        // return:
-        //     a string represents the statement
-        const string ToString(const int &level) const;
+    // for test use
+    // param:
+    //     level is the level of indentation that should be applied to the returned string
+    // return:
+    //     a string represents the statement
+    const string ToString(const int level) const;
 
-    private:
-        string id_;                                // name of the subprogram, eg. f, p
-        int return_type_;                          // -1 means procedure, eg. integer, real
-        vector<shared_ptr<Parameter>> parameters_; // can be empty, eg. a, b : integer
-    };
+private:
+    string id_;                                // name of the subprogram, eg. f, p
+    int return_type_;                          // -1 means procedure,TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE ,eg. integer, real
+    vector<shared_ptr<Parameter>> parameters_; // can be empty, eg. a, b : integer
+}; 
 ```
 
 ##### class SubprogramBody
@@ -505,47 +666,51 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 存储子程序体信息，存有常数声明列表，变量声明列表以及子程序内容
 
 ```c++
-    // SubprogramBody -> (const const_declarations | EMPTY)
-    //                   (var var_declarations | EMPTY)
-    //                   (statement_list | EMPTY)
-    // const_declarations -> id=ConstValue | const_declarations ; id=ConstValue
-    // var_declarations -> IdList : Type | var_declarations ; IdList : Type
-    // statement_list -> statement | statement_list ; statement
-    //
-    // eg. const a = 1; b = 2; var c, d : integer; begin end
-    class SubprogramBody
+// SubprogramBody -> (const const_declarations | ε)
+//                   (var var_declarations | ε)
+//                   statements
+// const_declarations -> id=ConstValue | const_declarations ; id=ConstValue
+// var_declarations -> IdList : Type | var_declarations ; IdList : Type
+//
+// eg. const a = 1; b = 2; var c, d : integer; begin end
+class SubprogramBody : public Ast
+{
+public:
+    SubprogramBody(const int line, const int column) : Ast(line, column) {}
+
+    inline const vector<shared_ptr<ConstDeclaration>> &const_declarations() const
     {
-    public:
-        inline const vector<shared_ptr<ConstDeclaration>> &const_declarations() const { return const_declarations_; }
+        return const_declarations_;
+    }
 
-        inline const vector<shared_ptr<VarDeclaration>> &var_declarations() const { return var_declarations_; }
+    inline const vector<shared_ptr<VarDeclaration>> &var_declarations() const { return var_declarations_; }
 
-        inline const vector<shared_ptr<Statement>> &statement_list() const { return statement_list_; }
+    inline const shared_ptr<Statement> &statement_list() const { return statements_; }
 
-        inline void AddConstDeclaration(shared_ptr<ConstDeclaration> const_declaration)
-        {
-            const_declarations_.push_back(std::move(const_declaration));
-        }
+    inline void AddConstDeclaration(shared_ptr<ConstDeclaration> const_declaration)
+    {
+        const_declarations_.push_back(std::move(const_declaration));
+    }
 
-        inline void AddVarDeclaration(shared_ptr<VarDeclaration> var_declaration)
-        {
-            var_declarations_.push_back(std::move(var_declaration));
-        }
+    inline void AddVarDeclaration(shared_ptr<VarDeclaration> var_declaration)
+    {
+        var_declarations_.push_back(std::move(var_declaration));
+    }
 
-        inline void AddStatement(shared_ptr<Statement> statement) { statement_list_.push_back(std::move(statement)); }
+    inline void set_statements(shared_ptr<Statement> statements) { statements_ = std::move(statements); }
 
-        // for test use
-        // param:
-        //     level is the level of indentation that should be applied to the returned string
-        // return:
-        //     a string represents the statement
-        const string ToString(const int &level) const;
+    // for test use
+    // param:
+    //     level is the level of indentation that should be applied to the returned string
+    // return:
+    //     a string represents the statement
+    const string ToString(const int level) const;
 
-    private:
-        vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be empty, eg. const a = 1; b = 2;
-        vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be empty, eg. var c, d : integer;
-        vector<shared_ptr<Statement>> statement_list_;            // can be empty, eg. begin end
-    };
+private:
+    vector<shared_ptr<ConstDeclaration>> const_declarations_; // can be empty, eg. const a = 1; b = 2;
+    vector<shared_ptr<VarDeclaration>> var_declarations_;     // can be empty, eg. var c, d : integer;
+    shared_ptr<Statement> statements_;                        // eg. begin end
+}; 
 ```
 
 ##### class Parameter
@@ -553,40 +718,40 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 存储子程序参数信息，参数可以为值或引用，存有参数名列表，参数类型以及是否为引用。
 
 ```c++
-    // Parameter -> var_parameter | value_parameter
-    // var_parameter -> var value_parameter
-    // value_parameter -> id_list : (TOK_INTEGER | TOK_REAL | TOK_BOOLEAN | TOK_CHAR)
-    //
-    // eg. a, b : integer
-    // eg. var c, d : real
-    class Parameter
-    {
-    public:
-        // param:
-        //     is_var is true if the parameter is var parameter
-        //     id_list is a list of identifiers
-        //     type is the type of the identifiers
-        Parameter(const bool &is_var, shared_ptr<IdList> id_list, const int &type)
-            : is_var_(is_var), id_list_(std::move(id_list)), type_(type) {}
+// Parameter -> var_parameter | value_parameter
+// var_parameter -> var value_parameter
+// value_parameter -> id_list : (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE)
+//
+// eg. a, b : integer
+// eg. var c, d : real
+class Parameter : public Ast
+{
+public:
+    // param:
+    //     is_var is true if the parameter is var parameter
+    //     id_list is a list of identifiers
+    //     type is the type of the identifiers
+    Parameter(const int line, const int column, const bool is_var, shared_ptr<IdList> id_list, const int type)
+        : Ast(line, column), is_var_(is_var), id_list_(std::move(id_list)), type_(type) {}
 
-        inline const bool &is_var() const { return is_var_; }
+    inline const bool &is_var() const { return is_var_; }
 
-        inline const shared_ptr<IdList> &id_list() const { return id_list_; }
+    inline const shared_ptr<IdList> &id_list() const { return id_list_; }
 
-        inline const int &type() const { return type_; }
+    inline const int &type() const { return type_; }
 
-        // for test use
-        // param:
-        //     level is the level of indentation that should be applied to the returned string
-        // return:
-        //     a string represents the statement
-        const string ToString(const int &level) const;
+    // for test use
+    // param:
+    //     level is the level of indentation that should be applied to the returned string
+    // return:
+    //     a string represents the statement
+    const string ToString(const int level) const;
 
-    private:
-        bool is_var_;                // true if the parameter is var parameter
-        shared_ptr<IdList> id_list_; // a list of identifiers, eg. a, b
-        int type_;                   // TOK_INTEGER | TOK_REAL | TOK_BOOLEAN | TOK_CHAR, eg. integer, real, boolean, char
-    };
+private:
+    bool is_var_;                // true if the parameter is var parameter
+    shared_ptr<IdList> id_list_; // a list of identifiers, eg. a, b
+    int type_;                   // TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE from lexer, eg. integer, real, boolean, char
+}; 
 ```
 
 ##### class IdList
@@ -594,34 +759,36 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 存储标志符列表
 
 ```c++
-    // IdList -> id | IdList , id
-    //
-    // eg. a, b, c
-    class IdList
-    {
-    public:
-        // param:
-        //     id is the identifier
-        // return:
-        //     the id at the index
-        inline const string &operator[](const int &index) const { return id_list_[index]; }
+// IdList -> id | IdList , id
+//
+// eg. a, b, c
+class IdList : public Ast
+{
+public:
+    IdList(const int line, const int column) : Ast(line, column) {}
 
-        // return:
-        //     the number of identifiers
-        inline const int Size() const { return id_list_.size(); }
+    // param:
+    //     id is the identifier
+    // return:
+    //     the id at the index
+    inline const string &operator[](const int index) const { return id_list_[index]; }
 
-        inline void AddId(const string &id) { id_list_.push_back(id); }
+    // return:
+    //     the number of identifiers
+    inline const int Size() const { return id_list_.size(); }
 
-        // for test use
-        // param:
-        //     level is the level of indentation that should be applied to the returned string
-        // return:
-        //     a string represents the statement
-        const string ToString(const int &level) const;
+    inline void AddId(const string &id) { id_list_.push_back(id); }
 
-    private:
-        vector<string> id_list_; // a list of identifiers, eg. a, b, c
-    };
+    // for test use
+    // param:
+    //     level is the level of indentation that should be applied to the returned string
+    // return:
+    //     a string represents the statement
+    const string ToString(const int level) const;
+
+private:
+    vector<string> id_list_; // a list of identifiers, eg. a, b, c
+};
 ```
 
 ##### class Type
@@ -631,56 +798,55 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 包含 struct `Period`，存储数组下标，存有下标上界和下界。
 
 ```c++
-    // Type -> (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE) | array [Period] of (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE)
-    // Period -> digits ... digits | period , digits ... digits
+// Type -> (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE) | array [Period] of (TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE)
+// Period -> digits ... digits | period , digits ... digits
+//
+// eg. integer, real, boolean, char
+// eg. array [1..10] of integer, array [1..10, 20..30] of real
+class Type : public Ast
+{
+public:
+    // digits_1 is the lower bound, digits_2 is the upper bound
     //
-    // eg. integer, real, boolean, char
-    // eg. array [1..10] of integer, array [1..10, 20..30] of real
-    class Type
+    // e.g. 1..10
+    struct Period
     {
-    public:
-        // digits_1 is the lower bound, digits_2 is the upper bound
-        //
-        // e.g. 1..10
-        struct Period
-        {
-            int digits_1;
-            int digits_2;
-        };
-
-        // param:
-        //     is_array is true if the type is array type
-        Type(const bool &is_array) : is_array_(is_array) {}
-
-        // param:
-        //     is_array is true if the type is array type
-        //     basic_type is the basic type of the array, eg. integer, real, boolean, char
-        Type(const bool &is_array, const int &basic_type)
-            : is_array_(is_array), basic_type_(basic_type) {}
-
-        inline const bool &is_array() const { return is_array_; }
-
-        inline const int &basic_type() const { return basic_type_; }
-
-        inline const vector<Period> &periods() const { return periods_; }
-
-        inline void AddPeriod(const int &digits_1, const int &digits_2)
-        {
-            periods_.push_back({digits_1, digits_2});
-        }
-
-        // for test use
-        // param:
-        //     level is the level of indentation that should be applied to the returned string
-        // return:
-        //     a string represents the statement
-        const string ToString(const int &level) const;
-
-    private:
-        bool is_array_;          // true if the type is array type
-        int basic_type_;         // TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE, eg. integer, real, boolean, char
-        vector<Period> periods_; // can be empty, eg. [1..10, 20..30]
+        int digits_1;
+        int digits_2;
     };
+
+    // param:
+    //     is_array is true if the type is array type
+    Type(const int line, const int column, const bool is_array) : Ast(line, column), is_array_(is_array), basic_type_(-1) {}
+
+    // param:
+    //     is_array is true if the type is array type
+    //     basic_type is the basic type of the array, eg. integer, real, boolean, char
+    Type(const int line, const int column, const bool is_array, const int basic_type)
+        : Ast(line, column), is_array_(is_array), basic_type_(basic_type) {}
+
+    inline const bool &is_array() const { return is_array_; }
+
+    inline const int &basic_type() const { return basic_type_; }
+
+    inline const vector<Period> &periods() const { return periods_; }
+
+    inline void AddPeriod(const Period &period) { periods_.push_back(period); }
+
+    inline void set_basic_type(const int basic_type) { basic_type_ = basic_type; }
+
+    // for test use
+    // param:
+    //     level is the level of indentation that should be applied to the returned string
+    // return:
+    //     a string represents the statement
+    const string ToString(const int level) const;
+
+private:
+    bool is_array_;          // true if the type is array type
+    int basic_type_;         // TOK_INTEGER_TYPE | TOK_REAL_TYPE | TOK_BOOLEAN_TYPE | TOK_CHAR_TYPE from lexer, eg. integer, real, boolean, char
+    vector<Period> periods_; // can be empty, eg. [1..10, 20..30]
+}; 
 ```
 
 ##### class Statement
@@ -1066,13 +1232,26 @@ private:
 
 #### 接口描述
 
+
+
 ##### class Parser
 | 描述                                               | 接口             | 参数                    | 返回值      | 异常                                                       |
 | -------------------------------------------------- | ---------------- | ----------------------- | ----------- | ---------------------------------------------------------- |
-| 给定输入文件指针，返回一个针对特定文件的Parser实例 | Parser(FILE *in) | FILE *in : 输入文件指针 | Parser实例  | 无                                                         |
-| 分析整个输入文件，得到整颗AST                      | ParseProgram()   | 无                      | Program指针 | 若存在语法错误，则会将所有的错误信息保存在一个成员变量中。 |
+| 构造函数                                           | Parser(FILE *in)           | in : 输入文件 | 无          | 无                                                         |
+| 获取错误信息列表 | const vector\<std::string> &err_msg() const | 无 | 错误信息列表，元素为错误信息字符串 | 无 |
+| 获取语法错误列表 | const vector\<SyntaxErr> &syntax_errs() const | 无 | 语法错误列表，元素为 [SyntaxErr](#class-syntaxerr) | 无 |
+| 对输入文件进行语法分析 | std::shared_ptr\<ast::Program> Parse() | 无 | 指向 [Program](#class-program) 的指针 | 无 |
 
-#### Parser定义
+##### class SyntaxErr
+
+| 描述     | 接口 | 参数 | 返回值 | 异常 |
+| -------- | ---- | ---- | ------ | ---- |
+| 获取错误信息 | const std::string &err_msg() const | 无 | 错误信息字符串 | 无 |
+| 获取错误行号 | int &line() const | 无 | 错误行号 | 无 |
+| 获取错误列号 | int &column() const | 无 | 错误列号 | 无 |
+
+
+#### Parser 数据结构定义
 
 `Parser`的构造函数接收一个`FILE *`，即输入文件。各个成员变量作用:
 
@@ -1088,26 +1267,275 @@ private:
 parser类的定义如下
 
 ```c++
-class Parser{
+// parser class
+// parse the pascal program
+// usage:
+//     Parser parser = new Parser(file_ptr);
+//     std::shared_ptr<ast::Program> program = std::move(parser.Parse());
+class Parser
+{
 public:
     // param:
     //     in is the input file
     explicit Parser(FILE *in);
+
+    GETTER(vector<std::string>, err_msg);
+    GETTER(vector<SyntaxErr>, syntax_errs);
+
+    // parse the whole program
+    // return:
+    //     the ast of the program
+    inline std::shared_ptr<ast::Program> Parse()
+    {
+        return ParseProgram();
+    }
+
 private:
-    int token_,next_token_;                      // current token and next token
-  	// if an lex error occur, error number will be stored in this variable
-    int lexer_errno_;     
-  	// token value
-    YYSTYPE tok_value_,next_tok_value_;
-    int line_,next_line_;                        // line number of token in the input file
-    int column_,next_column_;                      // column number of token in the input file
-    std::string text_,next_text_;
-  
-    vector<std::string> err_msg_;     // error massages
+    int token_, next_token_; // current token and next token
+
+    // if a lex error occur, error number will be stored in this variable
+    int lexer_errno_;
+
+    // token value
+    YYSTYPE tok_value_, next_tok_value_;
+    int line_, next_line_;     // line number of token in the input file
+    int column_, next_column_; // column number of token in the input file
+    std::string text_, next_text_;
+
+    vector<std::string> err_msg_; // error massages
+    vector<SyntaxErr>   syntax_errs_; // syntax error
+
+    std::shared_ptr<ast::Expression> (Parser::*prefix_parser_[500])();
+
+    void AddSyntaxErr(SyntaxErr &err);
+
+    // get next token
+    // return:
+    //     the next token
+    int NextToken();
+
+    // match token and get next token (only skip current token if it matches)
+    // param:
+    //     token is the token to match
+    // throw:
+    //     SyntaxErr if token not match
+    void Match(int token);
+
+    // match token and get next token (only skip current token if it matches)
+    // param:
+    //     token is the token to match
+    //     err_msg is the error message that is going to be thrown if token not match
+    // throw:
+    //     SyntaxErr if token not match
+    void Match(int token,const std::string& err_msg);
+
+    // match tokens and get next token (only skip current token if it matches)
+    // param:
+    //     tokens are the tokens to match
+    //     expected_token is the primary expected token in the err_msg
+    // return:
+    //     the matched token or the unexpected token
+    // throw:
+    //     SyntaxErr if token not match
+    int Match(const std::set<int> &tokens, const std::string &expected_token);
+
+    // Check if the token is matched,
+    // if not, get next token until either the expected token or the delimiters or the end of the file is found
+    // Note:
+    //     the current token will skip to the next token of the expected token if the expected token is found
+    //     otherwise, the current token will jump to the position of the delimiters or the end of the file
+    // param:
+    //     token is the token to match
+    //     delimiters is the end symbols to stop finding the expected token, that is the expected token of the next part
+    // return:
+    //     the matched token or the delimiters or end of the file
+    int CheckMatch(const int token, const std::set<int> &delimiters);
+
+    // Check if the token is matched,
+    // if not, get next token until either the expected tokens or the delimiters or the end of the file is found
+    // Note:
+    //     the current token will skip to the next token of the expected token only if the expected token is found
+    //     otherwise, the current token will jump to the position of the delimiters or the end of the file
+    // param:
+    //     tokens are the tokens to match
+    //     expected_token is the primary expected token in the err_msg
+    //     delimiters is the end symbols to stop finding the expected token, that is the expected token of the next part
+    // return:
+    //     the matched token or the delimiters or end of the file
+    int CheckMatch(const std::set<int> &tokens, const std::string &expected_token, const std::set<int> &delimiters);
+
+    // get the error message of lexer
+    // return:
+    //     the error message
+    std::string GetLexerErrMsg() const;
+
+    // parse the whole program
+    // e.g. program p; const a = 1; var b : integer; function f(a : integer) : integer; begin end; begin end.
+    // return:
+    //     the ast of the program
+    std::shared_ptr<ast::Program> ParseProgram();
+
+    // parse the program head
+    // eg. program p(a, b, c);
+    // return:
+    //     the ast of the program head
+    std::shared_ptr<ast::ProgramHead> ParseProgramHead();
+
+    // parse the program body
+    // e.g. const a = 1; var b : integer; function f(a : integer) : integer; begin end; begin end
+    // return:
+    //     the ast of the program body
+    std::shared_ptr<ast::ProgramBody> ParseProgramBody();
+
+    // parse the const declaration
+    // eg. const a = 1;
+    // return:
+    //     the ast of the const declaration
+    std::shared_ptr<ast::ConstDeclaration> ParseConstDeclaration();
+
+    // parse the var declaration
+    // eg. var a : integer;
+    // return:
+    //     the ast of the var declaration
+    std::shared_ptr<ast::VarDeclaration> ParseVarDeclaration();
+
+    // parse the subprogram declaration
+    // eg. function f(a : integer) : integer; begin end;
+    // eg. procedure p(a : integer); begin end;
+    // return:
+    //     the ast of the subprogram declaration
+    std::shared_ptr<ast::Subprogram> ParseSubprogram();
+
+    // parse the subprogram head
+    // eg. function f(a : integer) : integer;
+    // eg. procedure p(a : integer);
+    // return:
+    //     the ast of the subprogram head
+    std::shared_ptr<ast::SubprogramHead> ParseSubprogramHead();
+
+    // parse the subprogram body
+    // eg. begin end
+    // return:
+    //     the ast of the subprogram body
+    std::shared_ptr<ast::SubprogramBody> ParseSubprogramBody();
+
+    // parse the id list
+    // eg. a, b, c
+    // return:
+    //     the ast of the id list
+    std::shared_ptr<ast::IdList> ParseIdList();
+
+    // parse the type
+    // eg. integer
+    // eg. array[1..10] of integer
+    // return:
+    //     the ast of the type
+    std::shared_ptr<ast::Type> ParseType();
+
+    // parse the period
+    // eg. 1..10
+    // return:
+    //     the ast of the period
+    ast::Type::Period ParsePeriod();
+
+    // parse the parameter
+    // eg. a : integer
+    // eg. var a : integer
+    // return:
+    //     the ast of the parameter
+    std::shared_ptr<ast::Parameter> ParseParameter();
+
+    // parse the expression
+    // eg. a + b
+    // return:
+    //     the ast of the expression
+    std::shared_ptr<ast::Expression> ParseExpr();
+
+    // parse the expression
+    // param:
+    //     prec is the precedence of the operator
+    // return:
+    //     the ast of the expression
+    std::shared_ptr<ast::Expression> ParseExpr(int prec);
+
+    // parse the expression list
+    // return:
+    //     the ast of the expression list
+    vector<std::shared_ptr<ast::Expression>> ParseExprList();
+
+    // parse the primary unit of expression
+    // return:
+    //     the ast of the primary unit of expression
+    std::shared_ptr<ast::Expression> ParsePrimary();
+
+    // parse the parenthesis
+    // return:
+    //     the ast of the parenthesis
+    std::shared_ptr<ast::Expression> ParseParen();
+
+    // parse the prefix
+    // return:
+    //     the ast of the prefix
+    std::shared_ptr<ast::Expression> ParsePrefix();
+
+    // parse integer or real number
+    // return:
+    //     the integer or real number ast node
+    std::shared_ptr<ast::Expression> ParseNumber();
+
+    // parse the variable and call ast node such as a[10] or f(a, b)
+    // return:
+    //  if meet the variable, return the Variable ast node
+    //  if meet the call, return the Call ast node
+    //  if we can't determine whether it is variable or call, return CallOrVar ast node
+    std::shared_ptr<ast::Expression> ParseVariableAndCall();
+
+    // parse the string and char when meet something like 'abc' or 'a'
+    // return:
+    //   String ast node if meet 'aaf'
+    //   Char ast node if meet 'a'
+    std::shared_ptr<ast::Expression> ParseStringAndChar();
+
+    // parse the boolean value
+    // return:
+    //   Boolean ast node
+    std::shared_ptr<ast::Expression> ParseBoolean();
+
+    // parse the statement
+    // include: if statement, for statement, compound statement, assign and call statement
+    // return:
+    //     the ast of the statement
+    std::shared_ptr<ast::Statement> ParseStatement();
+
+    // parse the if statement
+    // return:
+    //     the ast of the if statement
+    std::shared_ptr<ast::Statement> ParseIFStatement();
+
+    // parse the for statement
+    // return:
+    //     the ast of the for statement
+    std::shared_ptr<ast::Statement> ParseForStatement();
+
+    // parse the compound statement
+    // this function will not throw exception
+    // all the exception occur when parsing statement
+    // will be handled in this function
+    // return:
+    //     the ast of the compound statement
+    std::shared_ptr<ast::Statement> ParseCompoundStatement() noexcept;
+
+    // parse the assign and call statement
+    // return:
+    //     the ast of the assign statement if meet the assign statement
+    //     the ast of the call statement if meet the call statement
+    std::shared_ptr<ast::Statement> ParseAssignAndCallStatement();
 };
 ```
 
 #### 算法描述
+
+##### 语法分析
 
 我们采用递归下降的方式来实现语法分析，对于每种语法成分，均编写对应方法进行解析，在这个过程中还会用到一些辅助方法，具体方法描述如下表
 
@@ -1134,12 +1562,14 @@ private:
 
 ![语法分析顺序图](assets/parser_flowchart.png)
 
+##### 错误处理
+
 进行**错误处理**时，将采取如下策略:
 
-- 在较低层的解析方法中碰到语法错误时抛出异常
-- 在较高层的解析方法调用底层解析函数时捕获异常，将错误信息存入`err_msg_`
+- 在解析过程中碰到语法错误时抛出异常
+- 在本层或较高层捕获异常，将错误信息存入`err_msg_` 和 `syntax_errs_`
 - 继续解析的两种处理策略:
-  - 碰到异常后，跳过若干`token`直到碰到想要的`token`
+  - 碰到异常后，跳过若干`token`直到碰到想要的`token` 或分隔符（如';', 'TOK_EOF'等）或后一部分可能的语法开头的`token`
   - 碰到异常后，忽略一些`token`接着解析
 
 如`ParseExpr`和`ParseStatement`在碰到语法错误时直接抛出异常，`ParseCompoundStatement`调用`ParseStatement`来解析一系列语句，若捕获异常，则记录下异常，并不断跳过`token`直到遇到`;`或者可能的语句开头的`token`再接着进行析。`ParseCompoundStatement`在碰到缺少`begin`的错误时，记录错误并忽略`begin`直接进行statement的解析操作。

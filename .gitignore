@@ -35,6 +35,9 @@
 .cache/
 compile_commands.json
 
+# vscode 
+.vscode/
+
 # build
 build/
 
