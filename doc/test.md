@@ -2,121 +2,168 @@
 
 ### 5.1 词法分析
 
-#### 测试用例1
+词法分析模块使用Google Test进行单元测试，测试用例位于`test/lexer/lexer_test.cc`中. 以下是各个测试套件的简介.
 
-输入： 
+另外, 为了方便交互式测试, 词法分析模块还提供了一个交互式测试程序 `lexer_exe`, 可以从标准输入读入Pascal源代码, 并将词法分析结果输出到标准输出.
 
-```
-program HelloWorld;
+#### 5.1.1 简单测试套件 (LexerSimpleTest)
 
-var
-  x: integer;
-  y: real;
+该测试套件用于测试词法分析器在最基本的输入情况下能否正常工作.
 
-begin
-  x := 10;
-  y := 3.14;
-  writeln('Hello, World!');
-  writeln('The value of x is ', x);
-  writeln('The value of y is ', y:2:2);
-end.
-```
-
-输出：
-
-```
-TokenType: PROGRAM, Line: 1, Column: 1
-TokenType: IDENTIFIER, Attribute: 'HelloWorld', Line: 1, Column: 9
-TokenType: SEMICOLON, Line: 1, Column: 19
-TokenType: VAR, Line: 3, Column: 1
-TokenType: IDENTIFIER, Attribute: 'x', Line: 4, Column: 3
-TokenType: COLON, Line: 4, Column: 4
-TokenType: INTEGER, Line: 4, Column: 6
-TokenType: SEMICOLON, Line: 4, Column: 13
-TokenType: IDENTIFIER, Attribute: 'y', Line: 5, Column: 3
-TokenType: COLON, Line: 5, Column: 4
-TokenType: REAL, Line: 5, Column: 6
-TokenType: SEMICOLON, Line: 5, Column: 10
-TokenType: BEGIN, Line: 7, Column: 1
-TokenType: IDENTIFIER, Attribute: 'x', Line: 8, Column: 3
-TokenType: ASSIGN, Line: 8, Column: 6
-TokenType: INTEGER_CONST, Attribute: '10', Line: 8, Column: 9
-TokenType: SEMICOLON, Line: 8, Column: 11
-TokenType: IDENTIFIER, Attribute: 'y', Line: 9, Column: 3
-TokenType: ASSIGN, Line: 9, Column: 6
-TokenType: REAL_CONST, Attribute: '3.14', Line: 9, Column: 9
-TokenType: SEMICOLON, Line: 9, Column: 13
-TokenType: WRITELN, Line: 10, Column: 3
-TokenType: LEFT_PAREN, Line: 10, Column: 9
-TokenType: STRING_CONST, Attribute: 'Hello, World!', Line: 10, Column: 10
-TokenType: RIGHT_PAREN, Line: 10, Column: 24
-TokenType: SEMICOLON, Line: 10, Column: 25
-TokenType: WRITELN, Line: 11, Column: 3
-TokenType: LEFT_PAREN, Line: 11, Column: 9
-TokenType: STRING_CONST, Attribute: 'The value of x is ', Line: 11, Column: 10
-TokenType: COMMA, Line: 11, Column: 29
-TokenType: IDENTIFIER, Attribute: 'x', Line: 11, Column: 31
-TokenType: RIGHT_PAREN, Line: 11, Column: 32
-TokenType: SEMICOLON, Line: 11, Column: 33
-TokenType: WRITELN, Line: 12, Column: 3
-TokenType: LEFT_PAREN, Line: 12, Column: 9
-TokenType: STRING_CONST, Attribute: 'The value of y is ', Line: 12, Column: 10
-TokenType: COMMA, Line: 12, Column: 29
-TokenType: IDENTIFIER, Attribute: 'y', Line: 12, Column: 31
-TokenType: COLON, Line: 12, Column: 32
-TokenType: INTEGER_CONST, Attribute: '2', Line: 12, Column: 34
-TokenType: COLON, Line: 12, Column: 35
-TokenType: INTEGER_CONST, Attribute: '2', Line: 12, Column: 37
-TokenType: RIGHT_PAREN, Line: 12, Column: 38
-TokenType: SEMICOLON, Line: 12, Column: 39
-TokenType: END, Line: 13, Column: 1
-TokenType: DOT, Line: 13, Column: 5
-```
-
-#### 测试用例2
+##### 简单测试 (SimpleTest)
 
 输入:
 
-```pascal
-program ErrorExample;
+```
+1 2 3 4
+5 6 7 8
+```
 
-var
-  1x: integer; // Error: identifier can't start with a number
-  y: integer;
+预期输出:
 
+8个TOK_INTEGER以及对应的行列号和值.
+
+##### Hello World测试 (HelloWorld)
+
+输入:
+
+```
+program hello;
 begin
-  1x := 12345678901234567890; // Error: integer is too long
-  y := 100;
-  { This is a comment with no closing delimiter EOF
-  // Error: comment not terminated before the end of the file end.
+    write('Hello, world!\n');
+end.
 ```
 
-输出:
+预期输出:
+
+每个TOKEN的类型及其对应的行列号. 对于标识符和字符串, 还需要输出其值.
+
+#### 5.1.2 注释测试套件 (LexerCommentTest)
+
+该套件用于测试词法分析器在遇到注释时能否正确跳过注释.
+
+##### 简单注释测试 (SimpleComment)
+
+输入:
 
 ```
-TokenType: PROGRAM, Line: 1, Column: 1
-TokenType: IDENTIFIER, Attribute: 'ErrorExample', Line: 1, Column: 9
-TokenType: SEMICOLON, Line: 1, Column: 21
-TokenType: VAR, Line: 3, Column: 1
-TokenType: ERROR, Attribute: '1x', Line: 4, Column: 3
-TokenType: COLON, Line: 4, Column: 4
-TokenType: INTEGER, Line: 4, Column: 6
-TokenType: SEMICOLON, Line: 4, Column: 14
-TokenType: IDENTIFIER, Attribute: 'y', Line: 5, Column: 3
-TokenType: COLON, Line: 5, Column: 5
-TokenType: INTEGER, Line: 5, Column: 7
-TokenType: SEMICOLON, Line: 5, Column: 14
-TokenType: ERROR, Errno: 1, Line: 7, Column: 3
-TokenType: ASSIGN, Line: 7, Column: 6
-TokenType: ERROR, Errno: 2, Line: 7, Column: 9
-TokenType: SEMICOLON, Line: 7, Column: 31
-TokenType: IDENTIFIER, Attribute: 'y', Line: 8, Column: 3
-TokenType: ASSIGN, Line: 8, Column: 6
-TokenType: INTEGER_CONST, Attribute: '100', Line: 8, Column: 9
-TokenType: SEMICOLON, Line: 8, Column: 12
-TokenType: LEFT_BRACE, Line: 9, Column: 3
-TokenType: ERROR, Errno: 3, Line: 9, Column: 4
+begin{comment here}begin
 ```
+
+预期输出:
+
+一个TOK_BEGIN, 一个TOK_BEGIN, 成功跳过注释.
+
+##### 嵌套注释测试 (NestedComment)
+
+输入:
+
+```
+begin{comment here{comment here}}begin
+```
+
+预期输出:
+
+一个TOK_BEGIN, 一个TOK_BEGIN, 成功跳过注释.
+
+##### 复杂注释测试 (ComplexComment)
+
+输入:
+
+```
+{{{{}}}}
+begin {begin{end
+}}             begin  {begin
+}
+begin
+```
+
+预期输出:
+
+三个TOK_BEGIN, 成功跳过注释.
+
+#### 5.1.3 标识符测试套件 (LexerIdentifierTest)
+
+该套件用于测试词法分析器在遇到各种标识符时能否正确识别.
+
+##### 合法标识符测试 (ValidIdentifier)
+
+输入:
+
+```
+begin
+    var a, a1, _a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q_: integer;
+    writeln('Valid identifiers');
+end.
+```
+
+预期输出:
+
+能够正确识别所有合法标识符.
+
+##### 大小写不敏感测试 (CaseInsensitiveTest)
+
+输入:
+
+```
+var Identifier, identifier, IDENTIFIER, IdEnTiFiEr: integer;
+```
+
+预期输出:
+
+输出四个TOK_ID, 值均为identifier. (Pascal语言中标识符大小写不敏感)
+
+#### 5.1.4 整数测试套件 (LexerIntegerTest)
+
+##### 简单整数测试 (SimpleInteger)
+
+输入:
+
+```
+12345, 9494949, 0;
+```
+
+预期输出:
+
+识别出其中的三个TOK_INTEGER, 值分别为12345, 9494949, 0.
+
+##### 整数长度测试 (IntegerLengthTest)
+
+输入:
+
+```
+2147483647, 2147483648
+```
+
+预期输出:
+
+第一个TOK_INTEGER的值为2147483647, 第二个输出为TOK_ERROR, 表示整数溢出.
+
+#### 5.1.5 实数测试套件 (LexerRealTest)
+
+##### 简单实数测试 (SimpleRealTest)
+
+输入:
+
+```
+123.456, 123., 123.0, 123.0e10, 123.0e+10, 123.0e-10;
+```
+
+预期输出:
+
+识别出其中的六个TOK_REAL, 值分别为123.456, 123., 123.0, 123.0e10, 123.0e+10, 123.0e-10.
+
+##### 实数省略测试 (RealOmitNumberTest)
+
+输入:
+
+```
+123.e10, .1e+10;
+```
+
+预期输出:
+
+识别出其中的两个TOK_REAL, 值分别为123.0e10, 0.1e+10.
 
 ---
 
