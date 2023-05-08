@@ -99,6 +99,21 @@ void Num::Accept(Visitor &visitor) {
     visitor.VisitNum(dynamic_pointer_cast<Num>(shared_from_this()));
 }
 
+// String
+void String::Accept(Visitor &visitor) {
+    visitor.VisitString(dynamic_pointer_cast<String>(shared_from_this()));
+}
+
+// Real
+void Real::Accept(Visitor &visitor) {
+    visitor.VisitReal(dynamic_pointer_cast<Real>(shared_from_this()));
+}
+
+// Char
+void Char::Accept(Visitor &visitor) {
+    visitor.VisitChar(dynamic_pointer_cast<Char>(shared_from_this()));
+}
+
 // Type
 void Type::Accept(Visitor &visitor) {
     visitor.VisitType(dynamic_pointer_cast<Type>(shared_from_this()));
@@ -136,6 +151,10 @@ void IfStatement::Accept(Visitor &visitor) {
 void ForStatement::Accept(Visitor &visitor) {
     visitor.VisitForStatement(
         dynamic_pointer_cast<ForStatement>(shared_from_this()));
+}
+void FunctionCall::Accept(Visitor &visitor) {
+    visitor.VisitFunctionCall(
+        dynamic_pointer_cast<FunctionCall>(shared_from_this()));
 }
 
 } // namespace code_generation

@@ -91,22 +91,29 @@ target_link_libraries(
 # >>> parser test >>>
 file(GLOB PARSER "src/parser/*.h" "src/parser/expr.cc" "src/parser/statement.cc" "src/parser/parser.cc" "src/parser/program.cc")
 file(GLOB PARSER_TEST "test/parser/*.cc")
-add_executable(
-        parser_test
-        ${PARSER_TEST}
+
+add_library(parser STATIC
         ${PARSER}
         ${AST}
         ${CMAKE_CURRENT_BINARY_DIR}/lexer.yy.c
         src/lexer/utils.c
 )
-target_include_directories(parser_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+add_executable(
+        parser_test
+        ${PARSER_TEST}
+)
+target_include_directories(parser PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(
-        parser_test
+        parser
         gtest_main
         gmock_main
 )
-
+target_link_libraries(
+        parser_test
+        parser
+)
 # <<< parser test <<<
 
 # >>> generator test >>>
@@ -122,10 +129,12 @@ add_executable(
 
 add_library(LibGenerator ${GENERATOR})
 
+add_subdirectory("src/semantic_analysis")
 # target_include_directories(generator_test PRIVATE "src/code_generation" "test/code_generation")
 target_link_libraries(
         generator_test
         LibGenerator
+        semantic
         GTest::gtest_main
         GTest::gmock_main
 )
@@ -152,3 +161,21 @@ add_executable(
 )
 target_include_directories(pascal2c PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(pascal2c LibGenerator GTest::gtest_main GTest::gmock_main)
+
+
+
+add_subdirectory("src/code_generation/optimizer")
+
+add_executable(transformer_test 
+        test/code_generation/transformer_test.cc
+)
+target_include_directories(transformer_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+target_link_libraries(transformer_test PUBLIC
+        parser
+        semantic
+        LibGenerator
+        optimizer
+	GTest::gtest_main
+	GTest::gmock_main
+)

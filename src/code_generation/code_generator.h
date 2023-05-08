@@ -44,6 +44,9 @@ class CodeGenerator : Visitor {
     virtual void VisitBinOp(const shared_ptr<BinaryOperation> &node) override;
     virtual void VisitOper(const shared_ptr<Oper> &node) override;
     virtual void VisitNum(const shared_ptr<Num> &node) override;
+    virtual void VisitString(const shared_ptr<String> &node) override;
+    virtual void VisitReal(const shared_ptr<Real> &node) override;
+    virtual void VisitChar(const shared_ptr<Char> &node) override;
     virtual void VisitType(const shared_ptr<Type> &node) override;
     virtual void VisitConstType(const shared_ptr<ConstType> &node) override;
     virtual void VisitAssign(const shared_ptr<Assignment> &node) override;
@@ -53,6 +56,8 @@ class CodeGenerator : Visitor {
     virtual void VisitIfStatement(const shared_ptr<IfStatement> &node) override;
     virtual void
     VisitForStatement(const shared_ptr<ForStatement> &node) override;
+    virtual void
+    VisitFunctionCall(const shared_ptr<FunctionCall> &node) override;
 
     // Get Symbol Table's current scope name
     const string GetCurrentScope() const {
@@ -66,8 +71,6 @@ class CodeGenerator : Visitor {
 
     // Is this var passed-by-reference or passed-by-value in current scope
     bool IsReferenceArg(const shared_ptr<Var> &node) const;
-    // Is return variable
-    bool IsReturnVar(const shared_ptr<Var> &node) const;
 
     // Get current indent blank string based on current indent level
     const string Indent() const;

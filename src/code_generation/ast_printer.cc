@@ -150,6 +150,18 @@ void ASTPrinter::VisitNum(const shared_ptr<Num> &node) {
              << endl;
 }
 
+void ASTPrinter::VisitString(const shared_ptr<String> &node) {
+    ErrNotImplemented();
+}
+
+void ASTPrinter::VisitReal(const shared_ptr<Real> &node) {
+    ErrNotImplemented();
+}
+
+void ASTPrinter::VisitChar(const shared_ptr<Char> &node) {
+    ErrNotImplemented();
+}
+
 void ASTPrinter::VisitStatement(const shared_ptr<Statement> &node) {
     ErrNotImplemented();
 }
@@ -157,6 +169,9 @@ void ASTPrinter::VisitIfStatement(const shared_ptr<IfStatement> &node) {
     ErrNotImplemented();
 }
 void ASTPrinter::VisitForStatement(const shared_ptr<ForStatement> &node) {
+    ErrNotImplemented();
+}
+void ASTPrinter::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
     ErrNotImplemented();
 }
 

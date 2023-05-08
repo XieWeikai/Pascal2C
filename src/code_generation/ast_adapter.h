@@ -1,6 +1,7 @@
 #ifndef PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
 #pragma once
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <utility>
@@ -88,6 +89,42 @@ class Num : public ASTNode {
 
   private:
     int value_;
+};
+
+class String : public ASTNode {
+  public:
+    String(const shared_ptr<Token> &token)
+        : value_(std::move(token->GetValue())) {}
+    virtual ~String() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetValue() const { return value_; };
+
+  private:
+    string value_;
+};
+
+class Real : public ASTNode {
+  public:
+    Real(const shared_ptr<Token> &token)
+        : value_(std::move(token->GetValue())) {}
+    virtual ~Real() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetValue() const { return value_; }
+
+  private:
+    string value_;
+};
+
+class Char : public ASTNode {
+  public:
+    Char(const shared_ptr<Token> &token)
+        : value_(std::move(token->GetValue())) {}
+    virtual ~Char() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetValue() const { return value_; }
+
+  private:
+    string value_;
 };
 
 class IVar : public ASTNode {
@@ -216,17 +253,17 @@ class ArrayDeclaration : public ASTNode {
 class ArrayAccess : public IVar {
   public:
     ArrayAccess(const shared_ptr<Array> &array,
-                const vector<shared_ptr<Num>> &indices)
+                const vector<shared_ptr<ASTNode>> &indices)
         : array_(array), indices_(indices) {}
     virtual ~ArrayAccess() = default;
     void Accept(Visitor &visitor) override;
     const shared_ptr<Array> &GetArray() const { return array_; }
-    const vector<shared_ptr<Num>> &GetIndices() const { return indices_; }
+    const vector<shared_ptr<ASTNode>> &GetIndices() const { return indices_; }
     const string GetName() const override { return array_->GetName(); }
 
   private:
     shared_ptr<Array> array_;
-    vector<shared_ptr<Num>> indices_;
+    vector<shared_ptr<ASTNode>> indices_;
 };
 
 class Argument : public ASTNode {
@@ -268,20 +305,16 @@ class Function : public ASTNode {
     Function(const string &name, const shared_ptr<Type> &return_type,
              const vector<shared_ptr<Argument>> &args,
              const shared_ptr<Block> &block)
-        : name_(name), return_type_(return_type), args_(args), block_(block),
-          return_var_(std::make_shared<Var>(
-              std::make_shared<Token>(TokenType::IDENTIFIER, name))) {}
+        : name_(name), return_type_(return_type), args_(args), block_(block) {}
     virtual ~Function() = default;
     void Accept(Visitor &visitor) override;
     const string GetName() const { return name_; }
-    const shared_ptr<Var> GetReturnVar() const { return return_var_; }
     const string GetReturnType() const { return return_type_->GetType(); }
     const vector<shared_ptr<Argument>> &GetArgs() const { return args_; }
     const shared_ptr<Block> &GetBlock() const { return block_; }
 
   private:
     string name_;
-    shared_ptr<Var> return_var_;
     shared_ptr<Type> return_type_;
     vector<shared_ptr<Argument>> args_;
     shared_ptr<Block> block_;
@@ -354,24 +387,20 @@ class NoOp : public ASTNode {
 };
 
 /**
- * @brief Expression node
+ * @brief Statement with a ';'
  * Pseudo-code example:
- * Expr e1 = Expr(2, +, 3);
- * Expr e2 = Expr(e1, -, 1);
+ * a;
+ * add(1, 2);
  */
 class Statement : public ASTNode {
   public:
-    Statement(const shared_ptr<ASTNode> &left_hand,
-              const shared_ptr<ASTNode> &right_hand)
-        : left_hand_(left_hand), right_hand_(right_hand) {}
+    Statement(const shared_ptr<ASTNode> &node) : node_(node) {}
     virtual ~Statement() = default;
     void Accept(Visitor &visitor) override;
-    const shared_ptr<ASTNode> &GetLeftHand() const { return left_hand_; }
-    const shared_ptr<ASTNode> &GetRightHand() const { return right_hand_; }
+    const shared_ptr<ASTNode> &GetNode() const { return node_; }
 
   private:
-    shared_ptr<ASTNode> left_hand_;
-    shared_ptr<ASTNode> right_hand_;
+    shared_ptr<ASTNode> node_;
 };
 
 class IfStatement : public ASTNode {
@@ -395,21 +424,37 @@ class IfStatement : public ASTNode {
 
 class ForStatement : public ASTNode {
   public:
-    ForStatement(const shared_ptr<Var> &variable, const shared_ptr<Num> &start,
-                 const shared_ptr<Num> &end, const shared_ptr<Compound> &body)
+    ForStatement(const shared_ptr<Var> &variable, const shared_ptr<ASTNode> &start,
+                 const shared_ptr<ASTNode> &end, const shared_ptr<Compound> &body)
         : variable_(variable), start_(start), end_(end), body_(body) {}
     virtual ~ForStatement() = default;
     void Accept(Visitor &visitor) override;
     const shared_ptr<Var> &GetVariable() const { return variable_; }
-    const shared_ptr<Num> &GetStart() const { return start_; }
-    const shared_ptr<Num> &GetEnd() const { return end_; }
+    const shared_ptr<ASTNode> &GetStart() const { return start_; }
+    const shared_ptr<ASTNode> &GetEnd() const { return end_; }
     const shared_ptr<Compound> &GetBody() const { return body_; }
 
   private:
     shared_ptr<Var> variable_;
-    shared_ptr<Num> start_;
-    shared_ptr<Num> end_;
+    shared_ptr<ASTNode> start_;
+    shared_ptr<ASTNode> end_;
     shared_ptr<Compound> body_;
+};
+
+class FunctionCall : public ASTNode {
+  public:
+    FunctionCall(const string &name,
+                 const vector<shared_ptr<ASTNode>> parameters)
+        : name_(name), parameters_(std::move(parameters)) {}
+    FunctionCall(const string &name) : name_(name), parameters_() {}
+    virtual ~FunctionCall() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetName() const { return name_; }
+    const vector<shared_ptr<ASTNode>> &GetParameters() { return parameters_; }
+
+  private:
+    string name_;
+    vector<shared_ptr<ASTNode>> parameters_;
 };
 
 } // namespace code_generation
