@@ -4,19 +4,35 @@
 
 ### 数据结构说明
 
-- TOKEN: `yylex()` 的返回值，类型是 int, 表示 token 的类型. 单字符的 token 的类型就是字符本身, 例如 `+` 对应 int 值为 `'+'`; 多字符的 token 的类型是一个预定义的宏, 例如 `PROGRAM` 对应 int 值为 `TOK_PROGRAM`. 多字符的预定义宏的值从 257 开始, 自动分配.
-- yylval: token 的词法属性, 类型为 `union { uint32_t intval; double realval; char strval[MAX_STR_LEN]; }`. `intval` 保存整型数的值, `realval` 保存实数的值, `strval` 保存字符串的值.
-- yylineno: 行号, 类型为 int, 从 1 开始计数.
-- yycolno: 列号, 类型为 int, 从 1 开始计数.
-- yyerrno: 错误类型, 类型为 int, 用于保存最后一次的错误类型.
-- yytext: token 的文本, 类型为 char*, 用于 TOK_ID 的词法属性.
-- YYERRMSG: 错误信息, 类型为 char**, 保存错误类型对应的错误信息.
+接口部分:
+
+- `yylex()`: 词法分析器的主函数, 用于从 stdin 中读取一个 token, 返回 token 的类型。类型是 int，表示 token 的类型。单字符的 token 的类型就是字符本身，例如 `+` 对应 int 值为 `'+'`；多字符的 token 的类型是一个预定义的宏，例如 `PROGRAM` 对应 int 值为 `TOK_PROGRAM`。多字符的预定义宏的值从 257 开始，自动分配。
+- `TokenToString(int token)`: 将 token 的类型转换为对应的字符串。
+- `yyreset(FILE *in)`: 重置词法分析器，使其从 `in` 中读取 token。
+- `yylineno`: 用于保存当前 token 的行数。类型为 int，从 1 开始计数。
+- `yycolno`: 用于保存当前 token 的列数。类型为 int，从 1 开始计数。
+- `yyerrno`: 用于保存错误类型。类型为 int，用于保存最后一次的错误类型。
+- `YYERRMSG`: 用于保存错误类型对应的错误信息。类型为 char**。
+- `yytext`: 用于保存当前 token 的文本。类型为 char*，用于 TOK_ID 的词法属性。
+- `yylval`: 用于保存当前 token 的值，例如数字的值。类型为 `union { uint32_t intval; double realval; char strval[MAX_STR_LEN]; }`。`intval` 保存整型数的值，`realval` 保存实数的值，`strval` 保存字符串的值。
+
+内部部分:
+
+- `yycolno_next`: 用于保存下一个 token 的列数。类型为 int，从 1 开始计数。
+- `cmt_level`: 用于保存注释的嵌套深度。类型为 int，从 0 开始计数。
+- `str_start_colno`: 用于保存字符串的起始列数。类型为 int，从 1 开始计数。用于在STRING状态下获得字符串的起始列数。
 
 ### 函数、方法说明
 
 ```c
-// 这个宏会在每次识别出一个 token 时执行, 用于维护列号计数器
-#define YY_USER_ACTION {yycolno = yycolno_next; yycolno_next += yyleng;}
+// 这个宏会在每次识别出一个 token 时执行, 用于维护列号计数器以及将 token 的文本转换为小写
+#define YY_USER_ACTION {                            \
+    if (YYSTATE == INITIAL) {                       \
+        char* p = yytext;                           \
+        for (; *p; ++p) *p = tolower(*p);           \
+    }                                               \
+    yycolno = yycolno_next; yycolno_next += yyleng; \
+}
 // ...
 // 设定词法分析器遇到 EOF 后直接退出
 int yywrap() {
@@ -65,22 +81,23 @@ char* TokenToString(int token) {
     - 遇到转义序列，将对应的实际字符追加到字符串中。
     - 遇到其他转义字符，将原始的内容追加到字符串中。
 4. 遇到单引号（'），返回到初始状态。
+5. 注意使用`str_start_col`维护字符串的起始列号。
 
 <img src="./assets/escape-char.png" style="zoom: 20%;" />
 
 ```
 %x STRING
 
-"'"                {BEGIN(STRING); yylval.strval[0] = '\0';}
-<STRING>\n         {yycolno_next = 1; yyerrno = ERR_UNTERMINATED_STRING; BEGIN(INITIAL); return TOK_ERROR;}
+"'"                {str_start_col = yycolno; BEGIN(STRING); yylval.strval[0] = '\0';}
+<STRING>\n         {yycolno = str_start_col; yycolno_next = 1; yyerrno = ERR_UNTERMINATED_STRING; BEGIN(INITIAL); return TOK_ERROR;}
 <STRING><<EOF>>    {yyerrno = ERR_UNTERMINATED_STRING; BEGIN(INITIAL); return TOK_ERROR;}
-<STRING>[^\\']     {strcat(yylval.strval, yytext);}
-<STRING>\\n        {strcat(yylval.strval, "\n");}
-<STRING>\\t        {strcat(yylval.strval, "\t");}
-<STRING>\\r        {strcat(yylval.strval, "\r");}
-<STRING>\\'        {strcat(yylval.strval, "'");}
-<STRING>\\.        {strcat(yylval.strval, yytext);}
-<STRING>"'"        {BEGIN(INITIAL); return TOK_STRING;}
+<STRING>[^\\']     {yycolno = str_start_col; strcat(yylval.strval, yytext);}
+<STRING>\\n        {yycolno = str_start_col; strcat(yylval.strval, "\n");}
+<STRING>\\t        {yycolno = str_start_col; strcat(yylval.strval, "\t");}
+<STRING>\\r        {yycolno = str_start_col; strcat(yylval.strval, "\r");}
+<STRING>\\'        {yycolno = str_start_col; strcat(yylval.strval, "'");}
+<STRING>\\.        {yycolno = str_start_col; strcat(yylval.strval, yytext);}
+<STRING>"'"        {yycolno = str_start_col; BEGIN(INITIAL); return TOK_STRING;}
 ```
 
 #### 处理关键字
@@ -107,12 +124,17 @@ identifier        {alpha}{alpha_num}*
 digit             [0-9]
 unsigned_integer  {digit}+
 
-{unsigned_integer} {
+{unsigned_integer}   {
     if (strlen(yytext) > MAX_INT_LEN) {
         yyerrno = ERR_INTEGER_TOO_LARGE;
         return TOK_ERROR;
     }
-    yylval.intval = strtoul(yytext, NULL, 10);
+    unsigned long int n = strtoul(yytext, NULL, 10);
+    if (n > INT_MAX) {
+        yyerrno = ERR_INTEGER_TOO_LARGE;
+        return TOK_ERROR;
+    }
+    yylval.intval = n;
     return TOK_INTEGER;
 }
 ```
@@ -126,11 +148,13 @@ exponent          e[+-]?{digit}+
 u                 {unsigned_integer}
 real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 
-{real} {
+{real}/[^\.]         {
     yylval.realval = strtod(yytext, NULL);
     return TOK_REAL;
 }
 ```
+
+注意这里需要处理 `..` 作为 `TOK_DOTDOT` 的情况, 因此需要排除浮点数(REAL)后再接`.`的情况.
 
 #### 处理运算符
 
