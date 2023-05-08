@@ -162,8 +162,7 @@ add_executable(
 target_include_directories(pascal2c PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(pascal2c LibGenerator GTest::gtest_main GTest::gmock_main)
 
-
-
+# >>> Transformer Test >>>
 add_subdirectory("src/code_generation/optimizer")
 
 add_executable(transformer_test 
@@ -179,3 +178,4 @@ target_link_libraries(transformer_test PUBLIC
 	GTest::gtest_main
 	GTest::gmock_main
 )
+# <<< Transformer Test <<<

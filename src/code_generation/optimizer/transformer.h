@@ -5,9 +5,12 @@ namespace pascal2c::code_generation {
 
 class Transformer {
 public : 
+    /**
+     * @attention It need analysis::init() has been executed.
+    */
+	explicit Transformer(std::shared_ptr<ast::Ast> root);
     Transformer() = delete;
-	Transformer(std::shared_ptr<ast::Program> root);
-    auto getASTRoot() const {return ast_root;}
+    auto GetASTRoot() const {return ast_root;}
 
 private :
 	std::shared_ptr<ASTRoot> ast_root;
@@ -16,7 +19,11 @@ private :
     shared_ptr<ASTNode>
         transSubprogram(shared_ptr<ast::Subprogram> cur);
 
-
+    /**
+     * @brief Handle Program
+    */
+    template<typename T>
+    shared_ptr<Block> transBody(shared_ptr<T> cur);
     template<typename T>
     shared_ptr<Declaration> transDeclaration(shared_ptr<T> body);
     shared_ptr<Assignment>
@@ -24,13 +31,15 @@ private :
     vector<shared_ptr<ASTNode>> 
         transVarDeclaration(shared_ptr<ast::VarDeclaration> cur);
 
-
-    template<typename T>
-    shared_ptr<Block> transBody(shared_ptr<T> cur);
-
+    /**
+     * @brief Handle Expressions
+    */
     shared_ptr<ASTNode>
         transExpression(shared_ptr<ast::Expression> cur);
 
+    /**
+     * @brief Handle Statements
+    */
     shared_ptr<ASTNode>
         transStatement(shared_ptr<ast::Statement> cur);
     shared_ptr<Compound>

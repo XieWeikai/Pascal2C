@@ -13,3 +13,8 @@ add_library(optimizer STATIC
 	transformer.cc
 	transformer.h
 )
+
+
+target_link_libraries(optimizer PUBLIC
+	semantic
+)

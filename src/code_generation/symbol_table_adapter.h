@@ -1,4 +1,3 @@
-#ifdef testing
 #ifndef PASCAL2C_SRC_CODE_GENERATION_SYMBOL_TABLE_ADAPTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_SYMBOL_TABLE_ADAPTER_H_
 #pragma once
@@ -39,8 +38,7 @@ class SymbolScope : ISymbolScope {
         : symbol_table_block_(symbol_table_block),
           symbol_type_converter_(symbol_table_converter) {}
     const shared_ptr<SymbolItem> Lookup(const string &name) const override;
-    void AddVariable(const string &name, bool is_reference) override;
-
+    void AddVariable(const shared_ptr<ASTNode> &node, bool is_reference) override;
   private:
     symbol_table::ItemType StringTypeToSymbolTable(const string &type) const;
     shared_ptr<SymbolTableConverter> symbol_type_converter_;
@@ -51,9 +49,12 @@ class SymbolScope : ISymbolScope {
 class SymbolTable : ISymbolTable {
   public:
     SymbolTable() {}
-    void AddVariable(const string &name, bool is_reference) override;
+    void AddVariable(const shared_ptr<ASTNode> &node,
+                             bool is_reference) override;
     bool IsReference(const string &name) const override;
+    bool IsReturnVar(const string &name) const override;
     void SetCurrentScope(const string &scope_name) override;
+    const string GetCurrentScope() override;
     const shared_ptr<SymbolItem> Lookup(const string &name) const override;
 
   private:
@@ -62,5 +63,4 @@ class SymbolTable : ISymbolTable {
 };
 } // namespace code_generation
 } // namespace pascal2c
-#endif
 #endif

@@ -2,14 +2,14 @@ program CompilerTest;
 
 const
   PI = 3.14159;
-
-type
-  TIntArray = array[1..5] of integer;
-  TRealArray = array[-2..2] of real;
-
+{
+  type
+    TIntArray = array[1..5] of integer;
+    TRealArray = array[-2..2] of real;
+}
 var
-  intArray: TIntArray;
-  realArray: TRealArray;
+  intArray: array[1..5] of integer;
+  realArray: array[-2..2] of real;
   i: integer;
 
 function Add(x, y: integer): integer;

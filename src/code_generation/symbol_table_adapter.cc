@@ -1,4 +1,3 @@
-#ifdef testing
 #include "symbol_table_adapter.h"
 #include "code_generation/ast_adapter.h"
 #include "semantic_analysis/symbol_table.h"
@@ -66,7 +65,13 @@ void SymbolTable::SetCurrentScope(const string &scope_name) {
     current_scope_ = make_shared<SymbolScope>(symbol_table_block);
 }
 
-void SymbolTable::AddVariable(const string &name, bool is_reference) {}
+void SymbolTable::AddVariable(const shared_ptr<ASTNode> &node, bool is_reference) {
+
+}
+
+bool SymbolTable::IsReference(const string &name) const {
+    
+}
 
 const std::shared_ptr<SymbolItem>
 SymbolTable::Lookup(const string &name) const {
@@ -80,4 +85,3 @@ bool SymbolTable::IsReference(const string &name) const {
 
 } // namespace code_generation
 } // namespace pascal2c
-#endif

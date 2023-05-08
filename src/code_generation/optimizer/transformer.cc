@@ -17,6 +17,11 @@ using ::std::make_shared;
 static const string TOKToCString(int tk) {
 	switch (tk) {
 	
+	case '=' : return "=";
+	case '+' : return "+";
+	case '-' : return "-";
+	case '*' : return "*";
+	case '/' : return "/";
 	case 297 : return "int";
 	case 298 : return "double";
 	case 299 : return "bool";
@@ -24,6 +29,7 @@ static const string TOKToCString(int tk) {
 	case 301 : return "string";
 	}
 	
+	std::cerr << "Err tk : " << tk << "->" << char(tk)<<"\n";
 	throw std::runtime_error{"[Transformer] unknown type"}; 
 	return "unkown-type";
 }
@@ -35,24 +41,34 @@ static auto make_shared_token(const TokenType type , const string value = "") {
 	);
 }
 
+// extern std::string nowblockName;
 
-Transformer::Transformer(shared_ptr<ast::Program> root) {
+Transformer::Transformer(shared_ptr<ast::Ast> root) {
 	auto program_handle = std::dynamic_pointer_cast<ast::Program>(root);
 	if (program_handle == nullptr) {
 		throw std::runtime_error{"[Transformer] bad root pointer"};
 	}
+	// if (nowblockName.size() == 0) {
+	// 	throw std::runtime_error{"[Transformer] analysis::init() has not been executed."};
+	// }
+
 	ast_root = transProgram(program_handle);
 }
 
 
 shared_ptr<Program> Transformer::transProgram(shared_ptr<ast::Program> cur) {
+	analysiser::BlockIn(std::to_string(cur->program_head()->line()));
 	return make_shared<Program>(
 		cur->program_head()->id() ,
 		transBody<ast::ProgramBody>(cur->program_body())
 	);
 }
+
 shared_ptr<ASTNode>
 Transformer::transSubprogram(shared_ptr<ast::Subprogram> cur) {
+	std::cerr << "Subpro@" << cur->line() <<" : " << cur->column() <<"\n";
+	analysiser::BlockIn(std::to_string(cur->subprogram_head()->line()));
+
 	auto params = cur->subprogram_head()->parameters();
 	vector<shared_ptr<Argument>> args;
 
@@ -62,12 +78,14 @@ Transformer::transSubprogram(shared_ptr<ast::Subprogram> cur) {
 			args.push_back(std::move(make_shared<Argument>(
 				make_shared_token<Var> (TokenType::IDENTIFIER , (*list)[i]) ,
 				make_shared_token<Type>(TokenType::RESERVED	  , TOKToCString(elem->type())),
-				!elem->is_var() //TODO
+				!elem->is_var() //TODO : need_test
 			)));
 		}
 	}
 
 	if (cur->subprogram_head()->is_function()) { // function
+		std::cerr << "Function@" << cur->line() <<" : " << cur->column() <<"\n";
+
 		return make_shared<Function>(
 			cur->subprogram_head()->id() ,
 			make_shared_token<Type>(
@@ -78,6 +96,8 @@ Transformer::transSubprogram(shared_ptr<ast::Subprogram> cur) {
 		);
 
 	} else { // procedure
+		std::cerr << "Proce@" << cur->line() <<" : " << cur->column() <<"\n";
+
 		return make_shared<Subprogram>(
 			cur->subprogram_head()->id() , args ,
 			transBody<ast::SubprogramBody>(cur->subprogram_body())
@@ -91,6 +111,8 @@ Transformer::transBody(shared_ptr<T> body) {
 	static_assert(std::is_same_v<T , ast::ProgramBody> ||
 				  std::is_same_v<T , ast::SubprogramBody> ,
 				"[Transformer] bad body type");
+	std::cerr << "Body@" << body->line() <<" : " << body->column() <<"\n";
+
 
 	vector<std::shared_ptr<ASTNode>> child;
 	if constexpr (std::is_same_v<T , ast::ProgramBody>) {
@@ -99,6 +121,7 @@ Transformer::transBody(shared_ptr<T> body) {
 		child.push_back(std::move(transStatement(body->statement_list())));
 	}
 
+	analysiser::BlockExit();
 	return make_shared<Block>(
 		transDeclaration<T>(body) ,
 		make_shared<Compound>(child)
@@ -112,6 +135,7 @@ Transformer::transDeclaration(shared_ptr<T> body) {
 	static_assert(std::is_same_v<T , ast::ProgramBody> ||
 				  std::is_same_v<T , ast::SubprogramBody> ,
 				"[Transformer] bad body type");
+	std::cerr << "body@" << body->line() <<" : " << body->column() <<"\n";
 
 	vector<shared_ptr<ASTNode>> decls;
 
@@ -119,15 +143,21 @@ Transformer::transDeclaration(shared_ptr<T> body) {
 	auto var_decl   = body->var_declarations();
 
 
-	for(const auto& elem : const_decl) {
-		decls.push_back(std::move(transConstDeclaration(elem)));
-	}
+	// for(const auto& elem : const_decl) {
+	// 	decls.push_back(std::move(transConstDeclaration(elem)));
+	// }
 
 	for(const auto& elem : var_decl) {
 		auto var_ret = transVarDeclaration(elem);
 		decls.insert(decls.end() ,var_ret.begin() ,var_ret.end() );
 	}
 
+	// >>> check >>>
+	for(const auto& elem : decls) {
+		if (elem == nullptr) {
+			throw std::runtime_error{"[Transformer] bad decl nullptr"};
+		}
+	}
 	return make_shared<Declaration>(decls);
 
 }
@@ -146,13 +176,13 @@ vector<shared_ptr<ASTNode>>
 Transformer::transVarDeclaration(shared_ptr<ast::VarDeclaration> cur) { 
 	const auto& list = cur->id_list();
 
-	vector<shared_ptr<ASTNode>> res; res.resize(list->Size());
+	vector<shared_ptr<ASTNode>> res; res.reserve(list->Size());
 	
 	if (cur->type()->is_array()) { // array decl
 
 		for (size_t i = 0 ; i < list->Size() ; i++) {
 			const auto& arr_type = cur->type();
-			vector<std::pair<int , int>> perd; perd.resize(arr_type->periods().size());
+			vector<std::pair<int , int>> perd; perd.reserve(arr_type->periods().size());
 
 			for (const auto& elem : arr_type->periods()) {
 				perd.push_back({elem.digits_1 , elem.digits_2});
@@ -256,7 +286,7 @@ passExpr(shared_ptr<ast::Expression> cur) {
 
 		} else { // array type
 			vector<shared_ptr<ASTNode>> indices; 
-			indices.resize(var->expr_list().size()); 
+			indices.reserve(var->expr_list().size()); 
 
 			for (const auto& elem : var->expr_list()) {
 				indices.push_back(std::move(passExpr(elem)));
@@ -286,19 +316,17 @@ passExpr(shared_ptr<ast::Expression> cur) {
 
 	case ast::ExprType::BINARY : {
 		auto bin_expr = std::static_pointer_cast<ast::BinaryExpr>(cur);
-		vector<shared_ptr<ASTNode>> child {
-			passExpr(bin_expr->lhs()),
-			passExpr(bin_expr->rhs())
-		};
 
-		return make_shared<Compound>(child);
+		return make_shared<BinaryOperation>(
+			passExpr(bin_expr->lhs()) ,
+			make_shared_token<Oper>(TokenType::OPERATOR , TOKToCString(bin_expr->op())) ,
+			passExpr(bin_expr->rhs())
+		);
 	}
 
 	case ast::ExprType::CALL : {
-		// throw std::runtime_error{"[Transformer] Bad call"};
-
 		auto callee = std::static_pointer_cast<ast::CallValue>(cur);
-		vector<shared_ptr<ASTNode>> param; param.resize(callee->params().size());
+		vector<shared_ptr<ASTNode>> param; param.reserve(callee->params().size());
 
 		for (const auto& elem : callee->params()) {
 			param.push_back(std::move(passExpr(elem)));
@@ -308,8 +336,15 @@ passExpr(shared_ptr<ast::Expression> cur) {
 	}
 
 	case ast::ExprType::CALL_OR_VAR : {
-		throw std::runtime_error{"[Transformer] unimpl callorvar"};
-		return nullptr;
+		auto callval = std::static_pointer_cast<ast::CallOrVar>(cur);
+		symbol_table::SymbolTableItem item;
+		analysiser::Find(item);
+
+		if (item.is_var()) {
+			return passExpr(make_shared<ast::Variable>(callval->line() , callval->column() , callval->id()));
+		} else if (item.is_func()) {
+			return passExpr(make_shared<ast::CallValue>(callval->line() , callval->column() , callval->id()));
+		}
 	}
 
 	}
@@ -322,6 +357,7 @@ shared_ptr<ASTNode>
 Transformer::transExpression(shared_ptr<ast::Expression> cur) {
 	// Optimizer::Calculator calc{cur};
 	// auto res = calc.getResultExpr();
+	std::cerr << "Cur@" << cur->line() <<" : " << cur->column() <<"\n";
 
 	return passExpr(cur);
 }
@@ -339,6 +375,7 @@ Transformer::transExpression(shared_ptr<ast::Expression> cur) {
 */
 shared_ptr<ASTNode>
 Transformer::transStatement(shared_ptr<ast::Statement> cur) {
+	std::cerr << "Cur@" << cur->line() <<" : " << cur->column() <<"\n";
 	switch (cur->GetType()) {
 
 	case ast::StatementType::ASSIGN_STATEMENT :
@@ -356,6 +393,7 @@ Transformer::transStatement(shared_ptr<ast::Statement> cur) {
 	case ast::StatementType::FOR_STATEMENT :
 		return transForStatement(std::static_pointer_cast<ast::ForStatement>(cur));
 	}
+
 	throw std::runtime_error{"[Transformer] unknown statement\n"};
 	return nullptr;
 }
@@ -370,7 +408,7 @@ Transformer::transAssignStatement(shared_ptr<ast::AssignStatement> cur) {
 
 shared_ptr<Statement>
 Transformer::transCallStatement(shared_ptr<ast::CallStatement> cur) {
-	vector<shared_ptr<ASTNode>> param; param.resize(cur->expr_list().size());
+	vector<shared_ptr<ASTNode>> param; param.reserve(cur->expr_list().size());
 
 	for (const auto& elem : cur->expr_list()) {
 		param.push_back(std::move(passExpr(elem)));
@@ -383,7 +421,7 @@ Transformer::transCallStatement(shared_ptr<ast::CallStatement> cur) {
 
 shared_ptr<Compound>
 Transformer::transCompoundStatement(shared_ptr<ast::CompoundStatement> cur) {
-	vector<shared_ptr<ASTNode>> states; states.resize(cur->statements().size());
+	vector<shared_ptr<ASTNode>> states; states.reserve(cur->statements().size());
 
 	for(const auto& elem : cur->statements()) {
 		states.push_back(std::move(transStatement(elem)));
@@ -396,8 +434,14 @@ shared_ptr<IfStatement>
 Transformer::transIfStatement(shared_ptr<ast::IfStatement> cur) {
 	auto cond = transExpression(cur->condition());
 	vector<shared_ptr<ASTNode>> then_branch_ {std::move(transStatement(cur->then()))};
-    vector<shared_ptr<ASTNode>> else_branch_ {std::move(transStatement(cur->else_part()))};
 
+	if (cur->else_part() == nullptr) {
+		return make_shared<IfStatement>(cond , 
+		make_shared<Compound>(then_branch_)
+	 );
+	}
+
+    vector<shared_ptr<ASTNode>> else_branch_ {std::move(transStatement(cur->else_part()))};
 	return make_shared<IfStatement>(cond , 
 		make_shared<Compound>(then_branch_) ,
 		make_shared<Compound>(else_branch_)
