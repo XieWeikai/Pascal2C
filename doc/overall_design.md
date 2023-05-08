@@ -41,12 +41,14 @@ User Subroutines
 #### 4.1.2 接口概览
 
 - `yylex()`: 词法分析器的主函数, 用于从 stdin 中读取一个 token, 返回 token 的类型.
-- `yyval`: 用于保存 token 的属性, 例如整型数的值, 实数的值.
+- `TokenToString(int token)`: 将 token 的类型转换为对应的字符串.
+- `yyreset(FILE *in)`: 重置词法分析器, 使其从 `in` 中读取 token.
 - `yylineno`: 用于保存当前 token 的行数.
 - `yycolno`: 用于保存当前 token 的列数.
 - `yyerrno`: 用于保存错误类型.
-- `yytext`: 用于保存当前 token 的文本.
 - `YYERRMSG`: 用于保存错误类型对应的错误信息.
+- `yytext`: 用于保存当前 token 的文本.
+- `yylval`: 用于保存当前 token 的值, 例如数字的值.
 
 ---
 
