@@ -1,5 +1,6 @@
 #ifndef PASCAL2C_SRC_CODE_GENERATION_SYMBOL_TABLE_ADAPTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_SYMBOL_TABLE_ADAPTER_H_
+#include "ast/program.h"
 #pragma once
 #include "abstract_symbol_table_adapter.h"
 #include "code_generation/ast_adapter.h"
@@ -33,9 +34,11 @@ class SymbolScope : ISymbolScope {
 
 class SymbolTable : ISymbolTable {
   public:
-    SymbolTable()
+    SymbolTable(ast::Program node)
         : name_table_(
-              std::make_shared<analysiser::nameTable>(analysiser::table)) {}
+              std::make_shared<analysiser::nameTable>(analysiser::table)) {
+        analysiser::DoProgram(node);
+    }
     bool IsReference(const string &name) const override;
     bool IsReturnVar(const string &name) const override;
     void SetCurrentScope(const string &scope_name) override;
