@@ -25,6 +25,9 @@ void PrintError(const std::vector<std::string> &lines,
         std::cout << Colorize(line_num + " | ", Color::Blue);
         if (i == line) {
             std::cout << lines[i - 1];
+            if (lines[i - 1].back() != '\n') {
+                std::cout << std::endl;
+            }
 
             int offset = num_width + 3 + col - 1;
             std::cout << std::string(offset, ' ');
