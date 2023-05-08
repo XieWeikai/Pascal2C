@@ -55,6 +55,9 @@ void CodeGenerator::VisitProgram(
     ostream_ << "#include <stdio.h>" << endl
              << "#include <stdlib.h>" << endl
              << endl;
+    for (auto &gd : node->GetGlobalDeclarations()) {
+        Visit(gd);
+    }
     ostream_ << "// " << node->GetName() << endl;
     ostream_ << "int main(int argc, char* argv[]) {" << endl;
 
