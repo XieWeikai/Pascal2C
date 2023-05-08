@@ -8,6 +8,7 @@ extern "C"
 #include "lexer.h"
 }
 
+// Output the line and column number of the current token and the current level of indentation.
 #define INIT_TOSTRING(str_s, level) \
     std::stringstream str_s;        \
     LineColumnOutput(str_s);        \
@@ -34,6 +35,7 @@ namespace pascal2c::ast
             return "unknown";
         }
     }
+    // eg. IdList: a, b, c
     const string IdList::ToString(const int level) const
     {
         INIT_TOSTRING(str_s, level);
@@ -51,6 +53,8 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
+    // eg. Type: array [1..10, 1..10] of integer
+    // eg. Type: integer
     const string Type::ToString(const int level) const
     {
         INIT_TOSTRING(str_s, level);
@@ -77,6 +81,10 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
+    // eg. Parameter: var integer
+    //         IdList: a, b, c
+    // eg. Parameter: integer
+    //        IdList: a, b, c
     const string Parameter::ToString(const int level) const
     {
         INIT_TOSTRING(str_s, level);
@@ -93,6 +101,8 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
+    // eg. ConstDeclaration: a
+    //         1
     const string ConstDeclaration::ToString(const int level) const
     {
         INIT_TOSTRING(str_s, level);
@@ -110,6 +120,9 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
+    // eg. VarDeclaration:
+    //         Type: integer
+    //         IdList: a, b, c
     const string VarDeclaration::ToString(const int level) const
     {
         INIT_TOSTRING(str_s, level);
@@ -120,6 +133,14 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
+    // eg. SubprogramHead: procedure a
+    //         Parameter: integer
+    //             IdList: a, b, c
+    // eg. SubprogramHead: function a integer
+    //         Parameter: integer
+    //             IdList: a
+    //         Parameter: real
+    //             IdList: b, c
     const string SubprogramHead::ToString(const int level) const
     {
         INIT_TOSTRING(str_s, level);
@@ -145,6 +166,13 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
+    // eg. SubprogramBody:
+    //         ConstDeclaration: a
+    //             1
+    //         VarDeclaration:
+    //             Type: integer
+    //             IdList: a, b, c
+    //         CompoundStatement :0
     const string SubprogramBody::ToString(const int level) const
     {
         INIT_TOSTRING(str_s, level);
@@ -165,6 +193,10 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
+    // eg. Subprogram:
+    //         SubprogramHead: procedure a
+    //         SubprogramBody:
+    //             CompoundStatement: 0
     const string Subprogram::ToString(const int level) const
     {
         INIT_TOSTRING(str_s, level);
@@ -175,6 +207,8 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
+    // eg. ProgramHead: a
+    //         IdList: a, b, c
     const string ProgramHead::ToString(const int level) const
     {
         INIT_TOSTRING(str_s, level);
@@ -187,6 +221,17 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
+    // eg. ProgramBody:
+    //         ConstDeclaration: a
+    //             1
+    //         VarDeclaration:
+    //             Type: integer
+    //             IdList: a, b, c
+    //         Subprogram:
+    //             SubprogramHead: procedure a
+    //             SubprogramBody:
+    //                 CompoundStatement: 0
+    //         CompoundStatement :0
     const string ProgramBody::ToString(const int level) const
     {
         INIT_TOSTRING(str_s, level);
@@ -212,6 +257,10 @@ namespace pascal2c::ast
         return str_s.str();
     }
 
+    // eg. Program:
+    //         ProgramHead: a
+    //         ProgramBody:
+    //             CompoundStatement: 0
     const string Program::ToString(const int level) const
     {
         INIT_TOSTRING(str_s, level);
