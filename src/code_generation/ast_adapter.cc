@@ -16,6 +16,12 @@ void Program::Accept(Visitor &visitor) {
     visitor.VisitProgram(dynamic_pointer_cast<Program>(shared_from_this()));
 }
 
+// ExitStatement
+void ExitStatement::Accept(Visitor &visitor) {
+    visitor.VisitExitStatement(
+        dynamic_pointer_cast<ExitStatement>(shared_from_this()));
+}
+
 // Subprogram
 void Subprogram::Accept(Visitor &visitor) {
     visitor.VisitSubprogram(

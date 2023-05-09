@@ -26,6 +26,8 @@ class CodeGenerator : Visitor {
   private:
     virtual void Visit(const shared_ptr<ASTNode> &node,
                        bool indent = false) override;
+    virtual void
+    VisitExitStatement(const shared_ptr<ExitStatement> &node) override;
     virtual void VisitArgument(const shared_ptr<Argument> &node) override;
     virtual void VisitProgram(const shared_ptr<Program> &node) override;
     virtual void VisitSubprogram(const shared_ptr<Subprogram> &node) override;

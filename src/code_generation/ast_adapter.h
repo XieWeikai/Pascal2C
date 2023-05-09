@@ -324,6 +324,13 @@ class Argument : public ASTNode {
     bool is_reference_;
 };
 
+// Nothing but a break; is required
+class ExitStatement : public ASTNode {
+    ExitStatement() {}
+    virtual ~ExitStatement() = default;
+    void Accept(Visitor &visitor) override;
+};
+
 class Subprogram : public ASTNode {
   public:
     Subprogram(const string &name, const vector<shared_ptr<Argument>> &args,

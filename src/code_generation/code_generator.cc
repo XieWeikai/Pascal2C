@@ -27,6 +27,10 @@ void CodeGenerator::Visit(const shared_ptr<code_generation::ASTNode> &node,
     node->Accept(*this);
 }
 
+void CodeGenerator::VisitExitStatement(const shared_ptr<ExitStatement> &node) {
+    ostream_ << Indent() << "break" << eol_;
+}
+
 void CodeGenerator::VisitArgument(const shared_ptr<Argument> &node) {
     if (node->IsReference()) {
         ostream_ << "/* Is Reference */";
