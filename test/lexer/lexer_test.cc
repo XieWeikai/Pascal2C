@@ -67,7 +67,7 @@ end.
     YYSTYPE expected_vals[11] = {{0}};
     strcpy(expected_vals[1].strval, "hello");
     strcpy(expected_vals[4].strval, "write");
-    strcpy(expected_vals[6].strval, "Hello, world!\n");
+    strcpy(expected_vals[6].strval, "Hello, world!\\n");
 
     int expected_lines[] = {
             1, 1, 1,
