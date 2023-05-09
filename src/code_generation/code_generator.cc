@@ -144,6 +144,10 @@ void CodeGenerator::VisitConstDeclaration(
     Visit(node->GetTypeNode());
     ostream_ << ' ';
     Visit(node->GetLeftNode());
+    if (node->GetRightNode()) {
+        ostream_ << " = ";
+        Visit(node->GetRightNode());
+    }
     ostream_ << eol_;
 }
 
@@ -152,6 +156,10 @@ void CodeGenerator::VisitVarDecl(
     Visit(node->GetTypeNode());
     ostream_ << ' ';
     Visit(node->GetLeftNode());
+    if (node->GetRightNode()) {
+        ostream_ << " = ";
+        Visit(node->GetRightNode());
+    }
     ostream_ << eol_;
 }
 

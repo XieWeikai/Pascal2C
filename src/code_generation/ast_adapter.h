@@ -198,8 +198,10 @@ class ConstType : public IType {
 class VarDeclaration : public ASTNode {
   public:
     VarDeclaration(const shared_ptr<ASTNode> &left_node,
-                   const shared_ptr<Type> &type_node)
-        : left_node_(left_node), type_node_(type_node){};
+                   const shared_ptr<Type> &type_node,
+                   const shared_ptr<ASTNode> &right_node)
+        : left_node_(left_node), type_node_(type_node),
+          right_node_(right_node){};
     virtual ~VarDeclaration() = default;
     void Accept(Visitor &visitor) override;
     const shared_ptr<ASTNode> &GetLeftNode() const { return left_node_; }
