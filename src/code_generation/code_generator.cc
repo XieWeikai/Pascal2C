@@ -308,7 +308,8 @@ void CodeGenerator::VisitForStatement(const shared_ptr<ForStatement> &node) {
 }
 
 // Print "%d%c%s%d..."
-void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node) {
+void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node,
+                                       bool new_line) {
     vector<string> specifiers;
     auto BaseCast = [&](const shared_ptr<ASTNode> &p) -> void {
         if (auto dp = dynamic_pointer_cast<Num>(p)) {
@@ -358,21 +359,24 @@ void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node) {
     for (auto &s : specifiers) {
         ostream_ << s;
     }
-    ostream_ << "\", ";
+    ostream_ << (new_line ? "\\n\", " : "\", ");
 }
 
 void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
     // Rename function when meet writeln or write
     auto func_name = node->GetName();
-    if (func_name == "writeln")
+    if (func_name == "writeln" || func_name == "write")
         func_name = "printf";
-    else if (func_name == "write")
-        func_name = "printf";
+    else if (func_name == "read")
+        func_name = "scanf";
 
     ostream_ << func_name << "(";
+    // print Format string
     if (func_name != node->GetName()) {
-        PrintfFormatString(node);
+        PrintfFormatString(node, (node->GetName() == "writeln"));
     }
+
+    // Print parameters
     for (int i = 0; i < node->GetParameters().size(); i++) {
         // Is reference or not
         auto r = node->GetIsReference(i);
@@ -386,6 +390,7 @@ void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
             ostream_ << ", ";
         }
     }
+
     ostream_ << ")";
 }
 

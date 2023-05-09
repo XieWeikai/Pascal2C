@@ -76,7 +76,8 @@ class CodeGenerator : Visitor {
     // Is return variable
     bool IsReturnVar(const shared_ptr<Var> &node) const;
 
-    void PrintfFormatString(const shared_ptr<FunctionCall> &node);
+    void PrintfFormatString(const shared_ptr<FunctionCall> &node,
+                            bool new_line = false);
 
     // Get current indent blank string based on current indent level
     const string Indent() const;
