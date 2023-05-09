@@ -181,31 +181,31 @@ class ConstType : public IType {
 
 class VarDeclaration : public ASTNode {
   public:
-    VarDeclaration(const shared_ptr<Var> &var_node,
+    VarDeclaration(const shared_ptr<ASTNode> &var_node,
                    const shared_ptr<Type> &type_node)
         : var_node_(var_node), type_node_(type_node){};
     virtual ~VarDeclaration() = default;
     void Accept(Visitor &visitor) override;
-    const shared_ptr<Var> &GetVarNode() const { return var_node_; }
+    const shared_ptr<ASTNode> &GetVarNode() const { return var_node_; }
     const shared_ptr<Type> &GetTypeNode() const { return type_node_; }
 
   private:
-    shared_ptr<Var> var_node_;
+    shared_ptr<ASTNode> var_node_;
     shared_ptr<Type> type_node_;
 };
 
 class ConstDeclaration : public ASTNode {
   public:
-    ConstDeclaration(const shared_ptr<Var> &var_node,
+    ConstDeclaration(const shared_ptr<ASTNode> &var_node,
                      const shared_ptr<ConstType> &type_node)
         : var_node_(var_node), type_node_(type_node) {}
     virtual ~ConstDeclaration() = default;
     void Accept(Visitor &visitor) override;
-    const shared_ptr<Var> &GetConstNode() const { return var_node_; }
+    const shared_ptr<ASTNode> &GetConstNode() const { return var_node_; }
     const shared_ptr<ConstType> &GetTypeNode() const { return type_node_; }
 
   private:
-    shared_ptr<Var> var_node_;
+    shared_ptr<ASTNode> var_node_;
     shared_ptr<ConstType> type_node_;
 };
 

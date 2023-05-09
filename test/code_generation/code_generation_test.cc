@@ -83,51 +83,6 @@ std::shared_ptr<Program> SimpleProgramAST() {
     return program;
 }
 
-TEST(GeneratorTest, DISABLED_ASTPrinterTest) {
-    string source_code = R"(program Simple;
-var
-    x, y: integer;
-begin
-    x := 2 + 3;
-    y := x - 1;
-end.
-)";
-
-    auto program = SimpleProgramAST();
-    EXPECT_EQ(program->GetName(), "Simple");
-    EXPECT_EQ(program->GetBlock()->GetDeclaration()->GetDeclarations().size(),
-              2);
-    ASTPrinter ast_printer;
-    ast_printer.Traverse(program);
-    string printed_ast = ast_printer.ToString();
-
-    string expected_ast = R"(Program: Simple
- Block
-  Declaration: 
-   VarDecl: x: integer
-   VarDecl: y: integer
-  Compound
-   Assign
-    Left:
-     Var: x
-    Right:
-     BinOp:
-      Num: 2
-      Oper: PLUS
-      Num: 3
-   Assign
-    Left:
-     Var: y
-    Right:
-     BinOp:
-      Var: x
-      Oper: MINUS
-      Num: 1
-)";
-
-    EXPECT_EQ(printed_ast, expected_ast);
-}
-
 TEST(GeneratorTest, CodeGeneratorTest) {
     string source_code = R"(program Simple;
 var
@@ -148,10 +103,10 @@ end.
     string expected_c_code = "#include <stdio.h>\n"
                              "#include <stdlib.h>\n"
                              "\n"
+                             "int x;\n"
+                             "int y;\n"
                              "// Simple\n"
                              "int main(int argc, char* argv[]) {\n"
-                             "    int x;\n"
-                             "    int y;\n"
                              "    x = (2 + 3);\n"
                              "    y = (x - 1);\n"
                              "    return 0;\n"

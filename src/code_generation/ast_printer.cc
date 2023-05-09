@@ -1,3 +1,4 @@
+#ifdef use_deprecated
 #include <iostream>
 #include <memory>
 #include <ostream>
@@ -178,3 +179,4 @@ void ASTPrinter::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
 string ASTPrinter::ToString() const { return ostream_.str(); }
 } // namespace code_generation
 } // namespace pascal2c
+#endif

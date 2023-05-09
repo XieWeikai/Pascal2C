@@ -1,3 +1,4 @@
+#ifdef use_deprecated
 #ifndef PASCAL2C_SRC_CODE_GENERATION_AST_PRINTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_AST_PRINTER_H_
 #pragma once
@@ -70,3 +71,4 @@ class ASTPrinter : Visitor {
 } // namespace code_generation
 } // namespace pascal2c
 #endif // !PASCAL2C_SRC_CODE_GENERATION_AST_PRINTER_H_
+#endif

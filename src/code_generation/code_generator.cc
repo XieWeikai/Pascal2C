@@ -141,7 +141,7 @@ void CodeGenerator::VisitConstDeclaration(
     Visit(node->GetTypeNode());
     ostream_ << ' ';
     Visit(node->GetConstNode());
-    // ostream_ << eol_;
+    ostream_ << eol_;
 }
 
 void CodeGenerator::VisitVarDecl(
@@ -290,7 +290,7 @@ void CodeGenerator::VisitForStatement(const shared_ptr<ForStatement> &node) {
 }
 
 void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
-    ostream_ << Indent() << node->GetName() << "(";
+    ostream_ << node->GetName() << "(";
     for (int i = 0; i < node->GetParameters().size(); i++) {
         auto p = node->GetParameters().at(i);
         Visit(p);
