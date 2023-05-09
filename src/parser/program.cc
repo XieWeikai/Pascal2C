@@ -107,7 +107,7 @@ namespace pascal2c::parser
 
         // Parse id
         auto name = text_;
-        int ret = CheckMatch(TOK_ID, {'=', ';'});
+        int ret = CheckMatch(TOK_ID, {'=', TOK_INTEGER, TOK_REAL, '+', '-', TOK_STRING, ';'});
         if (ret != TOK_ID)
         {
             name = "";
@@ -220,7 +220,7 @@ namespace pascal2c::parser
 
             // Parse function id
             auto name = text_;
-            int ret = CheckMatch(TOK_ID, {'(', ';'});
+            int ret = CheckMatch(TOK_ID, {'(', ':', TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE, ';'});
             if (ret == ';' || ret == TOK_EOF)
             {
                 return MAKE_AND_MOVE_SHARED(ast::SubprogramHead, "");
@@ -250,7 +250,7 @@ namespace pascal2c::parser
                         }
                     }
                 }
-                CheckMatch(')', {':', ';'});
+                CheckMatch(')', {':', TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE, ';'});
             }
 
             CheckMatch(':', {TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE, ';'});
@@ -359,10 +359,10 @@ namespace pascal2c::parser
         else if (ret == TOK_ARRAY || ret == '[')
         {
             auto type = MAKE_SHARED(ast::Type, true);
-            CheckMatch('[', {TOK_INTEGER, ']', ';'});
+            ret = CheckMatch('[', {TOK_INTEGER, TOK_DOTDOT, ']', TOK_OF, TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE, ';'});
 
             // If the array has a period list, parse it
-            if (token_ != ']')
+            if ((ret == '[' || ret == TOK_INTEGER || ret == TOK_DOTDOT) && token_ != ']')
             {
                 while (true)
                 {
@@ -377,7 +377,7 @@ namespace pascal2c::parser
                     }
                 }
             }
-            CheckMatch(']', {TOK_OF, ';'});
+            CheckMatch(']', {TOK_OF, TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE, ';'});
 
             CheckMatch(TOK_OF, {TOK_INTEGER_TYPE, TOK_REAL_TYPE, TOK_CHAR_TYPE, TOK_BOOLEAN_TYPE, ';'});
 
@@ -399,7 +399,7 @@ namespace pascal2c::parser
     ast::Type::Period Parser::ParsePeriod()
     {
         int value1 = tok_value_.intval;
-        if (CheckMatch(TOK_INTEGER, {TOK_DOTDOT, ';'}) != TOK_INTEGER)
+        if (CheckMatch(TOK_INTEGER, {TOK_DOTDOT, ',', ']', ';'}) != TOK_INTEGER)
         {
             value1 = -1;
         }
