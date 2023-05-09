@@ -326,6 +326,7 @@ class Argument : public ASTNode {
 
 // Nothing but a break; is required
 class ExitStatement : public ASTNode {
+  public:
     ExitStatement() {}
     virtual ~ExitStatement() = default;
     void Accept(Visitor &visitor) override;
@@ -432,6 +433,7 @@ class UnaryOperation : public IVar {
     const shared_ptr<Oper> GetOper() const { return oper_; }
     const shared_ptr<ASTNode> GetVarNode() const { return var_node_; }
     const VarType GetVarType() const override { return var_type_; }
+    const string GetName() const override { return "unary_operation"; }
 
   private:
     shared_ptr<Oper> oper_;

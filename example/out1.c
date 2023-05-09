@@ -2,49 +2,46 @@
 #include <stdlib.h>
 
 const int n = 10;
-int mas[11];
+int ans[10];
 int i;
-int random_(int a) {
-    int ret_random_;/* Auto Generated */
-    ret_random_ = 3;
-    return ret_random_;/* Auto Generated */
-}
 void inc(/* Is Reference */int *a) {
     *a = (*a + 1);
 }
-void mergesort(int a, int c) {
-    int x;
-    int j;
+void mergesort(int l, int r) {
+    int mid;
     int i;
-    int n1;
-    int n2;
-    int rez[1000];
-    x = ((a + c) / 2);
-    if (a == c) return;
-    mergesort(a, x);
-    mergesort((x + 1), c);
-    n1 = a;
-    n2 = (x + 1);
-    for (i = a; i <= c; i++) {
-        if (((n1 < (x + 1)) & ((n2 > c) | (mas[n1 - 1] < mas[n2 - 1])))) {
-            rez[i - 1] = mas[n1 - 1];
-            inc(&n1);
+    int ptr_1;
+    int ptr_2;
+    int tmp[1000];
+    if ((r <= l)) {
+        return;
+    }
+    mid = ((l + r) / 2);
+    mergesort(l, mid);
+    mergesort((mid + 1), r);
+    ptr_1 = l;
+    ptr_2 = (mid + 1);
+    for (i = l; i <= r; i++) {
+        if (((ptr_1 < (mid + 1)) & ((ptr_2 > r) | (ans[ptr_1 - 1] < ans[ptr_2 - 1])))) {
+            tmp[i - 1] = ans[ptr_1 - 1];
+            inc(&ptr_1);
         } else {
-            rez[i - 1] = mas[n2 - 1];
-            inc(&n2);
+            tmp[i - 1] = ans[ptr_2 - 1];
+            inc(&ptr_2);
         }
     }
-    for (j = a; j <= c; j++) {
-        mas[j - 1] = rez[j - 1];
+    for (i = l; i <= r; i++) {
+        ans[i - 1] = tmp[i - 1];
     }
 }
 // merge_sort
 int main(int argc, char* argv[]) {
     for (i = 1; i <= n; i++) {
-        mas[i - 1] = random_(20);
+        ans[i - 1] = (n - i);
     }
-    printf("%d\n", mas[1]);
     mergesort(1, n);
-    printf("%d\n", mas[1]);
+    for (i = 1; i <= n; i++) {
+        printf("%d \n", ans[i - 1]);
+    }
     return 0;
 }
