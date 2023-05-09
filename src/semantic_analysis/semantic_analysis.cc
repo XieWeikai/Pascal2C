@@ -588,6 +588,8 @@ namespace analysiser{
                     DoIfStatement(*(std::static_pointer_cast<pascal2c::ast::IfStatement>(i)));break;
                 case pascal2c::ast::FOR_STATEMENT: 
                     DoForStatement(*(std::static_pointer_cast<pascal2c::ast::ForStatement>(i)));break;
+                case pascal2c::ast::WHILE_STATEMENT:
+                    DoWhileStatement(*(std::static_pointer_cast<pascal2c::ast::WhileStatement>(i)));break;
             }
         }
     }
@@ -682,6 +684,23 @@ namespace analysiser{
             std::stringstream ss;
             ss<<":id:"<<tgt.type()<<" from:"<<fromtype<<" to:"<<totype;
             LOG("For Statement failure(type error in id from to)"+ss.str());
+            return;
+        }
+        if(x.statement())
+        {
+            std::vector<std::shared_ptr<pascal2c::ast::Statement>> inp;
+            inp.push_back(x.statement());
+            DoAllStatement(inp);
+        }
+    }
+    void DoWhileStatement(pascal2c::ast::WhileStatement x)
+    {
+        symbol_table::MegaType ty=GetExprType(x.condition());
+        if(ty!=symbol_table::BOOL)
+        {
+            std::stringstream ss;
+            ss<<ty;
+            LOG("While Statement failure(condition error:received type "+ss.str()+")");
             return;
         }
         if(x.statement())
