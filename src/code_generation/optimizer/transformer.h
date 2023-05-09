@@ -1,6 +1,11 @@
 #pragma once
 #include "opti_common.h"
 
+
+#include <unordered_map>
+#include <optional>
+#include <regex>
+
 namespace pascal2c::code_generation {
 
 class Transformer {
@@ -28,7 +33,7 @@ private :
     shared_ptr<Block> transBody(shared_ptr<T> cur);
     template<typename T>
     shared_ptr<Declaration> transDeclaration(shared_ptr<T> body);
-    shared_ptr<Assignment>
+    shared_ptr<ConstDeclaration>
         transConstDeclaration(shared_ptr<ast::ConstDeclaration> cur);
     vector<shared_ptr<ASTNode>> 
         transVarDeclaration(shared_ptr<ast::VarDeclaration> cur);
@@ -58,6 +63,8 @@ private :
 
     std::tuple<bool ,bool , bool , bool , bool>
         checkIdType(const string& id);
+    std::optional<std::vector<std::pair<int , int>>>
+        checkArrayType(const string& id);
 
     bool checkIdTypeIfVar(const string& id);
     bool checkIdTypeIfConst(const string& id);   

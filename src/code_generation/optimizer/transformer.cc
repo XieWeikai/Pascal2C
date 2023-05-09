@@ -1,14 +1,13 @@
 #include "transformer.h"
 #include "calculater.h"
 
-#include <unordered_map>
 
 namespace pascal2c::code_generation {
 
 using ::std::shared_ptr;
 using ::std::make_shared;
-
-
+using ::std::optional;
+using ::std::pair;
 /**
  *  TOK_INTEGER_TYPE 	297
  *  TOK_REAL_TYPE 		298
@@ -71,8 +70,6 @@ static std::unordered_map <string , // Scope Line Number, Name
 
 static auto getParamRefs(const string& func_name) {
 	// TODO : override checker and cache
-
-	printf("getParam refs : %s\n" , func_name.c_str());
 	std::bitset<k_max_parameters> is_refs; is_refs.reset();
 	size_t idx = 0;
 	auto func = func_name_table[func_name];
@@ -84,7 +81,6 @@ static auto getParamRefs(const string& func_name) {
 			if (elem->is_var()) is_refs.set(idx , true); idx++;
 		}
 	}
-	std::cerr<< "refs ans " << is_refs << "\n";
 	return is_refs;
 }
 
@@ -124,21 +120,55 @@ Transformer::checkIdType(const string& id) {
 		symbol_table::ERROR , 
 		id , true , true , 
 		std::vector<symbol_table::SymbolTablePara>()};
-	auto ret =  sym_block->Query(checker);
-	std::cerr << "	easy checker" <<saERRORS::toString(ret) << "\n";
-
+	auto ret 	 =  sym_block->Query(checker);
 	bool is_var  = checker.is_var() && !checker.is_func();
 	bool is_func =!checker.is_var() &&  checker.is_func();
 	bool is_ret  = checker.is_var() &&  checker.is_func();
 	bool is_const=!checker.is_var() && !checker.is_func();
 	bool is_ref  = checkIdTypeIfRef(id); // ATTENTION : will change table!
 
-	::fprintf(stderr , "I'm here : Func %s ,Check Id %s:  [%d , %d , %d , %d , %d]\n" ,
-		now.func_name.c_str() ,id.c_str() , is_var , is_func , is_ref , is_ret , is_const);
+	// ::fprintf(stderr , "I'm here : Func %s ,Check Id %s:  [%d , %d , %d , %d , %d]\n" ,
+	// 	now.func_name.c_str() ,id.c_str() , is_var , is_func , is_ref , is_ret , is_const);
 
 	return {is_var , is_func , is_ref , is_ret , is_const};
 }
 
+optional<vector<pair<int , int>>>
+Transformer::checkArrayType(const string& id) {
+	table->Query(now.func_line , sym_block);
+	symbol_table::SymbolTableItem checker{
+		symbol_table::MegaType(), 
+		id , true , true , 
+		std::vector<symbol_table::SymbolTablePara>()};
+	auto ret 	 =  sym_block->Query(checker);
+
+	if (checker.type().pointer().size() == 0) return std::nullopt;
+
+	static string pattern{"\\d"};
+	static std::regex rgx{pattern};
+	static std::smatch results;
+
+	vector<pair<int , int>> bounds;
+
+	for (const auto& elem : checker.type().pointer()) {
+		std::cerr << "In array "<< elem << "\n";
+		auto begin_ = elem.begin();
+		auto end_	= elem.end();
+		std::regex_search(begin_ , end_ , results , rgx);
+
+		int l = std::stoi(results.str());
+		std::cerr << results.str()<<  "\n";
+
+		begin_ = results[0].second;
+		std::regex_search(begin_ , end_ , results , rgx);
+
+		int r = std::stoi(results.str());
+		std::cerr << results.str()<<  "\n";
+
+		bounds.push_back({l , r});
+	}
+	return bounds;
+}
 
 Transformer::Transformer(shared_ptr<ast::Ast> root) {
 	auto program_handle = std::dynamic_pointer_cast<ast::Program>(root);
@@ -172,7 +202,7 @@ Transformer::transSubprogram(shared_ptr<ast::Subprogram> cur) {
 	};
 	func_name_table[now.func_name] = (cur->subprogram_head());
 
-	std::cerr << "Subpro@" << cur->line() <<" : " << cur->column() <<"\n";
+	// std::cerr << "Subpro@" << cur->line() <<" : " << cur->column() <<"\n";
 
 	auto params = cur->subprogram_head()->parameters();
 	vector<shared_ptr<Argument>> args;
@@ -191,7 +221,7 @@ Transformer::transSubprogram(shared_ptr<ast::Subprogram> cur) {
 
 	shared_ptr<ASTNode> ret;
 	if (cur->subprogram_head()->is_function()) { // function
-		std::cerr << "Function@" << cur->line() <<" : " << cur->column() <<"\n";
+		// std::cerr << "Function@" << cur->line() <<" : " << cur->column() <<"\n";
 
 		ret = make_shared<Function>(
 			cur->subprogram_head()->id() ,
@@ -203,7 +233,7 @@ Transformer::transSubprogram(shared_ptr<ast::Subprogram> cur) {
 		);
 
 	} else { // procedure
-		std::cerr << "Proce@" << cur->line() <<" : " << cur->column() <<"\n";
+		// std::cerr << "Proce@" << cur->line() <<" : " << cur->column() <<"\n";
 
 		ret = make_shared<Subprogram>(
 			cur->subprogram_head()->id() , args ,
@@ -221,7 +251,7 @@ Transformer::transBody(shared_ptr<T> body) {
 	static_assert(std::is_same_v<T , ast::ProgramBody> ||
 				  std::is_same_v<T , ast::SubprogramBody> ,
 				"[Transformer] bad body type");
-	std::cerr << "Body@" << body->line() <<" : " << body->column() <<"\n";
+	// std::cerr << "Body@" << body->line() <<" : " << body->column() <<"\n";
 
 	auto decls = transDeclaration<T>(body); // high priority
 
@@ -243,7 +273,7 @@ Transformer::transDeclaration(shared_ptr<T> body) {
 	static_assert(std::is_same_v<T , ast::ProgramBody> ||
 				  std::is_same_v<T , ast::SubprogramBody> ,
 				"[Transformer] bad body type");
-	std::cerr << "body@" << body->line() <<" : " << body->column() <<"\n";
+	// std::cerr << "body@" << body->line() <<" : " << body->column() <<"\n";
 
 	vector<shared_ptr<ASTNode>> decls;
 
@@ -271,16 +301,16 @@ Transformer::transDeclaration(shared_ptr<T> body) {
 }
 
 
-shared_ptr<Assignment>
+shared_ptr<ConstDeclaration>
 Transformer::transConstDeclaration(shared_ptr<ast::ConstDeclaration> cur) {
-	return make_shared<Assignment>(
-		make_shared<ConstDeclaration>(
+	return make_shared<ConstDeclaration>(
+		make_shared<Assignment>(
 			make_shared_token<Var>(TokenType::IDENTIFIER , cur->id() ) ,
-			make_shared_token<ConstType>(
-				TokenType::RESERVED , ToCString(analysiser::GetExprType(cur->const_value()).type())
-			)
-		),
-		transExpression(cur->const_value())
+			transExpression(cur->const_value())
+		) ,
+		make_shared_token<ConstType>(
+			TokenType::RESERVED , ToCString(analysiser::GetExprType(cur->const_value()).type())
+		)
 	);
 }
 
@@ -295,7 +325,7 @@ Transformer::transVarDeclaration(shared_ptr<ast::VarDeclaration> cur) {
 
 		for (size_t i = 0 ; i < list->Size() ; i++) {
 			const auto& arr_type = cur->type();
-			vector<std::pair<int , int>> perd; perd.reserve(arr_type->periods().size());
+			vector<pair<int , int>> perd; perd.reserve(arr_type->periods().size());
 
 			for (const auto& elem : arr_type->periods()) {
 				perd.push_back({elem.digits_1 , elem.digits_2});
@@ -332,11 +362,6 @@ Transformer::transVarDeclaration(shared_ptr<ast::VarDeclaration> cur) {
 	return res;
 
 }
-
-// void Transformer::DoSubprogram(ast::Subprogram x);
-// symbol_table::SymbolTableItem DoSubprogramHead(ast::SubprogramHead x);
-// void Transformer::DoSubprogramBody(ast::SubprogramBody x);
-
 /**
  *  INT = 0,
 	REAL = 1,
@@ -406,7 +431,9 @@ Transformer::passExpr(shared_ptr<ast::Expression> cur) {
 			for (const auto& elem : var->expr_list()) {
 				indices.push_back(std::move(passExpr(elem)));
 			}
-
+			auto bounds = checkArrayType(var->id())
+				.value_or(vector<pair<int , int>>{});
+			
 			return make_shared<ArrayAccess>(
 				make_shared<Array>(
 					make_shared<Var>( var->id() , is_ref )
@@ -477,7 +504,7 @@ shared_ptr<ASTNode>
 Transformer::transExpression(shared_ptr<ast::Expression> cur) {
 	// Optimizer::Calculator calc{cur};
 	// auto res = calc.getResultExpr();
-	std::cerr << "Cur@" << cur->line() <<" : " << cur->column() <<"\n";
+	// std::cerr << "Cur@" << cur->line() <<" : " << cur->column() <<"\n";
 
 	return passExpr(cur);
 }
@@ -495,7 +522,7 @@ Transformer::transExpression(shared_ptr<ast::Expression> cur) {
 */
 shared_ptr<ASTNode>
 Transformer::transStatement(shared_ptr<ast::Statement> cur) {
-	std::cerr << "Cur@" << cur->line() <<" : " << cur->column() <<"\n";
+	// std::cerr << "Cur@" << cur->line() <<" : " << cur->column() <<"\n";
 	switch (cur->GetType()) {
 
 	case ast::StatementType::ASSIGN_STATEMENT :

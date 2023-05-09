@@ -49,8 +49,7 @@ TEST(GeneratorTest, TransformerTest) {
 	auto program = trans.GetASTRoot();
     printf("[Transformer] Done\n");
 
-    auto s_table = make_shared<SymbolTableMock>();
-    auto code_generator = make_shared<CodeGenerator>(s_table);
+    auto code_generator = make_shared<CodeGenerator>();
     code_generator->Interpret(program);
     auto generated_ccode = code_generator->GetCCode();
 
