@@ -185,9 +185,15 @@ void CodeGenerator::VisitArrayDeclaration(
 
 void CodeGenerator::VisitArrayAccess(const shared_ptr<ArrayAccess> &node) {
     Visit(node->GetArray());
-    for (auto &index : node->GetIndices()) {
+    auto bounds = node->GetBounds();
+    auto indices = node->GetIndices();
+    for (int i = 0; i < node->GetIndices().size(); i++) {
+        auto b = bounds.at(i);
+        auto index = indices.at(i);
         ostream_ << '[';
         Visit(index);
+        ostream_ << " - ";
+        ostream_ << b.first;
         ostream_ << ']';
     }
 }
