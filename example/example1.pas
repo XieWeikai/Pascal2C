@@ -67,5 +67,5 @@ begin
   writeln('After swap:');
   PrintArrays;
 
-  writeln('PI = ', PI:1:5);
+  writeln(PI);
 end.

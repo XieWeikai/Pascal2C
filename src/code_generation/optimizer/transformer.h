@@ -14,6 +14,8 @@ public :
 
 private :
 	std::shared_ptr<ASTRoot> ast_root;
+    analysiser::nameTable* table; // TODO : singleton
+    std::shared_ptr<symbol_table::SymbolTableBlock> sym_block;
 
     shared_ptr<Program> transProgram(shared_ptr<ast::Program> cur);
     shared_ptr<ASTNode>
@@ -36,7 +38,8 @@ private :
     */
     shared_ptr<ASTNode>
         transExpression(shared_ptr<ast::Expression> cur);
-
+    shared_ptr<ASTNode> 
+        passExpr(shared_ptr<ast::Expression> cur);
     /**
      * @brief Handle Statements
     */
@@ -53,6 +56,14 @@ private :
     shared_ptr<ForStatement>
         transForStatement(shared_ptr<ast::ForStatement> cur);
 
+    std::tuple<bool ,bool , bool , bool , bool>
+        checkIdType(const string& id);
+
+    bool checkIdTypeIfVar(const string& id);
+    bool checkIdTypeIfConst(const string& id);   
+    bool checkIdTypeIfFunc(const string& id);
+    bool checkIdTypeIfRetVar(const string& id);
+    bool checkIdTypeIfRef(const string& id);
 };
 
 

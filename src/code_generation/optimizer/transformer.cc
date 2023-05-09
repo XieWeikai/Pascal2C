@@ -1,6 +1,8 @@
 #include "transformer.h"
 #include "calculater.h"
 
+#include <unordered_map>
+
 namespace pascal2c::code_generation {
 
 using ::std::shared_ptr;
@@ -44,23 +46,50 @@ static const string ToCString(int tk) {
 }
 
 template<typename T>
-static auto make_shared_token(const TokenType type , const string value = "" , const bool is_reference = false) {
+static auto make_shared_token(
+	const TokenType type , 
+	const string value = "" , 
+	const bool is_reference = false ,
+	const bool is_return_val= false ) {
 	if constexpr (std::is_same_v<T , Var>) {
-		return make_shared<T>(make_shared<Token>(type , value) , is_reference);
+		return make_shared<T>(make_shared<Token>(type , value) , is_reference , is_return_val);
 	
 	} else {
 		return make_shared<T>(make_shared<Token>(type , value));
 	}
 }
 
-static string las_func_line;
-static string las_func_name;
-static string now_func_line;
-static string now_func_name;
-static shared_ptr<ast::Subprogram> las_func_node , now_func_node;
+static struct {
+	string func_line;
+	string func_name;
+	shared_ptr<ast::Subprogram> func_node;
+} las , now;
 
-static size_t getParamIndex(const string& id) {
-	auto id_list = now_func_node->subprogram_head()->parameters();
+static std::unordered_map <string , // Scope Line Number, Name
+		shared_ptr<ast::SubprogramHead>> func_name_table;
+
+
+static auto getParamRefs(const string& func_name) {
+	// TODO : override checker and cache
+
+	printf("getParam refs : %s\n" , func_name.c_str());
+	std::bitset<k_max_parameters> is_refs; is_refs.reset();
+	size_t idx = 0;
+	auto func = func_name_table[func_name];
+	if (func == nullptr) return is_refs;
+	
+	for (const auto& elem : func->parameters()) {
+		const auto& list = elem->id_list();
+		for (size_t i = 0 ; i < list->Size() ; i++) {
+			if (elem->is_var()) is_refs.set(idx , true); idx++;
+		}
+	}
+	std::cerr<< "refs ans " << is_refs << "\n";
+	return is_refs;
+}
+
+static size_t getParamIndex(shared_ptr<ast::SubprogramHead> node ,const string& id) {
+	auto id_list = node->parameters();
 
 	size_t idx = -1;
 	for(const auto& elem : id_list) 
@@ -72,40 +101,42 @@ static size_t getParamIndex(const string& id) {
 	return -1ULL;
 }
 
-static std::tuple<bool , bool , bool , bool>
-checkIdType(const string& id) {
-	std::shared_ptr<symbol_table::SymbolTableBlock> sym_block;
-	auto table = analysiser::GetTable();
-	table->Query(now_func_line , sym_block);
+bool Transformer::checkIdTypeIfRef(const string& id) {
+	if (now.func_node == nullptr) return false;
 
-	symbol_table::SymbolTableItem var_checker{
+	auto func_checker = analysiser::SubprogramToItem(*now.func_node->subprogram_head());
+	table->Query("1" , sym_block);
+	auto func = sym_block->Query(func_checker);
+
+	const auto& para = func_checker.para();
+	if (para.size() == 0) return false;
+
+	auto idx  = getParamIndex(now.func_node->subprogram_head() , id);
+	return idx == -1ULL ? false : para[idx].is_var();
+}
+/**
+ * @return is_val | is_func | is_ref | is_ret | is_const
+*/
+std::tuple<bool , bool , bool , bool , bool>
+Transformer::checkIdType(const string& id) {
+	table->Query(now.func_line , sym_block);
+	symbol_table::SymbolTableItem checker{
 		symbol_table::ERROR , 
-		id , true , false , 
+		id , true , true , 
 		std::vector<symbol_table::SymbolTablePara>()};
+	auto ret =  sym_block->Query(checker);
+	std::cerr << "	easy checker" <<saERRORS::toString(ret) << "\n";
 
-	auto ans = sym_block->Query(var_checker);
+	bool is_var  = checker.is_var() && !checker.is_func();
+	bool is_func =!checker.is_var() &&  checker.is_func();
+	bool is_ret  = checker.is_var() &&  checker.is_func();
+	bool is_const=!checker.is_var() && !checker.is_func();
+	bool is_ref  = checkIdTypeIfRef(id); // ATTENTION : will change table!
 
+	::fprintf(stderr , "I'm here : Func %s ,Check Id %s:  [%d , %d , %d , %d , %d]\n" ,
+		now.func_name.c_str() ,id.c_str() , is_var , is_func , is_ref , is_ret , is_const);
 
-	auto is_var  = var_checker.is_var();
-	auto is_func = var_checker.is_func();
-	bool is_ref  = false;
-	bool is_ret  = var_checker.is_var() && var_checker.is_func();
-	if (now_func_node != nullptr) {
-		auto func_checker = analysiser::SubprogramToItem(*now_func_node->subprogram_head());
-		table->Query("1" , sym_block);
-		auto func = sym_block->Query(func_checker);
-		std::cerr << "Ref ans " << saERRORS::toString(func) << "\n";
-		const auto& para = func_checker.para();
-		if (para.size() != 0) {
-			auto idx  = getParamIndex(id);
-			is_ref    = idx == -1ULL ? false : para[idx].is_var();
-		}
-	}
-
-	printf("This : Func %s ,Check Id %s:  [%d , %d , %d , %d]\n" ,
-		now_func_name.c_str() ,id.c_str() , is_var , is_func , is_ref , is_ret);
-
-	return {is_var , is_func , is_ref , is_ret};
+	return {is_var , is_func , is_ref , is_ret , is_const};
 }
 
 
@@ -114,31 +145,32 @@ Transformer::Transformer(shared_ptr<ast::Ast> root) {
 	if (program_handle == nullptr) {
 		throw std::runtime_error{"[Transformer] bad root pointer"};
 	}
+	table = analysiser::GetTable();
 	ast_root = transProgram(program_handle);
 }
 
 shared_ptr<Program> Transformer::transProgram(shared_ptr<ast::Program> cur) {
-	las_func_line = now_func_line;
-	las_func_name = now_func_name;
-	now_func_line = std::to_string(cur->program_head()->line());
-	now_func_name = cur->program_head()->id();
-	now_func_node = nullptr;
+	now = {
+		std::to_string(cur->program_head()->line()) ,
+		cur->program_head()->id() ,
+		nullptr
+	};
 
-	auto ret = make_shared<Program>(
+	return make_shared<Program>(
 		cur->program_head()->id() ,
 		transBody<ast::ProgramBody>(cur->program_body())
 	);
-	now_func_line = las_func_line;
-	now_func_name = las_func_name;
-
-	return ret;
 }
 
 shared_ptr<ASTNode>
 Transformer::transSubprogram(shared_ptr<ast::Subprogram> cur) {
-	now_func_line = std::to_string(cur->subprogram_head()->line());
-	now_func_name = cur->subprogram_head()->id();
-	now_func_node = cur;
+	las = now;
+	now = {
+		std::to_string(cur->subprogram_head()->line()) ,
+		cur->subprogram_head()->id() ,
+		cur
+	};
+	func_name_table[now.func_name] = (cur->subprogram_head());
 
 	std::cerr << "Subpro@" << cur->line() <<" : " << cur->column() <<"\n";
 
@@ -179,9 +211,7 @@ Transformer::transSubprogram(shared_ptr<ast::Subprogram> cur) {
 		);
 	}
 
-	now_func_line = las_func_line;
-	now_func_name = las_func_name;
-	now_func_node = las_func_node;
+	now = las;
 	return ret;
 }
 
@@ -193,6 +223,7 @@ Transformer::transBody(shared_ptr<T> body) {
 				"[Transformer] bad body type");
 	std::cerr << "Body@" << body->line() <<" : " << body->column() <<"\n";
 
+	auto decls = transDeclaration<T>(body); // high priority
 
 	vector<std::shared_ptr<ASTNode>> child;
 	if constexpr (std::is_same_v<T , ast::ProgramBody>) {
@@ -202,10 +233,7 @@ Transformer::transBody(shared_ptr<T> body) {
 	}
 
 
-	return make_shared<Block>(
-		transDeclaration<T>(body) ,
-		make_shared<Compound>(child)
-	);
+	return make_shared<Block>( decls , make_shared<Compound>(child) );
 }
 
 
@@ -321,8 +349,8 @@ Transformer::transVarDeclaration(shared_ptr<ast::VarDeclaration> cur) {
 	UNARY = 8,
 	STRING = 9,
 */
-static shared_ptr<ASTNode> 
-passExpr(shared_ptr<ast::Expression> cur) {
+shared_ptr<ASTNode> 
+Transformer::passExpr(shared_ptr<ast::Expression> cur) {
 
 	switch (cur->GetType()) {
 	case ast::ExprType::INT :
@@ -366,10 +394,10 @@ passExpr(shared_ptr<ast::Expression> cur) {
 	case ast::ExprType::VARIABLE : {
 		auto var = std::static_pointer_cast<ast::Variable>(cur);
 
-		auto [_1 , _2 , is_ref , _4] = checkIdType(var->id());
+		auto [_1 , _2 , is_ref , is_ret , _5] = checkIdType(var->id());
 
 		if (var->expr_list().size() == 0) { // basic type
-			return make_shared<Var>( var->id() , is_ref);
+			return make_shared<Var>( var->id() , is_ref , is_ret);
 
 		} else { // array type
 			vector<shared_ptr<ASTNode>> indices; 
@@ -381,7 +409,7 @@ passExpr(shared_ptr<ast::Expression> cur) {
 
 			return make_shared<ArrayAccess>(
 				make_shared<Array>(
-					make_shared<Var>( var->id())
+					make_shared<Var>( var->id() , is_ref )
 				),
 				indices
 			);
@@ -415,19 +443,23 @@ passExpr(shared_ptr<ast::Expression> cur) {
 		auto callee = std::static_pointer_cast<ast::CallValue>(cur);
 		vector<shared_ptr<ASTNode>> param; param.reserve(callee->params().size());
 
+
 		for (const auto& elem : callee->params()) {
 			param.push_back(std::move(passExpr(elem)));
 		}
 
-		return make_shared<FunctionCall>( callee->id() , param );
+		return make_shared<FunctionCall>( callee->id() , param , getParamRefs(callee->id()));
 	}
 
 	case ast::ExprType::CALL_OR_VAR : {
 		auto callval = std::static_pointer_cast<ast::CallOrVar>(cur);
-		auto [is_var , is_func , _ , is_ret] = checkIdType(callval->id());
-		if ((is_var && !is_func) || is_ret || (!is_var && !is_func)) { // const and include 'return' -> func := expr;
-			return passExpr(make_shared<ast::Variable>(callval->line() , callval->column() , callval->id()));
-		} else if (!is_var && is_func) {
+		auto [is_var , is_func , _ , is_ret , is_const] = checkIdType(callval->id());
+		
+		if (is_var || is_ret || is_const) { // const and include 'return' -> func := expr;
+			return passExpr(make_shared<ast::Variable>(
+				callval->line() , callval->column() , callval->id()));
+		
+		} else if (is_func) {
 			return passExpr(make_shared<ast::CallValue>(
 				callval->line() , callval->column() , callval->id()));
 		}
@@ -503,7 +535,7 @@ Transformer::transCallStatement(shared_ptr<ast::CallStatement> cur) {
 	}
 
 	return make_shared<Statement>(
-		make_shared<FunctionCall>( cur->name() , param )
+		make_shared<FunctionCall>( cur->name() , param , getParamRefs(cur->name()))
 	);
 }
 
