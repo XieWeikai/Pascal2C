@@ -65,10 +65,10 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 <STRING>\n         {yycolno = str_start_col; yycolno_next = 1; yyerrno = ERR_UNTERMINATED_STRING; BEGIN(INITIAL); return TOK_ERROR;}
 <STRING><<EOF>>    {yyerrno = ERR_UNTERMINATED_STRING; BEGIN(INITIAL); return TOK_ERROR;}
 <STRING>[^\\']     {yycolno = str_start_col; strcat(yylval.strval, yytext);}
-<STRING>\\n        {yycolno = str_start_col; strcat(yylval.strval, "\n");}
-<STRING>\\t        {yycolno = str_start_col; strcat(yylval.strval, "\t");}
-<STRING>\\r        {yycolno = str_start_col; strcat(yylval.strval, "\r");}
-<STRING>\\'        {yycolno = str_start_col; strcat(yylval.strval, "'");}
+<STRING>\\n        {yycolno = str_start_col; strcat(yylval.strval, "\\n");}
+<STRING>\\t        {yycolno = str_start_col; strcat(yylval.strval, "\\t");}
+<STRING>\\r        {yycolno = str_start_col; strcat(yylval.strval, "\\r");}
+<STRING>\\'        {yycolno = str_start_col; strcat(yylval.strval, "\'");}
 <STRING>\\.        {yycolno = str_start_col; strcat(yylval.strval, yytext);}
 <STRING>"'"        {yycolno = str_start_col; BEGIN(INITIAL); return TOK_STRING;}
 
