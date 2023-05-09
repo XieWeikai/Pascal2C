@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <stdio.h>
 #include <map>
 #include "parser/parser.h"
@@ -10,7 +11,7 @@
 
 using namespace pascal2c;
 
-std::string filename;
+std::string input_filename;
 using ErrorMsg = std::variant<pascal2c::parser::SyntaxErr, analysiser::errorMsg>;
 using Location = std::pair<int, int>;
 std::map<Location, ErrorMsg> errors;
@@ -22,41 +23,43 @@ void PrintError(const std::vector<std::string> &lines,
     int start = std::max(1, line - context_num);
     int end = std::min((int) lines.size(), line + context_num);
 
-    std::cout << Colorize("Error (" + module_name + ") -> ", Color::Red) << filename
+    std::cerr << Colorize("Error (" + module_name + ") -> ", Color::Red) << input_filename
               << ":" << line << ":" << col << std::endl;
 
     int num_width = std::to_string(end).size();
 
     for (int i = start; i <= end; ++i) {
         std::string line_num = std::string(num_width - std::to_string(i).size(), ' ') + std::to_string(i);
-        std::cout << Colorize(line_num + " | ", Color::Blue);
+        std::cerr << Colorize(line_num + " | ", Color::Blue);
         if (i == line) {
-            std::cout << lines[i - 1];
+            std::cerr << lines[i - 1];
             if (lines[i - 1].back() != '\n') {
-                std::cout << std::endl;
+                std::cerr << std::endl;
             }
 
             int offset = num_width + 3 + col - 1;
-            std::cout << std::string(offset, ' ');
-            std::cout << Colorize("^", Color::Red);
-            std::cout << ' ' << Colorize(msg, Color::Red);
-            std::cout << std::endl;
+            std::cerr << std::string(offset, ' ');
+            std::cerr << Colorize("^", Color::Red);
+            std::cerr << ' ' << Colorize(msg, Color::Red);
+            std::cerr << std::endl;
         } else {
-            std::cout << lines[i - 1];
+            std::cerr << lines[i - 1];
         }
     }
-    std::cout << std::endl;
+    std::cerr << std::endl;
 }
 
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " <filename>" << std::endl;
+    if (argc < 2 || argc > 3) {
+        std::cerr << "Usage: " << argv[0] << " <input_file> [output_file]" << std::endl;
         return 0;
     }
 
-    filename = argv[1];
-    FILE *fp = fopen(filename.c_str(), "r");
+    input_filename = argv[1];
+    std::string output_filename = argc == 3 ? argv[2] : "a.c";
+    FILE *finp = fopen(input_filename.c_str(), "r");
+    std::ofstream fout(output_filename);
 
     // read all lines
     std::vector<std::string> lines;
@@ -64,14 +67,14 @@ int main(int argc, char *argv[]) {
     char buf[max_len];
     char *p = buf;
     int ret;
-    while (getline(&p, &max_len, fp) != -1) {
+    while (getline(&p, &max_len, finp) != -1) {
         lines.push_back(buf);
     }
-    // reset fp
-    fseek(fp, 0, SEEK_SET);
+    // reset finp
+    fseek(finp, 0, SEEK_SET);
 
     // >>>>>> lexer & parser <<<<<<
-    parser::Parser parser(fp);
+    parser::Parser parser(finp);
     auto program = parser.Parse();
 
     auto parser_errs = parser.syntax_errs();
@@ -106,7 +109,7 @@ int main(int argc, char *argv[]) {
 
     code_generator.Interpret(cg_program);
 
-    std::cout << code_generator.GetCCode() << std::endl;
+    fout << code_generator.GetCCode() << std::endl;
 
     return 0;
 }
