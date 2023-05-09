@@ -2028,374 +2028,644 @@ graph LR;
 
 #### AST接口部分说明
 
+##### ASTNode 类
+`ASTNode` 是一个抽象基类，表示抽象语法树（AST）的一个节点。这个类继承自 `std::enable_shared_from_this<ASTNode>`，允许从 ASTNode 派生的类能够获得其 `shared_ptr` 智能指针。其中包含一个纯虚函数 `Accept`，它接受一个访问者对象并将其传递给访问者模式(**Visitor Pattern**)中的相关方法。
+
 ```cpp
 // ASTNode 是抽象语法树节点的基类，所有其他 AST 节点类型都应从这个类派生
-class ASTNode {
+class ASTNode : public std::enable_shared_from_this<ASTNode> {
   public:
-    ASTNode(){};
+    ASTNode() = default;
     virtual ~ASTNode() = default;
+    virtual void Accept(Visitor &visitor) = 0;
 };
 
 // ASTRoot 是 ASTNode 的类型别名，表示抽象语法树的根节点
 typedef ASTNode ASTRoot;
+```
 
-// Program 类表示 Pascal 程序的整体结构，包含程序的名称和一个指向 Block 类型的智能指针
-class Program : public ASTNode {
+##### Compound 类
+`Compound` 类表示一个复合语句，继承自 ASTNode。它包含一个表示子节点的 std::vector<std::shared_ptr<ASTNode>> 类型的私有成员 children_。Compound 类有两个构造函数，一个默认构造函数和一个接受子节点的向量作为参数的构造函数。Accept 方法用于接受访问者对象。AddChild 方法用于向 children_ 向量中添加一个子节点。GetChildren 方法返回一个包含子节点的常量引用。
+
+```cpp
+class Compound : public ASTNode {
   public:
-    Program(const string &name, const std::shared_ptr<Block> &block)
-        : name_(name), block_(block){};
-    string getName() const { return name_; }
-    const std::shared_ptr<Block> &GetBlock() const { return block_; }
+    Compound(){};
+    virtual ~Compound() = default;
+    explicit Compound(const std::vector<std::shared_ptr<ASTNode>> &children)
+        : children_(children) {}
+    void Accept(Visitor &visitor) override;
+    void AddChild(shared_ptr<ASTNode> node);
+    const vector<shared_ptr<ASTNode>> &GetChildren() const { return children_; }
 
   private:
-    string name_;
-    std::shared_ptr<Block> block_;
+    vector<shared_ptr<ASTNode>> children_;
 };
+```   
 
-// Block 类表示 Pascal 代码中的一个代码块，包含一个用于存储声明语句的 ASTNode 类型的向量和一个表示复合语句的指向 Compound 类型的智能指针
+##### Declaration 类
+Declaration 类表示一个声明语句，继承自 ASTNode。它包含一个表示声明的 std::vector<std::shared_ptr<ASTNode>> 类型的私有成员 declaration_。Declaration 类有两个构造函数，一个默认构造函数和一个接受声明向量作为参数的构造函数。Accept 方法用于接受访问者对象。GetDeclarations 方法返回一个包含声明的常量引用。
+```cpp
+class Declaration : public ASTNode {
+  public:
+    Declaration() : declaration_() {}
+    Declaration(const vector<shared_ptr<ASTNode>> &declarations)
+        : declaration_(declarations) {}
+    virtual ~Declaration() = default;
+    void Accept(Visitor &visitor) override;
+    const vector<shared_ptr<ASTNode>> &GetDeclarations() const {
+        return declaration_;
+    }
+
+  private:
+    vector<shared_ptr<ASTNode>> declaration_;
+};
+```
+
+##### Block类
+Block 类表示一个程序块，继承自 ASTNode。它包含两个私有成员，declarations_（表示声明）和 compound_statement_（表示复合语句），它们都是 std::shared_ptr 类型。Block 类有两个构造函数，一个接受一个复合语句作为参数，另一个接受声明和复合语句作为参数。Accept 方法用于接受访问者对象。GetDeclaration 和 GetCompoundStatement 分别用于获取声明和复合语句的常量引用。
+
+```cpp
 class Block : public ASTNode {
   public:
-    Block(const vector<std::shared_ptr<ASTNode>> &declarations,
-          const std::shared_ptr<Compound> &compound_statement);
-    const vector<std::shared_ptr<ASTNode>> &GetDeclarations() const {
+    Block(shared_ptr<Compound> &compound_statement)
+        : declarations_(std::make_shared<Declaration>()),
+          compound_statement_(compound_statement) {}
+    Block(const shared_ptr<Declaration> &declarations,
+          const shared_ptr<Compound> &compound_statement)
+        : declarations_(declarations), compound_statement_(compound_statement) {
+    }
+    virtual ~Block() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<Declaration> &GetDeclaration() const {
         return declarations_;
     }
-    const std::shared_ptr<Compound> &GetCompoundStatement() const {
+    const shared_ptr<Compound> &GetCompoundStatement() const {
         return compound_statement_;
     }
 
   private:
-    vector<std::shared_ptr<ASTNode>> &declarations_;
-    std::shared_ptr<Compound> compound_statement_;
+    shared_ptr<Declaration> declarations_;
+    shared_ptr<Compound> compound_statement_;
 };
+```
 
-// VarDecl 类表示一个变量声明，包含一个指向 Var 类型的智能指针（表示变量节点）和一个指向 Type 类型的智能指针（表示类型节点）
-class VarDecl : public ASTNode {
+##### Num类
+Num 类表示一个数字字面量，继承自 ASTNode。它包含一个私有成员 value_，表示该数字的值。Num 类有一个构造函数，接受一个表示数字的 Token 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetValue 方法返回该数字的值。
+```cpp
+class Num : public ASTNode {
   public:
-    VarDecl(const std::shared_ptr<Var> &var_node,
-            const std::shared_ptr<Type> &type_node)
-        : var_node_(var_node), type_node_(type_node){};
-    const std::shared_ptr<Var> &GetVarNode() const { return var_node_; }
-    const std::shared_ptr<Type> &GetTypeNode() const { return type_node_; }
+    Num(const shared_ptr<Token> &token)
+        : value_(std::stoi(token->GetValue())) {}
+    virtual ~Num() = default;
+    void Accept(Visitor &visitor) override;
+    int GetValue() const { return (value_); }
 
   private:
-    std::shared_ptr<Var> var_node_;
-    std::shared_ptr<Type> type_node_;
+    int value_;
 };
+```
 
-// Type 类表示变量的类型，包含一个指向 lexer::Token 类型的智能指针和一个表示类型的枚举值 lexer::TokenType
-class Type : public ASTNode {
+##### String 类
+String 类表示一个字符串字面量，继承自 ASTNode。它包含一个私有成员 value_，表示该字符串的值。String 类有一个构造函数，接受一个表示字符串的 Token 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetValue 方法返回该字符串的值。
+
+```cpp
+class String : public ASTNode {
   public:
-    Type(const std::shared_ptr<lexer::Token> token)
-        : token_(token), type_(token->getType()){};
-    const lexer::TokenType GetType() const { return type_; }
+    String(const shared_ptr<Token> &token)
+        : value_(std::move(token->GetValue())) {}
+    virtual ~String() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetValue() const { return value_; };
 
   private:
-    std::shared_ptr<lexer::Token> token_;
-    const lexer::TokenType type_;
+    string value_;
 };
+```
 
-// Compound 表示一个复合语句，它包含一个或多个语句或声明
-class Compound : public ASTNode {
+##### Real 类
+Real 类表示一个实数字面量，继承自 ASTNode。它包含一个私有成员 value_，表示该实数的值。Real 类有一个构造函数，接受一个表示实数的 Token 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetValue 方法返回该实数的值。
+```cpp
+class Real : public ASTNode {
   public:
-    Compound(){};
-    explicit Compound(const std::vector<std::shared_ptr<ASTNode>> &children);
-    void AddChild(std::shared_ptr<ASTNode> node);
-    const vector<std::shared_ptr<ASTNode>> &GetChildren() const {
-        return children_;
-    }
-
-  private:
-    vector<std::shared_ptr<ASTNode>> children_;
-};
-
-// Assign 表示一个赋值语句，它包含左值、操作符（赋值符号）和右值
-class Assign : public ASTNode {
-  public:
-    Assign(const std::shared_ptr<ASTNode> &left, const lexer::Token &token,
-           const std::shared_ptr<ASTNode> &right)
-        : left_(left), token_(token), right_(right){};
-    const std::shared_ptr<ASTNode> &GetLeft() const { return left_; }
-    const std::shared_ptr<ASTNode> &GetRight() const { return right_; }
-
-  private:
-    std::shared_ptr<ASTNode> left_;
-    lexer::Token token_;
-    std::shared_ptr<ASTNode> right_;
-};
-
-// Var 表示一个变量，它包含一个标识符（名称）和关联的 Token
-class Var : public ASTNode {
-  public:
-    Var(const std::shared_ptr<lexer::Token> &token)
-        : token_(token), value_(token->GetValue()){};
+    Real(const shared_ptr<Token> &token)
+        : value_(std::move(token->GetValue())) {}
+    virtual ~Real() = default;
+    void Accept(Visitor &visitor) override;
     const string GetValue() const { return value_; }
 
   private:
-    std::shared_ptr<lexer::Token> token_;
     string value_;
 };
+```
 
-// Term 表示一个表达式中的术语，这是一个基类，由其他具体的术语类型继承
-class Term : public ASTNode {
+##### Char 类
+Char 类表示一个字符字面量，继承自 ASTNode。它包含一个私有成员 value_，表示该字符的值。Char 类有一个构造函数，接受一个表示字符的 Token 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetValue 方法返回该字符的值。
+```cpp
+class Char : public ASTNode {
   public:
-    Term() {}
-};
-
-// Factor 表示一个表达式中的因子，这是一个基类，由其他具体的因子类型继承
-class Factor : public ASTNode {
-  public:
-    Factor() {}
-};
-
-// Expr 表示一个表达式，它包含一个或多个子表达式
-class Expr : public ASTNode {
-  public:
-    Expr() {}
+    Char(const shared_ptr<Token> &token)
+        : value_(std::move(token->GetValue())) {}
+    virtual ~Char() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetValue() const { return value_; }
 
   private:
-    vector<std::shared_ptr<ASTNode>> children_;
+    string value_;
 };
+```
 
-// Num 表示一个数值，它包含一个数值 Token 和一个整数值
-class Num : public ASTNode {
+##### IVar 类
+IVar 类是一个抽象基类，表示一个标识符（变量），继承自 ASTNode。它包含一个纯虚函数 Accept，用于接受访问者对象。还包含两个纯虚函数 GetName 和 GetVarType，分别用于获取标识符的名称和变量类型。
+```cpp
+class IVar : public ASTNode {
   public:
-    Num(std::shared_ptr<lexer::Token> &token)
-        : token_(token), value_(std::stoi(token->GetValue())) {}
-    int getValue() const { return (value_); }
+    virtual ~IVar() = default;
+    virtual void Accept(Visitor &visitor) = 0;
+    virtual const string GetName() const = 0;
+    virtual const VarType GetVarType() const = 0;
+};
+```
+
+##### Var 类
+Var 类表示一个变量，继承自 IVar。它包含四个私有成员：name_（表示变量名），is_reference_（表示是否为引用类型），is_return_var_（表示是否为返回变量），和 var_type_（表示变量类型）。Var 类有两个构造函数，分别接受一个表示变量名的 Token 类型的智能指针和一个表示变量名的字符串作为参数。Accept 方法用于接受访问者对象。GetName 方法返回该变量的名称。IsReference 方法返回该变量是否为引用类型。IsReturnVar 方法返回该变量是否为返回变量。GetVarType 方法返回该变量的类型。
+```cpp
+class Var : public IVar {
+  public:
+    explicit Var(const shared_ptr<Token> &token, bool is_reference = false,
+                 bool is_return_var = false,
+                 VarType var_type = VarType::UNDEFINED)
+        : name_(token->GetValue()), is_reference_(is_reference),
+          is_return_var_(is_return_var), var_type_(var_type) {}
+    explicit Var(const string &name, bool is_reference = false,
+                 bool is_return_var = false ,
+                 VarType var_type = VarType::UNDEFINED)
+        : name_(name), is_reference_(is_reference), 
+          is_return_var_(is_return_var) , var_type_(var_type){}
+    virtual ~Var() = default;
+    void Accept(Visitor &visitor) override;
+    virtual const string GetName() const override { return name_; }
+    const bool IsReference() const { return is_reference_; }
+    const bool IsReturnVar() const { return is_return_var_; }
+    const VarType GetVarType() const override { return var_type_; }
 
   private:
-    std::shared_ptr<lexer::Token> token_;
-    int value_;
+    string name_;
+    bool is_reference_;
+    bool is_return_var_;
+    VarType var_type_;
 };
+```
 
-// BinOp 表示一个二元操作，包括两个操作数（左操作数和右操作数）以及一个操作符
-class BinOp : public ASTNode {
+##### IType 类
+IType 类是一个抽象基类，表示一个类型节点，继承自 ASTNode。它包含一个纯虚函数 Accept，用于接受访问者对象。还包含一个纯虚函数 GetType，用于获取类型节点的类型。
+```cpp
+class IType : public ASTNode {
   public:
-    explicit BinOp(std::shared_ptr<Var> &left,
-                   std::shared_ptr<lexer::Token> &token,
-                   std::shared_ptr<Expr> &right)
-        : left_(left), oper_(token), right_(right) {}
+    virtual ~IType() = default;
+    virtual void Accept(Visitor &visitor) = 0;
+    virtual const string GetType() const = 0;
+};
+```
 
-    explicit BinOp(std::shared_ptr<Var> &left,
-                   std::shared_ptr<lexer::Token> &token,
-                   std::shared_ptr<Var> &right)
-        : left_(left), oper_(token), right_(right) {}
-
-    explicit BinOp(std::shared_ptr<Expr> &left,
-                   std::shared_ptr<lexer::Token> &token,
-                   std::shared_ptr<Var> &right)
-        : left_(left), oper_(token), right_(right) {}
-
-    explicit BinOp(std::shared_ptr<Expr> &left,
-                   std::shared_ptr<lexer::Token> &token,
-                   std::shared_ptr<Expr> &right)
-        : left_(left), oper_(token), right_(right) {}
-
-    const std::shared_ptr<ASTNode> &getLeft() { return left_; }
-    const std::shared_ptr<lexer::Token> &getOper() { return oper_; }
-    const std::shared_ptr<ASTNode> &getRight() { return right_; }
+##### Type 类
+Type 类表示一个类型节点，继承自 IType。它包含一个私有成员 type_，表示类型的字符串。Type 类有一个构造函数，接受一个表示类型的 Token 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetType 方法返回该类型节点的类型。
+```cpp
+class Type : public IType {
+  public:
+    Type(const shared_ptr<Token> &token, bool is_reference = false)
+        : type_(token->GetValue()) {}
+    virtual ~Type() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetType() const override { return type_; }
 
   private:
-    std::shared_ptr<ASTNode> left_;
-    std::shared_ptr<lexer::Token> oper_;
-    std::shared_ptr<ASTNode> right_;
+    string type_;
 };
+```
 
-// NoOp 表示一个空操作，用于表示没有实际操作的情况，例如空语句或空块等
+##### ConstType 类
+ConstType 类表示一个常量类型节点，继承自 IType。它包含一个私有成员 type_，表示常量类型的字符串。ConstType 类有一个构造函数，接受一个表示常量类型的 Token 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetType 方法返回该常量类型节点的类型。
+```cpp
+class ConstType : public IType {
+  public:
+    ConstType(const shared_ptr<Token> &token) : type_(token->GetValue()) {}
+    virtual ~ConstType() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetType() const override { return type_; }
+
+  private:
+    string type_;
+};
+```
+
+##### VarDeclaration 类
+VarDeclaration 类表示一个变量声明节点，继承自 ASTNode。它包含三个私有成员：left_node_（表示变量名的节点），type_node_（表示类型节点），和 right_node_（表示变量初始值的节点）。VarDeclaration 类有一个构造函数，接受两个 ASTNode 类型的智能指针和一个 Type 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetLeftNode、GetRightNode 和 GetTypeNode 方法分别返回变量名节点、初始值节点和类型节点。
+```cpp
+class VarDeclaration : public ASTNode {
+  public:
+    VarDeclaration(const shared_ptr<ASTNode> &left_node,
+                   const shared_ptr<Type> &type_node,
+                   const shared_ptr<ASTNode> &right_node = nullptr)
+        : left_node_(left_node), type_node_(type_node),
+          right_node_(right_node){};
+    virtual ~VarDeclaration() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<ASTNode> &GetLeftNode() const { return left_node_; }
+    const shared_ptr<ASTNode> &GetRightNode() const { return right_node_; }
+    const shared_ptr<Type> &GetTypeNode() const { return type_node_; }
+
+  private:
+    shared_ptr<ASTNode> left_node_;
+    shared_ptr<ASTNode> right_node_;
+    shared_ptr<Type> type_node_;
+};
+```
+
+##### ConstDeclaration 类
+ConstDeclaration 类表示一个常量声明节点，继承自 ASTNode。它包含三个私有成员：left_node_（表示常量名的节点），type_node_（表示常量类型节点），和 right_node_（表示常量初始值的节点）。ConstDeclaration 类有一个构造函数，接受两个 ASTNode 类型的智能指针和一个 ConstType 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetLeftNode、GetRightNode 和 GetTypeNode 方法分别返回常量名节点、初始值节点和常量类型节点。
+```cpp
+class ConstDeclaration : public ASTNode {
+  public:
+    ConstDeclaration(const shared_ptr<ASTNode> &left_node,
+                     const shared_ptr<ConstType> &type_node,
+                     const shared_ptr<ASTNode> &right_node = nullptr)
+        : left_node_(left_node), type_node_(type_node),
+          right_node_(right_node) {}
+    virtual ~ConstDeclaration() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<ASTNode> &GetLeftNode() const { return left_node_; }
+    const shared_ptr<ASTNode> &GetRightNode() const { return right_node_; }
+    const shared_ptr<ConstType> &GetTypeNode() const { return type_node_; }
+
+  private:
+    shared_ptr<ASTNode> left_node_;
+    shared_ptr<ASTNode> right_node_;
+    shared_ptr<ConstType> type_node_;
+};
+```
+
+##### ArrayType 类
+ArrayType 类表示一个数组类型节点，继承自 IType。它包含两个私有成员：type_（表示元素类型的 Type 类型智能指针）和 bounds_（表示数组的边界，由一系列整数对组成）。ArrayType 类有一个构造函数，接受一个 Type 类型的智能指针和一个整数对向量作为参数。Accept 方法用于接受访问者对象。GetType 方法返回数组元素的类型。GetBounds 方法返回数组边界。
+```cpp
+class ArrayType : public IType {
+  public:
+    ArrayType(const shared_ptr<Type> &type,
+              vector<std::pair<int, int>> const bounds)
+        : type_(type), bounds_(bounds) {}
+    virtual ~ArrayType() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetType() const override { return type_->GetType(); }
+    const std::vector<std::pair<int, int>> &GetBounds() const {
+        return bounds_;
+    }
+
+  private:
+    shared_ptr<Type> type_;
+    vector<std::pair<int, int>> bounds_;
+};
+```
+
+##### Array 类
+Array 类表示一个数组变量节点，继承自 IVar。它包含三个私有成员：var_（表示变量名的 Var 类型智能指针），bounds_（表示数组的边界，由一系列整数对组成）和 var_type_（表示变量类型的枚举值）。Array 类有一个构造函数，接受一个 Var 类型的智能指针、一个整数对向量和一个变量类型枚举值作为参数。Accept 方法用于接受访问者对象。GetName 方法返回数组变量的名称。GetVarNode、GetVarType 和 GetBounds 方法分别返回变量名节点、变量类型和数组边界。
+```cpp
+class Array : public IVar {
+  public:
+    Array(const shared_ptr<Var> &var, vector<std::pair<int, int>> bounds,
+          VarType var_type = VarType::UNDEFINED)
+        : var_(var), bounds_(std::move(bounds)), var_type_(var_type) {}
+    virtual ~Array() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetName() const override { return var_->GetName(); }
+    const shared_ptr<Var> &GetVarNode() const { return var_; }
+    const VarType GetVarType() const override { return var_type_; }
+    const vector<std::pair<int, int>> GetBounds() const { return bounds_; }
+
+  private:
+    shared_ptr<Var> var_;
+    VarType var_type_;
+    vector<std::pair<int, int>> bounds_;
+};
+```
+
+##### ArrayDeclaration 类
+ArrayDeclaration 类表示一个数组声明节点，继承自 ASTNode。它包含两个私有成员：array_node_（表示数组变量节点）和 type_node_（表示数组类型节点）。ArrayDeclaration 类有一个构造函数，接受一个 Array 类型的智能指针和一个 ArrayType 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetArrayNode 和 GetTypeNode 方法分别返回数组变量节点和数组类型节点。
+```cpp
+class ArrayDeclaration : public ASTNode {
+  public:
+    ArrayDeclaration(const shared_ptr<Array> &array_node,
+                     const shared_ptr<ArrayType> &type_node)
+        : array_node_(array_node), type_node_(type_node) {}
+    virtual ~ArrayDeclaration() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<Array> &GetArrayNode() const { return array_node_; }
+    const shared_ptr<ArrayType> &GetTypeNode() const { return type_node_; }
+
+  private:
+    shared_ptr<Array> array_node_;
+    shared_ptr<ArrayType> type_node_;
+};
+```
+
+##### ArrayAccess 类
+ArrayAccess 类表示一个数组访问节点，继承自 IVar。它包含三个私有成员：array_（表示数组变量的 Array 类型智能指针），indices_（表示访问数组元素的索引节点向量）和 var_type_（表示变量类型的枚举值）。ArrayAccess 类有一个构造函数，接受一个 Array 类型的智能指针、一个 ASTNode 类型的智能指针向量和一个变量类型枚举值作为参数。Accept 方法用于接受访问者对象。GetArray、GetIndices、GetName、GetVarType 和 GetBounds 方法分别返回数组变量节点、索引节点向量、数组变量名、变量类型和数组边界。
+```cpp
+class ArrayAccess : public IVar {
+  public:
+    ArrayAccess(const shared_ptr<Array> &array,
+                const vector<shared_ptr<ASTNode>> &indices,
+                VarType var_type = VarType::UNDEFINED)
+        : array_(array), indices_(indices), var_type_(var_type) {}
+    virtual ~ArrayAccess() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<Array> &GetArray() const { return array_; }
+    const vector<shared_ptr<ASTNode>> &GetIndices() const { return indices_; }
+    const string GetName() const override { return array_->GetName(); }
+    const VarType GetVarType() const override { return var_type_; }
+    const vector<std::pair<int, int>> GetBounds() const {
+        return array_->GetBounds();
+    }
+
+  private:
+    shared_ptr<Array> array_;
+    vector<shared_ptr<ASTNode>> indices_;
+    VarType var_type_;
+};
+```
+
+##### Argument 类
+Argument 类表示一个函数参数节点，继承自 ASTNode。它包含三个私有成员：variable_（表示参数变量的 IVar 类型智能指针），type_（表示参数类型的 IType 类型智能指针）和 is_reference_（表示参数是否是引用类型的布尔值）。Argument 类有一个构造函数，接受一个 IVar 类型的智能指针、一个 IType 类型的智能指针和一个布尔值作为参数。Accept 方法用于接受访问者对象。GetVariable 方法返回参数变量节点。GetType 方法返回参数类型节点。IsReference 方法返回参数是否为引用类型的布尔值。
+```cpp
+class Argument : public ASTNode {
+  public:
+    explicit Argument(const shared_ptr<IVar> &variable,
+                      const shared_ptr<IType> &type, bool is_reference = false)
+        : variable_(variable), type_(type), is_reference_(is_reference) {}
+    virtual ~Argument() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<IVar> &GetVariable() const { return variable_; }
+    const shared_ptr<IType> &GetType() const { return type_; }
+    const bool IsReference() const { return is_reference_; }
+
+  private:
+    shared_ptr<IVar> variable_;
+    shared_ptr<IType> type_;
+    bool is_reference_;
+};
+```
+
+##### Subprogram 类
+Subprogram 类表示子程序（例如过程或函数）的抽象语法树节点。它有三个私有成员：name_（表示子程序名称的字符串），args_（表示子程序参数的 Argument 类型智能指针向量）和 block_（表示子程序代码块的 Block 类型智能指针）。Subprogram 类有一个构造函数，接受一个字符串、一个 Argument 类型智能指针向量和一个 Block 类型智能指针作为参数。Accept 方法用于接受访问者对象。GetName 方法返回子程序名称。GetArgs 方法返回子程序参数列表。GetBlock 方法返回子程序代码块。
+```cpp
+class Subprogram : public ASTNode {
+  public:
+    Subprogram(const string &name, const vector<shared_ptr<Argument>> &args,
+               const shared_ptr<Block> &block)
+        : name_(name), args_(args), block_(block) {}
+    virtual ~Subprogram() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetName() const { return name_; }
+    const vector<shared_ptr<Argument>> &GetArgs() const { return args_; }
+    const shared_ptr<Block> &GetBlock() const { return block_; }
+
+  private:
+    string name_;
+    vector<shared_ptr<Argument>> args_;
+    shared_ptr<Block> block_;
+};
+```
+
+##### Function 类
+Function 类表示抽象语法树中的函数节点。它有五个私有成员：name_（表示函数名称的字符串），return_var_（表示返回变量的 Var 类型智能指针），return_type_（表示返回类型的 Type 类型智能指针），args_（表示函数参数的 Argument 类型智能指针向量）和 block_（表示函数代码块的 Block 类型智能指针）。Function 类有一个构造函数，接受一个字符串、一个 Type 类型智能指针、一个 Argument 类型智能指针向量和一个 Block 类型智能指针作为参数。Accept 方法用于接受访问者对象。GetName 方法返回函数名称。GetReturnVar 方法返回返回变量。GetReturnType 方法返回返回类型。GetArgs 方法返回函数参数列表。GetBlock 方法返回函数代码块。
+```cpp
+class Function : public ASTNode {
+  public:
+    Function(const string &name, const shared_ptr<Type> &return_type,
+             const vector<shared_ptr<Argument>> &args,
+             const shared_ptr<Block> &block)
+        : name_(name), return_type_(return_type), args_(args), block_(block),
+          return_var_(std::make_shared<Var>(
+              std::make_shared<Token>(TokenType::IDENTIFIER, name), false,
+              true)) {}
+    virtual ~Function() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetName() const { return name_; }
+    const shared_ptr<Var> GetReturnVar() const { return return_var_; }
+    const string GetReturnType() const { return return_type_->GetType(); }
+    const vector<shared_ptr<Argument>> &GetArgs() const { return args_; }
+    const shared_ptr<Block> &GetBlock() const { return block_; }
+
+  private:
+    string name_;
+    shared_ptr<Var> return_var_;
+    shared_ptr<Type> return_type_;
+    vector<shared_ptr<Argument>> args_;
+    shared_ptr<Block> block_;
+};
+```
+
+##### Program 类
+Program 类表示抽象语法树中的程序节点。它有三个私有成员：name_（表示程序名称的字符串），global_declarations_（表示全局声明的 ASTNode 类型智能指针向量）和 block_（表示程序代码块的 Block 类型智能指针）。Program 类有两个构造函数，分别接受一个字符串和一个 Block 类型智能指针，以及一个字符串、一个 Block 类型智能指针和一个 ASTNode 类型智能指针向量作为参数。Accept 方法用于接受访问者对象。GetName 方法返回程序名称。GetBlock 方法返回程序代码块。GetGlobalDeclarations 方法返回全局声明列表。
+```cpp
+class Program : public ASTNode {
+  public:
+    Program(const string &name, const shared_ptr<Block> &block)
+        : name_(name), block_(block){};
+    Program(const string &name, const shared_ptr<Block> &block,
+            vector<shared_ptr<ASTNode>> &global_declarations)
+        : name_(name), block_(block),
+          global_declarations_(global_declarations){};
+    virtual ~Program() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetName() const { return name_; }
+    const shared_ptr<Block> &GetBlock() const { return block_; }
+    const vector<shared_ptr<ASTNode>> &GetGlobalDeclarations() const {
+        return global_declarations_;
+    }
+
+  private:
+    string name_;
+    vector<shared_ptr<ASTNode>> global_declarations_;
+    shared_ptr<Block> block_;
+};
+```
+
+##### Assignment 类
+Assignment 类表示抽象语法树中的赋值节点。它有两个私有成员：left_（表示左侧 ASTNode 类型智能指针）和 right_（表示右侧 ASTNode 类型智能指针）。Assignment 类有一个构造函数，接受两个 ASTNode 类型智能指针作为参数, Accept 方法用于接受访问者对象。GetLeft 方法返回赋值左侧的节点。GetRight 方法返回赋值右侧的节点。
+```cpp
+class Assignment : public ASTNode {
+  public:
+    Assignment(const shared_ptr<ASTNode> &left,
+               const shared_ptr<ASTNode> &right)
+        : left_(left), right_(right){};
+    virtual ~Assignment() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<ASTNode> &GetLeft() const { return left_; }
+    const shared_ptr<ASTNode> &GetRight() const { return right_; }
+
+  private:
+    shared_ptr<ASTNode> left_;
+    shared_ptr<ASTNode> right_;
+};
+```
+
+##### Oper 类
+Oper 类表示抽象语法树中的操作符节点（如 '+', '-', 等）。它有一个私有成员：oper_（表示操作符的字符串）。Oper 类有一个构造函数，接受一个 Token 类型智能指针作为参数。Accept 方法用于接受访问者对象。GetOper 方法返回操作符字符串。
+```cpp
+// Operators, like '+', '-', etc.
+class Oper : public ASTNode {
+  public:
+    Oper(const shared_ptr<Token> &oper) : oper_(oper->GetValue()) {}
+    virtual ~Oper() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetOper() { return oper_; };
+
+  private:
+    string oper_;
+};
+```
+
+##### UnaryOperation 类
+UnaryOperation 类表示抽象语法树中的一元操作节点。它有三个私有成员：oper_（表示操作符的 Oper 类型智能指针），var_node_（表示操作数的 ASTNode 类型智能指针）和 var_type_（表示操作结果类型的 VarType 枚举值）。UnaryOperation 类有一个构造函数，接受一个 Oper 类型智能指针、一个 ASTNode 类型智能指针和一个 VarType 枚举值作为参数。Accept 方法用于接受访问者对象。GetOper 方法返回操作符。GetVarNode 方法返回操作数节点。GetVarType 方法返回操作结果类型。
+```cpp
+class UnaryOperation : public IVar {
+  public:
+    UnaryOperation(const shared_ptr<Oper> &oper,
+                   const shared_ptr<ASTNode> &var_node, VarType var_type)
+        : oper_(oper), var_node_(var_node), var_type_(var_type) {}
+    virtual ~UnaryOperation() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<Oper> GetOper() const { return oper_; }
+    const shared_ptr<ASTNode> GetVarNode() const { return var_node_; }
+    const VarType GetVarType() const override { return var_type_; }
+
+  private:
+    shared_ptr<Oper> oper_;
+    shared_ptr<ASTNode> var_node_;
+    VarType var_type_;
+};
+```
+
+##### BinaryOperation 类
+BinaryOperation 类表示抽象语法树中的二元操作节点。它有四个私有成员：left_（表示左操作数的 ASTNode 类型智能指针），oper_（表示操作符的 Oper 类型智能指针），right_（表示右操作数的 ASTNode 类型智能指针）和 var_type_（表示操作结果类型的 VarType 枚举值）。BinaryOperation 类有一个构造函数，接受一个 ASTNode 类型智能指针、一个 Oper 类型智能指针、一个 ASTNode 类型智能指针和一个 VarType 枚举值作为参数。Accept 方法用于接受访问者对象。GetLeft 方法返回左操作数节点。GetOper 方法返回操作符。GetRight 方法返回右操作数节点。GetVarType 方法返回操作结果类型。GetName 方法返回 "binary_operation" 字符串。
+```cpp
+class BinaryOperation : public IVar {
+  public:
+    explicit BinaryOperation(const shared_ptr<ASTNode> &left,
+                             const shared_ptr<Oper> &oper,
+                             const shared_ptr<ASTNode> &right,
+                             VarType var_type = VarType::UNDEFINED)
+        : left_(left), oper_(oper), right_(right), var_type_(var_type) {}
+    virtual ~BinaryOperation() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<ASTNode> &GetLeft() { return left_; }
+    const shared_ptr<Oper> &GetOper() { return oper_; }
+    const shared_ptr<ASTNode> &GetRight() { return right_; }
+    const VarType GetVarType() const override { return var_type_; }
+    const string GetName() const override { return "binary_operation"; }
+
+  private:
+    shared_ptr<ASTNode> left_;
+    shared_ptr<Oper> oper_;
+    shared_ptr<ASTNode> right_;
+    VarType var_type_;
+};
+```
+
+##### NoOp 类
+NoOp 类表示抽象语法树中的一个空操作节点，它不执行任何操作。这个类只有一个构造函数和一个 Accept 方法，用于接受访问者对象。
+```cpp
 class NoOp : public ASTNode {
   public:
     NoOp(){};
+    virtual ~NoOp() = default;
+    void Accept(Visitor &visitor) override;
 };
-
 ```
+
+##### Statement 类
+Statement 类表示抽象语法树中的一个带有分号的语句节点。它有一个私有成员：node_（表示 ASTNode 类型的智能指针）。Statement 类有一个构造函数，接受一个 ASTNode 类型智能指针作为参数。Accept 方法用于接受访问者对象。GetNode 方法返回语句节点。
+```cpp
+/**
+ * @brief Statement with a ';'
+ * Pseudo-code example:
+ * a;
+ * add(1, 2);
+ */
+class Statement : public ASTNode {
+  public:
+    Statement(const shared_ptr<ASTNode> &node) : node_(node) {}
+    virtual ~Statement() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<ASTNode> &GetNode() const { return node_; }
+
+  private:
+    shared_ptr<ASTNode> node_;
+};
+```
+
+##### IfStatement 类
+IfStatement 类表示抽象语法树中的一个条件语句节点。它有三个私有成员：condition_（表示条件的 ASTNode 类型智能指针），then_branch_（表示条件为真时执行的代码块的 Compound 类型智能指针）和 else_branch_（表示条件为假时执行的代码块的 Compound 类型智能指针，如果没有 else 分支，则为 nullptr）。IfStatement 类有一个构造函数，接受一个 ASTNode 类型智能指针、一个 Compound 类型智能指针和一个 Compound 类型智能指针作为参数。Accept 方法用于接受访问者对象。GetCondition 方法返回条件节点。GetThenBranch 方法返回 then 分支代码块。GetElseBranch 方法返回 else 分支代码块。`
+```cpp
+class IfStatement : public ASTNode {
+  public:
+    IfStatement(const shared_ptr<ASTNode> &condition,
+                const shared_ptr<Compound> &then_branch,
+                const shared_ptr<Compound> &else_branch = nullptr)
+        : condition_(condition), then_branch_(then_branch),
+          else_branch_(else_branch) {}
+    virtual ~IfStatement() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<ASTNode> &GetCondition() const { return condition_; }
+    const shared_ptr<Compound> &GetThenBranch() const { return then_branch_; }
+    const shared_ptr<Compound> &GetElseBranch() const { return else_branch_; }
+
+  private:
+    shared_ptr<ASTNode> condition_;
+    shared_ptr<Compound> then_branch_;
+    shared_ptr<Compound> else_branch_;
+};
+```
+
+##### ForStatement 类
+ForStatement 类表示抽象语法树中的一个循环语句节点。它有四个私有成员：variable_（表示循环变量的 Var 类型智能指针），start_（表示循环起始值的 ASTNode 类型智能指针），end_（表示循环终止值的 ASTNode 类型智能指针）和 body_（表示循环体的 Compound 类型智能指针）。ForStatement 类有一个构造函数，接受一个 Var 类型智能指针、一个 ASTNode 类型智能指针、一个 ASTNode 类型智能指针和一个 Compound 类型智能指针作为参数。Accept 方法用于接受访问者对象。GetVariable 方法返回循环变量。GetStart 方法返回循环起始值。GetEnd 方法返回循环终止值。GetBody 方法返回循环体。
+```cpp
+class ForStatement : public ASTNode {
+  public:
+    ForStatement(const shared_ptr<Var> &variable,
+                 const shared_ptr<ASTNode> &start,
+                 const shared_ptr<ASTNode> &end,
+                 const shared_ptr<Compound> &body)
+        : variable_(variable), start_(start), end_(end), body_(body) {}
+    virtual ~ForStatement() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<Var> &GetVariable() const { return variable_; }
+    const shared_ptr<ASTNode> &GetStart() const { return start_; }
+    const shared_ptr<ASTNode> &GetEnd() const { return end_; }
+    const shared_ptr<Compound> &GetBody() const { return body_; }
+
+  private:
+    shared_ptr<Var> variable_;
+    shared_ptr<ASTNode> start_;
+    shared_ptr<ASTNode> end_;
+    shared_ptr<Compound> body_;
+};
+```
+
+##### FunctionCall 类
+FunctionCall 类表示抽象语法树中的一个函数调用节点。它有四个私有成员：name_（表示函数名的字符串），parameters_（表示函数参数的 ASTNode 类型智能指针向量），is_reference_（表示参数是否为引用的位集合）和 return_type_（表示函数返回类型的 VarType 枚举值）。`Function
+
 
 ### 函数、方法说明
 
-#### AST打印类 AST Printer
+#### 设计模式说明
+Code Generator使用了访问者模式(Visitor Pattern)来设计和遍历AST树，以便在不修改AST节点类的情况下，可以方便地添加新的操作，例如优化、代码生成等。以下是关于AST设计和遍历方法的详细文档。
 
-该类用于打印AST, 方便debug. 由于打印和代码生成一样都需要对AST进行遍历, 这样可以更方便的定位错误.
+##### AST的访问者模式设计
+访问者模式是一种将算法与其所操作的对象结构分离的设计模式。在本例中，访问者模式用于遍历AST。每个节点类都实现了一个Accept方法，该方法接受一个访问者对象作为参数, 可以根据需要执行例如优化、代码生成、错误检查等。要遍历AST，只需调用根节点（通常为Program节点）的Accept方法，并将访问者对象作为参数传递, 而不需要频繁的对AST进行修改.
 
-```cpp
-// ASTPrinter 类负责访问和打印抽象语法树（AST）的各个节点。它通过使用访问者模式来实现对不同类型节点的处理。
-class ASTPrinter {
-  public:
-    // 构造函数
-    explicit ASTPrinter(){};
-
-    // 根据节点类型访问相应的 Visit 函数，处理抽象语法树的节点
-    void Visit(const std::shared_ptr<semantic::ASTNode> &node);
-
-  private:
-    // 处理二元操作符节点
-    void VisitBinOp(const std::shared_ptr<semantic::BinOp> &node);
-    // 处理数值节点
-    void VisitNum(const std::shared_ptr<semantic::Num> &node);
-    // 处理程序节点
-    void VisitProgram(const std::shared_ptr<semantic::Program> &node);
-    // 处理代码块节点
-    void VisitBlock(const std::shared_ptr<semantic::Block> &node);
-    // 处理变量声明节点
-    void VisitVarDecl(const std::shared_ptr<semantic::VarDecl> &node);
-    // 处理复合语句节点
-    void VisitCompound(const std::shared_ptr<semantic::Compound> &node);
-    // 处理赋值语句节点
-    void VisitAssign(const std::shared_ptr<semantic::Assign> &node);
-    // 处理变量节点
-    void VisitVar(const std::shared_ptr<semantic::Var> &node);
-    // 处理类型节点
-    void VisitType(const std::shared_ptr<semantic::Type> &node);
-    // 处理 NoOp（空操作）节点
-    void VisitNoOp(const std::shared_ptr<semantic::NoOp> &node);
-
-    // 输出流，用于保存访问节点的输出结果
-    std::stringstream ostream_;
-    // 当前缩进级别，用于控制输出格式
-    int indent_level_;
-};
-```
-
-其具体遍历过程如下.
-
-```cpp
-// 访问并处理抽象语法树的各种节点类型
-void ASTPrinter::Visit(const std::shared_ptr<semantic::ASTRoot> &node) {
-    // 根据节点类型，调用相应的 Visit 函数
-    if (std::dynamic_pointer_cast<semantic::Program>(node)) {
-        VisitProgram(std::dynamic_pointer_cast<semantic::Program>(node));
-    } else if (std::dynamic_pointer_cast<semantic::Block>(node)) {
-        VisitBlock(std::dynamic_pointer_cast<semantic::Block>(node));
-    } else if (std::dynamic_pointer_cast<semantic::VarDecl>(node)) {
-        VisitVarDecl(std::dynamic_pointer_cast<semantic::VarDecl>(node));
-    } else if (std::dynamic_pointer_cast<semantic::Type>(node)) {
-        VisitType(std::dynamic_pointer_cast<semantic::Type>(node));
-    } else if (std::dynamic_pointer_cast<semantic::Compound>(node)) {
-        VisitCompound(std::dynamic_pointer_cast<semantic::Compound>(node));
-    } else if (std::dynamic_pointer_cast<semantic::Assign>(node)) {
-        VisitAssign(std::dynamic_pointer_cast<semantic::Assign>(node));
-    } else if (std::dynamic_pointer_cast<semantic::Var>(node)) {
-        VisitVar(std::dynamic_pointer_cast<semantic::Var>(node));
-    } else if (std::dynamic_pointer_cast<semantic::NoOp>(node)) {
-        VisitNoOp(std::dynamic_pointer_cast<semantic::NoOp>(node));
-    } else if (std::dynamic_pointer_cast<semantic::BinOp>(node)) {
-        VisitBinOp(std::dynamic_pointer_cast<semantic::BinOp>(node));
-    } else if (std::dynamic_pointer_cast<semantic::Num>(node)) {
-        VisitNum(std::dynamic_pointer_cast<semantic::Num>(node));
-    }
-
-    // 如果节点类型无效，抛出异常
-    throw std::runtime_error("Invalid node type");
-}
-
-// 处理程序节点
-void ASTPrinter::VisitProgram(const std::shared_ptr<semantic::Program> &node) {
-    // 输出程序节点的名称
-    ostream_ << "Program: " << node->getName() << std::endl;
-    // 增加缩进级别
-    indent_level_++;
-    // 访问程序节点的子节点（代码块）
-    Visit(node->GetBlock());
-    // 减少缩进级别
-    indent_level_--;
-}
-
-// 处理代码块节点
-void ASTPrinter::VisitBlock(const std::shared_ptr<semantic::Block> &node) {
-    // 输出 Block
-    ostream_ << string(indent_level_, ' ') << " Block" << std::endl;
-    // 增加缩进级别
-    indent_level_++;
-    // 访问代码块节点的子节点（声明和复合语句）
-    for (auto decl : node->GetDeclarations()) {
-        Visit(decl);
-    }
-    Visit(node->GetCompoundStatement());
-    // 减少缩进级别
-    indent_level_--;
-}
-
-// 处理变量声明节点
-void ASTPrinter::VisitVarDecl(const std::shared_ptr<semantic::VarDecl> &node) {
-    // 输出变量声明节点的信息（变量名和类型）
-    ostream_ << string(indent_level_, ' ')
-             << "VarDecl: " << node->Get
-             VarNode()->GetValue() << ": "
-             << node->GetTypeNode()->GetType() << std::endl;
-}
-
-// 处理复合语句节点
-void ASTPrinter::VisitCompound(
-    const std::shared_ptr<semantic::Compound> &node) {
-    // 输出 Compound
-    ostream_ << string(indent_level_, ' ') << "Compound" << std::endl;
-    // 增加缩进级别
-    indent_level_++;
-    // 访问复合语句节点的子节点
-    for (const auto &child : node->GetChildren()) {
-        Visit(child);
-    }
-    // 减少缩进级别
-    indent_level_--;
-}
-
-// 处理赋值语句节点
-void ASTPrinter::VisitAssign(const std::shared_ptr<semantic::Assign> &node) {
-    // 输出 Assign
-    ostream_ << string(indent_level_, ' ') << "Assign" << std::endl;
-    // 增加缩进级别
-    indent_level_++;
-    // 访问赋值语句节点的左侧子节点
-    ostream_ << string(indent_level_, ' ') << "Left:" << std::endl;
-    Visit(node->GetLeft());
-    // 访问赋值语句节点的右侧子节点
-    ostream_ << string(indent_level_, ' ') << "Right:" << std::endl;
-    Visit(node->GetRight());
-    // 减少缩进级别
-    indent_level_--;
-}
-
-// 处理变量节点
-void ASTPrinter::VisitVar(const std::shared_ptr<semantic::Var> &node) {
-    // 输出变量节点的值（变量名）
-    ostream_ << string(indent_level_, ' ') << "Var:" << node->GetValue()
-             << std::endl;
-}
-
-// 处理类型节点
-void ASTPrinter::VisitType(const std::shared_ptr<semantic::Type> &node) {
-    // 输出类型节点的类型
-    ostream_ << string(indent_level_, ' ') << "Type:" << node->GetType()
-             << std::endl;
-}
-
-// 处理空操作节点
-void ASTPrinter::VisitNoOp(const std::shared_ptr<semantic::NoOp> &node) {
-    // 输出 NoOp
-    ostream_ << string(indent_level_, ' ') << "NoOp" << std::endl;
-}
-
-// 处理二元操作节点
-void ASTPrinter::VisitBinOp(const std::shared_ptr<semantic::BinOp> &node) {
-    // 输出二元操作节点的操作符
-    ostream_ << string(indent_level_, ' ')
-             << "BinOp:" << node->getOper()->getType() << std::endl;
-    // 增加缩进级别
-    indent_level_++;
-    // 访问二元操作节点的左侧子节点
-    Visit(node->getLeft());
-    // 访问二元操作节点的右侧子节点
-    Visit(node->getRight());
-    // 减少缩进级别
-    indent_level_--;
-}
-
-// 处理数字节点
-void ASTPrinter::VisitNum(const std::shared_ptr<semantic::Num> &node) {
-    // 输出数字节点的值
-    ostream_ << string(indent_level_, ' ') << "Num:" << node->getValue()
-             << std::endl;
-}
-```
+##### 遍历方法
+首先编写Visitor虚基类, 所有的使用访问者模式的类都需要继承并实现该虚基类中的所有方法.
 
 #### 代码生成CodeGenerator
 
