@@ -41,11 +41,15 @@ class SymbolTable : ISymbolTable {
     void SetCurrentScope(const string &scope_name) override;
     const string GetCurrentScope() override { return current_scope_name_; }
     const shared_ptr<SymbolItem> Lookup(const string &name) const override;
+    void AddLineNo(const string &name, int lineno) {
+        name_lineno_map_.insert({name, lineno});
+    }
 
   private:
     shared_ptr<SymbolScope> current_scope_;
     string current_scope_name_;
     shared_ptr<analysiser::nameTable> name_table_;
+    unordered_map<string, int> name_lineno_map_;
 };
 } // namespace code_generation
 } // namespace pascal2c
