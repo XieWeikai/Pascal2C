@@ -190,20 +190,22 @@ var Identifier, identifier, IDENTIFIER, IdEnTiFiEr: integer;
   * 数组上下界分析测试（TestParsePeriod）
   * 参数分析测试（TestParseParameter）
 * 表达式分析测试（ExprParserTest）
-  * 基本表达式分析测试（TestParsePrimary）
-  * 复杂表达式分析测试（TestParseExpr）
+  * 表达式因子解析测试（TestParsePrimary）
+  * 复杂表达式解析测试（TestParseExpr）
+  * 表达式错误检测测试 (TestParserErr)
 * 语句分析测试（StatementParserTest）
-  * 赋值语句分析测试（TestAssignStatement）
+  * 赋值语句解析测试（TestAssignStatement）
   * if语句分析测试（TestIfStatement）
   * for语句分析测试（TestForStatement）
   * 复合语句分析测试（TestCompoundStatement）
+  * 语句解析错误处理测试（TestStatementErr）
 * 综合分析测试（TotalParserTest）
 
 各个部分的解析采用手写递归下降的方式来实现，每种语言结构的解析都有对应的方法/函数来完成解析成AST的操作。为了保证代码的正确性，需要对上面提到的各个部分均进行充分的测试。
 
 #### 5.2.3 单元测试用例
 
-对于parser的各个小功能需要分别进行测试以保证整体功能的正确性，在做测试时需要竟可能的保证覆盖率。
+对于parser的各个小功能需要分别进行测试以保证整体功能的正确性，在做测试时需要尽可能的保证覆盖率。
 
 ##### 程序分析测试（TestParseProgram）
 
@@ -379,68 +381,199 @@ var Identifier, identifier, IDENTIFIER, IdEnTiFiEr: integer;
 |a, b :|Parameter: unknown<br>-IdList: a, b|syntax err:expected basic type(integer, real, bool, char) before end of file|
 
 
-##### expression
+##### 表达式解析测试(ExprParserTest)
 
-表达式解析是递归下降解析中最有难度的部分，需要考虑运算符的结合性、优先级、括号等。设计表达式解析的测试样例如下
+表达式解析是递归下降解析中最有难度的部分，需要考虑运算符的结合性、优先级、括号等。在`Parser`中较为重要的两个方法为`ParsePrimary`和`ParseExpr`，`ParsePrimary`方法可以解析出一个表达式最基本的构成部分，如`3` `1.234` `-3` `add(3,4)` `true` `false` `abc` `a[10]`等等；`ParseExpr`方法可以解析出一整个表达式.在`ExprParserTest`中，我们对这两个方法进行了测试，同时也测试了碰到错误的表达式时`Parser`的表现。
 
+**TestParsePrimary**
+测试样例如下
 ```pascal
-123
+3  1.23  -3  not 4 +4  -4.1234 abcd add(3,4) count[i+1,b+2] say() true false not true
+```
+|测试用例| 预期结果 |
+|:---:|:---:|
+|3|解析出一个整数，整数值为3|
+|1.23|解析出一个实数，实数值为1.23|
+|-3|解析出一个`UnaryExpr`节点，op为'-' `factor`为3对应ast节点|
+|not 4|解析出一个`UnaryExpr`节点，op为'not' `factor`为4对应ast节点|
+|4    |解析出一个整数，整数值为4|
+|+4   |解析出一个`UnaryExpr`节点，op为'+' `factor`为4对应ast节点|
+|-4.1234|解析出一个`UnaryExpr`节点，op为'-' `factor`为4.1234对应ast节点|
+|abcd|解析出一个`CallOrVar`节点，id为abcd|
+|add(3,4)|解析出一个`CallValue`节点，id为add，params包含两个`Expr`节点，分别对应3和4|
+|count[i+1,b+2]|解析出一个`Variable`节点，id为count，expr_list包含两个`Expr`节点，分别对应i+1和b+2|
+|say()|解析出一个`CallValue`节点，id为say，params为空|
+|true|解析出一个`Boolean`节点，value为true|
+|false|解析出一个`Boolean`节点，value为false|
+|not true|解析出一个`UnaryExpr`节点，op为'not' `factor`为true对应ast节点|
 
-1.234
+测试结果符合预期，测试通过。
 
-true
-
-false
-
-abc
-
-cde[2]
-
-efg(1,2.3)
-
-not true
-
-not false
-
-1 + 2 * 3
-
-(1 + 2) * (4 - 2 + a[3]) - add(1,1) <= 34 and 3 > 5 or -(7 * 4) > -288
-
-1 +- 4   {语法错误}
-
-1+(3*(4-(5+5))    {语法错误，括号匹配错误}
+**TestParseExpr**
+测试样例如下
+```pascal
+1 + 2 + 3 + 4;
+1 + 2 * 3  ;
+(1 + 2) * 3 ;
+-(1 + 2) * 3  ;
+(-(1 + 2) * 3 <= 5) and (3 > 4) or (4 < 3) ;
+(-(1 + 2) * 3 <= 5) or (3 > 4) and (4 < 3) ;
+1 + 'a' + 'abc' + a + b ;
+true or false and true ;
+(true or false) and true ;
+true or (false and true) ;
 ```
 
-##### statement
+上述各个表达式解析的结果应该满足`pascal`中的运算符优先级结合规则，并且括号能改变运算结合顺序。通过`ToString`方法测试结果是否符合预期，最终通过测试。
 
-目前支持好几种语句的解析，设计测试样例如下
+**TestParserErr**
+const char *input_strs[] = {
+                "a + ",  // 不完整表达式
+                "(a+1",  // 括号不匹配
+                "a + * 1 ",  // 表达式错误
+                "a[]",     // 数组下标错误
+                "a[1",     // 数组下标错误
+        };
+|测试用例| 预期结果 |
+|:---:|:---:|
+|a + |在+后parser希望碰到值或id，但没有，故解析出错，抛出异常|
+|(a+1|括号不匹配，抛出异常|
+|a + * 1 |表达式错误，+后面希望碰到值或id，但碰到了*，故解析错误，抛出异常|
+|a[]|数组下标错误希望碰到数值或id，但碰到了]，故解析错误，抛出异常|
+|a[1|中括号未正确闭合，抛出异常|
 
+最终测试结果符合预期，测试通过。
+
+##### 语句解析测试(StatementParserTest)
+
+目前支持解析的语句有如下几种:
+- compound statement: 复合语句
+- assignment statement: 赋值语句
+- if statement: if语句
+- for statement: for语句
+- call statement: 子程序调用语句
+
+对这些语句的解析设计测试程序如下:
+
+**TestAssignStatement**
+
+样例输入:    
 ```pascal
-a := <expr>      {expr采用表达式测试时使用的表达式}
+a := a + 100 ;
+abc := 1 + 2 + 3 ;
+count[1,2] := 1 + 2 * 3;
+res := add(i+1,b+3) * factor() ;
+```
+|测试用例| 预期结果 |
+|:---:|:---:|
+|a := a + 100 ;|解析出一条赋值语句，其中var部分对应a，expr部分对应a + 100这个表达式|
+|abc := 1 + 2 + 3 ;|解析出一条赋值语句，其中var部分对应abc，expr部分对应1 + 2 + 3这个表达式|
+|count[1,2] := 1 + 2 * 3;|解析出一条赋值语句，其中var部分对应count[1,2]，expr部分对应1 + 2 * 3这个表达式|
+|res := add(i+1,b+3) * factor() ;|解析出一条赋值语句，其中var部分对应res，expr部分对应add(i+1,b+3) * factor()这个表达式|
 
-add := oprand1 + oprand2  {add 为函数名}
+上述各个测试样例解析结果都是正确的，因此测试通过。
 
-say_hello                 {调用procedure}
+**TestIfStatement**
 
-say_hello_to(a)           {调用function}
+样例输入:    
+```pascal
+if a <= limit then
+   a := a + 100;
+if i <= 10 then
+   i := i + 1
+else\n"
+   i := i - 1;
+```
+|测试用例| 预期结果 |
+|:---:|:---:|
+|if a <= limit then a := a + 100;|解析出一条if语句，其中condition部分对应a <= limit，then部分对应a := a + 100这条语句|
+|if i <= 10 then i := i + 1 else i := i - 1;|解析出一条if语句，其中condition部分对应i <= 10，then部分对应i := i + 1，else部分对应i := i - 1|
 
-if a > b then <statement>
+上述各个测试样例解析结果都是正确的，因此测试通过。
 
-if a < b then <statement> else <statement>
+**TestForStatement**
 
-for a := <expr> to <expr> do <statement>
-
-read(a,b)
-
-write(c+d,add(e,f))
-
+样例输入:    
+```pascal
+for i := 1 to 10 do
+   count := count + 1;
+for i := lower(i) to upper(i) do
 begin
-	<statement>;
-	<statement>;
-	...
-	<statement>
+   sub_program;
+   call(1,2,3);
+   a := a + 1
 end
 ```
+|测试用例| 预期结果 |
+|:---:|:---:|
+|for i := 1 to 10 do count := count + 1;|解析出一条for语句，其中id部分对应i，from部分对应1，to部分对应10，do部分对应count := count + 1这条语句|
+|for i := lower(i) to upper(i) do begin sub_program; call(1,2,3); a := a + 1 end|解析出一条for语句，其中var部分对应i，from部分对应lower(i)，to部分对应upper(i)，do部分对应begin sub_program; call(1,2,3); a := a + 1 end这个复合语句|
+
+上述各个测试样例解析结果都是正确的，因此测试通过。
+
+**TestCompoundStatement**
+样例输入
+```pascal
+begin
+   if l < r then
+       begin
+           mid := (l + r) / 2;
+           sort(l,mid);
+           sort(mid+1,r)
+       end
+   else
+       write(a,b,c + d)
+end;
+```
+这个测试用例中有两个`CompoundStatement`，一个就是外层的`begin` `end`包围的语句，该`CompoundStatement`由一条`if`语句构成，而`if`语句的`then`部分是一个`CompoundStatement`,该`CompoundStatement`由三条语句构成，分别是`mid := (l + r) / 2;` `sort(l,mid);` `sort(mid+1,r)`.因此用该测试样例不仅可以测试能否正常解析`CompoundStatement`，还可以测试`CompoundStatement`嵌套的情况的解析。
+
+最终解析结果与预期一致，测试通过。
+
+**TestErrorHandle**
+在对整个`pascal`源码进行解析时，`subprogram body`和`program body`其实就是一个`CompoundStatement`，因此在解析`subprogram body`和`program body`时，会调用`ParseCompoundStatement`，而在解析语句碰到语法错误时，我们需要能够记录下该错误并能够继续解析，因此我们需要在`ParseCompoundStatement`中进行错误处理，为了测试错误处理效果设计测试样例如下
+```pascal
+begin
+    a : = 1 + 2;
+    for := 1 to 10 do
+        subprogram;
+    if 3 <> 4 then
+        a := 3 + 4;
+
+    const a = 'b';
+    var c = 'd' 
+
+    my_func (1,2+3;
+    c := 1 + 2 + *
+
+    d := (3 * 4 -( 5 - 3))
+
+    if (3 - (4) > c then
+        write('hello')
+
+    for c := a to b do begin
+        write(a,b,c);
+    end
+    c[3,4,7 := 4
+end.
+```
+`ParseCompoundStatement`解析上面的语句后应当产生如下错误信息
+- "2:7 syntax error: lost ':=' when parsing assign statement",
+- "3:9 syntax error: missing id in for statement",
+- "8:5 syntax error: declaration is not part of statement",
+- "8:13 syntax error: lost ':=' when parsing assign statement",
+- "9:5 syntax error: declaration is not part of statement",
+- "9:11 syntax error: lost ':=' when parsing assign statement",
+- "11:19 syntax error: unclosed parentheses",
+- "12:18 syntax error: parse expression error: no expected token",
+- "16:5 syntax error: missing ';' at the end of statement",
+- "16:21 syntax err:expected ')' before 'then'",
+- "19:5 syntax error: missing ';' at the end of statement",
+- "21:5 last statement should not end with ;",
+- "22:5 syntax error: missing ';' at the end of statement",
+- "22:13 syntax error: unclosed brackets"
+
+经过测试后发现`Parser`可以正确提示上面的错误信息，因此测试通过。
+
 
 ##### procedure
 
