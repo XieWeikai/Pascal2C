@@ -144,11 +144,8 @@ Transformer::checkIdType(const string& id) {
 		is_func = sym_block->Query(func_checker) == saERRORS::NO_ERROR;
 		is_ret = false;
 	}
-	::fprintf(stderr , "I'm here : Func %s ,Check Id %s:  [%d , %d , %d , %d , %d]\n Msg : %s\n" ,
-		now.func_name.c_str() ,id.c_str() , is_var , is_func , is_ref , is_ret , is_const , saERRORS::toString(ret).c_str());
-
-		
-
+	// ::fprintf(stderr , "I'm here : Func %s ,Check Id %s:  [%d , %d , %d , %d , %d]\n Msg : %s\n" ,
+	// now.func_name.c_str() ,id.c_str() , is_var , is_func , is_ref , is_ret , is_const , saERRORS::toString(ret).c_str());
 	return {is_var , is_func , is_ref , is_ret , is_const , checker.type().type()};
 }
 
@@ -171,19 +168,16 @@ Transformer::checkArrayType(const string& id) {
 	vector<pair<int , int>> bounds;
 
 	for (const auto& elem : checker.type().pointer()) {
-		std::cerr << "In array "<< elem << "\n";
 		auto begin_ = elem.begin();
 		auto end_	= elem.end();
 		std::regex_search(begin_ , end_ , results , rgx);
 
 		int l = std::stoi(results.str());
-		std::cerr << results.str()<<  "\n";
 
 		begin_ = results[0].second;
 		std::regex_search(begin_ , end_ , results , rgx);
 
 		int r = std::stoi(results.str());
-		std::cerr << results.str()<<  "\n";
 
 		bounds.push_back({l , r});
 	}
@@ -443,7 +437,6 @@ Transformer::passExpr(shared_ptr<ast::Expression> cur) {
 		auto [_1 , _2 , is_ref , is_ret , _5 , _type] = checkIdType(var->id());
 
 		if (var->expr_list().size() == 0) { // basic type
-			std::cerr <<"Basic type : " << ToCString(_type)  << " id() " << var->id()<< "\n";
 			return make_shared<Var>( 
 				var->id() , is_ref , is_ret ,
 				type_kit->StringToVarType(ToCString(_type)));
@@ -455,10 +448,8 @@ Transformer::passExpr(shared_ptr<ast::Expression> cur) {
 			for (const auto& elem : var->expr_list()) {
 				indices.push_back(std::move(passExpr(elem)));
 			}
+
 			auto type_info = checkArrayType(var->id()).value();
-
-			std::cerr << "Array type :" << ToCString(type_info.first) << " id() " << var->id() << "\n";
-
 			return make_shared<ArrayAccess>(
 				make_shared<Array>(
 					make_shared<Var>( var->id() , is_ref ) ,
@@ -484,8 +475,7 @@ Transformer::passExpr(shared_ptr<ast::Expression> cur) {
 
 	case ast::ExprType::BINARY : {
 		auto bin_expr = std::static_pointer_cast<ast::BinaryExpr>(cur);
-		// auto type_info = analysiser::GetExprType(bin_expr).type();
-		// std::cerr << "Binary Type : " << ToCString(type_info) << "\n";
+
 		return make_shared<BinaryOperation>(
 			passExpr(bin_expr->lhs()) ,
 			make_shared_token<Oper>(TokenType::OPERATOR , ToCString(bin_expr->op())) ,
@@ -497,7 +487,6 @@ Transformer::passExpr(shared_ptr<ast::Expression> cur) {
 		auto callee = std::static_pointer_cast<ast::CallValue>(cur);
 		vector<shared_ptr<ASTNode>> param; param.reserve(callee->params().size());
 
-		std::cerr << "Caller Params : " << callee->id() << "\n"; 
 		auto ret_type = func_name_table[callee->id()]->return_type();
 
 		for (const auto& elem : callee->params()) {
@@ -534,7 +523,7 @@ shared_ptr<ASTNode>
 Transformer::transExpression(shared_ptr<ast::Expression> cur) {
 	// Optimizer::Calculator calc{cur};
 	// auto res = calc.getResultExpr();
-	std::cerr << "Cur@" << cur->line() <<" : " << cur->column() <<"\n";
+	// std::cerr << "Cur@" << cur->line() <<" : " << cur->column() <<"\n";
 
 	return passExpr(cur);
 }
@@ -552,7 +541,7 @@ Transformer::transExpression(shared_ptr<ast::Expression> cur) {
 */
 shared_ptr<ASTNode>
 Transformer::transStatement(shared_ptr<ast::Statement> cur) {
-	std::cerr << "Cur@" << cur->line() <<" : " << cur->column() <<"\n";
+	// std::cerr << "Cur@" << cur->line() <<" : " << cur->column() <<"\n";
 	switch (cur->GetType()) {
 
 	case ast::StatementType::ASSIGN_STATEMENT :

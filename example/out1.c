@@ -18,13 +18,13 @@ void swap(/* Is Reference */int *x, /* Is Reference */int *y) {
 }
 void printarrays() {
     int i;
-    printf("%s", "Integer array:");
+    printf("%s\n", "Integer array:");
     for (i = 1; i <= 5; i++) {
-        printf("%s%d%s%d", "intArray[", i, "] = ", intarray[i]);
+        printf("%s%d%s%d\n", "intArray[", i, "] = ", intarray[i]);
     }
-    printf("%s", "Real array:");
+    printf("%s\n", "Real array:");
     for (i = 3; i <= 5; i++) {
-        printf("%s%d%s%f", "realArray[", i, "] = ", realarray[i]);
+        printf("%s%d%s%f\n", "realArray[", i, "] = ", realarray[i]);
     }
 }
 // compilertest
@@ -37,14 +37,14 @@ int main(int argc, char* argv[]) {
     realarray[5] = 2.500000;
     realarray[6] = 3.500000;
     realarray[7] = 4.500000;
-    printf("%s", "Before swap:");
+    printf("%s\n", "Before swap:");
     printarrays();
     if ((add(intarray[2], intarray[4]) == 13)) {
-        printf("%s", "Swapping intArray[2] and intArray[4]");
+        printf("%s\n", "Swapping intArray[2] and intArray[4]");
         swap(&intarray[2], &intarray[4]);
     }
-    printf("%s", "After swap:");
+    printf("%s\n", "After swap:");
     printarrays();
-    printf("%f", pi);
+    printf("%f\n", pi);
     return 0;
 }

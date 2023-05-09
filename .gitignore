@@ -58,3 +58,6 @@ lexer
 lexer_exe
 lexer_test
 Testing/Temporary
+
+example/out1
+example/out1.c
