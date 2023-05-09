@@ -205,25 +205,118 @@ var Identifier, identifier, IDENTIFIER, IdEnTiFiEr: integer;
 
 对于parser的各个小功能需要分别进行测试以保证整体功能的正确性，在做测试时需要竟可能的保证覆盖率。
 
-##### program header
+##### 程序分析测试（TestParseProgram）
 
-program header是pascal程序起始部分，声明了程序名和程序参数，设计各种测试样例如下
-
-```pascal
-program MyProgram;  {不带id list}
-
-program MyProgram(input);  {id list中有一个id}
-
-program MyProgram(input,output,logfile);  {id list中有多个id}
-
-MyProgram;        {语法错误，没有program关键字 期望报错:filename:line:column: syntax error:expect program}
-
-MyProgram(a,b,c);  { 同上 }
-
-program MyProgram(a,b,);    {语法错误}
-
-program MyProgram(a ;       {语法错误}
+```c++
+        const vector<string> input_strs = {
+            "program f(a, b); var a, b : integer; begin  end.",
+            "program test; var a:integer; begin end.",
+            "program test var a: integer; begin end.",
+            "program test const a = 1; begin end.",
+            "program test procedure p;begin end; begin end.",
+            "program test function f : integer ;begin end; begin end.",
+            "program test begin end.",
+            "program test; begin end",
+        };
+        const vector<string>
+            results = {
+                "1:1 Program: \n"
+                "1:1     ProgramHead: f\n"
+                "1:11         IdList: a, b\n"
+                "1:18     ProgramBody: \n"
+                "1:22         VarDeclaration: \n"
+                "1:29             Type: integer\n"
+                "1:22             IdList: a, b\n"
+                "        1:38 CompoundStatement :0",
+                "1:1 Program: \n"
+                "1:1     ProgramHead: test\n"
+                "\n"
+                "1:15     ProgramBody: \n"
+                "1:19         VarDeclaration: \n"
+                "1:21             Type: integer\n"
+                "1:19             IdList: a\n"
+                "        1:30 CompoundStatement :0",
+                "1:1 Program: \n"
+                "1:1     ProgramHead: test\n"
+                "\n"
+                "1:14     ProgramBody: \n"
+                "1:18         VarDeclaration: \n"
+                "1:21             Type: integer\n"
+                "1:18             IdList: a\n"
+                "        1:30 CompoundStatement :0",
+                "1:1 Program: \n"
+                "1:1     ProgramHead: test\n"
+                "\n"
+                "1:14     ProgramBody: \n"
+                "1:20         ConstDeclaration: a\n"
+                "            1:24 1\n"
+                "        1:27 CompoundStatement :0",
+                "1:1 Program: \n"
+                "1:1     ProgramHead: test\n"
+                "\n"
+                "1:14     ProgramBody: \n"
+                "1:14         Subprogram: \n"
+                "1:14             SubprogramHead: procedure p\n"
+                "\n"
+                "1:26             SubprogramBody: \n"
+                "                1:26 CompoundStatement :0\n"
+                "        1:37 CompoundStatement :0",
+                "1:1 Program: \n"
+                "1:1     ProgramHead: test\n"
+                "\n"
+                "1:14     ProgramBody: \n"
+                "1:14         Subprogram: \n"
+                "1:14             SubprogramHead: function f integer\n"
+                "\n"
+                "1:36             SubprogramBody: \n"
+                "                1:36 CompoundStatement :0\n"
+                "        1:47 CompoundStatement :0",
+                "1:1 Program: \n"
+                "1:1     ProgramHead: test\n"
+                "\n"
+                "1:14     ProgramBody: \n"
+                "        1:14 CompoundStatement :0",
+                "1:1 Program: \n"
+                "1:1     ProgramHead: test\n"
+                "\n"
+                "1:15     ProgramBody: \n"
+                "        1:15 CompoundStatement :0",
+            };
+        const vector<vector<string>> errs = {
+            {},
+            {},
+            {
+                "1:14 syntax err:expected ';' before 'var'",
+            },
+            {
+                "1:14 syntax err:expected ';' before 'const'",
+            },
+            {
+                "1:14 syntax err:expected ';' before 'procedure'",
+            },
+            {
+                "1:14 syntax err:expected ';' before 'function'",
+            },
+            {
+                "1:14 syntax err:expected ';' before 'begin'",
+            },
+            {
+                "1:21 syntax err:expected '.' before end of file",
+            },
+        };
 ```
+
+|测试用例|预期结果|测试错误|
+|---|---|---|
+|program f(a, b); var a, b : integer; begin  end.|Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 f，包含一个 IdList 节点；IdList 含有 a 和 b 两个 id；ProgramBody 含有一个 VarDeclaration 节点和一个 Statement 节点；VarDeclaration 含有一个 IdList 节点和一个 Type 节点；IdList 含有 a 和 b 两个 id；Type 为 integer 基础类型|无|
+|program test; var a:integer; begin end.| Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 test，不包含 IdList 节点；ProgramBody 含有一个 VarDeclaration 节点和一个 Statement 节点；VarDeclaration 含有一个 IdList 节点和一个 Type 节点；IdList 含有 a 一个 id；Type 为 integer 基础类型|无|
+| program test var a: integer; begin end.| Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 test，不包含 IdList 节点；ProgramBody 含有一个 VarDeclaration 节点和一个 Statement 节点；VarDeclaration 含有一个 IdList 节点和一个 Type 节点；IdList 含有 a 一个 id；Type 为 integer 基础类型|syntax err:expected ';' before 'var'|
+|program test; const a = 1; begin end.|Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 test，不包含 IdList 节点；ProgramBody 含有一个 ConstDeclaration 节点和一个 Statement 节点；ConstDeclaration 的 id 为 a，包含一个 Expression 节点；Expression 为 1|syntax err:expected ';' before 'const'|
+|program test; procedure p; begin end.|Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 test，不包含 IdList 节点；ProgramBody 含有一个 Subprogram 节点和一个 Statement 节点；Subprogram 含有一个 SubprogramHead 节点和一个 SubprogramBody 节点；SubprogramHead 为 procedure，名称为 p，不包含 Parameter 节点；SubprogramBody 含有一个 Statement 节点；|syntax err:expected ';' before 'procedure'|
+|program test; function f; begin end.|Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 test，不包含 IdList 节点；ProgramBody 含有一个 Subprogram 节点和一个 Statement 节点；Subprogram 含有一个 SubprogramHead 节点和一个 SubprogramBody 节点；SubprogramHead 的名称为 f，不包含 IdList 节点；SubprogramBody 含有一个 CompoundStatement 节点；CompoundStatement 为空|syntax err:expected ';' before 'function'|
+|program test; begin end.|Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 test，不包含 IdList 节点；ProgramBody 含有一个 CompoundStatement 节点；CompoundStatement 为空|syntax err:expected ';' before 'begin'|
+|program test; begin end.|Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 test，不包含 IdList 节点；ProgramBody 含有一个 CompoundStatement 节点；CompoundStatement 为空|syntax err:expected '.' before end of file|
+
 
 ##### const declarations
 
