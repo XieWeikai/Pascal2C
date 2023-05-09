@@ -1855,21 +1855,56 @@ parse_expression_1(lhs, min_precedence)
 #### 数据结构说明
 
 - `enum ItemType;`表示检查类型所需的基本类型，包括INT、CHAR、BOOL等；
+- `class MegaType;`表示检查类型所需的全部类型，相比基本类型主要添加了处理指针相关类型的方法；
 - `class SymbolTableItem;`记录检查表达式类型所需的信息，如表达式名、类型、参数等；
 - `class SymbolTablePara;`表示表达式参数的所需信息。仅包含其类型、是否可传引用及是否为函数调用；
 - `class SymbolTableBlock;`表示一个作用域对应的符号表。内有符号表的查询、插入方法以及一个表示访问链的指针；
+- `enum ERROR_TYPE;`定义了语义分析返回的所有错误类型。
 
-在作用域的内部，采用map和set容器来完成符号表的查询、插入工作。
+在作用域的内部，采用`std::map`和`std::set`容器来完成符号表的查询、插入工作。
 
 #### 函数、方法说明
 
-- `SymbolTablePara`重载了`==`运算符以完成对`SymbolTableItem`的类型检查；
-- `SymbolTableItem`重载了`==`运算符以完成对`SymbolTableItem`的类型检查；
-- `SymbolTableItem`中`Name()`方法以提取对象的变量/函数名；
-- `SymbolTableBlock`中`AddItem()`方法为向当前作用域的符号表中插入一个新的变量/函数；
-- `SymbolTableBlock`中`Query()`方法为在当前作用域的符号表中查询该变量/函数是否存在；
-- `std::shared_ptr<SymbolTableBlock>  Locate(std::shared_ptr<SymbolTableBlock> father);`为符号表的定位操作，从当前位置新建一个新的作用域；
-- `std::shared_ptr<SymbolTableBlock> Relocate(std::shared_ptr<SymbolTableBlock> to_del);`为符号表的重定位操作，删除当前作用域并返回上一级作用域。
+- `SymbolTablePara`重载了`<`和`==`运算符以完成对`SymbolTableItem`的类型检查；
+- `SymbolTableItem`重载了`<`和`==`运算符以完成符号表中对`SymbolTableItem`的查询与类型检查；
+- `ERROR_TYPE SymbolTableBlock::AddItem(const SymbolTableItem &x)`方法为向当前作用域的符号表中插入一个新的变量/函数，返回值为错误类型；
+- `ERROR_TYPE SymbolTableBlock::Query(SymbolTableItem &x)`方法为在当前作用域的符号表中查询该变量/函数是否存在，并将该变量/函数的类型、参数等信息填充回原地址，返回值为错误类型；
+- `void SymbolTableBlock::Locate(std::shared_ptr<SymbolTableBlock> nowfather);`为符号表的定位操作，为当前作用域的符号表指定其访问链指向的作用域；
+- 符号表的重定位操作由`std::shared_ptr`智能指针支持的指针自动析构特性在程序结束运行时完成全部符号表的析构操作。
+
+#### 错误类型及处理方案
+
+由于pascal中变量和函数不能重名，变量与函数的冲突规则也不同，所以先提取出对象的名称，先根据名称索引其属于变量还是函数。
+
+##### 插入时
+
+- 对象名称首次出现：无错误，将对象插入符号表中并标记其名字对应的属性。
+- 对象名称在符号表中出现过：
+	- 对象与符号表中同名对象的属性不匹配，返回错误；
+	- 如果对象为变量，返回重定义错误；
+	- 如果对象为函数，则在符号表中查询是否存在参数完全一致的函数，若有则返回重定义错误。
+- 其他情况下成功插入，返回无错误。
+
+##### 查询时
+
+沿着访问链递归向上在符号表中查询：
+- 在某一层符号表中第一次查询到对象名称出现：
+	- 对象与符号表中同名对象的属性不匹配，返回错误；
+	- 如果对象为变量，检查其参数长度是否小于等于定义时参数长度，参数是否全为INT类型，若检查通过则填充其对应的（指针）类型。例：
+		- 定义`a[0..5,0..5]`，调用为`a[1,1,1]`，返回错误；
+		- 定义`a[0..5,0..5]:integer`，调用`a[1]`的类型为`Array[0..5] of INT`，无错误。
+	- 如果对象为函数，在符号表中查询是否存在参数完全一致的函数，若有则进一步检查参数的传引用属性是否匹配。
+- 如果在符号表中查询不到名称，额外特殊检查其是否为pascal内置的`read`、`readln`、`write`、`writeln`。
+
+由于pascal中函数的返回值与函数本身重名，其行为与通用的pascal对象不符，如下面这个例子，同名的函数调用与函数返回值同时存在：
+```pascal
+function f(x:integer):integer;
+begin
+    f:=x;
+    if f>1 then f:=f*f(f-1);
+end;
+```
+所以需要特殊处理函数返回值问题，定义时将其同时标记为变量和函数以解决这个问题。
 
 ### 语义分析器设计
 
