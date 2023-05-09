@@ -91,8 +91,10 @@ int main(int argc, char *argv[]) {
         errors.insert({{err.line(), err.column()}, err});
     }
 
+    bool has_error = false;
     // print errors
     for (auto &err : errors) {
+        has_error = true;
         auto [line, col] = err.first;
         auto msg = err.second;
         if (auto *p = std::get_if<pascal2c::parser::SyntaxErr>(&msg)) {
@@ -101,6 +103,9 @@ int main(int argc, char *argv[]) {
             PrintError(lines, "Semantic", line, col, p->msg());
         }
     }
+
+    if(has_error)
+        return 1;
 
     code_generation::Transformer trans(program);
     auto cg_program = trans.GetASTRoot();
