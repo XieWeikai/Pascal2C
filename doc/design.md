@@ -311,6 +311,141 @@ real              ({u}\.{u}?|{u}?\.{u}){exponent}?
 | 起始下标 | digits_1 |
 | 终止下标 | digits_2 |
 
+##### class Statement
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 判断是否为赋值语句  |virtual StatementType GetType() const = 0;|无|具体Statement Type|无|
+
+##### class AssignmentStatement
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取左值  |const shared_ptr\<Variable> &variable() const|无|指向 ast::Variable 的指针|无|
+| 获取右值  |const shared_ptr\<Expression> &expr() const|无|指向 ast::Expression 的指针|无|
+
+##### class IfStatement
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取条件  |const shared_ptr\<Expression> &condition() const|无|指向 ast::Expression 的指针|无|
+| 获取then语句  |const shared_ptr\<Statement> &then() const|无|指向 ast::Statement 的指针|无|
+| 获取else语句  |const shared_ptr\<Statement> &else_part() const|无|指向 ast::Statement 的指针|无|
+
+##### class CallStatement
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取子程序名  |const string &name() const|无|子程序名|无|
+| 获取参数列表  |const shared_ptr\<ExpressionList> &expr_list() const|无|vector,每一个元素为一个expr|无|
+
+##### class CompoundStatement
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取语句列表  |const vector\<shared_ptr\<Statement>> &statements() const|无|语句列表，可以为空，元素为指向 ast::Statement 的指针|无|
+
+##### class ForStatement
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取循环变量  |const std::string &id() const|无|循环变量的名字|无|
+| 获取循环变量的初始值  |const shared_ptr\<Expression> &from() const|无|指向 ast::Expression 的指针|无|
+| 获取循环变量的终止值  |const shared_ptr\<Expression> &to() const|无|指向 ast::Expression 的指针|无|
+
+##### class Expression
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取表达式类型  |virtual ExprType GetType() const = 0;|无|具体Expression Type|无|
+
+##### enum ExprType
+定义表示表达式类型的枚举类型，具体定义如下：
+```c++
+enum ExprType
+    {
+        INT = 0,
+        REAL = 1,
+        CHAR = 2,
+        BOOLEAN = 3,
+        CALL_OR_VAR = 4,
+        VARIABLE = 5,
+        CALL = 6,
+        BINARY = 7,
+        UNARY = 8,
+        STRING = 9,
+    };
+```
+| 描述     | 名称 |
+| -------- | ------------------------------------------------------------ |
+| 整数 | INT |
+| 实数 | REAL |
+| 字符 | CHAR |
+| 布尔 | BOOLEAN |
+| 变量或者函数调用 | CALL_OR_VAR |
+| 变量 | VARIABLE |
+| 函数调用 | CALL |
+| 二元表达式 | BINARY |
+| 一元表达式 | UNARY |
+| 字符串 | STRING |
+
+##### class StringValue
+该类继承自Expression，表示字符串常量
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取字符串值  |const string &value() const|无|字符串值|无|
+
+##### class IntegerValue
+该类继承自Expression，表示整数常量
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取整数值  |const int &value() const|无|整数值|无|
+
+##### class RealValue
+该类继承自Expression，表示实数常量
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取实数值  |const double &value() const|无|实数值|无|
+
+##### class CharValue
+该类继承自Expression，表示字符常量
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取字符值  |const char &ch() const|无|字符值|无|
+
+##### class BooleanValue
+该类继承自Expression，表示布尔常量
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取布尔值  |const bool &value() const|无|布尔值|无|
+
+##### class CallOrVar 
+该类继承自Expression，表示变量或者函数调用，在语法分析时由于没有符号表信息，故在有些情况下语法分析阶段无法区分变量和函数调用(如`a := Add`，`Add`有可能是函数也有可能是变量)，因此将二者统一表示为CallOrVar，语义分析阶段再根据符号表信息进行区分
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取变量或者函数调用的名字  |const string &id() const|无|变量或者函数调用的名字|无|
+
+##### class CallValue
+该类继承自CallOrVar，表示函数调用，在CallOrVar的基础上增加了参数列表，当碰到形如`Add(1,2)`这样的函数调用时，语法分析阶段会将其解析为CallValue
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取参数列表  |const shared_ptr\<ExpressionList> &params() const|无|参数列表，每一个元素为一个expr|无|
+
+##### class Variable
+该类继承自CallOrVar，表示变量，在CallOrVar的基础上增加了下标列表，当碰到形如`a[1]`这样的变量时，语法分析阶段会将其解析为Variable
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取下标列表  |const shared_ptr\<ExpressionList> &expr_list() const|无|下标列表，每一个元素为一个expr|无|
+
+##### class BinaryExpr
+该类继承自Expression，表示二元表达式，如`a+b`
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取操作符  |const string &op() const|无|操作符|无|
+| 获取左操作数  |const shared_ptr\<Expression> &lhs() const|无|左操作数|无|
+| 获取右操作数  |const shared_ptr\<Expression> &rhs() const|无|右操作数|无|
+
+##### class UnaryExpr
+该类继承自Expression，表示一元表达式，如`-a`
+| 描述     | 接口                                                         | 参数 | 返回值 | 异常 |
+| -------- | ------------------------------------------------------------ | ---- | ------ | ---- |
+| 获取操作符  |const string &op() const|无|操作符|无|
+| 获取操作数  |const shared_ptr\<Expression> &factor() const|无|操作数|无|
+
+
 #### 数据结构定义
 
 为了完整表示源程序的所有信息，我们为pascal各种语法结构设计了相应的AST节点，各个类的定义均放在`pascal2c::ast`命名空间中，具体定义如下文所述。
@@ -890,21 +1025,29 @@ enum StatementType{
 ```c++
 // var_ := expr_
 // var_ can be: var_name    var_name[expr_list]  func_id
-class AssignStatement : public Statement {
+class AssignStatement : public Statement
+{
 public:
     // basic constructor
     // param:
     //     var is used to initialize the class member var_
     //     expr is used to initialize the class member expr_
-    AssignStatement(std::shared_ptr<Variable> var,std::shared_ptr<Expression> expr) : var_(std::move(var)),expr_(
+    AssignStatement(std::shared_ptr<Variable> var, std::shared_ptr<Expression> expr) : var_(std::move(var)), expr_(
+                                                                                                                    std::move(expr)) {}
+
+    AssignStatement(int line,int col, std::shared_ptr<Variable> var, std::shared_ptr<Expression> expr) :Statement(line,col), var_(std::move(var)), expr_(
             std::move(expr)) {}
 
     inline StatementType GetType() const override { return ASSIGN_STATEMENT; }
 
     std::string ToString(int level) const override;
+
+    GETTER(std::shared_ptr<Variable>, var);
+    GETTER(std::shared_ptr<Expression>, expr);
+
 private:
-    std::shared_ptr<Variable> var_;      // lhs of the assign statement
-    std::shared_ptr<Expression> expr_;   // rhs of the assign statement
+    std::shared_ptr<Variable> var_;    // lhs of the assign statement
+    std::shared_ptr<Expression> expr_; // rhs of the assign statement
 };
 ```
 
@@ -920,20 +1063,27 @@ private:
 // expr_list_ is the arguments of procedure or function
 // expr_list_ can be empty
 // write and read are treated as CallStatement as built-in function
-class CallStatement : public Statement {
+class CallStatement : public Statement
+{
 public:
-    CallStatement(std::string name, vector<std::shared_ptr<Expression> > expr_list) :
-            name_(std::move(name)), expr_list_(std::move(expr_list)) {}
-
+    CallStatement(std::string name, vector<std::shared_ptr<Expression>> expr_list) : name_(std::move(name)), expr_list_(std::move(expr_list)) {}
+    CallStatement(int line,int col, std::string name, vector<std::shared_ptr<Expression>> expr_list) :
+                        Statement(line,col), name_(std::move(name)), expr_list_(std::move(expr_list)) {}
     explicit CallStatement(std::string name) : name_(std::move(name)) {}
+    explicit CallStatement(int line,int col,std::string name) :Statement(line,col), name_(std::move(name)) {}
+
 
     inline StatementType GetType() const override { return CALL_STATEMENT; }
 
     std::string ToString(int level) const override;
-private:
-    std::string name_;   // procedure name or function name
 
-    vector<std::shared_ptr<Expression> > expr_list_; // can be empty:  e.g. procedure_name;   func();
+    GETTER(std::string, name);
+    GETTER(vector<std::shared_ptr<Expression>>, expr_list);
+
+private:
+    std::string name_; // procedure name or function name
+
+    vector<std::shared_ptr<Expression>> expr_list_; // can be empty:  e.g. procedure_name;   func();
 };
 ```
 
@@ -948,15 +1098,21 @@ private:
 //    statement2 ;
 //    ...
 // end
-class CompoundStatement: public Statement {
+class CompoundStatement : public Statement
+{
 public:
-    explicit CompoundStatement(vector<std::shared_ptr<Statement> > statements) : statements_(std::move(statements)) {}
+    explicit CompoundStatement(vector<std::shared_ptr<Statement>> statements) : statements_(std::move(statements)) {}
+    explicit CompoundStatement(int line,int col, vector<std::shared_ptr<Statement>> statements) :
+                            Statement(line,col), statements_(std::move(statements)) {}
 
     inline StatementType GetType() const override { return COMPOUND_STATEMENT; }
 
     std::string ToString(int level) const override;
+
+    GETTER(vector<std::shared_ptr<Statement>>, statements);
+
 private:
-    vector<std::shared_ptr<Statement> > statements_;  // vector of statement
+    vector<std::shared_ptr<Statement>> statements_; // vector of statement
 };
 ```
 
@@ -968,20 +1124,30 @@ private:
 // if condition_ then
 //      then_
 // else
-//      else_
-class IfStatement : public Statement {
+//      else_part_
+class IfStatement : public Statement
+{
 public:
-    IfStatement(std::shared_ptr<Expression> cond,std::shared_ptr<Statement> then,
+    IfStatement(std::shared_ptr<Expression> cond, std::shared_ptr<Statement> then,
                 std::shared_ptr<Statement> else_part)
-                : condition_(std::move(cond)),then_(std::move(then)),else_(std::move(else_part)) {}
+        : condition_(std::move(cond)), then_(std::move(then)), else_part_(std::move(else_part)) {}
+
+    IfStatement(int line,int col, std::shared_ptr<Expression> cond, std::shared_ptr<Statement> then,
+                std::shared_ptr<Statement> else_part) :
+                Statement(line,col), condition_(std::move(cond)), then_(std::move(then)), else_part_(std::move(else_part)) {}
 
     inline StatementType GetType() const override { return IF_STATEMENT; }
 
     std::string ToString(int level) const override;
+
+    GETTER(std::shared_ptr<Expression>, condition);
+    GETTER(std::shared_ptr<Statement>, then);
+    GETTER(std::shared_ptr<Statement>, else_part);
+
 private:
-    std::shared_ptr<Expression> condition_;    // condition expression
-    std::shared_ptr<Statement>  then_;         // then part of if statement
-    std::shared_ptr<Statement>  else_;         // else part of if statement, can be empty
+    std::shared_ptr<Expression> condition_; // condition expression
+    std::shared_ptr<Statement> then_;       // then part of if statement
+    std::shared_ptr<Statement> else_part_;       // else part of if statement, can be empty
 };
 ```
 
@@ -991,20 +1157,35 @@ private:
 
 ```c++
 // for id_ := from_ to to_ do statement_
-class ForStatement : public Statement {
+class ForStatement : public Statement
+{
 public:
-    ForStatement(std::shared_ptr<Expression> from,std::shared_ptr<Expression> to,
-                 std::shared_ptr<Statement>  statement)
-                 : from_(std::move(from)),to_(std::move(to)),statement_(std::move(statement)) {}
+    ForStatement(std::shared_ptr<Expression> from, std::shared_ptr<Expression> to,
+                    std::shared_ptr<Statement> statement)
+        : from_(std::move(from)), to_(std::move(to)), statement_(std::move(statement)) {}
+
+    ForStatement(std::string id, std::shared_ptr<Expression> from, std::shared_ptr<Expression> to,
+                    std::shared_ptr<Statement> statement)
+            :id_(std::move(id)), from_(std::move(from)), to_(std::move(to)), statement_(std::move(statement)) {}
+
+    ForStatement(int line,int col, std::string id, std::shared_ptr<Expression> from, std::shared_ptr<Expression> to,
+                    std::shared_ptr<Statement> statement) :
+                    Statement(line,col), id_(std::move(id)), from_(std::move(from)), to_(std::move(to)), statement_(std::move(statement)) {}
 
     inline StatementType GetType() const override { return FOR_STATEMENT; }
 
     std::string ToString(int level) const override;
+
+    GETTER(std::string, id);
+    GETTER(std::shared_ptr<Expression>, from);
+    GETTER(std::shared_ptr<Expression>, to);
+    GETTER(std::shared_ptr<Statement>, statement);
+
 private:
     std::string id_;
     std::shared_ptr<Expression> from_;
     std::shared_ptr<Expression> to_;
-    std::shared_ptr<Statement>  statement_;
+    std::shared_ptr<Statement> statement_;
 };
 ```
 
@@ -1014,7 +1195,8 @@ private:
 
 ```c++
 // base class for expression
-class Expression {
+class Expression : public Ast
+{
 public:
     // for test use
     // param:
@@ -1027,21 +1209,27 @@ public:
     // return:
     //     one of ExprType
     virtual ExprType GetType() const = 0;
+
+    Expression() = default;
+    Expression(int line, int col) : Ast(line, col) {}
 };
 ```
 
 其中`ExprType`的定义如下
 
 ```c++
-enum ExprType{
+enum ExprType
+{
     INT = 0,
     REAL = 1,
     CHAR = 2,
     BOOLEAN = 3,
-    VARIABLE = 4,
-    CALL = 5,
-    BINARY = 6,
-    UNARY = 7,
+    CALL_OR_VAR = 4,
+    VARIABLE = 5,
+    CALL = 6,
+    BINARY = 7,
+    UNARY = 8,
+    STRING = 9,
 };
 ```
 
@@ -1054,12 +1242,16 @@ enum ExprType{
 // this node represents an integer value in pascal
 // e.g. 123  482
 // value_ stores the value of the integer
-class IntegerValue : public Expression {
+class IntegerValue : public Expression
+{
 public:
     explicit IntegerValue(int value) : value_(value) {}
+    IntegerValue(int line, int col, int value) : Expression(line, col), value_(value) {}
 
     std::string ToString(int level) const override;
-    inline ExprType GetType() const override {return INT;}
+    inline ExprType GetType() const override { return INT; }
+
+    GETTER(int, value);
 
 private:
     int value_;
@@ -1075,12 +1267,16 @@ private:
 // this node represents a real value in pascal
 // e.g. 12.34
 // value_ stores the value of the real number
-class RealValue : public Expression {
+class RealValue : public Expression
+{
 public:
     explicit RealValue(double value) : value_(value) {}
+    RealValue(int line, int col, double value) : Expression(line, col), value_(value) {}
 
     std::string ToString(int level) const override;
-    inline ExprType GetType() const override {return REAL;}
+    inline ExprType GetType() const override { return REAL; }
+
+    GETTER(double, value);
 
 private:
     double value_;
@@ -1093,18 +1289,21 @@ private:
 
 ```c++
 // leaf node
-// represent a boolean value
-// e.g. true  false
-// value_ store the value
-class BooleanValue : public Expression {
+// represent a character
+// e.g. 'a'
+// ch_ store the ascii code of the character
+class CharValue : public Expression
+{
 public:
-    explicit BooleanValue(bool value) : value_(value) {}
+    explicit CharValue(int ch) : ch_(ch) {}
+    CharValue(int line,int col, int ch) :Expression(line, col), ch_(ch) {}
 
     std::string ToString(int level) const override;
-    inline ExprType GetType() const override {return BOOLEAN;}
+    inline ExprType GetType() const override { return CHAR; }
 
+    GETTER(int, ch);
 private:
-    bool value_;
+    int ch_;
 };
 ```
 
@@ -1117,15 +1316,45 @@ private:
 // represent a boolean value
 // e.g. true  false
 // value_ store the value
-class BooleanValue : public Expression {
+class BooleanValue : public Expression
+{
 public:
     explicit BooleanValue(bool value) : value_(value) {}
+    BooleanValue(int line, int col, bool value) : Expression(line, col), value_(value) {}
 
     std::string ToString(int level) const override;
-    inline ExprType GetType() const override {return BOOLEAN;}
+    inline ExprType GetType() const override { return BOOLEAN; }
 
+    GETTER(bool, value);
 private:
     bool value_;
+};
+```
+##### class CallOrVar
+
+该类表示一个函数调用或者一个变量，定义如下
+
+```c++
+// when we met some statement like var1 := A;
+// we don't know whether var1 is a variable or a function call,
+// so we use this node to represent it
+class CallOrVar : public Expression
+{
+public:
+    explicit CallOrVar(std::string id) : id_(std::move(id)) {}
+    CallOrVar(int line, int col, std::string id) : Expression(line, col), id_(std::move(id)) {}
+
+    std::string ToString(int level) const override;
+    inline virtual ExprType GetType() const override { return CALL_OR_VAR; }
+
+    GETTER(std::string, id);
+protected:
+    // id_ is the name of the variable or function
+    // in the example of var1 := A;
+    // id_ is "A"
+    // and we do not need an expression list since no matter
+    // it is a variable or a function call, it has no parameters
+    std::string id_;
 };
 ```
 
@@ -1138,66 +1367,85 @@ private:
 // e.g. add(3+4,5)
 // params_ is a vector of expressions used as parameters of the function
 // params_ can be empty
-class CallValue : public Expression {
+class CallValue : public CallOrVar
+{
 public:
-    explicit CallValue(std::string func_name) : func_name_(std::move(func_name)) {}
-    CallValue(std::string func_name,vector<std::shared_ptr<Expression> > params) : func_name_(std::move(func_name)),params_(
-            std::move(params)) {}
+    explicit CallValue(std::string func_name) : CallOrVar(std::move(func_name)) {}
+    CallValue(int line, int col, std::string func_name) : CallOrVar(line, col, std::move(func_name)) {}
+    CallValue(std::string func_name, vector<std::shared_ptr<Expression>> params) : CallOrVar(std::move(func_name)) , params_(std::move(params)) {}
+    CallValue(int line, int col, std::string func_name, vector<std::shared_ptr<Expression>> params) :
+                                    CallOrVar(line, col, std::move(func_name)), params_(std::move(params)) {}
+
     void AddParam(std::shared_ptr<Expression> expr);
 
     std::string ToString(int level) const override;
-    inline ExprType GetType() const override {return CALL;}
+    inline ExprType GetType() const override { return CALL; }
+
+    GETTER(vector<std::shared_ptr<Expression>>, params);
 
 private:
-    std::string func_name_;
-    vector<std::shared_ptr<Expression> > params_;
+    // id is defined in CallOrValue base class
+    // std::string id_;
+    vector<std::shared_ptr<Expression>> params_;
 };
 ```
 
 ##### class Variable
 
-该类表示一个pascal变量，如`a count num[3] v[i+1,j]`具体定义如下
+该类表示一个pascal变量，如`num[3] v[i+1,j]`具体定义如下
 
 ```c++
 // represent variable in pascal
 // e.g. count  num[3+i]  pos[3,4]
 // in the example of pos[3,4] the elements of expr_list_ is 3 and 4
 // expr_list_ can be empty
-class Variable : public Expression {
+class Variable : public CallOrVar
+{
 public:
-    explicit Variable(std::string id) : id_(std::move(id)) {}
-    Variable(std::string id,vector<std::shared_ptr<Expression> > expr_list) : id_(std::move(id)),expr_list_(
-            std::move(expr_list)) {}
+    explicit Variable(std::string id) : CallOrVar(std::move(id)) {}
+    Variable(int line, int col, std::string id) : CallOrVar(line, col, std::move(id)) {}
+    Variable(std::string id, vector<std::shared_ptr<Expression>> expr_list) : CallOrVar(std::move(id)) , expr_list_(
+                                                                                                        std::move(expr_list)) {}
+    Variable(int line, int col, std::string id, vector<std::shared_ptr<Expression>> expr_list) :
+            CallOrVar(line, col, std::move(id)), expr_list_(std::move(expr_list)) {}
 
     void AddExpr(std::shared_ptr<Expression> expr);
 
     std::string ToString(int level) const override;
-    inline ExprType GetType() const override {return VARIABLE;}
+    inline ExprType GetType() const override { return VARIABLE; }
+
+    GETTER(vector<std::shared_ptr<Expression>>, expr_list);
 
 private:
-    std::string id_;
-    vector<std::shared_ptr<Expression> > expr_list_;
+    // id is defined in CallOrValue base class
+    // std::string id_;
+    vector<std::shared_ptr<Expression>> expr_list_;
 };
 ```
 
 ##### class BinaryExpr
 
 该类表示一个二元运算表达式，具体定义如下
-
 ```c++
 // represent binary expression
 // e.g. 3 + 4 + 5    3 * ((6 + 7) - 2)
 // in the example of 3 + 4 + 5, lhs_ is 3 + 4 ,rhs_ is 5 and op_ is '+'
-class BinaryExpr : public Expression {
+class BinaryExpr : public Expression
+{
 public:
-    BinaryExpr(int op, std::shared_ptr<Expression> lhs, std::shared_ptr<Expression> rhs) :
-            op_(op), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+    BinaryExpr(int op, std::shared_ptr<Expression> lhs, std::shared_ptr<Expression> rhs) : op_(op), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+    BinaryExpr(int line, int col, int op, std::shared_ptr<Expression> lhs, std::shared_ptr<Expression> rhs) :
+            Expression(line, col), op_(op), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
 
     std::string ToString(int level) const override;
-    inline ExprType GetType() const override {return BINARY;}
+    inline ExprType GetType() const override { return BINARY; }
+
+    GETTER(int, op);
+    GETTER(std::shared_ptr<Expression>, lhs);
+    GETTER(std::shared_ptr<Expression>, rhs);
 
 private:
-    int op_;                 // operator
+    int op_;                                // operator
     std::shared_ptr<Expression> lhs_, rhs_; // two operands
 };
 ```
@@ -1210,12 +1458,18 @@ private:
 // represent unary expression
 // e.g. -3
 // in the above example, op_ is '-' and factor is 3
-class UnaryExpr : public Expression {
+class UnaryExpr : public Expression
+{
 public:
     UnaryExpr(int op, std::shared_ptr<Expression> factor) : op_(op), factor_(std::move(factor)) {}
+    UnaryExpr(int line, int col, int op, std::shared_ptr<Expression> factor) :
+            Expression(line, col), op_(op), factor_(std::move(factor)) {}
 
     std::string ToString(int level) const override;
-    inline ExprType GetType() const override {return UNARY;}
+    inline ExprType GetType() const override { return UNARY; }
+
+    GETTER(int, op);
+    GETTER(std::shared_ptr<Expression>, factor);
 
 private:
     int op_;
@@ -1231,8 +1485,6 @@ private:
 
 
 #### 接口描述
-
-
 
 ##### class Parser
 | 描述                                               | 接口             | 参数                    | 返回值      | 异常                                                       |
@@ -1562,18 +1814,6 @@ private:
 
 ![语法分析顺序图](assets/parser_flowchart.png)
 
-##### 错误处理
-
-进行**错误处理**时，将采取如下策略:
-
-- 在解析过程中碰到语法错误时抛出异常
-- 在本层或较高层捕获异常，将错误信息存入`err_msg_` 和 `syntax_errs_`
-- 继续解析的两种处理策略:
-  - 碰到异常后，跳过若干`token`直到碰到想要的`token` 或分隔符（如';', 'TOK_EOF'等）或后一部分可能的语法开头的`token`
-  - 碰到异常后，忽略一些`token`接着解析
-
-如`ParseExpr`和`ParseStatement`在碰到语法错误时直接抛出异常，`ParseCompoundStatement`调用`ParseStatement`来解析一系列语句，若捕获异常，则记录下异常，并不断跳过`token`直到遇到`;`或者可能的语句开头的`token`再接着进行析。`ParseCompoundStatement`在碰到缺少`begin`的错误时，记录错误并忽略`begin`直接进行statement的解析操作。
-
 对于多数的语法结构解析，均可以根据产生式编写对应的一个解析该语法结构的方法来进行解析，但是对于**表达式解析**，若完全按照产生式来写会较为繁琐，因为表达式中有单目运算符、双目运算符、括号等很多元素，在解析时需要考虑运算符的优先级和结合性问题，若采用传统的方法，需要为每一个优先级的运算符写一个函数解析对应优先级，还要消除左递归，较繁琐，故在本项目中采用`pratt parser`的方式来进行表达式解析，对应伪代码如下
 
 ```
@@ -1596,7 +1836,16 @@ parse_expression_1(lhs, min_precedence)
     return lhs
 ```
 
+##### 错误处理
 
+进行**错误处理**时，将采取如下策略:
+
+- 在解析过程中碰到语法错误时抛出异常
+- 在本层或较高层捕获异常，将错误信息存入`err_msg_` 和 `syntax_errs_`
+- 继续解析的两种处理策略:
+  - 碰到异常后，跳过若干`token`直到碰到想要的`token` 或分隔符（如';', 'TOK_EOF'等）或后一部分可能的语法开头的`token`
+  - 碰到异常后，忽略一些`token`接着解析
+  如`ParseExpr`和`ParseStatement`在碰到语法错误时直接抛出异常，`ParseCompoundStatement`调用`ParseStatement`来解析一系列语句，若捕获异常，则记录下异常，并不断跳过`token`直到遇到`;`或者可能的语句开头的`token`再接着进行析。`ParseCompoundStatement`在碰到缺少`begin`的错误时，记录错误并忽略`begin`直接进行statement的解析操作。
 ---
 
 ## 语义分析
@@ -2222,6 +2471,7 @@ void mul(int x , int y) {return x * y * y;}
 ```
 * 去除冗余操作 ：
   
+
 去除未使用的代码段或变量声明；
 ```c
 bool flag = false;
