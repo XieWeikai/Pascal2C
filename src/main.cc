@@ -101,8 +101,8 @@ int main(int argc, char *argv[]) {
 
     code_generation::Transformer trans(program);
     auto cg_program = trans.GetASTRoot();
-    auto s_table = std::make_shared<code_generation::SymbolTable>();
-    auto code_generator = code_generation::CodeGenerator(s_table);
+
+    auto code_generator = code_generation::CodeGenerator();
 
     code_generator.Interpret(cg_program);
 
