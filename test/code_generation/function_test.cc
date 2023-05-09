@@ -19,7 +19,7 @@ class FunctionTest : public ::testing::Test {
 
         // Set args for function
         var_by_reference = make_shared<Var>(
-            make_shared<Token>(TokenType::IDENTIFIER, "by_reference"));
+            make_shared<Token>(TokenType::IDENTIFIER, "by_reference"), true);
         auto type_by_reference =
             make_shared<Type>(make_shared<Token>(TokenType::RESERVED, "char"));
         auto arg_by_reference =
@@ -76,7 +76,8 @@ class FunctionTest : public ::testing::Test {
 
         // test_function = by_value[3][4];
         auto var_return = make_shared<Var>(
-            make_shared<Token>(TokenType::IDENTIFIER, function_name_));
+            make_shared<Token>(TokenType::IDENTIFIER, function_name_), false,
+            true);
         auto assign_return =
             make_shared<Assignment>(var_return, array_access_by_value_3_4);
         compound->AddChild(assign_by_reference);

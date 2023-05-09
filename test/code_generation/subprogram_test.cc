@@ -20,7 +20,7 @@ class SubprogramTest : public ::testing::Test {
 
         // Set args for subprogram
         var_by_reference = make_shared<Var>(
-            make_shared<Token>(TokenType::IDENTIFIER, "by_reference"));
+            make_shared<Token>(TokenType::IDENTIFIER, "by_reference"), true);
         auto type_by_reference = make_shared<Type>(
             make_shared<Token>(TokenType::RESERVED, "integer"));
         auto arg_by_reference =

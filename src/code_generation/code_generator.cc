@@ -12,7 +12,6 @@ namespace pascal2c {
 namespace code_generation {
 using ::std::dynamic_pointer_cast;
 using ::std::endl;
-using ::std::runtime_error;
 using ::std::shared_ptr;
 
 void CodeGenerator::Interpret(const shared_ptr<ASTNode> &node) { Visit(node); }
@@ -311,7 +310,7 @@ bool CodeGenerator::IsReferenceArg(const shared_ptr<Var> &node) const {
 }
 
 bool CodeGenerator::IsReturnVar(const shared_ptr<Var> &node) const {
-    return symbol_table_->IsReturnVar(node->GetName());
+    return node->IsReturnVar();
 }
 
 const string CodeGenerator::Indent() const {
