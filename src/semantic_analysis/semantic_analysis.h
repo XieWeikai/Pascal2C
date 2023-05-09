@@ -60,5 +60,6 @@ namespace analysiser{
     void DoCompoundStatement(pascal2c::ast::CompoundStatement x);
     void DoIfStatement(pascal2c::ast::IfStatement x);
     void DoForStatement(pascal2c::ast::ForStatement x);
+    void DoWhileStatement(pascal2c::ast::WhileStatement x);
 }//end namespace analysiser
 #endif
