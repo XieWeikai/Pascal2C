@@ -17,7 +17,7 @@ using ::std::shared_ptr;
 using ::std::string;
 using ::std::unordered_map;
 
-class SymbolScope : ISymbolScope {
+class SymbolScope : public ISymbolScope {
   public:
     SymbolScope(
         const shared_ptr<symbol_table::SymbolTableBlock> &symbol_table_block)
@@ -31,7 +31,7 @@ class SymbolScope : ISymbolScope {
     shared_ptr<symbol_table::SymbolTableBlock> symbol_table_block_;
 };
 
-class SymbolTable : ISymbolTable {
+class SymbolTable : public ISymbolTable {
   public:
     SymbolTable()
         : name_table_(
