@@ -19,7 +19,7 @@ class ArrayTest : public ::testing::Test {
         array_type_ = make_shared<ArrayType>(type_, bounds);
         array_var_ =
             make_shared<Var>(make_shared<Token>(TokenType::IDENTIFIER, name_));
-        array_ = make_shared<Array>(array_var_);
+        array_ = make_shared<Array>(array_var_, bounds);
         array_declaration_ = make_shared<ArrayDeclaration>(array_, array_type_);
         // Expected C array declaration statement
         expected_array_declaration_statement_ = "int arr[100];\n";

@@ -26,11 +26,12 @@ class FunctionTest : public ::testing::Test {
             make_shared<Argument>(var_by_reference, type_by_reference, true);
         var_by_value = make_shared<Var>(
             make_shared<Token>(TokenType::IDENTIFIER, "by_value"));
-        auto array_by_value = make_shared<Array>(var_by_value);
-        auto type_by_value =
-            make_shared<Type>(make_shared<Token>(TokenType::RESERVED, "int"));
         auto array_bounds_by_value =
             std::vector<pair<int, int>>{make_pair(3, 5), make_pair(7, 16)};
+        auto array_by_value =
+            make_shared<Array>(var_by_value, array_bounds_by_value);
+        auto type_by_value =
+            make_shared<Type>(make_shared<Token>(TokenType::RESERVED, "int"));
         auto array_type_by_value =
             make_shared<ArrayType>(type_by_value, array_bounds_by_value);
         auto arg_by_value =

@@ -143,7 +143,7 @@ void CodeGenerator::VisitConstDeclaration(
     const shared_ptr<ConstDeclaration> &node) {
     Visit(node->GetTypeNode());
     ostream_ << ' ';
-    Visit(node->GetConstNode());
+    Visit(node->GetLeftNode());
     ostream_ << eol_;
 }
 
@@ -151,7 +151,7 @@ void CodeGenerator::VisitVarDecl(
     const shared_ptr<code_generation::VarDeclaration> &node) {
     Visit(node->GetTypeNode());
     ostream_ << ' ';
-    Visit(node->GetVarNode());
+    Visit(node->GetLeftNode());
     ostream_ << eol_;
 }
 

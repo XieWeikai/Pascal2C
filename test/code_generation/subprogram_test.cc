@@ -28,11 +28,12 @@ class SubprogramTest : public ::testing::Test {
 
         var_by_value = make_shared<Var>(
             make_shared<Token>(TokenType::IDENTIFIER, "by_value"));
-        auto array_by_value = make_shared<Array>(var_by_value);
-        auto type_by_value = make_shared<Type>(
-            make_shared<Token>(TokenType::RESERVED, "integer"));
         auto array_bounds_by_value =
             std::vector<pair<int, int>>{make_pair(3, 5)};
+        auto array_by_value =
+            make_shared<Array>(var_by_value, array_bounds_by_value);
+        auto type_by_value = make_shared<Type>(
+            make_shared<Token>(TokenType::RESERVED, "integer"));
         auto array_type_by_value =
             make_shared<ArrayType>(type_by_value, array_bounds_by_value);
         auto arg_by_value =
