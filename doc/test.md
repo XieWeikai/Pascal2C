@@ -169,8 +169,6 @@ var Identifier, identifier, IDENTIFIER, IdEnTiFiEr: integer;
 
 ### 5.2 语法分析
 
-#### 5.2.1 测试目标
-
 语法分析模块需要将各种程序结构解析成对应的AST树，包括如下一些部分
 
 - program header 的解析。
@@ -183,7 +181,7 @@ var Identifier, identifier, IDENTIFIER, IdEnTiFiEr: integer;
 
 各个部分的解析采用手写递归下降的方式来实现，每种语言结构的解析都有对应的方法/函数来完成解析成AST的操作。为了保证代码的正确性，需要对上面提到的各个部分均进行充分的测试。
 
-#### 5.2.2 单元测试用例
+#### 5.2.1 单元测试
 
 对于parser的各个小功能需要分别进行测试以保证整体功能的正确性，在做测试时需要竟可能的保证覆盖率。
 
@@ -245,37 +243,53 @@ var c : array [1..10] integer;       { 语法错误 }
 var a;                               { 语法错误 }
 ```
 
-##### expression
+##### 表达式解析套件(ExprParserTest)
 
-表达式解析是递归下降解析中最有难度的部分，需要考虑运算符的结合性、优先级、括号等。设计表达式解析的测试样例如下
+表达式解析中比较重要的两个方法一个是`ParsePrimary`，用于解析一个表达式最基本的构成成分，如`add(3,4) 3.14 8 true -5`等；另一个重要的方法是`ParseExpr`，用于解析一个完整的表达式。故在`ExprParserTest`中包括三个`Test case`，分别为`TestParsePrimary`、`TestParseExpr`和`TestParserErr`，分别进行对表达式基本因子解析的测试、对表达式解析的测试、错误表达式解析报错。
+
+**TestParsePrimary**
+
+该测试输入如下
 
 ```pascal
-123
-
-1.234
-
-true
-
-false
-
-abc
-
-cde[2]
-
-efg(1,2.3)
-
-not true
-
-not false
-
-1 + 2 * 3
-
-(1 + 2) * (4 - 2 + a[3]) - add(1,1) <= 34 and 3 > 5 or -(7 * 4) > -288
-
-1 +- 4   {语法错误}
-
-1+(3*(4-(5+5))    {语法错误，括号匹配错误}
+3  1.23  -3  not 4 +4  -4.1234 abcd add(3,4) count[i+1,b+2] say() true false not true
 ```
+
+对于以上输入，不断调用`ParsePrimary`，该方法应该依次如下的ast node
+
+1. `IntegerValue`: 3
+2. `RealValue`:1.23
+3. `UnaryExpr`: -3
+4. `UnaryExpr`:not 4
+5. `UnaryExpr`:+4
+6. `UnaryExpr`:-4.1234
+7. `CallOrVar`:abcd 
+8. `CallValue`:add(3,4)
+9. `Variable`:count[i+1,b+2]
+10. `CallValue`:say()
+11. `BooleanValue`:true
+12. `BooleanValue`:false
+13. `UnaryExpr`:not true
+
+使用辅助方法`ToString`将ast node可视化来查看解析结果是否正确，最终测试通过。
+
+**TestParseExpr**
+
+该测试输入如下
+
+```pascal
+1 + 2 + 3 + 4;
+1 + 2 * 3  ;
+(1 + 2) * 3 ;
+-(1 + 2) * 3  ;
+(-(1 + 2) * 3 <= 5) and (3 > 4) or (4 < 3) ;
+(-(1 + 2) * 3 <= 5) or (3 > 4) and (4 < 3) ;
+1 + 'a' + 'abc' + a + b ;
+true or false and true ;
+(true or false) and true ;
+true or (false and true) ;
+```
+最终产生的表达式ast node应当符合pascal的运算优先级规律，且括号可以正确改变结合顺序。该测试依旧通过`ToString`方法可视化ast node来查看解析结果是否正确，最终测试通过。
 
 ##### statement
 
