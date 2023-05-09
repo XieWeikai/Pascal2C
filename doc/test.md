@@ -172,7 +172,7 @@ var Identifier, identifier, IDENTIFIER, IdEnTiFiEr: integer;
 #### 5.2.1 测试环境
 
 语法分析模块的测试环境是在 Linux 下使用 Google Test 进行单元测试，测试用例位于`test/parser`目录下。
-#### 5.2.1 测试功能
+#### 5.2.2 测试功能
 
 语法分析模块的测试目标是保证语法分析器能够正确的将输入的 token 序列解析成 AST 并且能够正确的处理各种语法错误。具体包括以下几个部分：
 
@@ -197,164 +197,187 @@ var Identifier, identifier, IDENTIFIER, IdEnTiFiEr: integer;
   * if语句分析测试（TestIfStatement）
   * for语句分析测试（TestForStatement）
   * 复合语句分析测试（TestCompoundStatement）
-* 总体分析测试（TotalParserTest）
+* 综合分析测试（TotalParserTest）
 
 各个部分的解析采用手写递归下降的方式来实现，每种语言结构的解析都有对应的方法/函数来完成解析成AST的操作。为了保证代码的正确性，需要对上面提到的各个部分均进行充分的测试。
 
-#### 5.2.2 单元测试用例
+#### 5.2.3 单元测试用例
 
 对于parser的各个小功能需要分别进行测试以保证整体功能的正确性，在做测试时需要竟可能的保证覆盖率。
 
 ##### 程序分析测试（TestParseProgram）
 
-```c++
-        const vector<string> input_strs = {
-            "program f(a, b); var a, b : integer; begin  end.",
-            "program test; var a:integer; begin end.",
-            "program test var a: integer; begin end.",
-            "program test const a = 1; begin end.",
-            "program test procedure p;begin end; begin end.",
-            "program test function f : integer ;begin end; begin end.",
-            "program test begin end.",
-            "program test; begin end",
-        };
-        const vector<string>
-            results = {
-                "1:1 Program: \n"
-                "1:1     ProgramHead: f\n"
-                "1:11         IdList: a, b\n"
-                "1:18     ProgramBody: \n"
-                "1:22         VarDeclaration: \n"
-                "1:29             Type: integer\n"
-                "1:22             IdList: a, b\n"
-                "        1:38 CompoundStatement :0",
-                "1:1 Program: \n"
-                "1:1     ProgramHead: test\n"
-                "\n"
-                "1:15     ProgramBody: \n"
-                "1:19         VarDeclaration: \n"
-                "1:21             Type: integer\n"
-                "1:19             IdList: a\n"
-                "        1:30 CompoundStatement :0",
-                "1:1 Program: \n"
-                "1:1     ProgramHead: test\n"
-                "\n"
-                "1:14     ProgramBody: \n"
-                "1:18         VarDeclaration: \n"
-                "1:21             Type: integer\n"
-                "1:18             IdList: a\n"
-                "        1:30 CompoundStatement :0",
-                "1:1 Program: \n"
-                "1:1     ProgramHead: test\n"
-                "\n"
-                "1:14     ProgramBody: \n"
-                "1:20         ConstDeclaration: a\n"
-                "            1:24 1\n"
-                "        1:27 CompoundStatement :0",
-                "1:1 Program: \n"
-                "1:1     ProgramHead: test\n"
-                "\n"
-                "1:14     ProgramBody: \n"
-                "1:14         Subprogram: \n"
-                "1:14             SubprogramHead: procedure p\n"
-                "\n"
-                "1:26             SubprogramBody: \n"
-                "                1:26 CompoundStatement :0\n"
-                "        1:37 CompoundStatement :0",
-                "1:1 Program: \n"
-                "1:1     ProgramHead: test\n"
-                "\n"
-                "1:14     ProgramBody: \n"
-                "1:14         Subprogram: \n"
-                "1:14             SubprogramHead: function f integer\n"
-                "\n"
-                "1:36             SubprogramBody: \n"
-                "                1:36 CompoundStatement :0\n"
-                "        1:47 CompoundStatement :0",
-                "1:1 Program: \n"
-                "1:1     ProgramHead: test\n"
-                "\n"
-                "1:14     ProgramBody: \n"
-                "        1:14 CompoundStatement :0",
-                "1:1 Program: \n"
-                "1:1     ProgramHead: test\n"
-                "\n"
-                "1:15     ProgramBody: \n"
-                "        1:15 CompoundStatement :0",
-            };
-        const vector<vector<string>> errs = {
-            {},
-            {},
-            {
-                "1:14 syntax err:expected ';' before 'var'",
-            },
-            {
-                "1:14 syntax err:expected ';' before 'const'",
-            },
-            {
-                "1:14 syntax err:expected ';' before 'procedure'",
-            },
-            {
-                "1:14 syntax err:expected ';' before 'function'",
-            },
-            {
-                "1:14 syntax err:expected ';' before 'begin'",
-            },
-            {
-                "1:21 syntax err:expected '.' before end of file",
-            },
-        };
-```
 
 |测试用例|预期结果|测试错误|
 |---|---|---|
-|program f(a, b); var a, b : integer; begin  end.|Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 f，包含一个 IdList 节点；IdList 含有 a 和 b 两个 id；ProgramBody 含有一个 VarDeclaration 节点和一个 Statement 节点；VarDeclaration 含有一个 IdList 节点和一个 Type 节点；IdList 含有 a 和 b 两个 id；Type 为 integer 基础类型|无|
-|program test; var a:integer; begin end.| Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 test，不包含 IdList 节点；ProgramBody 含有一个 VarDeclaration 节点和一个 Statement 节点；VarDeclaration 含有一个 IdList 节点和一个 Type 节点；IdList 含有 a 一个 id；Type 为 integer 基础类型|无|
-| program test var a: integer; begin end.| Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 test，不包含 IdList 节点；ProgramBody 含有一个 VarDeclaration 节点和一个 Statement 节点；VarDeclaration 含有一个 IdList 节点和一个 Type 节点；IdList 含有 a 一个 id；Type 为 integer 基础类型|syntax err:expected ';' before 'var'|
-|program test; const a = 1; begin end.|Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 test，不包含 IdList 节点；ProgramBody 含有一个 ConstDeclaration 节点和一个 Statement 节点；ConstDeclaration 的 id 为 a，包含一个 Expression 节点；Expression 为 1|syntax err:expected ';' before 'const'|
-|program test; procedure p; begin end.|Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 test，不包含 IdList 节点；ProgramBody 含有一个 Subprogram 节点和一个 Statement 节点；Subprogram 含有一个 SubprogramHead 节点和一个 SubprogramBody 节点；SubprogramHead 为 procedure，名称为 p，不包含 Parameter 节点；SubprogramBody 含有一个 Statement 节点；|syntax err:expected ';' before 'procedure'|
-|program test; function f; begin end.|Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 test，不包含 IdList 节点；ProgramBody 含有一个 Subprogram 节点和一个 Statement 节点；Subprogram 含有一个 SubprogramHead 节点和一个 SubprogramBody 节点；SubprogramHead 的名称为 f，不包含 IdList 节点；SubprogramBody 含有一个 CompoundStatement 节点；CompoundStatement 为空|syntax err:expected ';' before 'function'|
-|program test; begin end.|Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 test，不包含 IdList 节点；ProgramBody 含有一个 CompoundStatement 节点；CompoundStatement 为空|syntax err:expected ';' before 'begin'|
-|program test; begin end.|Program 包含 ProgramHead 和 ProgramBody 两个节点；ProgramHead 的名称为 test，不包含 IdList 节点；ProgramBody 含有一个 CompoundStatement 节点；CompoundStatement 为空|syntax err:expected '.' before end of file|
+|program f(a, b); var a, b : integer; begin  end.|Program: <br>-ProgramHead: f<br>--IdList: a, b<br>-ProgramBody: <br>--VarDeclaration: <br>---Type: integer<br>---IdList: a, b<br>--CompoundStatement :0|无|
+|program test; var a:integer; begin end.|Program: <br>-ProgramHead: test<br>-ProgramBody: <br>--VarDeclaration: <br>---Type: integer<br>---IdList: a<br>--CompoundStatement :0|无|
+|program test var a: integer; begin end.|Program: <br>-ProgramHead: test<br>-ProgramBody: <br>--VarDeclaration: <br>---Type: integer<br>---IdList: a<br>--CompoundStatement :0|syntax err:expected ';' before 'var'|
+|program test const a = 1; begin end.|Program: <br>-ProgramHead: test<br>-ProgramBody: <br>--ConstDeclaration: a<br>---1<br>--CompoundStatement :0|syntax err:expected ';' before 'const'|
+|program test procedure p;begin end; begin end.|Program: <br>-ProgramHead: test<br>-ProgramBody: <br>--Subprogram: <br>---SubprogramHead: procedure p<br>---SubprogramBody: <br>----CompoundStatement :0<br>--CompoundStatement :0| syntax err:expected ';' before 'procedure'|
+|program test function f : integer;begin end; begin end.|Program: <br>-ProgramHead: test<br>-ProgramBody: <br>--Subprogram: <br>---SubprogramHead: function f integer<br>---SubprogramBody: <br>----CompoundStatement :0<br>--CompoundStatement :0|syntax err:expected ';' before 'function'|
+|program test begin end.|Program: <br>-ProgramHead: test<br>-ProgramBody: <br>--CompoundStatement :0|syntax err:expected ';' before 'begin'|
+|program test; begin end|Program: <br>-ProgramHead: test<br>-ProgramBody: <br>--CompoundStatement :0|syntax err:expected '.' before end of file|
+##### 程序头部分析测试（TestParseProgramHead）
 
 
-##### const declarations
+|测试用例|预期结果|测试错误|
+|---|---|---|
+|program f(a, b);| ProgramHead: f<br>-IdList: a, b|无|
+|program f;| ProgramHead: f|无|
+|空| ProgramHead:|syntax err:expected 'program' before end of file<br>syntax err:expected 'id' before end of file|
+|f|ProgramHead: f|syntax err:expected 'program' before 'id'|
+|program|ProgramHead:|syntax err:expected 'id' before end of file|
+|(a,b)|ProgramHead: <br>-IdList: a, b|syntax err:expected 'program' before '('<br>syntax err:expected 'id' before '('|
+|program f(a, b|ProgramHead: <br>-IdList: a, b|syntax err:expected ')' before end of file|
 
-该部分为program header后接的部分或子程序原型后接的部分，声明全局作用域或局部作用域下的常量。设计测试用例如下
+##### 程序体分析测试（TestParseProgramBody）
 
-```pascal
-const a = 'b';
 
-const a = 1; b = -2; ch = 'b';
+|测试用例|预测结果|测试错误|
+|---|---|---|
+|const a = 1; b = 2; var c, d : integer; procedure p; begin end; function f(a, b : integer) : integer; begin end; begin end|ProgramBody: <br>-ConstDeclaration: a<br>--1<br>-ConstDeclaration: b<br>--2<br>-VarDeclaration: <br>--Type: integer<br>--IdList: c, d<br>-Subprogram: <br>--SubprogramHead: procedure p<br>--SubprogramBody: <br>---CompoundStatement :0<br>-Subprogram: <br>--SubprogramHead: function f integer<br>--Parameter: integer<br>---IdList: a, b<br>--SubprogramBody: <br>---CompoundStatement :0<br>-CompoundStatement :0|无|
+|const a = 1 b = 2; begin end|ProgramBody: <br>-ConstDeclaration: a<br>--1<br>-ConstDeclaration: b<br>--2<br>-CompoundStatement :0| syntax err:expected ';' before 'id'|
+|const a = 1 var a : integer; begin end|ProgramBody: <br>-ConstDeclaration: a<br>--1<br>-VarDeclaration: <br>--Type: integer<br>--IdList: a<br>-CompoundStatement :0|syntax err:expected ';' before 'var'|
+|const a = 1 procedure p; begin end;begin end|ProgramBody: <br>-ConstDeclaration: a<br>--1<br>-Subprogram: <br>--SubprogramHead: procedure p<br>--SubprogramBody: <br>---CompoundStatement :0<br>-CompoundStatement :0|syntax err:expected ';' before 'procedure'|
+|const a = 1 function f integer; begin end; begin end|ProgramBody: <br>-ConstDeclaration: a<br>--1<br>-Subprogram: <br>--SubprogramHead: function f integer<br>--SubprogramBody: <br>---CompoundStatement :0<br>-CompoundStatement :0|syntax err:expected ';' before 'function'|
+|const a = 1 begin end|ProgramBody: <br>-ConstDeclaration: a<br>--1<br>-CompoundStatement :0|syntax err:expected ';' before 'begin'|
+|var a : integer b : integer ;begin end|ProgramBody: <br>-VarDeclaration: <br>--Type: integer<br>--IdList: a<br>-VarDeclaration: <br>--Type: integer<br>--IdList: b<br>-CompoundStatement :0|syntax err:expected ';' before 'id'|
+|var a : integer procedure p; begin end;begin end|ProgramBody: <br>-VarDeclaration: <br>--Type: integer<br>--IdList: a<br>-Subprogram: <br>--SubprogramHead: procedure p<br>--SubprogramBody: <br>---CompoundStatement :0<br>-CompoundStatement :0|syntax err:expected ';' before 'procedure'|
+|var a : integer function f integer; begin end; begin end|ProgramBody: <br>-VarDeclaration: <br>--Type: integer<br>--IdList: a<br>-Subprogram: <br>--SubprogramHead: function f integer<br>--SubprogramBody: <br>---CompoundStatement :0<br>-CompoundStatement :0|syntax err:expected ';' before 'function'|
+|var a : integer begin end|ProgramBody: <br>-VarDeclaration: <br>--Type: integer<br>--IdList: a<br>-CompoundStatement :0|syntax err:expected ';' before 'begin'|
+|procedure p;begin end function f : integer; begin end; begin end|ProgramBody: <br>-Subprogram: <br>--SubprogramHead: procedure p<br>--SubprogramBody: <br>---CompoundStatement :0<br>-Subprogram: <br>--SubprogramHead: function f integer<br>--SubprogramBody: <br>---CompoundStatement :0<br>-CompoundStatement :0|syntax err:expected ';' before 'function'|
+|procedure p;begin end procedure p2; begin end; begin end|ProgramBody: <br>-Subprogram: <br>--SubprogramHead: procedure p<br>--SubprogramBody: <br>---CompoundStatement :0<br>-Subprogram: <br>--SubprogramHead: procedure p2<br>--SubprogramBody: <br>---CompoundStatement :0<br>-CompoundStatement :0|syntax err:expected ';' before 'procedure'|
+|procedure p;begin end begin end|ProgramBody: <br>-Subprogram: <br>--SubprogramHead: procedure p<br>--SubprogramBody: <br>---CompoundStatement :0<br>-CompoundStatement :0|syntax err:expected ';' before 'begin'|
 
-const a; b = -2; ch = 'a';     { 语法错误 }
+##### 常量声明分析测试（TestParseConstDecl）
 
-const ;                        { 语法错误 }
-```
+|测试用例|预测结果|测试错误|
+|---|---|---|
+|a=1|ConstDeclaration: a<br>-1|无|
+|b=2.0|ConstDeclaration: b<br>-2.0000|无|
+|c=-1|ConstDeclaration: c<br>-unary_op:'-'<br>-expr :<br>--1|无|
+|d='a'|ConstDeclaration: d<br>-'a'|无|
+|空|ConstDeclaration: <br>-unknown value|syntax err:expected 'id' before end of file<br>syntax err:expected '=' before end of file<br>syntax error: parse expression error: no expected token|
+|=1|ConstDeclaration: <br>-1|syntax err:expected 'id' before '='|
+|a -1|ConstDeclaration: a<br>-unary_op:'-'<br>-expr :<br>--1|syntax err:expected '=' before '-'|
+|a 1.1|ConstDeclaration: a<br>-1.1000|syntax err:expected '=' before 'real'|
+|a 'a'|ConstDeclaration: a<br>-'a'|syntax err:expected '=' before 'string'|
+|a 1|ConstDeclaration: a<br>-1|syntax err:expected '=' before 'integer'|
+|a |ConstDeclaration: a<br>-unknown value|syntax err:expected '=' before end of file<br>syntax error: parse expression error: no expected token|
 
-##### variable declarations
+##### 变量声明分析测试（TestParseVarDecl）
 
-在程序开头或子程序开头常量声明(如果有的话)之后可以接变量声明，对变量声明解析设计测试如下
+|测试用例|预测结果|测试错误|
+|---|---|---|
+|a, b, c : integer|VarDeclaration: <br>-Type: integer<br>-IdList: a, b, c|无|
+|d, e : array [] of integer|VarDeclaration: <br>-Type: array [] of integer<br>-IdList: d, e|无|
+|a|VarDeclaration: <br>-Type: unknown<br>-IdList: a|syntax err:expected ':' before end of file<br>syntax err:expected basic type(integer, real, bool, char) or array before end of file|
+|a,b,c integer|VarDeclaration: <br>-Type: integer<br>-IdList: a, b, c|syntax err:expected ':' before 'integer_type'|
+|a,b,c array [] of integer|VarDeclaration: <br>-Type: array [] of integer<br>-IdList: a, b, c|syntax err:expected ':' before 'array'|
+|a,b,c real|VarDeclaration: <br>-Type: real<br>-IdList: a, b, c|syntax err:expected ':' before 'real_type'|
+|a,b,c char|VarDeclaration: <br>-Type: char<br>-IdList: a, b, c|syntax err:expected ':' before 'char_type'|
+|a,b,c boolean|VarDeclaration: <br>-Type: boolean<br>-IdList: a, b, c|syntax err:expected ':' before 'boolean_type'|
 
-```pascal
-var a, b: integer;
-		x, y: real; ch: char;
-		mx: array [3..9] of integer;
+##### 子程序声明分析测试（TestParseSubProgramDecl）
 
-var a:integer;
-		b:integer;
-		arr: array [1..2 , 3..4 , 5..9] of real;
-		
-var a,b integer;      {语法错误}
+|测试用例|预测结果|测试错误|
+|---|---|---|
+|function f : integer; begin end|Subprogram: <br>-SubprogramHead: function f integer<br>-SubprogramBody: <br>--CompoundStatement :0|无|
+|procedure p; begin end|Subprogram: <br>-SubprogramHead: procedure p<br>-SubprogramBody: <br>--CompoundStatement :0|无|
+|procedure p const a = 1;begin end|Subprogram: <br>-SubprogramHead: procedure p<br>-SubprogramBody: <br>--ConstDeclaration: a<br>---1<br>--CompoundStatement :0|Syntax err:expected ';' before 'const'|
+|procedure p var a : integer;begin end|Subprogram: <br>-SubprogramHead: procedure p<br>-SubprogramBody: <br>--VarDeclaration: <br>---Type: integer<br>---IdList: a<br>--CompoundStatement :0|Syntax err:expected ';' before 'var'|
+|procedure p begin end|Subprogram: <br>-SubprogramHead: procedure p<br>-SubprogramBody: <br>--CompoundStatement :0|Syntax err:expected ';' before 'begin'|
 
-var c : array [1...3] of integer;   { 语法错误 }
+##### 子程序头部分析测试（TestParseSubProgramHead）
 
-var c : array [1..10,] of integer ;  { 语法错误 }
+|测试用例|预测结果|测试错误|
+|---|---|---|
+|procedure p(a : integer)|SubprogramHead: procedure p<br>-Parameter: integer<br>--IdList: a|无|
+|procedure p|SubprogramHead: procedure p|无|
+|procedure|SubprogramHead: procedure|syntax err:expected 'id' before end of file|
+|procedure (a : integer)|SubprogramHead: procedure <br>-Parameter: integer<br>--IdList: a|syntax err:expected 'id' before '('|
+|procedure p(a : integer; b : integer|SubprogramHead: procedure p<br>-Parameter: integer<br>--IdList: a<br>-Parameter: integer<br>--IdList: b|syntax err:expected ')' before end of file|
+|function f(a,b : integer) :integer|SubprogramHead: function f integer<br>-Parameter: integer<br>--IdList: a, b|无|
+|function f : integer|SubprogramHead: function f integer|无|
+|function|SubprogramHead: function|syntax err:expected 'id' before end of file|
+|function (a : integer) : integer|SubprogramHead: function <br>-Parameter: integer<br>--IdList: a|syntax err:expected 'id' before '('|
+|function f(a : integer; b : integer|SubprogramHead: function f unknown<br>-Parameter: integer<br>--IdList: a<br>-Parameter: integer<br>--IdList: b|syntax err:expected ')' before end of file<br>syntax err:expected ':' before end of file<br>syntax err:expected basic type(integer, real, bool, char) before end of file|
+|function f(a : integer; b : integer : integer|SubprogramHead: function f integer<br>-Parameter: integer<br>--IdList: a<br>-Parameter: integer<br>--IdList: b|syntax err:expected ')' before ':'|
+|function f(a : integer, b : integer|SubprogramHead: function f unknown<br>-Parameter: integer<br>--IdList: a|syntax err:expected ')' before ','|
+|function f(a : integer) |SubprogramHead: function f unknown<br>-Parameter: integer<br>--IdList: a|syntax err:expected ':' before end of file<br>syntax err:expected basic type(integer, real, bool, char) before end of file|
+|function f(a : integer) integer|SubprogramHead: function f integer<br>-Parameter: integer<br>--IdList: a|syntax err:expected ':' before 'integer_type'|
+|function f(a : integer) real|SubprogramHead: function f real<br>-Parameter: integer<br>--IdList: a|syntax err:expected ':' before 'real_type'|
+|function f(a : integer) boolean|SubprogramHead: function f boolean<br>-Parameter: integer<br>--IdList: a|syntax err:expected ':' before 'boolean_type'|
+|function f(a : integer) char|SubprogramHead: function f char<br>-Parameter: integer<br>--IdList: a|syntax err:expected ':' before 'char_type'|
+|function f(a : integer) :|SubprogramHead: function f unknown<br>-Parameter: integer<br>--IdList: a|syntax err:expected basic type(integer, real, bool, char) before end of file|
 
-var c : array [1..10] integer;       { 语法错误 }
+##### 子程序体分析测试（TestParseSubProgramBody）
 
-var a;                               { 语法错误 }
-```
+|测试用例|预测结果|测试错误|
+|---|---|---|
+|const a = 1; b = 2; var c, d : integer;  begin end|SubprogramBody: <br>-ConstDeclaration: a<br>--1<br>-ConstDeclaration: b<br>--2<br>-VarDeclaration: <br>--Type: integer<br>--IdList: c, d<br>-CompoundStatement :0|无|
+|const a = 1 b = 2; begin end|SubprogramBody: <br>-ConstDeclaration: a<br>--1<br>-ConstDeclaration: b<br>--2<br>-CompoundStatement :0|syntax err:expected ';' before 'id'|
+|const a = 1 var a : integer; begin end|SubprogramBody: <br>-ConstDeclaration: a<br>--1<br>-VarDeclaration: <br>--Type: integer<br>--IdList: a<br>-CompoundStatement :0|syntax err:expected ';' before 'var'|
+|const a = 1 begin end|SubprogramBody: <br>-ConstDeclaration: a<br>--1<br>-CompoundStatement :0|syntax err:expected ';' before 'begin'|
+|var a : integer b : integer; begin end|SubprogramBody: <br>-VarDeclaration: <br>--Type: integer<br>--IdList: a<br>-VarDeclaration: <br>--Type: integer<br>--IdList: b<br>-CompoundStatement :0|syntax err:expected ';' before 'id'|
+|var a : integer begin end|SubprogramBody: <br>-VarDeclaration: <br>--Type: integer<br>--IdList: a<br>-CompoundStatement :0|syntax err:expected ';' before 'begin'|
+
+##### 标识符列表分析测试（TestParseIdList）
+
+|测试用例|预测结果|测试错误|
+|---|---|---|
+|a, b, c|IdList: a, b, c|无|
+|a|IdList: a|无|
+|空|IdList: |syntax err:expected 'id' before end of file|
+|, b|IdList: b|syntax err:expected 'id' before ','|
+
+
+##### 类型分析测试（TestParseType）
+
+|测试用例|预测结果|测试错误|
+|---|---|---|
+|integer|Type: integer|无|
+|real|Type: real|无|
+|boolean|Type: boolean|无|
+|char|Type: char|无|
+|array [] of integer|Type: array [] of integer|无|
+|array [1..10] of integer|Type: array [1..10] of integer|无|
+|array [1..10, 20..30] of integer|Type: array [1..10, 20..30] of integer|无|
+|空|Type: unknown|syntax err:expected 'id' before end of file|syntax err:expected basic type(integer, real, bool, char) or array before end of file|
+|[] of integer|Type: array [] of integer|syntax err:expected basic type(integer, real, bool, char) or array before '['|
+|array [1..10 20..30] of integer|Type: array [1..10] of integer|syntax err:expected ']' before 'integer'|
+|array [ of integer|Type: array [0..0] of integer|syntax err:expected 'integer' before 'of'<br>syntax err:expected '..' before end of file<br>syntax err:expected 'integer' before end of file<br>syntax err:expected ']' before end of file<br>syntax err:expected 'of' before end of file<br>syntax err:expected basic type(integer, real, bool, char) before end of file|
+|array [] integer|Type: array [] of integer|syntax err:expected 'of' before 'integer_type'|
+|array [] real|Type: array [] of real|syntax err:expected 'of' before 'real_type'|
+|array [] boolean|Type: array [] of boolean|syntax err:expected 'of' before 'boolean_type'|
+|array [] char|Type: array [] of char|syntax err:expected 'of' before 'char_type'|
+|array [] of|Type: array [] of unknown|syntax err:expected basic type(integer, real, bool, char) before end of file|
+
+##### 数组上下界分析测试（TestParsePeriod）
+
+|测试用例|预测结果|测试错误|
+|---|---|---|
+|1..10|1..10|无|
+|无|0..0|syntax err:expected 'integer' before end of file<br>syntax err:expected '..' before end of file<br>syntax err:expected 'integer' before end of file|
+|..10|0..10|syntax err:expected 'integer' before '..'|
+|1 10|1..10|syntax err:expected '..' before 'integer'|
+|1|1..0|syntax err:expected '..' before end of file<br>syntax err:expected 'integer' before end of file|
+|1..|1..0|syntax err:expected 'integer' before end of file|
+
+##### 参数分析测试（TestParseParameter）
+
+|测试用例|预测结果|测试错误|
+|---|---|---|
+|a, b : integer|Parameter: integer<br>-IdList: a, b|无|
+|var a, b : integer|Parameter: var integer<br>-IdList: a, b|无|
+|a, b|Parameter: unknown<br>-IdList: a, b|syntax err:expected ':' before end of file<br>syntax err:expected basic type(integer, real, bool, char) before end of file|
+|a, b integer|Parameter: integer<br>-IdList: a, b|syntax err:expected ':' before 'integer_type'|
+|a, b real|Parameter: real<br>-IdList: a, b|syntax err:expected ':' before 'real_type'|
+|a, b boolean|Parameter: boolean<br>-IdList: a, b|syntax err:expected ':' before 'boolean_type'|
+|a, b char|Parameter: char<br>-IdList: a, b|syntax err:expected ':' before 'char_type'|
+|a, b :|Parameter: unknown<br>-IdList: a, b|syntax err:expected basic type(integer, real, bool, char) before end of file|
+
 
 ##### expression
 
@@ -451,61 +474,321 @@ function cde(a : integer; var d : real) boolean ;
 function efg(var d : real; a,b :integer) real;
 ```
 
----
 
-#### 5.2.3 综合测试
+#### 5.2.4 综合分析测试（TotalParserTest）
 
 做完各个部分的单元测试后，需要将各个部分整合为一个完整的parser，然后做集成测试，生成完整的AST，设计一个综合测试用例如下
 
 ```pascal
-program merge_sort;
+program CompilerTest;
 
 const
-    n = 10;
+  PI = 3.14159;
 
 var
-    mas: array [1..n] of integer;
-    i: integer;
+  intArray: array[1..5] of integer;
+  realArray: array[2..2] of real;
+  i: integer;
 
-procedure MergeSort(a, c: integer);
-var
-    x, j, i, n1, n2: integer;
-    rez: array[1..1000] of integer;
+function Add(x, y: integer): integer;
 begin
-    if c <= a then 
-        exit 
-    else 
-    begin
-        x := (a + c) div 2;
-        MergeSort(a, x);
-        MergeSort(x + 1, c);
-        n1 := a;
-        n2 := x + 1;
-        for i := a to c do 
-        begin
-            if (n1 < x + 1) and ((n2 > c) or (mas[n1] < mas[n2])) then
-            begin
-                rez[i] := mas[n1];
-                inc(n1);
-            end 
-            else 
-            begin
-                rez[i] := mas[n2];
-                inc(n2);
-            end;
-        end;
-        for j := a to c do
-            mas[j] := rez[j];
-    end; 
+  Add := x + y
 end;
 
+procedure Swap(var x, y: integer);
+var
+  temp: integer;
 begin
-    for i := 1 to n do
-        mas[i] := random(20);
-    writeln(mas);
-    MergeSort(1, n);
-    writeln(mas);
+  temp := x;
+  x := y;
+  y := temp
+end;
+
+procedure PrintArrays;
+var
+  i: integer;
+begin
+  writeln('Integer array:');
+  for i := 1 to 5 do
+    writeln('intArray[', i, '] = ', intArray[i]);
+
+  writeln('Real array:');
+  for i := -2 to 2 do
+    writeln('realArray[', i, '] = ', realArray[i])
+end;
+
+{
+  This is a comment.
+  { This is a nested comment.
+    { This is another nested comment. }
+  }
+}
+begin
+  for i := 1 to 5 do
+    intArray[i] := i * 2;
+
+  realArray[-2] := 0.5;
+  realArray[-1] := 1.5;
+  realArray[0] := 2.5;
+  realArray[1] := 3.5;
+  realArray[2] := 4.5;
+
+  writeln('Before swap:');
+  PrintArrays;
+
+  if Add(intArray[2], intArray[4]) = 13 then
+  begin
+    writeln('Swapping intArray[2] and intArray[4]');
+    Swap(intArray[2], intArray[4])
+  end;
+
+  writeln('After swap:');
+  PrintArrays;
+
+  writeln('PI = ', PI)
 end.
+```
+
+测试生成的 AST 如下：
+
+```
+Program: 
+-ProgramHead: compilertest
+-ProgramBody: 
+--ConstDeclaration: pi
+------3.1416
+--VarDeclaration: 
+---Type: array [1..5] of integer
+---IdList: intarray
+--VarDeclaration: 
+---Type: array [2..2] of real
+---IdList: realarray
+--VarDeclaration: 
+---Type: integer
+---IdList: i
+--Subprogram: 
+---SubprogramHead: function add integer
+----Parameter: integer
+-----IdList: x, y
+---SubprogramBody: 
+----CompoundStatement :1
+----statement 1:
+-----AssignStatement :
+-----Variable:
+------variable:add
+-----Expr :
+------binary_op:'+'
+------lhs :
+-------CallOrVar: x
+------rhs :
+-------CallOrVar: y
+--Subprogram: 
+---SubprogramHead: procedure swap
+----Parameter: var integer
+-----IdList: x, y
+---SubprogramBody: 
+----VarDeclaration: 
+-----Type: integer
+-----IdList: temp
+----CompoundStatement :3
+----statement 1:
+-----AssignStatement :
+-----Variable:
+------variable:temp
+-----Expr :
+------CallOrVar: x
+----statement 2:
+-----AssignStatement :
+-----Variable:
+------variable:x
+-----Expr :
+------CallOrVar: y
+----statement 3:
+-----AssignStatement :
+-----Variable:
+------variable:y
+-----Expr :
+------CallOrVar: temp
+--Subprogram: 
+---SubprogramHead: procedure printarrays
+---SubprogramBody: 
+----VarDeclaration: 
+-----Type: integer
+-----IdList: i
+----CompoundStatement :4
+----statement 1:
+-----CallStatement :
+-----name:writeln
+-----expr 1:
+------string: Integer array:
+----statement 2:
+-----ForStatement:
+-----id: i
+-----from:
+------1
+-----to:
+------5
+-----do:
+------CallStatement :
+------name:writeln
+------expr 1:
+-------string: intArray[
+------expr 2:
+-------CallOrVar: i
+------expr 3:
+-------string: ] = 
+------expr 4:
+-------variable:intarray
+-------index 1:
+--------CallOrVar: i
+----statement 3:
+-----CallStatement :
+-----name:writeln
+-----expr 1:
+------string: Real array:
+----statement 4:
+-----ForStatement:
+-----id: i
+-----from:
+------unary_op:'-'
+------expr :
+-------2
+-----to:
+------2
+-----do:
+------CallStatement :
+------name:writeln
+------expr 1:
+-------string: realArray[
+------expr 2:
+-------CallOrVar: i
+------expr 3:
+-------string: ] = 
+------expr 4:
+-------variable:realarray
+-------index 1:
+--------CallOrVar: i
+--CompoundStatement :12
+--statement 1:
+---ForStatement:
+---id: i
+---from:
+----1
+---to:
+----5
+---do:
+----AssignStatement :
+----Variable:
+-----variable:intarray
+-----index 1:
+------CallOrVar: i
+----Expr :
+-----binary_op:'*'
+-----lhs :
+------CallOrVar: i
+-----rhs :
+------2
+--statement 2:
+---AssignStatement :
+---Variable:
+----variable:realarray
+----index 1:
+-----unary_op:'-'
+-----expr :
+------2
+---Expr :
+--------0.5000
+--statement 3:
+---AssignStatement :
+---Variable:
+----variable:realarray
+----index 1:
+-----unary_op:'-'
+-----expr :
+------1
+---Expr :
+--------1.5000
+--statement 4:
+---AssignStatement :
+---Variable:
+----variable:realarray
+----index 1:
+-----0
+---Expr :
+--------2.5000
+--statement 5:
+---AssignStatement :
+---Variable:
+----variable:realarray
+----index 1:
+-----1
+---Expr :
+--------3.5000
+--statement 6:
+---AssignStatement :
+---Variable:
+----variable:realarray
+----index 1:
+-----2
+---Expr :
+--------4.5000
+--statement 7:
+---CallStatement :
+---name:writeln
+---expr 1:
+----string: Before swap:
+--statement 8:
+---CallStatement :
+---name:printarrays
+--statement 9:
+---IfStatement :
+---condition:
+----binary_op:'='
+----lhs :
+-----function:add
+-----expr 1:
+------variable:intarray
+------index 1:
+-------2
+-----expr 2:
+------variable:intarray
+------index 1:
+-------4
+----rhs :
+-----13
+---if_part:
+----CompoundStatement :2
+----statement 1:
+-----CallStatement :
+-----name:writeln
+-----expr 1:
+------string: Swapping intArray[2] and intArray[4]
+----statement 2:
+-----CallStatement :
+-----name:swap
+-----expr 1:
+------variable:intarray
+------index 1:
+-------2
+-----expr 2:
+------variable:intarray
+------index 1:
+-------4
+--statement 10:
+---CallStatement :
+---name:writeln
+---expr 1:
+----string: After swap:
+--statement 11:
+---CallStatement :
+---name:printarrays
+--statement 12:
+---CallStatement :
+---name:writeln
+---expr 1:
+----string: PI = 
+---expr 2:
+----CallOrVar: pi";
 ```
 
 ---
