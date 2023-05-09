@@ -275,13 +275,16 @@ namespace pascal2c::parser
             "           sort(mid+1,r)\n"
             "       end\n"
             "   else\n"
-            "       write(a,b,c + d)\n"
-            "end;\n";
+            "       write(a,b,c + d);\n"
+            "   while i < 10 do\n"
+            "       i := i + 1;\n"
+            "   exit;\n"
+            "end\n";
         FILE *input = fmemopen((void *)input_str, strlen(input_str), "r");
         pascal2c::parser::Parser par(input);
 
         std::string res =
-            "1:1 CompoundStatement :1\n"
+            "1:1 CompoundStatement :3\n"
             "statement 1:\n"
             "    2:4 IfStatement :\n"
             "    condition:\n"
@@ -336,7 +339,27 @@ namespace pascal2c::parser
             "            lhs :\n"
             "                9:18 CallOrVar: c\n"
             "            rhs :\n"
-            "                9:22 CallOrVar: d\n\n";
+            "                9:22 CallOrVar: d\n"
+            "statement 2:\n"
+            "    10:4 WhileStatement:\n"
+            "    condition:\n"
+            "        10:10 binary_op:'<'\n"
+            "        lhs :\n"
+            "            10:10 CallOrVar: i\n"
+            "        rhs :\n"
+            "            10:14 10\n"
+            "    do:\n"
+            "        11:8 AssignStatement :\n"
+            "        Variable:\n"
+            "            11:8 variable:i\n"
+            "        Expr :\n"
+            "            11:13 binary_op:'+'\n"
+            "            lhs :\n"
+            "                11:13 CallOrVar: i\n"
+            "            rhs :\n"
+            "                11:17 1\n"
+            "statement 3:\n"
+            "    12:4 ExitStatement\n\n";
         std::stringstream str_s;
         while (par.token_ != 0)
         {
@@ -403,6 +426,8 @@ namespace pascal2c::parser
         for (const auto &e: par.err_msg_) {
             EXPECT_EQ(e, err_msgs[ind++]);
         }
+
+        std::cout << input_str << std::endl;
 
         fclose(input);
     }
