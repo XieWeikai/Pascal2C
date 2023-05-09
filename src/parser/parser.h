@@ -110,11 +110,11 @@ namespace pascal2c::parser
         FRIEND_TEST(StatementParserTest, TestAssignStatement);
         FRIEND_TEST(StatementParserTest, TestIfStatement);
         FRIEND_TEST(StatementParserTest, TestForStatement);
+        FRIEND_TEST(StatementParserTest, TestErrorHandle);
         FRIEND_TEST(StatementParserTest, TestCompoundStatement);
-        FRIEND_TEST(ErrorHandleTest, TestErrorHandle);
         FRIEND_TEST(ExprParserTest, TestParserErr);
 
-        int token_, next_token_; // current token and next token
+            int token_, next_token_; // current token and next token
 
         // if a lex error occur, error number will be stored in this variable
         int lexer_errno_;
