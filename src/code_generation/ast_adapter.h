@@ -1,5 +1,6 @@
 #ifndef PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
+#include "code_generation/type_adaper.h"
 #include <bitset>
 #pragma once
 #include <algorithm>
@@ -136,12 +137,14 @@ class IVar : public ASTNode {
     virtual ~IVar() = default;
     virtual void Accept(Visitor &visitor) = 0;
     virtual const string GetName() const = 0;
+    virtual const VarType GetVarType() const = 0;
 };
 
 class Var : public IVar {
   public:
     explicit Var(const shared_ptr<Token> &token, bool is_reference = false,
-                 bool is_return_var = false)
+                 bool is_return_var = false,
+                 VarType var_type = VarType::UNDEFINED)
         : name_(token->GetValue()), is_reference_(is_reference),
           is_return_var_(is_return_var) {}
     explicit Var(const string &name , bool is_reference = false , bool is_return_var = false) : 
@@ -151,11 +154,13 @@ class Var : public IVar {
     virtual const string GetName() const override { return name_; }
     const bool IsReference() const { return is_reference_; }
     const bool IsReturnVar() const { return is_return_var_; }
+    const VarType GetVarType() const override { return var_type_; }
 
   private:
     string name_;
     bool is_reference_;
     bool is_return_var_;
+    VarType var_type_;
 };
 
 class IType : public ASTNode {

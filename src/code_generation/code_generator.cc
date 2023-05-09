@@ -44,7 +44,7 @@ void CodeGenerator::VisitArgument(const shared_ptr<Argument> &node) {
         }
     }
 
-    ostream_ << " ";
+    ostream_ << (node->IsReference() ? " *" : " ");
     // When visiting variable, will lookup variable in Symbol table, and add '*'
     // if variable is passed-by-reference or is a pointer
     Visit(node->GetVariable());
@@ -297,8 +297,7 @@ void CodeGenerator::VisitForStatement(const shared_ptr<ForStatement> &node) {
 // Print "%d%c%s%d..."
 void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node) {
     vector<string> specifiers;
-    auto params = node->GetParameters();
-    for (auto &p : params) {
+    auto BaseCast = [&](const shared_ptr<ASTNode> &p) -> void {
         if (auto dp = dynamic_pointer_cast<Num>(p)) {
             specifiers.push_back("%d");
         } else if (auto dp = dynamic_pointer_cast<Real>(p)) {
@@ -310,6 +309,18 @@ void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node) {
         } else {
             specifiers.push_back("%s");
         }
+    };
+
+    auto params = node->GetParameters();
+    for (auto &p : params) {
+        if (auto dp = dynamic_pointer_cast<ArrayAccess>(p)) {
+            BaseCast(dp->GetArray()->GetVarNode());
+        } else if (auto dp = dynamic_pointer_cast<Var>(p)) {
+            BaseCast(dp);
+        } else if (auto dp = dynamic_pointer_cast<FunctionCall>(p)) {
+            BaseCast(dp);
+        }
+        BaseCast(p);
     }
     ostream_ << '"';
     for (auto &s : specifiers) {
