@@ -425,9 +425,9 @@ passExpr(shared_ptr<ast::Expression> cur) {
 	case ast::ExprType::CALL_OR_VAR : {
 		auto callval = std::static_pointer_cast<ast::CallOrVar>(cur);
 		auto [is_var , is_func , _ , is_ret] = checkIdType(callval->id());
-		if (is_var || is_ret) { // include 'return' -> func := expr;
+		if ((is_var && !is_func) || is_ret || (!is_var && !is_func)) { // const and include 'return' -> func := expr;
 			return passExpr(make_shared<ast::Variable>(callval->line() , callval->column() , callval->id()));
-		} else if (is_func) {
+		} else if (!is_var && is_func) {
 			return passExpr(make_shared<ast::CallValue>(
 				callval->line() , callval->column() , callval->id()));
 		}
