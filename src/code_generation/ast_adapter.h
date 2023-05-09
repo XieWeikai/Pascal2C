@@ -1,5 +1,6 @@
 #ifndef PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
+#include <bitset>
 #pragma once
 #include <algorithm>
 #include <memory>
@@ -11,9 +12,12 @@
 
 namespace pascal2c {
 namespace code_generation {
+using ::std::bitset;
 using ::std::shared_ptr;
 using ::std::string;
 template <typename Tp> using vector = ::std::vector<Tp>;
+
+const int k_max_parameters = 255;
 
 class Visitor;
 
@@ -466,16 +470,25 @@ class FunctionCall : public ASTNode {
   public:
     FunctionCall(const string &name,
                  const vector<shared_ptr<ASTNode>> parameters)
-        : name_(name), parameters_(std::move(parameters)) {}
+        : name_(name), parameters_(std::move(parameters)) {
+        is_reference_.reset();
+    }
     FunctionCall(const string &name) : name_(name), parameters_() {}
     virtual ~FunctionCall() = default;
     void Accept(Visitor &visitor) override;
     const string GetName() const { return name_; }
     const vector<shared_ptr<ASTNode>> &GetParameters() { return parameters_; }
+    void SetIsReference(int pos) {
+        is_reference_.set(static_cast<size_t>(pos), true);
+    }
+    bool IsReference(int pos) { return is_reference_.test(pos); }
 
   private:
     string name_;
+    // Params align from begin() to end()
     vector<shared_ptr<ASTNode>> parameters_;
+    // Params align from little endian to big endian
+    bitset<k_max_parameters> is_reference_;
 };
 
 } // namespace code_generation

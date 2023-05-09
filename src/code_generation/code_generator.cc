@@ -303,6 +303,12 @@ void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
 
     ostream_ << func_name << "(";
     for (int i = 0; i < node->GetParameters().size(); i++) {
+        // Is reference or not
+        auto r = node->IsReference(i);
+        if (r)
+            ostream_ << "&";
+
+        // Visit parameter
         auto p = node->GetParameters().at(i);
         Visit(p);
         if (i < node->GetParameters().size() - 1) {
