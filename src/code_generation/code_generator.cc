@@ -313,6 +313,17 @@ void CodeGenerator::VisitForStatement(const shared_ptr<ForStatement> &node) {
     ostream_ << Indent() << "}\n";
 }
 
+void CodeGenerator::VisitWhileStatement(
+    const shared_ptr<WhileStatement> &node) {
+    ostream_ << Indent() << "while (";
+    Visit(node->GetCondition());
+    ostream_ << ") {\n";
+    IncIndent();
+    Visit(node->GetBody());
+    DecIndent();
+    ostream_ << Indent() << "}\n";
+}
+
 // Print "%d%c%s%d..."
 void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node,
                                        bool new_line) {

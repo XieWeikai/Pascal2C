@@ -1,6 +1,5 @@
 #include "ast_adapter_test.cc"
 #include "code_generation/ast_adapter.h"
-#include "code_generation/ast_printer.h"
 #include "code_generation/code_generator.h"
 #include "code_generation/token_adapter.h"
 #include "symbol_table_mock.h"

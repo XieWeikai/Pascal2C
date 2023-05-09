@@ -518,6 +518,21 @@ class ForStatement : public ASTNode {
     shared_ptr<Compound> body_;
 };
 
+class WhileStatement : public ASTNode {
+  public:
+    WhileStatement(const shared_ptr<ASTNode> &condition,
+                   const shared_ptr<Compound> &body)
+        : condition_(std::move(condition)), body_(std::move(body)) {}
+    virtual ~WhileStatement() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<ASTNode> GetCondition() const { return condition_; }
+    const shared_ptr<Compound> GetBody() const { return body_; }
+
+  private:
+    shared_ptr<ASTNode> condition_;
+    shared_ptr<Compound> body_;
+};
+
 class FunctionCall : public ASTNode {
   public:
     FunctionCall(const string &name,

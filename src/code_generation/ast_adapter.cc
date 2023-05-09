@@ -159,6 +159,12 @@ void ForStatement::Accept(Visitor &visitor) {
     visitor.VisitForStatement(
         dynamic_pointer_cast<ForStatement>(shared_from_this()));
 }
+
+void WhileStatement::Accept(Visitor &visitor) {
+    visitor.VisitWhileStatement(
+        dynamic_pointer_cast<WhileStatement>(shared_from_this()));
+}
+
 void FunctionCall::Accept(Visitor &visitor) {
     visitor.VisitFunctionCall(
         dynamic_pointer_cast<FunctionCall>(shared_from_this()));

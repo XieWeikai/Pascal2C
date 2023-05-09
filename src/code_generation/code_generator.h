@@ -59,6 +59,8 @@ class CodeGenerator : Visitor {
     virtual void
     VisitForStatement(const shared_ptr<ForStatement> &node) override;
     virtual void
+    VisitWhileStatement(const shared_ptr<WhileStatement> &node) override;
+    virtual void
     VisitFunctionCall(const shared_ptr<FunctionCall> &node) override;
 
     // Get Symbol Table's current scope name
