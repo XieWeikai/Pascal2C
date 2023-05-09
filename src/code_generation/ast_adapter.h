@@ -199,7 +199,7 @@ class VarDeclaration : public ASTNode {
   public:
     VarDeclaration(const shared_ptr<ASTNode> &left_node,
                    const shared_ptr<Type> &type_node,
-                   const shared_ptr<ASTNode> &right_node)
+                   const shared_ptr<ASTNode> &right_node = nullptr)
         : left_node_(left_node), type_node_(type_node),
           right_node_(right_node){};
     virtual ~VarDeclaration() = default;
@@ -414,7 +414,7 @@ class Oper : public ASTNode {
     string oper_;
 };
 
-class BinaryOperation : public ASTNode {
+class BinaryOperation : public IVar {
   public:
     explicit BinaryOperation(const shared_ptr<ASTNode> &left,
                              const shared_ptr<Oper> &oper,
@@ -425,11 +425,14 @@ class BinaryOperation : public ASTNode {
     const shared_ptr<ASTNode> &GetLeft() { return left_; }
     const shared_ptr<Oper> &GetOper() { return oper_; }
     const shared_ptr<ASTNode> &GetRight() { return right_; }
+    const VarType GetVarType() const override { return var_type_; }
+    const string GetName() const override { return "binary_operation"; }
 
   private:
     shared_ptr<ASTNode> left_;
     shared_ptr<Oper> oper_;
     shared_ptr<ASTNode> right_;
+    VarType var_type_;
 };
 
 class NoOp : public ASTNode {
