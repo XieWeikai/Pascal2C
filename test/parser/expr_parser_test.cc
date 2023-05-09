@@ -51,7 +51,8 @@ namespace pascal2c::parser {
     }
 
     TEST(ExprParserTest,TestParsePrimary) {
-        const char *input_str = "3  1.23  -3  not 4 +4  -4.1234 abcd add(3,4) count[i+1,b+2] say() b[]";
+        const char *input_str = "3  1.23  -3  not 4 +4  -4.1234 abcd add(3,4) count[i+1,b+2] say() true false not true";
+
         FILE *input = fmemopen((void *)input_str, strlen(input_str),"r");
         Parser par(input);
         std::string res =
@@ -88,18 +89,18 @@ namespace pascal2c::parser {
                 "        1:56 CallOrVar: b\n"
                 "    rhs :\n"
                 "        1:58 2\n"
-                "1:61 function:say\n";
+                "1:61 function:say\n"
+                "1:67 true\n"
+                "1:72 false\n"
+                "1:78 unary_op:'n'\n"
+                "expr :\n"
+                "    1:82 true\n";
 
         std::stringstream str_s;
         std::shared_ptr<ast::Expression> expr;
         while(par.token_ != 0){
-            try {
-                expr = par.ParsePrimary();
-            }catch (SyntaxErr &e){
-                // std::cout << e.what() << std::endl;
-                EXPECT_EQ(std::string(e.what()),"1:69: parse expression error: no expected token");
-                break;
-            }
+            expr = par.ParsePrimary();
+
             str_s << expr->ToString(0) << std::endl;
         }
 //        std::cout << str_s.str() << std::endl;
@@ -115,7 +116,7 @@ namespace pascal2c::parser {
                                 "-(1 + 2) * 3  ;\n"
                                 "(-(1 + 2) * 3 <= 5) and (3 > 4) or (4 < 3) ;\n"
                                 "(-(1 + 2) * 3 <= 5) or (3 > 4) and (4 < 3) ;\n"
-                                "1 + 'a' + 'abc' + a + b \n"
+                                "1 + 'a' + 'abc' + a + b ;\n"
                                 "true or false and true ;\n"
                                 "(true or false) and true ;\n"
                                 "true or (false and true) ;\n";
@@ -292,6 +293,38 @@ namespace pascal2c::parser {
         EXPECT_EQ(str_s.str(),res);
 
         fclose(input);
+    }
+
+    TEST(ExprParserTest, TestParserErr) {
+        const char *input_strs[] = {
+                "a + ",  // 不完整表达式
+                "(a+1",  // 括号不匹配
+                "a + * 1 ",  // 表达式错误
+                "a[]",     // 数组下标错误
+                "a[1",     // 数组下标错误
+        };
+
+        std::string errs[] = {
+                "syntax error: parse expression error: no expected token",
+                "syntax err:expected ')' before end of file",
+                "syntax error: parse expression error: no expected token",
+                "syntax error: parse expression error: no expected token",
+                "syntax err:expected ']' before end of file"
+        };
+        int n = sizeof(input_strs) / sizeof(char *);
+
+        for(int i = 0;i < n;i ++){
+            auto input = fmemopen((void *)input_strs[i], strlen(input_strs[i]), "r");
+            Parser par(input);
+            try {
+                auto ast = par.ParseExpr();
+                std::cout << ast->ToString(0) << std::endl;
+            }catch (SyntaxErr &e){
+//                std::cout << e.err_msg() << std::endl;
+                EXPECT_EQ(e.err_msg(),errs[i]);
+            }
+            fclose(input);
+        }
     }
 
 }

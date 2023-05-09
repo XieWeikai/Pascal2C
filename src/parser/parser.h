@@ -112,6 +112,7 @@ namespace pascal2c::parser
         FRIEND_TEST(StatementParserTest, TestForStatement);
         FRIEND_TEST(StatementParserTest, TestCompoundStatement);
         FRIEND_TEST(ErrorHandleTest, TestErrorHandle);
+        FRIEND_TEST(ExprParserTest, TestParserErr);
 
         int token_, next_token_; // current token and next token
 

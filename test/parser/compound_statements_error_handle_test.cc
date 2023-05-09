@@ -41,24 +41,33 @@ namespace pascal2c::parser{
                 "    end\n"
                 "    c[3,4,7 := 4\n"
                 "end.";
+
+        std::string err_msgs[] = {
+                "2:7 syntax error: lost ':=' when parsing assign statement",
+                "3:9 syntax error: missing id in for statement",
+                "8:5 syntax error: declaration is not part of statement",
+                "8:13 syntax error: lost ':=' when parsing assign statement",
+                "9:5 syntax error: declaration is not part of statement",
+                "9:11 syntax error: lost ':=' when parsing assign statement",
+                "11:19 syntax error: unclosed parentheses",
+                "12:18 syntax error: parse expression error: no expected token",
+                "16:5 syntax error: missing ';' at the end of statement",
+                "16:21 syntax err:expected ')' before 'then'",
+                "19:5 syntax error: missing ';' at the end of statement",
+                "21:5 last statement should not end with ;",
+                "22:5 syntax error: missing ';' at the end of statement",
+                "22:13 syntax error: unclosed brackets"
+        };
+        int ind = 0;
+
         FILE *input = fmemopen((void *) input_str, strlen(input_str), "r");
         Parser par(input);
         auto stat = par.ParseCompoundStatement();
-        std::stringstream output;
-        output << stat->ToString(0) << std::endl;
-        output << "\nerr_msg:\n";
-        for (const auto &e: par.err_msg_)
-            output << e << std::endl;
 
-        std::cout << output.str() << std::endl;
-
-        fclose(input);
-
-        std::cout << "-----syntax errors------" << std::endl;
-        for(const auto &e: par.syntax_errs()){
-            std::cout << "line:" << e.line() << " col:" << e.col() << " " << e.err_msg() << std::endl;
+        for (const auto &e: par.err_msg_) {
+            EXPECT_EQ(e, err_msgs[ind++]);
         }
 
-        std::cout << input_str;
+        fclose(input);
     }
 }
