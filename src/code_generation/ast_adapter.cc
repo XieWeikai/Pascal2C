@@ -1,4 +1,5 @@
 #include "ast_adapter.h"
+#include "code_generation/visitor.h"
 #include "token_adapter.h"
 #include <memory>
 
@@ -87,6 +88,12 @@ void Compound::AddChild(std::shared_ptr<ASTNode> node) {
 void BinaryOperation::Accept(Visitor &visitor) {
     visitor.VisitBinOp(
         dynamic_pointer_cast<BinaryOperation>(shared_from_this()));
+}
+
+// UnaryOp
+void UnaryOperation::Accept(Visitor &visitor) {
+    visitor.VisitUnaryOperation(
+        dynamic_pointer_cast<UnaryOperation>(shared_from_this()));
 }
 
 // Oper

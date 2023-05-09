@@ -414,6 +414,23 @@ class Oper : public ASTNode {
     string oper_;
 };
 
+class UnaryOperation : public IVar {
+  public:
+    UnaryOperation(const shared_ptr<Oper> &oper,
+                   const shared_ptr<ASTNode> &var_node, VarType var_type)
+        : oper_(oper), var_node_(var_node), var_type_(var_type) {}
+    virtual ~UnaryOperation() = default;
+    void Accept(Visitor &visitor) override;
+    const shared_ptr<Oper> GetOper() const { return oper_; }
+    const shared_ptr<ASTNode> GetVarNode() const { return var_node_; }
+    const VarType GetVarType() const override { return var_type_; }
+
+  private:
+    shared_ptr<Oper> oper_;
+    shared_ptr<ASTNode> var_node_;
+    VarType var_type_;
+};
+
 class BinaryOperation : public IVar {
   public:
     explicit BinaryOperation(const shared_ptr<ASTNode> &left,

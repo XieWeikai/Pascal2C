@@ -229,9 +229,14 @@ void CodeGenerator::VisitNoOp(const shared_ptr<code_generation::NoOp> &node) {
     ostream_ << ";" << endl;
 }
 
+void CodeGenerator::VisitUnaryOperation(
+    const shared_ptr<UnaryOperation> &node) {
+    Visit(node->GetOper());
+    Visit(node->GetVarNode());
+}
+
 void CodeGenerator::VisitBinOp(
     const shared_ptr<code_generation::BinaryOperation> &node) {
-    IncIndent();
     ostream_ << '(';
     Visit(node->GetLeft());
     ostream_ << ' ';
@@ -239,7 +244,6 @@ void CodeGenerator::VisitBinOp(
     ostream_ << ' ';
     Visit(node->GetRight());
     ostream_ << ')';
-    DecIndent();
 }
 
 void CodeGenerator::VisitOper(const shared_ptr<Oper> &node) {
