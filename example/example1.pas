@@ -9,7 +9,7 @@ const
 }
 var
   intArray: array[1..6] of integer;
-  realArray: array[-2..4] of real;
+  realArray: array[3..7] of real;
   i: integer;
 
 function Add(x, y: integer): integer;
@@ -35,7 +35,7 @@ begin
     writeln('intArray[', i, '] = ', intArray[i]);
 
   writeln('Real array:');
-  for i := -2 to 2 do
+  for i := 3 to 5 do
     writeln('realArray[', i, '] = ', realArray[i]);
 end;
 
@@ -49,11 +49,11 @@ begin
   for i := 1 to 5 do
     intArray[i] := i * 2;
 
-  realArray[-2] := 0.5;
-  realArray[-1] := 1.5;
-  realArray[0] := 2.5;
-  realArray[1] := 3.5;
-  realArray[2] := 4.5;
+  realArray[3] := 0.5;
+  realArray[4] := 1.5;
+  realArray[5] := 2.5;
+  realArray[6] := 3.5;
+  realArray[7] := 4.5;
 
   writeln('Before swap:');
   PrintArrays;

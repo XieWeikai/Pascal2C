@@ -21,6 +21,7 @@ private :
 	std::shared_ptr<ASTRoot> ast_root;
     analysiser::nameTable* table; // TODO : singleton
     std::shared_ptr<symbol_table::SymbolTableBlock> sym_block;
+    std::shared_ptr<TypeToolKit> type_kit;
 
     shared_ptr<Program> transProgram(shared_ptr<ast::Program> cur);
     shared_ptr<ASTNode>
@@ -61,9 +62,9 @@ private :
     shared_ptr<ForStatement>
         transForStatement(shared_ptr<ast::ForStatement> cur);
 
-    std::tuple<bool ,bool , bool , bool , bool>
+    std::tuple<bool ,bool , bool , bool , bool , symbol_table::ItemType>
         checkIdType(const string& id);
-    std::optional<std::vector<std::pair<int , int>>>
+    std::optional<std::pair<symbol_table::ItemType , std::vector<std::pair<int , int>>>>
         checkArrayType(const string& id);
 
     bool checkIdTypeIfVar(const string& id);
