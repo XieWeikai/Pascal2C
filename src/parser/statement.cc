@@ -39,6 +39,14 @@ namespace pascal2c::parser {
                 statement = std::move(ParseAssignAndCallStatement());
                 break;
 
+            case TOK_EXIT:
+                statement = std::make_shared<ast::ExitStatement>();
+                break;
+
+            case TOK_WHILE:
+                statement = std::move(ParseWhileStatement());
+                break;
+
             default:
                 if(token_ == TOK_PROCEDURE || token_ == TOK_FUNCTION || token_ == TOK_VAR || token_ == TOK_CONST)
                     throw(SyntaxErr("syntax error: declaration is not part of statement",line_,column_));
@@ -47,6 +55,14 @@ namespace pascal2c::parser {
         }
         statement->SetLineAndColumn(begin_line,begin_column);
         return std::move(statement);
+    }
+
+    std::shared_ptr<ast::Statement> Parser::ParseWhileStatement() {
+        Match(TOK_WHILE);
+        auto cond = ParseExpr();
+        Match(TOK_DO);
+        auto statement = ParseStatement();
+        return std::move(std::make_shared<ast::WhileStatement>(cond,statement));
     }
 
     std::shared_ptr<ast::Statement> Parser::ParseIFStatement(){

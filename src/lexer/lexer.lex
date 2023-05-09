@@ -107,6 +107,7 @@ until              {return TOK_UNTIL;}
 var                {return TOK_VAR;}
 while              {return TOK_WHILE;}
 with               {return TOK_WITH;}
+exit               {return TOK_EXIT;}
 
 integer            {return TOK_INTEGER_TYPE;}
 real               {return TOK_REAL_TYPE;}

@@ -162,6 +162,7 @@ add_executable(
         src/semantic_analysis/symbol_table.cc
         src/semantic_analysis/errors.cc
         ${CMAKE_CURRENT_BINARY_DIR}/lexer.yy.c
+        ${OUTPUT_HEADER}
         src/lexer/utils.c
 )
 target_include_directories(pascal2c PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

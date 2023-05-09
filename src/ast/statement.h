@@ -25,6 +25,8 @@ namespace pascal2c::ast
         COMPOUND_STATEMENT = 3,
         IF_STATEMENT = 4,
         FOR_STATEMENT = 5,
+        EXIT_STATEMENT = 6,
+        WHILE_STATEMENT = 7,
     };
 
     // base type of statement
@@ -44,6 +46,29 @@ namespace pascal2c::ast
 
         Statement() = default;
         Statement(int line, int col) : Ast(line, col) {}
+    };
+
+    class ExitStatement : public Statement{
+    public:
+        ExitStatement() = default;
+        ExitStatement(int line, int col) : Statement(line,col) {}
+        std::string ToString(int level) const override;
+        StatementType GetType() const override { return EXIT_STATEMENT; }
+    };
+
+    class WhileStatement : public Statement{
+    public:
+        WhileStatement(std::shared_ptr<Expression> condition, std::shared_ptr<Statement> statement) : condition_(std::move(condition)), statement_(std::move(statement)) {}
+        WhileStatement(int line, int col, std::shared_ptr<Expression> condition, std::shared_ptr<Statement> statement) : Statement(line,col), condition_(std::move(condition)), statement_(std::move(statement)) {}
+        std::string ToString(int level) const override;
+        StatementType GetType() const override { return WHILE_STATEMENT; }
+
+        GETTER(std::shared_ptr<Expression>, condition);
+        GETTER(std::shared_ptr<Statement>, statement);
+
+    private:
+        std::shared_ptr<Expression> condition_;
+        std::shared_ptr<Statement> statement_;
     };
 
     // var_ := expr_

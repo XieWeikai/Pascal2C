@@ -353,6 +353,11 @@ namespace pascal2c::parser
         //     the ast of the assign statement if meet the assign statement
         //     the ast of the call statement if meet the call statement
         std::shared_ptr<ast::Statement> ParseAssignAndCallStatement();
+
+        // parse the while statement
+        // return:
+        //     the ast of the while statement
+        std::shared_ptr<ast::Statement> ParseWhileStatement();
     };
 }
 

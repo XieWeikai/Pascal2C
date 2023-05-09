@@ -100,4 +100,22 @@ namespace pascal2c::ast
               << statement_->ToString(level + 1);
         return str_s.str();
     }
+
+    std::string ExitStatement::ToString(int level) const {
+        INIT_TOSTRING(str_s, level);
+        str_s << "ExitStatement";
+        return str_s.str();
+    }
+
+    std::string WhileStatement::ToString(int level) const {
+        INIT_TOSTRING(str_s, level);
+        str_s << "WhileStatement:\n";
+        IndentOutput(str_s, level);
+        str_s << "condition:\n"
+              << condition_->ToString(level + 1) << "\n";
+        IndentOutput(str_s, level);
+        str_s << "do:\n"
+              << statement_->ToString(level + 1);
+        return str_s.str();
+    }
 }
