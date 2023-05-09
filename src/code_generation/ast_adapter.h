@@ -418,8 +418,9 @@ class BinaryOperation : public IVar {
   public:
     explicit BinaryOperation(const shared_ptr<ASTNode> &left,
                              const shared_ptr<Oper> &oper,
-                             const shared_ptr<ASTNode> &right)
-        : left_(left), oper_(oper), right_(right) {}
+                             const shared_ptr<ASTNode> &right,
+                             VarType var_type = VarType::UNDEFINED)
+        : left_(left), oper_(oper), right_(right), var_type_(var_type) {}
     virtual ~BinaryOperation() = default;
     void Accept(Visitor &visitor) override;
     const shared_ptr<ASTNode> &GetLeft() { return left_; }
