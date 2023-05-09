@@ -54,8 +54,8 @@ void CodeGenerator::VisitProgram(
     ostream_ << "#include <stdio.h>" << endl
              << "#include <stdlib.h>" << endl
              << endl;
-    
-    auto program_block = node->GetBlock(); 
+
+    auto program_block = node->GetBlock();
     Visit(program_block->GetDeclaration());
 
     ostream_ << "// " << node->GetName() << endl;
@@ -294,7 +294,14 @@ void CodeGenerator::VisitForStatement(const shared_ptr<ForStatement> &node) {
 }
 
 void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
-    ostream_ << node->GetName() << "(";
+    // Rename function when meet writeln or write
+    auto func_name = node->GetName();
+    if (func_name == "writeln")
+        func_name = "printf";
+    else if (func_name == "write")
+        func_name = "printf";
+
+    ostream_ << func_name << "(";
     for (int i = 0; i < node->GetParameters().size(); i++) {
         auto p = node->GetParameters().at(i);
         Visit(p);
