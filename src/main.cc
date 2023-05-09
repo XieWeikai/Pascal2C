@@ -4,6 +4,9 @@
 #include "parser/parser.h"
 #include "semantic_analysis/semantic_analysis.h"
 #include "utils.hpp"
+#include "code_generation/optimizer/transformer.h"
+#include "code_generation/code_generator.h"
+
 
 using namespace pascal2c;
 
@@ -95,6 +98,15 @@ int main(int argc, char *argv[]) {
             PrintError(lines, "Semantic", line, col, p->msg());
         }
     }
+
+    code_generation::Transformer trans(program);
+    auto cg_program = trans.GetASTRoot();
+
+    auto code_generator = code_generation::CodeGenerator();
+
+    code_generator.Interpret(cg_program);
+
+    std::cout << code_generator.GetCCode() << std::endl;
 
     return 0;
 }

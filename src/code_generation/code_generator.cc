@@ -12,7 +12,6 @@ namespace pascal2c {
 namespace code_generation {
 using ::std::dynamic_pointer_cast;
 using ::std::endl;
-using ::std::runtime_error;
 using ::std::shared_ptr;
 
 void CodeGenerator::Interpret(const shared_ptr<ASTNode> &node) { Visit(node); }
@@ -55,8 +54,8 @@ void CodeGenerator::VisitProgram(
     ostream_ << "#include <stdio.h>" << endl
              << "#include <stdlib.h>" << endl
              << endl;
-    
-    auto program_block = node->GetBlock(); 
+
+    auto program_block = node->GetBlock();
     Visit(program_block->GetDeclaration());
 
     ostream_ << "// " << node->GetName() << endl;
@@ -72,8 +71,8 @@ void CodeGenerator::VisitProgram(
 void CodeGenerator::VisitSubprogram(const shared_ptr<Subprogram> &node) {
     // Store parent scope name, return to this scope after visiting
     // subprogram.
-    string parent_scope_name = GetCurrentScope();
-    SetCurrentScope(node->GetName());
+    // string parent_scope_name = GetCurrentScope();
+    // SetCurrentScope(node->GetName());
 
     ostream_ << Indent() << "void " << node->GetName() << "(";
     for (auto i = 0; i < node->GetArgs().size(); i++) {
@@ -89,13 +88,13 @@ void CodeGenerator::VisitSubprogram(const shared_ptr<Subprogram> &node) {
     DecIndent();
     ostream_ << Indent() << "}\n";
     // Return to parent symbol scope
-    SetCurrentScope(parent_scope_name);
+    // SetCurrentScope(parent_scope_name);
 }
 
 void CodeGenerator::VisitFunction(const shared_ptr<Function> &node) {
     // Get parent symbol scope name for returning after visiting function
-    string parent_scope_name = GetCurrentScope();
-    SetCurrentScope(node->GetName());
+    // string parent_scope_name = GetCurrentScope();
+    // SetCurrentScope(node->GetName());
 
     ostream_ << node->GetReturnType() << ' ' << node->GetName() << '(';
     for (int i = 0; i < node->GetArgs().size(); i++) {
@@ -108,16 +107,18 @@ void CodeGenerator::VisitFunction(const shared_ptr<Function> &node) {
     ostream_ << ") {\n";
     IncIndent();
     // Declare return variable
-    ostream_ << Indent() << node->GetReturnType() << ' ' << node->GetName()
-             << ";/* Auto Generated */\n";
+    ostream_ << Indent() << node->GetReturnType() << ' ';
+    Visit(node->GetReturnVar());
+    ostream_ << ";/* Auto Generated */\n";
     Visit(node->GetBlock());
     // Return statement
-    ostream_ << Indent() << "return " << node->GetName()
-             << ";/* Auto Generated */\n";
+    ostream_ << Indent() << "return ";
+    Visit(node->GetReturnVar());
+    ostream_ << ";/* Auto Generated */\n";
     DecIndent();
     ostream_ << Indent() << "}\n";
     // Return to parent scope
-    SetCurrentScope(parent_scope_name);
+    // SetCurrentScope(parent_scope_name);
 }
 
 void CodeGenerator::VisitBlock(const shared_ptr<code_generation::Block> &node) {
@@ -199,6 +200,9 @@ void CodeGenerator::VisitAssign(
 void CodeGenerator::VisitVar(const shared_ptr<code_generation::Var> &node) {
     if (IsReferenceArg(node)) {
         ostream_ << "*";
+    }
+    if (IsReturnVar(node)) {
+        ostream_ << "ret_";
     }
     ostream_ << node->GetName();
 }
@@ -290,8 +294,21 @@ void CodeGenerator::VisitForStatement(const shared_ptr<ForStatement> &node) {
 }
 
 void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
-    ostream_ << node->GetName() << "(";
+    // Rename function when meet writeln or write
+    auto func_name = node->GetName();
+    if (func_name == "writeln")
+        func_name = "printf";
+    else if (func_name == "write")
+        func_name = "printf";
+
+    ostream_ << func_name << "(";
     for (int i = 0; i < node->GetParameters().size(); i++) {
+        // Is reference or not
+        auto r = node->IsReference(i);
+        if (r)
+            ostream_ << "&";
+
+        // Visit parameter
         auto p = node->GetParameters().at(i);
         Visit(p);
         if (i < node->GetParameters().size() - 1) {
@@ -303,6 +320,10 @@ void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
 
 bool CodeGenerator::IsReferenceArg(const shared_ptr<Var> &node) const {
     return node->IsReference();
+}
+
+bool CodeGenerator::IsReturnVar(const shared_ptr<Var> &node) const {
+    return node->IsReturnVar();
 }
 
 const string CodeGenerator::Indent() const {

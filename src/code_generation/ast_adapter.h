@@ -1,5 +1,6 @@
 #ifndef PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
 #define PASCAL2C_SRC_CODE_GENERATION_AST_ADAPTER_H_
+#include <bitset>
 #pragma once
 #include <algorithm>
 #include <memory>
@@ -11,9 +12,12 @@
 
 namespace pascal2c {
 namespace code_generation {
+using ::std::bitset;
 using ::std::shared_ptr;
 using ::std::string;
 template <typename Tp> using vector = ::std::vector<Tp>;
+
+const int k_max_parameters = 255;
 
 class Visitor;
 
@@ -136,18 +140,22 @@ class IVar : public ASTNode {
 
 class Var : public IVar {
   public:
-    explicit Var(const shared_ptr<Token> &token , bool is_reference = false) : 
-      name_(token->GetValue()) , is_reference_(is_reference) {}
+    explicit Var(const shared_ptr<Token> &token, bool is_reference = false,
+                 bool is_return_var = false)
+        : name_(token->GetValue()), is_reference_(is_reference),
+          is_return_var_(is_return_var) {}
     explicit Var(const string &name , bool is_reference = false) : 
       name_(name) , is_reference_(is_reference){}
     virtual ~Var() = default;
     void Accept(Visitor &visitor) override;
     virtual const string GetName() const override { return name_; }
     const bool IsReference() const { return is_reference_; }
+    const bool IsReturnVar() const { return is_return_var_; }
 
   private:
     string name_;
     bool is_reference_;
+    bool is_return_var_;
 };
 
 class IType : public ASTNode {
@@ -309,16 +317,21 @@ class Function : public ASTNode {
     Function(const string &name, const shared_ptr<Type> &return_type,
              const vector<shared_ptr<Argument>> &args,
              const shared_ptr<Block> &block)
-        : name_(name), return_type_(return_type), args_(args), block_(block) {}
+        : name_(name), return_type_(return_type), args_(args), block_(block),
+          return_var_(std::make_shared<Var>(
+              std::make_shared<Token>(TokenType::IDENTIFIER, name), false,
+              true)) {}
     virtual ~Function() = default;
     void Accept(Visitor &visitor) override;
     const string GetName() const { return name_; }
+    const shared_ptr<Var> GetReturnVar() const { return return_var_; }
     const string GetReturnType() const { return return_type_->GetType(); }
     const vector<shared_ptr<Argument>> &GetArgs() const { return args_; }
     const shared_ptr<Block> &GetBlock() const { return block_; }
 
   private:
     string name_;
+    shared_ptr<Var> return_var_;
     shared_ptr<Type> return_type_;
     vector<shared_ptr<Argument>> args_;
     shared_ptr<Block> block_;
@@ -457,16 +470,25 @@ class FunctionCall : public ASTNode {
   public:
     FunctionCall(const string &name,
                  const vector<shared_ptr<ASTNode>> parameters)
-        : name_(name), parameters_(std::move(parameters)) {}
+        : name_(name), parameters_(std::move(parameters)) {
+        is_reference_.reset();
+    }
     FunctionCall(const string &name) : name_(name), parameters_() {}
     virtual ~FunctionCall() = default;
     void Accept(Visitor &visitor) override;
     const string GetName() const { return name_; }
     const vector<shared_ptr<ASTNode>> &GetParameters() { return parameters_; }
+    void SetIsReference(int pos) {
+        is_reference_.set(static_cast<size_t>(pos), true);
+    }
+    bool IsReference(int pos) { return is_reference_.test(pos); }
 
   private:
     string name_;
+    // Params align from begin() to end()
     vector<shared_ptr<ASTNode>> parameters_;
+    // Params align from little endian to big endian
+    bitset<k_max_parameters> is_reference_;
 };
 
 } // namespace code_generation

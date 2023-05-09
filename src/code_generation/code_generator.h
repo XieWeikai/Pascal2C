@@ -19,7 +19,7 @@ using ::std::shared_ptr;
 class CodeGenerator : Visitor {
   public:
     CodeGenerator(const shared_ptr<ISymbolTable> &symbol_table = nullptr)
-        : indent_level_(0), type_tool_kit_(), symbol_table_(symbol_table) {}
+        : indent_level_(0), type_tool_kit_() {}
     void Interpret(const shared_ptr<ASTRoot> &node);
     const string GetCCode() const;
 
@@ -60,17 +60,19 @@ class CodeGenerator : Visitor {
     VisitFunctionCall(const shared_ptr<FunctionCall> &node) override;
 
     // Get Symbol Table's current scope name
-    const string GetCurrentScope() const {
-        return symbol_table_->GetCurrentScope();
-    }
+    // const string GetCurrentScope() const {
+    // return symbol_table_->GetCurrentScope();
+    // }
 
     // Set symbol table's current scope by name
-    void SetCurrentScope(const string &scope_name) const {
-        symbol_table_->SetCurrentScope(scope_name);
-    }
+    // void SetCurrentScope(const string &scope_name) const {
+    //     symbol_table_->SetCurrentScope(scope_name);
+    // }
 
     // Is this var passed-by-reference or passed-by-value in current scope
     bool IsReferenceArg(const shared_ptr<Var> &node) const;
+    // Is return variable
+    bool IsReturnVar(const shared_ptr<Var> &node) const;
 
     // Get current indent blank string based on current indent level
     const string Indent() const;
@@ -82,7 +84,7 @@ class CodeGenerator : Visitor {
     const string eol_ = ";\n";
 
     // Symbol table
-    shared_ptr<ISymbolTable> symbol_table_;
+    // shared_ptr<ISymbolTable> symbol_table_;
     // ostream
     std::stringstream ostream_;
     // Current indent level

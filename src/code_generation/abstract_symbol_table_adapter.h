@@ -14,8 +14,8 @@ class ISymbolScope {
   public:
     virtual ~ISymbolScope() = default;
     virtual const shared_ptr<SymbolItem> Lookup(const string &name) const = 0;
-    virtual void AddVariable(const shared_ptr<ASTNode> &node,
-                             bool is_reference) = 0;
+    virtual bool IsReference(const string &name) const = 0;
+    virtual bool IsReturnVar(const string &name) const = 0;
 };
 
 /**
@@ -25,8 +25,6 @@ class ISymbolScope {
 class ISymbolTable {
   public:
     virtual ~ISymbolTable() = default;
-    virtual void AddVariable(const shared_ptr<ASTNode> &node,
-                             bool is_reference) = 0;
     virtual bool IsReference(const string &name) const = 0;
     virtual bool IsReturnVar(const string &name) const = 0;
     virtual void SetCurrentScope(const string &scope_name) = 0;

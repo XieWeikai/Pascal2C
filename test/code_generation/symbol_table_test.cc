@@ -19,11 +19,10 @@ TEST(SymbolTableTest, MockSymbolTableTest) {
     EXPECT_CALL(*symbol_table_mock, IsReference(x->GetName()))
         .WillOnce(Return(false));
     EXPECT_CALL(*symbol_table_mock, Lookup("x"))
-        .WillOnce(Return(std::make_shared<SymbolItem>("x", x)));
+        .WillOnce(Return(std::make_shared<SymbolItem>("x", false, false)));
     EXPECT_CALL(*symbol_scope_mock, Lookup("x"))
-        .WillOnce(Return(std::make_shared<SymbolItem>("x", x)));
+        .WillOnce(Return(std::make_shared<SymbolItem>("x", false, false)));
 
-    symbol_table_mock->AddVariable(x, false);
     symbol_scope_mock->Lookup(x->GetName());
     auto item_x = symbol_table_mock->Lookup(x->GetName());
     EXPECT_FALSE(symbol_table_mock->IsReference(x->GetName()));
