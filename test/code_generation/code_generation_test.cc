@@ -95,7 +95,7 @@ end.
 
     auto program = SimpleProgramAST();
     EXPECT_EQ(program->GetName(), "Simple");
-    EXPECT_EQ(program->GetBlock()->GetDeclatation()->GetDeclarations().size(),
+    EXPECT_EQ(program->GetBlock()->GetDeclaration()->GetDeclarations().size(),
               2);
     ASTPrinter ast_printer;
     ast_printer.Traverse(program);

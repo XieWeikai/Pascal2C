@@ -114,6 +114,7 @@ target_link_libraries(
         parser_test
         parser
 )
+
 # <<< parser test <<<
 
 # >>> generator test >>>
@@ -130,10 +131,14 @@ add_executable(
 add_library(LibGenerator ${GENERATOR})
 
 add_subdirectory("src/semantic_analysis")
-# target_include_directories(generator_test PRIVATE "src/code_generation" "test/code_generation")
+
+# Include lexer.h
+target_include_directories(generator_test PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(
         generator_test
         LibGenerator
+        optimizer
+        parser
         semantic
         GTest::gtest_main
         GTest::gmock_main
@@ -165,7 +170,7 @@ target_link_libraries(pascal2c LibGenerator GTest::gtest_main GTest::gmock_main)
 # >>> Transformer Test >>>
 add_subdirectory("src/code_generation/optimizer")
 
-add_executable(transformer_test 
+add_executable(transformer_test
         test/code_generation/transformer_test.cc
 )
 target_include_directories(transformer_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
@@ -175,7 +180,8 @@ target_link_libraries(transformer_test PUBLIC
         semantic
         LibGenerator
         optimizer
-	GTest::gtest_main
-	GTest::gmock_main
+        GTest::gtest_main
+        GTest::gmock_main
 )
+
 # <<< Transformer Test <<<

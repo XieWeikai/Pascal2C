@@ -52,7 +52,7 @@ class SubprogramTest : public ::testing::Test {
 
         // by_value[3] = 5;
         auto array_access_by_value_3 = make_shared<ArrayAccess>(
-            array_by_value, std::vector<shared_ptr<Num>>{make_shared<Num>(
+            array_by_value, std::vector<shared_ptr<ASTNode>>{make_shared<Num>(
                                 make_shared<Token>(TokenType::NUMBER, "3"))});
         auto assign_by_value = make_shared<Assignment>(
             array_access_by_value_3,
