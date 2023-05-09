@@ -343,7 +343,7 @@ void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
     }
     for (int i = 0; i < node->GetParameters().size(); i++) {
         // Is reference or not
-        auto r = node->IsReference(i);
+        auto r = node->GetIsReference(i);
         if (r)
             ostream_ << "&";
 

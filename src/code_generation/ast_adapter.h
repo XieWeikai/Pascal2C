@@ -146,7 +146,7 @@ class Var : public IVar {
                  bool is_return_var = false,
                  VarType var_type = VarType::UNDEFINED)
         : name_(token->GetValue()), is_reference_(is_reference),
-          is_return_var_(is_return_var) {}
+          is_return_var_(is_return_var), var_type_(var_type) {}
     explicit Var(const string &name , bool is_reference = false , bool is_return_var = false) : 
       name_(name) , is_reference_(is_reference) , is_return_var_(is_return_var){}
     virtual ~Var() = default;
@@ -241,14 +241,17 @@ class ArrayType : public IType {
 
 class Array : public IVar {
   public:
-    Array(const shared_ptr<Var> &var) : var_(var) {}
+    Array(const shared_ptr<Var> &var, VarType var_type = VarType::UNDEFINED)
+        : var_(var), var_type_(var_type) {}
     virtual ~Array() = default;
     void Accept(Visitor &visitor) override;
     const string GetName() const override { return var_->GetName(); }
     const shared_ptr<Var> &GetVarNode() const { return var_; }
+    const VarType GetVarType() const override { return var_type_; }
 
   private:
     shared_ptr<Var> var_;
+    VarType var_type_;
 };
 
 class ArrayDeclaration : public ASTNode {
@@ -270,17 +273,20 @@ class ArrayDeclaration : public ASTNode {
 class ArrayAccess : public IVar {
   public:
     ArrayAccess(const shared_ptr<Array> &array,
-                const vector<shared_ptr<ASTNode>> &indices)
-        : array_(array), indices_(indices) {}
+                const vector<shared_ptr<ASTNode>> &indices,
+                VarType var_type = VarType::UNDEFINED)
+        : array_(array), indices_(indices), var_type_(var_type) {}
     virtual ~ArrayAccess() = default;
     void Accept(Visitor &visitor) override;
     const shared_ptr<Array> &GetArray() const { return array_; }
     const vector<shared_ptr<ASTNode>> &GetIndices() const { return indices_; }
     const string GetName() const override { return array_->GetName(); }
+    const VarType GetVarType() const override { return var_type_; }
 
   private:
     shared_ptr<Array> array_;
     vector<shared_ptr<ASTNode>> indices_;
+    VarType var_type_;
 };
 
 class Argument : public ASTNode {
@@ -485,7 +491,7 @@ class FunctionCall : public ASTNode {
     void SetIsReference(int pos) {
         is_reference_.set(static_cast<size_t>(pos), true);
     }
-    bool IsReference(int pos) { return is_reference_.test(pos); }
+    bool GetIsReference(int pos) { return is_reference_.test(pos); }
 
   private:
     string name_;
