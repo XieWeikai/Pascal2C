@@ -25,8 +25,7 @@ using namespace pascal2c::code_generation;
 using namespace pascal2c::parser;
 
 TEST(GeneratorTest, TransformerTest) {
-
-    FILE *input = fopen("../example/example1.pas", "r");
+    FILE *input = fopen("../example/merge_sort.pas", "r");
     std::cerr <<"[Parser] Begin\n";
 
 	Parser par{input};
@@ -76,28 +75,28 @@ void printarrays() {
     int i;
     printf("%s\n", "Integer array:");
     for (i = 1; i <= 5; i++) {
-        printf("%s%d%s%d\n", "intArray[", i, "] = ", intarray[i]);
+        printf("%s%d%s%d\n", "intArray[", i, "] = ", intarray[i - 1]);
     }
     printf("%s\n", "Real array:");
     for (i = 3; i <= 5; i++) {
-        printf("%s%d%s%f\n", "realArray[", i, "] = ", realarray[i]);
+        printf("%s%d%s%f\n", "realArray[", i, "] = ", realarray[i - 3]);
     }
 }
 // compilertest
 int main(int argc, char* argv[]) {
     for (i = 1; i <= 5; i++) {
-        intarray[i] = (i * 2);
+        intarray[i - 1] = (i * 2);
     }
-    realarray[3] = 0.500000;
-    realarray[4] = 1.500000;
-    realarray[5] = 2.500000;
-    realarray[6] = 3.500000;
-    realarray[7] = 4.500000;
+    realarray[3 - 3] = 0.500000;
+    realarray[4 - 3] = 1.500000;
+    realarray[5 - 3] = 2.500000;
+    realarray[6 - 3] = 3.500000;
+    realarray[7 - 3] = 4.500000;
     printf("%s\n", "Before swap:");
     printarrays();
-    if ((add(intarray[2], intarray[4]) == 13)) {
+    if ((add(intarray[2 - 1], intarray[4 - 1]) == 13)) {
         printf("%s\n", "Swapping intArray[2] and intArray[4]");
-        swap(&intarray[2], &intarray[4]);
+        swap(&intarray[2 - 1], &intarray[4 - 1]);
     }
     printf("%s\n", "After swap:");
     printarrays();

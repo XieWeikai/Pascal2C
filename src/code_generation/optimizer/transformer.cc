@@ -9,6 +9,10 @@ using ::std::make_shared;
 using ::std::optional;
 using ::std::pair;
 /**
+ * 	TOK_AND				262
+ *  TOK_DIV				267
+ * 	TOK_MOD				279
+ * 	TOK_OR 				283
  *  TOK_INTEGER_TYPE 	297
  *  TOK_REAL_TYPE 		298
  *  TOK_BOOLEAN_TYPE 	299
@@ -22,7 +26,17 @@ static const string ToCString(int tk) {
 	case '+' : return "+";
 	case '-' : return "-";
 	case '*' : return "*";
+	
+    case '<' : return "<";
+	case '>' : return ">";
+
+	case 262 : return "&";
+	case 267 : 
 	case '/' : return "/";
+
+	case 279 : return "%";
+	case 283 : return "|";
+
 	case symbol_table::ItemType::INT :
 	case 297 : return "int";
 

@@ -1,50 +1,50 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const double pi = 3.141590;
-int intarray[6];
-double realarray[5];
+const int n = 10;
+int mas[11];
 int i;
-int add(int x, int y) {
-    int ret_add;/* Auto Generated */
-    ret_add = (x + y);
-    return ret_add;/* Auto Generated */
+int random_(int a) {
+    int ret_random_;/* Auto Generated */
+    ret_random_ = 3;
+    return ret_random_;/* Auto Generated */
 }
-void swap(/* Is Reference */int *x, /* Is Reference */int *y) {
-    int temp;
-    temp = *x;
-    *x = *y;
-    *y = temp;
+void inc(/* Is Reference */int *a) {
+    *a = (*a + 1);
 }
-void printarrays() {
+void mergesort(int a, int c) {
+    int x;
+    int j;
     int i;
-    printf("%s\n", "Integer array:");
-    for (i = 1; i <= 5; i++) {
-        printf("%s%d%s%d\n", "intArray[", i, "] = ", intarray[i]);
+    int n1;
+    int n2;
+    int rez[1000];
+    x = ((a + c) / 2);
+    if (a == c) return;
+    mergesort(a, x);
+    mergesort((x + 1), c);
+    n1 = a;
+    n2 = (x + 1);
+    for (i = a; i <= c; i++) {
+        if (((n1 < (x + 1)) & ((n2 > c) | (mas[n1 - 1] < mas[n2 - 1])))) {
+            rez[i - 1] = mas[n1 - 1];
+            inc(&n1);
+        } else {
+            rez[i - 1] = mas[n2 - 1];
+            inc(&n2);
+        }
     }
-    printf("%s\n", "Real array:");
-    for (i = 3; i <= 5; i++) {
-        printf("%s%d%s%f\n", "realArray[", i, "] = ", realarray[i]);
+    for (j = a; j <= c; j++) {
+        mas[j - 1] = rez[j - 1];
     }
 }
-// compilertest
+// merge_sort
 int main(int argc, char* argv[]) {
-    for (i = 1; i <= 5; i++) {
-        intarray[i] = (i * 2);
+    for (i = 1; i <= n; i++) {
+        mas[i - 1] = random_(20);
     }
-    realarray[3] = 0.500000;
-    realarray[4] = 1.500000;
-    realarray[5] = 2.500000;
-    realarray[6] = 3.500000;
-    realarray[7] = 4.500000;
-    printf("%s\n", "Before swap:");
-    printarrays();
-    if ((add(intarray[2], intarray[4]) == 13)) {
-        printf("%s\n", "Swapping intArray[2] and intArray[4]");
-        swap(&intarray[2], &intarray[4]);
-    }
-    printf("%s\n", "After swap:");
-    printarrays();
-    printf("%f\n", pi);
+    printf("%d\n", mas[1]);
+    mergesort(1, n);
+    printf("%d\n", mas[1]);
     return 0;
 }
