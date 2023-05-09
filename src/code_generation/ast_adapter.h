@@ -244,17 +244,20 @@ class ArrayType : public IType {
 
 class Array : public IVar {
   public:
-    Array(const shared_ptr<Var> &var, VarType var_type = VarType::UNDEFINED)
-        : var_(var), var_type_(var_type) {}
+    Array(const shared_ptr<Var> &var, vector<std::pair<int, int>> bounds,
+          VarType var_type = VarType::UNDEFINED)
+        : var_(var), bounds_(std::move(bounds)), var_type_(var_type) {}
     virtual ~Array() = default;
     void Accept(Visitor &visitor) override;
     const string GetName() const override { return var_->GetName(); }
     const shared_ptr<Var> &GetVarNode() const { return var_; }
     const VarType GetVarType() const override { return var_type_; }
+    const vector<std::pair<int, int>> GetBounds() const { return bounds_; }
 
   private:
     shared_ptr<Var> var_;
     VarType var_type_;
+    vector<std::pair<int, int>> bounds_;
 };
 
 class ArrayDeclaration : public ASTNode {
@@ -285,6 +288,9 @@ class ArrayAccess : public IVar {
     const vector<shared_ptr<ASTNode>> &GetIndices() const { return indices_; }
     const string GetName() const override { return array_->GetName(); }
     const VarType GetVarType() const override { return var_type_; }
+    const vector<std::pair<int, int>> GetBounds() const {
+        return array_->GetBounds();
+    }
 
   private:
     shared_ptr<Array> array_;
