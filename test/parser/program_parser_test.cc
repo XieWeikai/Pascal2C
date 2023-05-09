@@ -407,7 +407,7 @@ namespace pascal2c::parser
             " ",
             "=1",
             "a -1",
-            "a 1.1",
+            "a 1.1 ",
             "a 'a'",
             "a 1",
             "a ",
@@ -433,7 +433,7 @@ namespace pascal2c::parser
             "    expr :\n"
             "        1:4 1",
             "1:1 ConstDeclaration: a\n"
-            "    1:3     1.0000",
+            "    1:3     1.1000",
             "1:1 ConstDeclaration: a\n"
             "    1:3 'a'",
             "1:1 ConstDeclaration: a\n"
@@ -871,7 +871,7 @@ namespace pascal2c::parser
             "1:1 Type: unknown",
             "1:1 Type: array [] of integer",
             "1:1 Type: array [1..10] of integer",
-            "1:1 Type: array [-1..-1] of unknown",
+            "1:1 Type: array [0..0] of unknown",
             "1:1 Type: array [] of integer",
             "1:1 Type: array [] of real",
             "1:1 Type: array [] of boolean",
@@ -936,11 +936,11 @@ namespace pascal2c::parser
         };
         const vector<string> results = {
             "1..10",
-            "-1..-1",
-            "-1..10",
+            "0..0",
+            "0..10",
             "1..10",
-            "1..-1",
-            "1..-1",
+            "1..0",
+            "1..0",
         };
         const vector<vector<string>> errs = {
             {},
