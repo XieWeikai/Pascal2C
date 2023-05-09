@@ -115,7 +115,7 @@ namespace pascal2c::ast
         else
         {
             IndentOutput(str_s, level + 1);
-            str_s << "unknown value" << std::endl;
+            str_s << "unknown value";
         }
         return str_s.str();
     }
@@ -188,7 +188,7 @@ namespace pascal2c::ast
             str_s << var_declarations_[i]->ToString(level + 1) << std::endl;
         }
 
-        str_s << statements_->ToString(level + 1) << std::endl;
+        str_s << statements_->ToString(level + 1);
 
         return str_s.str();
     }
@@ -252,7 +252,7 @@ namespace pascal2c::ast
             str_s << subprogram_declarations_[i]->ToString(level + 1) << std::endl;
         }
 
-        str_s << statements_->ToString(level + 1) << std::endl;
+        str_s << statements_->ToString(level + 1);
 
         return str_s.str();
     }

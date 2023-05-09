@@ -10,7 +10,7 @@ var
 
 function Add(x, y: integer): integer;
 begin
-  Add := x + y;
+  Add := x + y
 end;
 
 procedure Swap(var x, y: integer);
@@ -19,7 +19,7 @@ var
 begin
   temp := x;
   x := y;
-  y := temp;
+  y := temp
 end;
 
 procedure PrintArrays;
@@ -32,7 +32,7 @@ begin
 
   writeln('Real array:');
   for i := -2 to 2 do
-    writeln('realArray[', i, '] = ', realArray[i]);
+    writeln('realArray[', i, '] = ', realArray[i])
 end;
 
 {
@@ -57,11 +57,11 @@ begin
   if Add(intArray[2], intArray[4]) = 13 then
   begin
     writeln('Swapping intArray[2] and intArray[4]');
-    Swap(intArray[2], intArray[4]);
+    Swap(intArray[2], intArray[4])
   end;
 
   writeln('After swap:');
   PrintArrays;
 
-  writeln('PI = ', PI);
+  writeln('PI = ', PI)
 end.
