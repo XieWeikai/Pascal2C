@@ -147,8 +147,10 @@ class Var : public IVar {
                  VarType var_type = VarType::UNDEFINED)
         : name_(token->GetValue()), is_reference_(is_reference),
           is_return_var_(is_return_var), var_type_(var_type) {}
-    explicit Var(const string &name , bool is_reference = false , bool is_return_var = false) : 
-      name_(name) , is_reference_(is_reference) , is_return_var_(is_return_var){}
+    explicit Var(const string &name, bool is_reference = false,
+                 bool is_return_var = false)
+        : name_(name), is_reference_(is_reference),
+          is_return_var_(is_return_var) {}
     virtual ~Var() = default;
     void Accept(Visitor &visitor) override;
     virtual const string GetName() const override { return name_; }
@@ -172,7 +174,8 @@ class IType : public ASTNode {
 
 class Type : public IType {
   public:
-    Type(const shared_ptr<Token> &token , bool is_reference = false) : type_(token->GetValue()) {}
+    Type(const shared_ptr<Token> &token, bool is_reference = false)
+        : type_(token->GetValue()) {}
     virtual ~Type() = default;
     void Accept(Visitor &visitor) override;
     const string GetType() const override { return type_; }
@@ -460,8 +463,10 @@ class IfStatement : public ASTNode {
 
 class ForStatement : public ASTNode {
   public:
-    ForStatement(const shared_ptr<Var> &variable, const shared_ptr<ASTNode> &start,
-                 const shared_ptr<ASTNode> &end, const shared_ptr<Compound> &body)
+    ForStatement(const shared_ptr<Var> &variable,
+                 const shared_ptr<ASTNode> &start,
+                 const shared_ptr<ASTNode> &end,
+                 const shared_ptr<Compound> &body)
         : variable_(variable), start_(start), end_(end), body_(body) {}
     virtual ~ForStatement() = default;
     void Accept(Visitor &visitor) override;
@@ -480,9 +485,11 @@ class ForStatement : public ASTNode {
 class FunctionCall : public ASTNode {
   public:
     FunctionCall(const string &name,
-                 const vector<shared_ptr<ASTNode>> parameters ,
-                 const bitset<k_max_parameters> ref_set)
-        : name_(name), parameters_(std::move(parameters)) , is_reference_(std::move(ref_set)) {}
+                 const vector<shared_ptr<ASTNode>> parameters,
+                 const bitset<k_max_parameters> ref_set,
+                 VarType return_type = VarType::VOID)
+        : name_(name), parameters_(std::move(parameters)),
+          is_reference_(std::move(ref_set)), return_type_(return_type) {}
     FunctionCall(const string &name) : name_(name), parameters_() {}
     virtual ~FunctionCall() = default;
     void Accept(Visitor &visitor) override;
@@ -492,6 +499,7 @@ class FunctionCall : public ASTNode {
         is_reference_.set(static_cast<size_t>(pos), true);
     }
     bool GetIsReference(int pos) { return is_reference_.test(pos); }
+    const VarType GetReturnType() const { return return_type_; }
 
   private:
     string name_;
@@ -499,6 +507,7 @@ class FunctionCall : public ASTNode {
     vector<shared_ptr<ASTNode>> parameters_;
     // Params align from little endian to big endian
     bitset<k_max_parameters> is_reference_;
+    VarType return_type_;
 };
 
 } // namespace code_generation

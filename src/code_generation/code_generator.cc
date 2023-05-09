@@ -5,6 +5,7 @@
 #include <string>
 
 #include "code_generation/ast_adapter.h"
+#include "code_generation/type_adaper.h"
 #include "code_generation/visitor.h"
 #include "code_generator.h"
 #include "token_adapter.h"
@@ -311,16 +312,35 @@ void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node) {
         }
     };
 
+    auto CastByVarType = [&](const VarType vt) -> void {
+        if (vt == VarType::INT)
+            specifiers.push_back("%d");
+        else if (vt == VarType::REAL)
+            specifiers.push_back("%f");
+        else if (vt == VarType::STRING)
+            specifiers.push_back("%s");
+        else if (vt == VarType::CHAR)
+            specifiers.push_back("%c");
+        else
+            specifiers.push_back("%s");
+    };
+
+    auto IVarCast = [&](const shared_ptr<IVar> &p) -> void {
+        CastByVarType(p->GetVarType());
+    };
+
+    auto FuncCallCast = [&](const shared_ptr<FunctionCall> &p) -> void {
+        CastByVarType(p->GetReturnType());
+    };
+
     auto params = node->GetParameters();
     for (auto &p : params) {
-        if (auto dp = dynamic_pointer_cast<ArrayAccess>(p)) {
-            BaseCast(dp->GetArray()->GetVarNode());
-        } else if (auto dp = dynamic_pointer_cast<Var>(p)) {
-            BaseCast(dp);
-        } else if (auto dp = dynamic_pointer_cast<FunctionCall>(p)) {
-            BaseCast(dp);
-        }
-        BaseCast(p);
+        if (auto dp = dynamic_pointer_cast<IVar>(p))
+            IVarCast(dp);
+        else if (auto dp = dynamic_pointer_cast<FunctionCall>(p))
+            FuncCallCast(dp);
+        else
+            BaseCast(p);
     }
     ostream_ << '"';
     for (auto &s : specifiers) {
