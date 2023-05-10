@@ -168,6 +168,7 @@ AST 树是一种树状的数据结构，用于表示源代码的结构。AST 树
 符号表逻辑结构依附于AST的实现。每个作用域拥有自己的符号表，在当前符号表中查询不到的符号将递归向父亲查询。
 
 参考结构如下：
+
 ![draw1](https://github.com/XieWeikai/Pascal2C/assets/106591984/79fba3d2-77ac-453a-bd2c-eacd1924a4dd)
 
 
