@@ -484,7 +484,8 @@ class BinaryOperation : public IVar {
         if (GetOper()->GetOper() == "/") {
             var_type_ = VarType::REAL;
             return true;
-        } else if (GetOper()->GetOper() == "mod") {
+        } else if (GetOper()->GetOper() == "mod" ||
+                   GetOper()->GetOper() == "div") {
             var_type_ = VarType::INT;
         }
         return false;
