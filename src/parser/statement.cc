@@ -22,7 +22,6 @@ namespace pascal2c::parser {
     }
 
     std::shared_ptr<ast::Statement> Parser::ParseStatement(){
-        static char buff[1024];
         INIT_PARSE(line_,column_);
         std::shared_ptr<ast::Statement> statement;
         switch (token_) {
@@ -40,6 +39,7 @@ namespace pascal2c::parser {
                 break;
 
             case TOK_EXIT:
+                NextToken(); // eat exit
                 statement = std::make_shared<ast::ExitStatement>();
                 break;
 
