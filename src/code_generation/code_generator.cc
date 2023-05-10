@@ -367,6 +367,8 @@ void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node) {
             specifiers.push_back("%s");
         } else if (auto dp = dynamic_pointer_cast<Char>(p)) {
             specifiers.push_back("%c");
+        } else if (auto dp = dynamic_pointer_cast<Bool>(p)) {
+            specifiers.push_back("%d");
         } else {
             specifiers.push_back("%s");
         }
@@ -381,6 +383,8 @@ void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node) {
             specifiers.push_back("%s");
         else if (vt == VarType::CHAR)
             specifiers.push_back("%c");
+        else if (vt == VarType::BOOL)
+            specifiers.push_back("%d");
         else
             specifiers.push_back("%s");
     };
