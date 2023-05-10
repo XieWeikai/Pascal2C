@@ -54,6 +54,35 @@ User Subroutines
 
 ### 4.2 语法分析
 
+#### 4.2.1 数据结构
+
+语法分析包含两个部分，分别是 AST 树部分和语法分析器 Parser 部分。
+
+* AST 树部分：存储 AST 树，作为语法分析的输出，交给语义分析进一步处理
+* 语法分析器 Parser 部分：使用递归下降法，根据语法规则，将词法分析器输出的 token 序列转换为 AST 树
+
+##### AST 树
+
+AST 树是一种树状的数据结构，用于表示源代码的结构。AST 树的每个节点都是一个语法单元，包含了该语法单元的类型和属性。具体语法单元结构如下：
+
+|语法单元|属性|子语法单元|
+|:---:|:---:|:---:|
+|程序 Program||程序头 ProgramHead<br>程序体 ProgramBody|
+|程序头 ProgramHead|程序名 id|参数标志符列表 IdList|
+|程序体 ProgramBody||常量声明 ConstDeclaration<br>变量声明 VarDeclaration<br>子程序声明 Subprogram<br>复合语句 Statement|
+|常量声明 ConstDeclaration|常量名 id|常量值 Expression|
+|变量声明 VarDeclaration||标志符列表 IdList<br>类型 Type|
+|子程序声明 Subprogram||子程序头 SubprogramHead<br>子程序体 SubprogramBody|
+|子程序头 SubprogramHead|子程序名 id<br>返回类型 return_type<br>是否为函数 is_function|参数 Parameter|
+|子程序体 SubprogramBody||常量声明 ConstDeclaration<br>变量声明 VarDeclaration<br>复合语句 Statement|
+|参数 Parameter|类型 type<br>是否为引用 is_var|标志符列表 IdList|
+|类型 Type|基础类型 base_type<br>是否为数组 is_array|下标范围 Period|
+|下标范围 Period|下界 lower_bound<br>上界 upper_bound||
+|标志符列表 IdList|标志符 id1, id2, ...||
+
+
+
+
 #### 4.2.1 输入和输出
 
 - **输入**:在语法分析阶段，语法分析器将以词法分析器处理pascal源代码得到的`token`作为输入，如
@@ -81,21 +110,6 @@ User Subroutines
 
   ![语法分析输出](assets/语法分析输出 AST.jpeg)
 
-#### 4.2.2 处理流程
-
-| 系统事件名称                             | 用例           | 参数说明                              |
-| ---------------------------------------- | -------------- | ------------------------------------- |
-| SyntaxAnalysis(tokens)                   | 语法分析       | 1. tokens:vector\<Token>              |
-| ParseProgramHead(tokens, pos)            | 分析程序头     | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseProgramBody(tokens, pos)()          | 分析程序主体   | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseConstDeclarations(tokens, pos)      | 分析常量声明   | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseVarDeclarations(tokens, pos)        | 分析变量声明   | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseSubprogramDeclarations(tokens, pos) | 分析子程序     | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseSubprogramHead(tokens, pos)         | 分析子程序头   | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseSubprogramBody(tokens, pos)         | 分析子程序主体 | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseCompoundStatements(tokens, pos)     | 分析复合语句   | 1. tokens:vector\<Token>; 2. pos:int; |
-
-![语法分析流程图](assets/parser_flowchart.jpg)
 
 ---
 

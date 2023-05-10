@@ -498,7 +498,7 @@ else\n"
 for i := 1 to 10 do
    count := count + 1;
 for i := lower(i) to upper(i) do
-begin
+**begin**
    sub_program;
    call(1,2,3);
    a := a + 1
