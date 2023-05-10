@@ -169,19 +169,35 @@ AST 树是一种树状的数据结构，用于表示源代码的结构。AST 树
 
 参考结构如下：
 
-![draw1](https://github.com/XieWeikai/Pascal2C/assets/106591984/79fba3d2-77ac-453a-bd2c-eacd1924a4dd)
+![draw1](assets/analysiser_symbol_table.png)
 
 
 ##### 4.3.1.2 符号表物理结构设计
 
-计划采用哈希表实现符号表。具体表示变量/函数的数据结构需要与语法分析对接。
+计划采用哈希表实现符号表。具体表示变量/函数的数据结构如下：
+
+```cpp
+ class SymbolTableItem{
+    MegaType type_;
+    std::string name_;
+    bool is_var_;
+    bool is_func_;
+    std::vector<SymbolTablePara> para_;
+};
+class MegaType{
+    std::vector<std::string> pointer_;
+    symbol_table::ItemType type_;
+};
+```
+
+主要由SymbolTableItem类中的is_var和is_func属性判断是函数还是变量。
 
 #### 4.3.2 符号表管理
 
-- 查询操作：在哈希表中查询；未查询到则递归向上查询。若查询不到则调用错误处理部分。
-- 插入操作：在哈希表中插入。
+- 查询操作：在哈希表中查询；未查询到则递归向上查询。若查询不到则返回对应的错误信息。
+- 插入操作：在哈希表中插入对应的值。
 - 定位操作：在进入当前作用域时执行，新建一个哈希表代表当前作用域。
-- 重定位操作：在退出当前作用域时执行，删除哈希表中所有记录并释放内存使用。
+- 重定位操作：在退出当前作用域时执行，返回到上一个作用域中。
 
 ---
 
