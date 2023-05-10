@@ -36,7 +36,8 @@ class TypeToolKit {
     const hashmap<string, string> PascalToCTypeMap = {
         {"integer", "int"}, {"real", "double"}, {"char", "char"},
         {"string", "char"}, {"boolean", "int"}, {"record", "struct"},
-        {":=", "="},        {"=", "=="},        {"mod", "%"}};
+        {":=", "="},        {"=", "=="},        {"mod", "%"},
+        {"div", "/"},       {"/", "/"}};
     const hashmap<VarType, string> VarTypeToStringMap = {
         {VarType::VOID, "void"},          {VarType::CHAR, "char"},
         {VarType::STRING, "string"},      {VarType::INT, "int"},
