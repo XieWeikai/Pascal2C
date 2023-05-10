@@ -61,11 +61,17 @@ private :
         transIfStatement(shared_ptr<ast::IfStatement> cur);
     shared_ptr<ForStatement>
         transForStatement(shared_ptr<ast::ForStatement> cur);
+    shared_ptr<ExitStatement>
+        transExitStatement(shared_ptr<ast::ExitStatement> cur);
+    shared_ptr<WhileStatement>
+        transWhileStatement(shared_ptr<ast::WhileStatement> cur);
+
 
     std::tuple<bool ,bool , bool , bool , bool , symbol_table::ItemType>
         checkIdType(const string& id);
     std::optional<std::pair<symbol_table::ItemType , std::vector<std::pair<int , int>>>>
         checkArrayType(const string& id);
+    string checkExprType(shared_ptr<ast::Expression> cur);
 
     bool checkIdTypeIfVar(const string& id);
     bool checkIdTypeIfConst(const string& id);   

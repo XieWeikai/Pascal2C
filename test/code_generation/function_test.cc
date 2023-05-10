@@ -19,7 +19,7 @@ class FunctionTest : public ::testing::Test {
 
         // Set args for function
         var_by_reference = make_shared<Var>(
-            make_shared<Token>(TokenType::IDENTIFIER, "by_reference"), true);
+            make_shared<Token>(TokenType::IDENTIFIER, "by_reference"));
         auto type_by_reference =
             make_shared<Type>(make_shared<Token>(TokenType::RESERVED, "char"));
         auto arg_by_reference =
@@ -62,6 +62,8 @@ class FunctionTest : public ::testing::Test {
             make_shared<Oper>(make_shared<Token>(TokenType::OPERATOR, "+")),
             array_access_by_value_0_19);
         // Assignment
+        var_by_reference = make_shared<Var>(
+            make_shared<Token>(TokenType::IDENTIFIER, "by_reference"), true);
         auto assign_by_reference =
             make_shared<Assignment>(var_by_reference, bin_op);
 
@@ -94,9 +96,9 @@ class FunctionTest : public ::testing::Test {
     string expected_ccode_ =
         R"(char test_function(int[3][10] by_value, /* Is Reference */char *by_reference) {
     char ret_test_function;/* Auto Generated */
-    *by_reference = (by_value[5][9] + by_value[0][19]);
-    by_value[3][4] = 5;
-    ret_test_function = by_value[3][4];
+    *by_reference = (by_value[5 - 3][9 - 7] + by_value[0 - 3][19 - 7]);
+    by_value[3 - 3][4 - 7] = 5;
+    ret_test_function = by_value[3 - 3][4 - 7];
     return ret_test_function;/* Auto Generated */
 }
 )";
@@ -109,9 +111,6 @@ class FunctionTest : public ::testing::Test {
 
 TEST_F(FunctionTest, FunctionDeclarationTest) {
     auto s_table = make_shared<SymbolTableMock>();
-    EXPECT_CALL(*s_table, GetCurrentScope()).WillOnce(Return("global"));
-    EXPECT_CALL(*s_table, SetCurrentScope(function_name_));
-    EXPECT_CALL(*s_table, SetCurrentScope("global"));
     CodeGenerator cg(s_table);
     EXPECT_CALL(*s_table, IsReference(function_name_))
         .WillRepeatedly(Return(false));

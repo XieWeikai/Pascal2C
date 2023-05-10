@@ -104,8 +104,10 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if(has_error)
-        return 1;
+    if (has_error) {
+        remove(output_filename.c_str());
+        return 0;
+    }
 
     code_generation::Transformer trans(program);
     auto cg_program = trans.GetASTRoot();

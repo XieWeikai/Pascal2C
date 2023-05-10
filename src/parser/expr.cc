@@ -98,7 +98,6 @@ namespace pascal2c::parser {
 
     std::shared_ptr<ast::Expression> Parser::ParseVariableAndCall(){
         std::string id = text_;
-        int ch;
         NextToken();
         vector<std::shared_ptr<ast::Expression> > expr_list;
         switch (token_) {

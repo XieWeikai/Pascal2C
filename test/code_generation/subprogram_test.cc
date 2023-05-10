@@ -20,7 +20,7 @@ class SubprogramTest : public ::testing::Test {
 
         // Set args for subprogram
         var_by_reference = make_shared<Var>(
-            make_shared<Token>(TokenType::IDENTIFIER, "by_reference"), true);
+            make_shared<Token>(TokenType::IDENTIFIER, "by_reference"));
         auto type_by_reference = make_shared<Type>(
             make_shared<Token>(TokenType::RESERVED, "integer"));
         auto arg_by_reference =
@@ -48,6 +48,8 @@ class SubprogramTest : public ::testing::Test {
             var_by_value,
             make_shared<Oper>(make_shared<Token>(TokenType::OPERATOR, "*")),
             make_shared<Num>(make_shared<Token>(TokenType::NUMBER, "1")));
+        var_by_reference = make_shared<Var>(
+            make_shared<Token>(TokenType::IDENTIFIER, "by_reference"), true);
         auto assign_by_reference =
             make_shared<Assignment>(var_by_reference, bin_op);
 
@@ -69,7 +71,7 @@ class SubprogramTest : public ::testing::Test {
     string expected_ccode_ =
         R"(void test_subprogram(/* Is Reference */int *by_reference, int[3] by_value) {
     *by_reference = (by_value * 1);
-    by_value[3] = 5;
+    by_value[3 - 3] = 5;
 }
 )";
     string subprogram_name_;
@@ -79,9 +81,6 @@ class SubprogramTest : public ::testing::Test {
 TEST_F(SubprogramTest, SubprogramDeclaration) {
     // Mock symbol table used for IsReference Lookup
     auto s_table = make_shared<SymbolTableMock>();
-    EXPECT_CALL(*s_table, GetCurrentScope()).WillOnce(Return("global"));
-    EXPECT_CALL(*s_table, SetCurrentScope(subprogram_name_));
-    EXPECT_CALL(*s_table, SetCurrentScope("global"));
     CodeGenerator cg(s_table);
     EXPECT_CALL(*s_table, IsReference(var_by_reference->GetName()))
         .WillRepeatedly(Return(true));

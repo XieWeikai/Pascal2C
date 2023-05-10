@@ -324,11 +324,24 @@ class Argument : public ASTNode {
     bool is_reference_;
 };
 
-// Nothing but a break; is required
+/**
+ * @brief If function_name is empty, generate a return;
+ * Example: return;
+ * else generate a return function_name;
+ * Example: return ret_test_function;
+ *
+ */
 class ExitStatement : public ASTNode {
-    ExitStatement() {}
+  public:
+    ExitStatement() : function_name_("") {}
+    explicit ExitStatement(const string &function_name)
+        : function_name_(function_name) {}
     virtual ~ExitStatement() = default;
     void Accept(Visitor &visitor) override;
+    const string GetFunctionName() const { return function_name_; }
+
+  private:
+    string function_name_;
 };
 
 class Subprogram : public ASTNode {
@@ -432,6 +445,7 @@ class UnaryOperation : public IVar {
     const shared_ptr<Oper> GetOper() const { return oper_; }
     const shared_ptr<ASTNode> GetVarNode() const { return var_node_; }
     const VarType GetVarType() const override { return var_type_; }
+    const string GetName() const override { return "unary_operation"; }
 
   private:
     shared_ptr<Oper> oper_;
@@ -453,6 +467,15 @@ class BinaryOperation : public IVar {
     const shared_ptr<ASTNode> &GetRight() { return right_; }
     const VarType GetVarType() const override { return var_type_; }
     const string GetName() const override { return "binary_operation"; }
+    bool TestCastToFloat() {
+        if (GetOper()->GetOper() == "/") {
+            var_type_ = VarType::REAL;
+            return true;
+        } else if (GetOper()->GetOper() == "mod") {
+            var_type_ = VarType::INT;
+        }
+        return false;
+    }
 
   private:
     shared_ptr<ASTNode> left_;

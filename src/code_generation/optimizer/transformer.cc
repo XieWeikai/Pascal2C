@@ -18,6 +18,9 @@ using ::std::pair;
  *  TOK_BOOLEAN_TYPE 	299
  *  TOK_CHAR_TYPE 		300
  *  TOK_STRING_TYPE 	301
+ *  TOK_NEQOP 			304
+ *	TOK_LEOP 			305
+ *	TOK_GEOP 			306
 */
 static const string ToCString(int tk) {
 	switch (tk) {
@@ -51,6 +54,10 @@ static const string ToCString(int tk) {
 
 	case symbol_table::ItemType::STRING :
 	case 301 : return "string";
+
+	case 304 : return "!=";
+	case 305 : return "<=";
+	case 306 : return ">=";
 
 	case symbol_table::ItemType::VOID :
 	return "void";
@@ -128,6 +135,12 @@ bool Transformer::checkIdTypeIfRef(const string& id) {
 	auto idx  = getParamIndex(now.func_node->subprogram_head() , id);
 	return idx == -1ULL ? false : para[idx].is_var();
 }
+
+string Transformer::checkExprType(shared_ptr<ast::Expression> cur) {
+	auto ans = analysiser::GetExprType(cur).type();
+	return ToCString(ans);
+}
+
 /**
  * @return is_val | is_func | is_ref | is_ret | is_const
 */
@@ -214,7 +227,6 @@ shared_ptr<Program> Transformer::transProgram(shared_ptr<ast::Program> cur) {
 		cur->program_head()->id() ,
 		nullptr
 	};
-
 	return make_shared<Program>(
 		cur->program_head()->id() ,
 		transBody<ast::ProgramBody>(cur->program_body())
@@ -477,19 +489,21 @@ Transformer::passExpr(shared_ptr<ast::Expression> cur) {
 
 
 	case ast::ExprType::UNARY : {
-		vector<shared_ptr<ASTNode>> child {
-			make_shared_token<Oper> (TokenType::OPERATOR , "-"),
-			passExpr(
-				std::static_pointer_cast<ast::UnaryExpr>(cur)->factor()
-			)
-		};
-		return make_shared<Compound>(child);
+		auto expr = std::static_pointer_cast<ast::UnaryExpr>(cur);
+
+		return make_shared<UnaryOperation>(
+			make_shared_token<Oper> (TokenType::OPERATOR , ToCString(expr->op())) ,
+			passExpr( expr->factor() ) ,
+			VarType::UNDEFINED
+		);
 	}
 
 
 	case ast::ExprType::BINARY : {
 		auto bin_expr = std::static_pointer_cast<ast::BinaryExpr>(cur);
 
+		// std::cerr << "Get Type : " << checkExprType(bin_expr) << "\n";
+	
 		return make_shared<BinaryOperation>(
 			passExpr(bin_expr->lhs()) ,
 			make_shared_token<Oper>(TokenType::OPERATOR , ToCString(bin_expr->op())) ,
@@ -551,6 +565,8 @@ Transformer::transExpression(shared_ptr<ast::Expression> cur) {
         COMPOUND_STATEMENT 	= 3,
         IF_STATEMENT 		= 4,
         FOR_STATEMENT 		= 5,
+		EXIT_STATEMENT 		= 6,
+        WHILE_STATEMENT 	= 7
     };
 */
 shared_ptr<ASTNode>
@@ -572,6 +588,12 @@ Transformer::transStatement(shared_ptr<ast::Statement> cur) {
 	
 	case ast::StatementType::FOR_STATEMENT :
 		return transForStatement(std::static_pointer_cast<ast::ForStatement>(cur));
+
+	case ast::StatementType::EXIT_STATEMENT :
+		return transExitStatement(std::static_pointer_cast<ast::ExitStatement>(cur));
+
+	case ast::StatementType::WHILE_STATEMENT : 
+		return transWhileStatement(std::static_pointer_cast<ast::WhileStatement>(cur));
 	}
 
 	throw std::runtime_error{"[Transformer] unknown statement\n"};
@@ -628,7 +650,7 @@ Transformer::transIfStatement(shared_ptr<ast::IfStatement> cur) {
 	 );
 }
 
-shared_ptr<ForStatement>
+shared_ptr<ForStatement>	
 Transformer::transForStatement(shared_ptr<ast::ForStatement> cur) {
 	vector<shared_ptr<ASTNode>> body {std::move(transStatement(cur->statement()))};
 	auto from = transExpression(cur->from());
@@ -638,6 +660,22 @@ Transformer::transForStatement(shared_ptr<ast::ForStatement> cur) {
 		make_shared_token<Var>(TokenType::IDENTIFIER , cur->id()),
 		from , to ,
 		make_shared<Compound>(body)
+	);
+}
+
+shared_ptr<ExitStatement>
+Transformer::transExitStatement(shared_ptr<ast::ExitStatement> cur) {
+	return make_shared<ExitStatement>();
+}
+
+shared_ptr<WhileStatement>
+Transformer::transWhileStatement(shared_ptr<ast::WhileStatement> cur) {
+	return make_shared<WhileStatement>(
+		passExpr(cur->condition()) ,
+		make_shared<Compound>(
+			vector<shared_ptr<ASTNode>>
+			{transStatement( cur->statement() )}
+		)
 	);
 }
 

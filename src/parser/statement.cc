@@ -22,7 +22,6 @@ namespace pascal2c::parser {
     }
 
     std::shared_ptr<ast::Statement> Parser::ParseStatement(){
-        static char buff[1024];
         INIT_PARSE(line_,column_);
         std::shared_ptr<ast::Statement> statement;
         switch (token_) {
@@ -40,6 +39,7 @@ namespace pascal2c::parser {
                 break;
 
             case TOK_EXIT:
+                NextToken(); // eat exit
                 statement = std::make_shared<ast::ExitStatement>();
                 break;
 
@@ -107,9 +107,9 @@ namespace pascal2c::parser {
                 statements.push_back(std::move(statement));
                 if(token_ != TOK_END) {
                     Match(';', "syntax error: missing ';' at the end of statement");
-                    if(token_ == TOK_END) {
-                        throw SyntaxErr("last statement should not end with ;", line_, column_);
-                    }
+//                    if(token_ == TOK_END) {
+//                        throw SyntaxErr("last statement should not end with ;", line_, column_);
+//                    }
                 }
             }catch (SyntaxErr &e){
                 AddSyntaxErr(e);
@@ -134,7 +134,6 @@ namespace pascal2c::parser {
         Match(TOK_ID);
         vector<std::shared_ptr<ast::Expression> > expr_list;
         auto var = std::make_shared<ast::Variable>(id);
-        bool is_var = false;
 
         switch (token_) {
             case '(':
@@ -151,11 +150,11 @@ namespace pascal2c::parser {
                 expr_list = ParseExprList();
                 Match(']',"syntax error: unclosed brackets");
                 var = std::make_shared<ast::Variable>(id,expr_list);
-                is_var = true;
+                break;
+            case TOK_END: // a subprogram call without parameters
+            case ';':
+                return std::make_shared<ast::CallStatement>(id);
         }
-
-        if(!is_var && token_ == ';')
-            return std::make_shared<ast::CallStatement>(id);
 
         Match(TOK_ASSIGNOP,"syntax error: lost ':=' when parsing assign statement");
         auto expr = ParseExpr();

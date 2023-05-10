@@ -401,7 +401,7 @@ namespace pascal2c::parser
         int value1 = tok_value_.intval;
         if (CheckMatch(TOK_INTEGER, {TOK_DOTDOT, ',', ']', ';'}) != TOK_INTEGER)
         {
-            value1 = -1;
+            value1 = 0;
         }
 
         CheckMatch(TOK_DOTDOT, {TOK_INTEGER, ';'});
@@ -409,7 +409,7 @@ namespace pascal2c::parser
         int value2 = tok_value_.intval;
         if (CheckMatch(TOK_INTEGER, {',', ']', ';'}) != TOK_INTEGER)
         {
-            value2 = -1;
+            value2 = 0;
         }
 
         return {value1, value2};
