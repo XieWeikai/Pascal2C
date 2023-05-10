@@ -1,5 +1,197 @@
 # 详细设计
 
+- [详细设计](#详细设计)
+  - [词法分析](#词法分析)
+    - [数据结构说明](#数据结构说明)
+    - [函数、方法说明](#函数方法说明)
+    - [算法描述](#算法描述)
+      - [处理注释](#处理注释)
+      - [处理字符串](#处理字符串)
+      - [处理关键字](#处理关键字)
+      - [处理标识符](#处理标识符)
+      - [处理整数](#处理整数)
+      - [处理浮点数](#处理浮点数)
+      - [处理运算符](#处理运算符)
+      - [忽略空白符](#忽略空白符)
+      - [处理换行](#处理换行)
+      - [处理其他字符](#处理其他字符)
+  - [语法分析](#语法分析)
+    - [概述](#概述)
+    - [AST 树](#ast-树)
+      - [功能描述](#功能描述)
+      - [接口描述](#接口描述)
+        - [class Ast](#class-ast)
+        - [class Program](#class-program)
+        - [class ProgramHead](#class-programhead)
+        - [class ProgramBody](#class-programbody)
+        - [class ConstDeclaration](#class-constdeclaration)
+        - [class VarDeclaration](#class-vardeclaration)
+        - [class Subprogram](#class-subprogram)
+        - [class SubprogramHead](#class-subprogramhead)
+        - [class SubprogramBody](#class-subprogrambody)
+        - [class Parameter](#class-parameter)
+        - [class IdList](#class-idlist)
+        - [class Type](#class-type)
+        - [struct Type::Period](#struct-typeperiod)
+        - [class Statement](#class-statement)
+        - [class AssignmentStatement](#class-assignmentstatement)
+        - [class IfStatement](#class-ifstatement)
+        - [class CallStatement](#class-callstatement)
+        - [class CompoundStatement](#class-compoundstatement)
+        - [class ForStatement](#class-forstatement)
+        - [class Expression](#class-expression)
+        - [enum ExprType](#enum-exprtype)
+        - [class StringValue](#class-stringvalue)
+        - [class IntegerValue](#class-integervalue)
+        - [class RealValue](#class-realvalue)
+        - [class CharValue](#class-charvalue)
+        - [class BooleanValue](#class-booleanvalue)
+        - [class CallOrVar](#class-callorvar)
+        - [class CallValue](#class-callvalue)
+        - [class Variable](#class-variable)
+        - [class BinaryExpr](#class-binaryexpr)
+        - [class UnaryExpr](#class-unaryexpr)
+      - [数据结构定义](#数据结构定义)
+        - [class Ast](#class-ast-1)
+        - [class Program](#class-program-1)
+        - [class ProgramHead](#class-programhead-1)
+        - [class ProgramBody](#class-programbody-1)
+        - [class ConstDeclaration](#class-constdeclaration-1)
+        - [class VarDeclaration](#class-vardeclaration-1)
+        - [class Subprogram](#class-subprogram-1)
+        - [class SubprogramHead](#class-subprogramhead-1)
+        - [class SubprogramBody](#class-subprogrambody-1)
+        - [class Parameter](#class-parameter-1)
+        - [class IdList](#class-idlist-1)
+        - [class Type](#class-type-1)
+        - [class Statement](#class-statement-1)
+        - [class AssignStatement](#class-assignstatement)
+        - [class CallStatement](#class-callstatement-1)
+        - [class CompoundStatement](#class-compoundstatement-1)
+        - [class  IfStatement](#class--ifstatement)
+        - [class ForStatement](#class-forstatement-1)
+        - [class Expression](#class-expression-1)
+        - [class IntegerValue](#class-integervalue-1)
+        - [Class RealValue](#class-realvalue-1)
+        - [class CharValue](#class-charvalue-1)
+        - [class BooleanValue](#class-booleanvalue-1)
+        - [class CallOrVar](#class-callorvar-1)
+        - [class CallValue](#class-callvalue-1)
+        - [class Variable](#class-variable-1)
+        - [class BinaryExpr](#class-binaryexpr-1)
+        - [class UnaryExpr](#class-unaryexpr-1)
+    - [Parser](#parser)
+      - [功能描述](#功能描述-1)
+      - [接口描述](#接口描述-1)
+        - [class Parser](#class-parser)
+        - [class SyntaxErr](#class-syntaxerr)
+      - [Parser 数据结构定义](#parser-数据结构定义)
+      - [算法描述](#算法描述-1)
+        - [语法分析](#语法分析-1)
+        - [错误处理](#错误处理)
+  - [如`ParseExpr`和`ParseStatement`在碰到语法错误时直接抛出异常，`ParseCompoundStatement`调用`ParseStatement`来解析一系列语句，若捕获异常，则记录下异常，并不断跳过`token`直到遇到`;`或者可能的语句开头的`token`再接着进行析。`ParseCompoundStatement`在碰到缺少`begin`的错误时，记录错误并忽略`begin`直接进行statement的解析操作。](#如parseexpr和parsestatement在碰到语法错误时直接抛出异常parsecompoundstatement调用parsestatement来解析一系列语句若捕获异常则记录下异常并不断跳过token直到遇到或者可能的语句开头的token再接着进行析parsecompoundstatement在碰到缺少begin的错误时记录错误并忽略begin直接进行statement的解析操作)
+  - [语义分析](#语义分析)
+    - [符号表设计](#符号表设计)
+      - [数据结构说明](#数据结构说明-1)
+      - [函数、方法说明](#函数方法说明-1)
+      - [错误类型及处理方案](#错误类型及处理方案)
+        - [插入时](#插入时)
+        - [查询时](#查询时)
+    - [语义分析器设计](#语义分析器设计)
+      - [数据结构说明](#数据结构说明-2)
+      - [函数、方法说明](#函数方法说明-2)
+    - [ast 处理](#ast-处理)
+  - [代码生成](#代码生成)
+    - [数据结构说明](#数据结构说明-3)
+      - [AST接口部分说明](#ast接口部分说明)
+        - [ASTNode 类](#astnode-类)
+        - [Compound 类](#compound-类)
+        - [Declaration 类](#declaration-类)
+        - [Block类](#block类)
+        - [Num类](#num类)
+        - [String 类](#string-类)
+        - [Real 类](#real-类)
+        - [Char 类](#char-类)
+        - [IVar 类](#ivar-类)
+        - [Var 类](#var-类)
+        - [IType 类](#itype-类)
+        - [Type 类](#type-类)
+        - [ConstType 类](#consttype-类)
+        - [VarDeclaration 类](#vardeclaration-类)
+        - [ConstDeclaration 类](#constdeclaration-类)
+        - [ArrayType 类](#arraytype-类)
+        - [Array 类](#array-类)
+        - [ArrayDeclaration 类](#arraydeclaration-类)
+        - [ArrayAccess 类](#arrayaccess-类)
+        - [Argument 类](#argument-类)
+        - [Subprogram 类](#subprogram-类)
+        - [Function 类](#function-类)
+        - [Program 类](#program-类)
+        - [Assignment 类](#assignment-类)
+        - [Oper 类](#oper-类)
+        - [UnaryOperation 类](#unaryoperation-类)
+        - [BinaryOperation 类](#binaryoperation-类)
+        - [NoOp 类](#noop-类)
+        - [Statement 类](#statement-类)
+        - [IfStatement 类](#ifstatement-类)
+        - [ForStatement 类](#forstatement-类)
+        - [FunctionCall 类](#functioncall-类)
+        - [总结](#总结)
+    - [函数、方法说明](#函数方法说明-3)
+      - [设计模式说明](#设计模式说明)
+        - [AST的访问者模式设计](#ast的访问者模式设计)
+        - [遍历方法](#遍历方法)
+        - [访问者模式如何使用](#访问者模式如何使用)
+      - [代码生成CodeGenerator](#代码生成codegenerator)
+        - [API文档](#api文档)
+          - [构造函数](#构造函数)
+          - [成员函数](#成员函数)
+          - [示例](#示例)
+      - [代码生成过程](#代码生成过程)
+        - [Interpret 方法](#interpret-方法)
+        - [GetCCode 方法](#getccode-方法)
+        - [Visit 方法](#visit-方法)
+        - [VisitExitStatement 方法](#visitexitstatement-方法)
+        - [VisitArgument 方法](#visitargument-方法)
+        - [VisitProgram 方法](#visitprogram-方法)
+        - [VisitSubprogram 方法](#visitsubprogram-方法)
+        - [VisitFunction 方法](#visitfunction-方法)
+        - [VisitBlock 方法](#visitblock-方法)
+        - [VisitDeclaration 方法](#visitdeclaration-方法)
+        - [VisitVarDecl 方法](#visitvardecl-方法)
+        - [VisitConstDeclaration 方法](#visitconstdeclaration-方法)
+        - [VisitArrayType 方法](#visitarraytype-方法)
+        - [VisitArray 方法](#visitarray-方法)
+        - [VisitArrayDeclaration 方法](#visitarraydeclaration-方法)
+        - [VisitArrayAccess 方法](#visitarrayaccess-方法)
+        - [VisitCompound 方法](#visitcompound-方法)
+        - [VisitAssign 方法](#visitassign-方法)
+        - [VisitVar 方法](#visitvar-方法)
+        - [VisitType 方法](#visittype-方法)
+        - [VisitConstType 方法](#visitconsttype-方法)
+        - [VisitNoOp 方法](#visitnoop-方法)
+        - [VisitUnaryOperation 方法](#visitunaryoperation-方法)
+        - [VisitBinOp 方法](#visitbinop-方法)
+        - [VisitOper方法](#visitoper方法)
+        - [VisitNum 方法](#visitnum-方法)
+        - [VisitString 方法](#visitstring-方法)
+        - [VisitReal 方法](#visitreal-方法)
+        - [VisitChar 方法](#visitchar-方法)
+        - [VisitStatement 方法](#visitstatement-方法)
+        - [VisitIfStatement 方法](#visitifstatement-方法)
+        - [VisitForStatement 方法](#visitforstatement-方法)
+        - [VisitWhileStatement 方法](#visitwhilestatement-方法)
+        - [VisitFunctionCall 方法](#visitfunctioncall-方法)
+        - [对Visitor访问者函数的总结](#对visitor访问者函数的总结)
+        - [PrintFormatString 方法](#printformatstring-方法)
+        - [IsReferenceArg 方法](#isreferencearg-方法)
+        - [IsReturnVar 方法](#isreturnvar-方法)
+        - [Indent 方法](#indent-方法)
+        - [IncIndent 方法](#incindent-方法)
+        - [DecIndent 方法](#decindent-方法)
+        - [SymbolToC 方法](#symboltoc-方法)
+    - [算法说明](#算法说明)
+
 ## 词法分析
 
 ### 数据结构说明
@@ -2653,8 +2845,40 @@ class ForStatement : public ASTNode {
 ```
 
 ##### FunctionCall 类
-FunctionCall 类表示抽象语法树中的一个函数调用节点。它有四个私有成员：name_（表示函数名的字符串），parameters_（表示函数参数的 ASTNode 类型智能指针向量），is_reference_（表示参数是否为引用的位集合）和 return_type_（表示函数返回类型的 VarType 枚举值）。`Function
+FunctionCall 类表示抽象语法树中的一个函数调用节点。它有四个私有成员：name_（表示函数名的字符串），parameters_（表示函数参数的 ASTNode 类型智能指针向量），is_reference_（表示参数是否为引用的位集合）和 return_type_（表示函数返回类型的 VarType 枚举值）。`Function Call` 类有两个构造函数，一个接受函数名、参数向量、引用位集和返回类型作为参数，另一个仅接受函数名。Accept 方法用于接受访问者对象。GetName 方法返回函数名。GetParameters 方法返回参数向量。SetIsReference方法接受一个整数pos，将位集合中相应位置的标志设置为 true，表示该位置的参数是引用。GetIsReference方法接受一个整数pos，返回位集合中相应位置的标志（如果为 true，表示该位置的参数是引用）。GetReturnType` 方法返回函数返回类型。
+```cpp
+class FunctionCall : public ASTNode {
+  public:
+    FunctionCall(const string &name,
+                 const vector<shared_ptr<ASTNode>> parameters,
+                 const bitset<k_max_parameters> ref_set,
+                 VarType return_type = VarType::VOID)
+        : name_(name), parameters_(std::move(parameters)),
+          is_reference_(std::move(ref_set)), return_type_(return_type) {}
+    FunctionCall(const string &name) : name_(name), parameters_() {}
+    virtual ~FunctionCall() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetName() const { return name_; }
+    const vector<shared_ptr<ASTNode>> &GetParameters() { return parameters_; }
+    void SetIsReference(int pos) {
+        is_reference_.set(static_cast<size_t>(pos), true);
+    }
+    bool GetIsReference(int pos) { return is_reference_.test(pos); }
+    const VarType GetReturnType() const { return return_type_; }
 
+  private:
+    string name_;
+    // Params align from begin() to end()
+    vector<shared_ptr<ASTNode>> parameters_;
+    // Params align from little endian to big endian
+    bitset<k_max_parameters> is_reference_;
+    VarType return_type_;
+};
+```
+
+##### 总结
+
+Call 类有两个构造函数，一个接受函数名、参数向量、引用位集和返回类型作为参数，另一个仅接受函数名。Accept 方法用于接受访问者对象。GetName 方法返回函数名。GetParameters 方法返回参数向量。SetIsReference方法接受一个整数pos，将位集合中相应位置的标志设置为 true，表示该位置的参数是引用。GetIsReference方法接受一个整数pos，返回位集合中相应位置的标志（如果为 true，表示该位置的参数是引用）。GetReturnType` 方法返回函数返回类型。
 
 ### 函数、方法说明
 
@@ -2665,11 +2889,172 @@ Code Generator使用了访问者模式(Visitor Pattern)来设计和遍历AST树�
 访问者模式是一种将算法与其所操作的对象结构分离的设计模式。在本例中，访问者模式用于遍历AST。每个节点类都实现了一个Accept方法，该方法接受一个访问者对象作为参数, 可以根据需要执行例如优化、代码生成、错误检查等。要遍历AST，只需调用根节点（通常为Program节点）的Accept方法，并将访问者对象作为参数传递, 而不需要频繁的对AST进行修改.
 
 ##### 遍历方法
-首先编写Visitor虚基类, 所有的使用访问者模式的类都需要继承并实现该虚基类中的所有方法.
+首先编写Visitor虚基类, 所有的使用访问者模式的类都需要继承并实现该虚基类中的所有方法. Visitor 类是一个抽象基类，用于遍历和处理抽象语法树（AST）的节点。它定义了用于访问各种类型节点的虚拟方法。通过实现这些方法，可以对 AST 节点执行各种操作，例如语法检查、优化或代码生成。
+
+以下是对Visit抽象类中的各个访问方法的简要说明:
+`Visit(const shared_ptr<ASTNode> &node, bool indent = false)`：访问 ASTNode 类型的节点，indent 参数表示是否应缩进打印输出。
+`VisitArgument(const shared_ptr<Argument> &node)`：访问表示函数或子程序参数的 Argument 类型节点。
+`VisitProgram(const shared_ptr<Program> &node)`：访问表示整个程序的 Program 类型节点。
+`VisitSubprogram(const shared_ptr<Subprogram> &node)`：访问表示子程序（如过程）的 Subprogram 类型节点。
+`VisitFunction(const shared_ptr<Function> &node)`：访问表示函数的 Function 类型节点。
+`VisitBlock(const shared_ptr<Block> &node)`：访问表示块结构的 Block 类型节点。
+`VisitDeclaration(const shared_ptr<Declaration> &node)`：访问表示声明的 Declaration 类型节点。
+`VisitConstDeclaration(const shared_ptr<ConstDeclaration> &node)`：访问表示常量声明的 ConstDeclaration 类型节点。
+`VisitArrayType(const shared_ptr<ArrayType> &node)`：访问表示数组类型的 ArrayType 类型节点。
+`VisitArray(const shared_ptr<Array> &node)`：访问表示数组的 Array 类型节点。
+`VisitArrayDeclaration(const shared_ptr<ArrayDeclaration> &node)`：访问表示数组声明的 ArrayDeclaration 类型节点。
+`VisitArrayAccess(const shared_ptr<ArrayAccess> &node)`：访问表示数组访问的 ArrayAccess 类型节点。
+`VisitVarDecl(const shared_ptr<VarDeclaration> &node)`：访问表示变量声明的 VarDeclaration 类型节点。
+`VisitCompound(const shared_ptr<Compound> &node)`：访问表示复合语句的 Compound 类型节点。
+`VisitBinOp(const shared_ptr<BinaryOperation> &node)`：访问表示二元操作的 BinaryOperation 类型节点。
+`VisitUnaryOperation(const shared_ptr<UnaryOperation> &node)`：访问表示一元操作的 UnaryOperation 类型节点。
+`VisitOper(const shared_ptr<Oper> &node)`：访问表示操作符（如加法、减法等）的 Oper 类型节点。
+`VisitNum(const shared_ptr<Num> &node)`：访问表示整数值的 Num 类型节点。
+`VisitString(const shared_ptr<String> &node)`：访问表示字符串值的 String 类型节点。
+`VisitReal(const shared_ptr<Real> &node)`：访问表示实数值的 Real 类型节点。
+`VisitChar(const shared_ptr<Char> &node)`：访问表示字符值的 Char 类型节点。
+`VisitType(const shared_ptr<Type> &node)`：访问表示类型的 Type 类型节点。
+`VisitConstType(const shared_ptr<ConstType> &node)`：访问表示常量类型的 ConstType 类型节点。
+`VisitAssign(const shared_ptr<Assignment> &node)`：访问表示赋值操作的 Assignment 类型节点。
+`VisitVar(const shared_ptr<Var> &node)`：访问表示变量的 Var 类型节点。
+`VisitNoOp(const shared_ptr<NoOp> &node)`：访问表示无操作的 NoOp 类型节点。
+`VisitStatement(const shared_ptr<Statement> &node)`：访问表示语句的 Statement 类型节点。
+`VisitIfStatement(const shared_ptr<IfStatement> &node)`：访问表示 if 语句的 IfStatement 类型节点。
+`VisitForStatement(const shared_ptr<ForStatement> &node)`：访问表示 for 循环语句的 ForStatement 类型节点。
+`VisitFunctionCall(const shared_ptr<FunctionCall> &node)`：访问表示函数调用的 FunctionCall 类型节点。
+```cpp
+class Visitor {
+  public:
+    virtual void Visit(const shared_ptr<ASTNode> &node,
+                       bool indent = false) = 0;
+    virtual void VisitExitStatement(const shared_ptr<ExitStatement> &node) = 0;
+    virtual void VisitArgument(const shared_ptr<Argument> &node) = 0;
+    virtual void VisitProgram(const shared_ptr<Program> &node) = 0;
+    virtual void VisitSubprogram(const shared_ptr<Subprogram> &node) = 0;
+    virtual void VisitFunction(const shared_ptr<Function> &node) = 0;
+    virtual void VisitBlock(const shared_ptr<Block> &node) = 0;
+    virtual void VisitDeclaration(const shared_ptr<Declaration> &node) = 0;
+    virtual void
+    VisitConstDeclaration(const shared_ptr<ConstDeclaration> &node) = 0;
+    virtual void VisitArrayType(const shared_ptr<ArrayType> &node) = 0;
+    virtual void VisitArray(const shared_ptr<Array> &node) = 0;
+    virtual void
+    VisitArrayDeclaration(const shared_ptr<ArrayDeclaration> &node) = 0;
+    virtual void VisitArrayAccess(const shared_ptr<ArrayAccess> &node) = 0;
+    virtual void VisitVarDecl(const shared_ptr<VarDeclaration> &node) = 0;
+    virtual void VisitCompound(const shared_ptr<Compound> &node) = 0;
+    virtual void VisitBinOp(const shared_ptr<BinaryOperation> &node) = 0;
+    virtual void
+    VisitUnaryOperation(const shared_ptr<UnaryOperation> &node) = 0;
+    virtual void VisitOper(const shared_ptr<Oper> &node) = 0;
+    virtual void VisitNum(const shared_ptr<Num> &node) = 0;
+    virtual void VisitString(const shared_ptr<String> &node) = 0;
+    virtual void VisitReal(const shared_ptr<Real> &node) = 0;
+    virtual void VisitChar(const shared_ptr<Char> &node) = 0;
+    virtual void VisitType(const shared_ptr<Type> &node) = 0;
+    virtual void VisitConstType(const shared_ptr<ConstType> &node) = 0;
+    virtual void VisitAssign(const shared_ptr<Assignment> &node) = 0;
+    virtual void VisitVar(const shared_ptr<Var> &node) = 0;
+    virtual void VisitNoOp(const shared_ptr<NoOp> &node) = 0;
+    virtual void VisitStatement(const shared_ptr<Statement> &node) = 0;
+    virtual void VisitIfStatement(const shared_ptr<IfStatement> &node) = 0;
+    virtual void VisitForStatement(const shared_ptr<ForStatement> &node) = 0;
+    virtual void
+    VisitWhileStatement(const shared_ptr<WhileStatement> &node) = 0;
+    virtual void VisitFunctionCall(const shared_ptr<FunctionCall> &node) = 0;
+};
+```
+
+##### 访问者模式如何使用
+要使用 Visitor 模式，首先需要创建一个具体的 Visitor 类(在本部分中为CodeGenerator)，该类继承自 Visitor 基类并实现所有的访问方法。然后，可以通过将具体的 Visitor 对象传递给 AST 节点的 Accept() 方法来遍历和处理 AST。在具体的 Visitor 类中实现的访问方法将根据节点类型自动调用。
+
+Visitor 模式允许在不修改 AST 节点类的情况下添加新的操作。这使得 AST 节点类和操作它们的算法之间保持解耦，从而提高了代码的可扩展性和可维护性。
 
 #### 代码生成CodeGenerator
 
 `CodeGenerator` 类用于将给定的 Pascal 代码的抽象语法树转换为等价的 C 代码。它包含了访问不同类型 AST 节点的成员函数，以生成相应的 C 代码。类还维护一个输出流，用于保存生成的 C 代码，以及当前缩进级别，以生成格式化的 C 代码。
+
+`CodeGenerator` 类是一个具体的 Visitor，用于将源代码中的抽象语法树 (AST) 转换为 C 语言代码。它包含以下方法：
+
+构造函数 `CodeGenerator(const shared_ptr<ISymbolTable> &symbol_table = nullptr)`：创建一个新的 `CodeGenerator` 实例。可以选择传入一个符号表 `symbol_table。默认情况下，不需要传入符号表。`
+
+`Interpret(const shared_ptr<ASTRoot> &node)`：遍历给定的 AST，并生成相应的 C 代码。
+
+`GetCCode() const`：返回生成的 C 代码。
+
+私有方法：这些方法重写了 `Visitor` 基类中定义的虚拟方法。这些方法实现了 AST 中各种类型节点的具体访问逻辑，以生成相应的 C 代码。
+
+此外，CodeGenerator 还包含以下辅助方法：
+
+`IsReferenceArg(const shared_ptr<Var> &node) const`：检查给定的变量是否在当前作用域中以引用方式传递。
+
+`IsReturnVar(const shared_ptr<Var> &node) const`：检查给定的变量是否为返回变量。
+
+`PrintfFormatString(const shared_ptr<FunctionCall> &node, bool new_line = false)`：为给定的 FunctionCall 节点生成 C 语言 printf 格式字符串。可选择在字符串末尾添加换行符。
+
+`Indent() const`：返回当前缩进级别对应的空白字符串。
+
+`IncIndent()`：增加缩进级别。
+
+`DecIndent()`：减少缩进级别。
+
+`SymbolToC(const string &pascal_type) const`：将给定的 Pascal 类型字符串转换为对应的 C 类型字符串。
+
+在使用 CodeGenerator 时，首先创建一个 CodeGenerator 实例，然后调用其 Interpret() 方法遍历 AST。最后，调用 GetCCode() 方法获取生成的 C 代码。这种方法将源代码的 AST 转换为目标语言（C 语言）的代码，从而实现了源代码的编译。
+
+##### API文档
+
+###### 构造函数
+```cpp
+CodeGenerator(const shared_ptr<ISymbolTable> &symbol_table = nullptr)
+```
+创建一个新的 CodeGenerator 实例。可以选择传入一个符号表 symbol_table。默认情况下，不需要传入符号表即可使用全部功能。
+
+###### 成员函数
+
+Interpret
+```cpp
+void Interpret(const shared_ptr<ASTRoot> &node);
+```
+遍历给定的 AST，并生成相应的 C 代码。
+
+GetCCode
+```cpp
+const string GetCCode() const;
+```
+返回生成的 C 代码。
+
+###### 示例
+
+```cpp
+#include <iostream>
+#include <memory>
+#include "code_generator.h"
+#include "visitor.h"
+#include "ast_adapter.h"
+
+using namespace ::pascal2c::code_generation;
+
+int main() {
+    // 构建 AST
+    auto ast_root = std::make_shared<Program>();
+
+    // 创建 CodeGenerator 实例
+    CodeGenerator code_generator;
+
+    // 解释 AST
+    code_generator.Interpret(ast_root);
+
+    // 获取生成的 C 代码
+    std::string c_code = code_generator.GetCCode();
+
+    // 输出 C 代码
+    std::cout << c_code;
+
+    return 0;
+}
+```
+在这个示例中，我们首先构建了一个 AST (ast_root)，然后创建了一个 CodeGenerator 实例 code_generator。接着，我们调用了 Interpret() 方法遍历 AST。最后，我们使用 GetCCode() 方法获取生成的 C 代码并输出。
 
 `CodeGenerator`的流程图如下.
 ```mermaid
@@ -2705,77 +3090,871 @@ graph TD
   T --> F
   AC --> F
   AD --> F
-  F --> X(错误检测)
-  X -- No Error --> Y{所有节点访问完毕?}
-  X -- Error --> Z(错误处理)
-  Z -- 错误可恢复 --> Z1(恢复错误)
-  Z1 --> F
-  Z -- 错误不可恢复 --> Y1(报错并生成提示信息)
-  Y1 --> W
-  Y -- Yes --> V(生成C代码)
+  F -- AST遍历结束 --> V(C代码生成完成)
   V --> W(结束)
-  Y -- No --> F
 ```
 
 ```cpp
-class CodeGenerator {
+class CodeGenerator : Visitor {
   public:
-    // 构造函数，接收一个指向 parser::Parser 类型的智能指针，用于解析源代码生成抽象语法树
-    explicit CodeGenerator(std::shared_ptr<parser::Parser> parser)
-        : parser_(parser) {}
-
-    // 访问抽象语法树的根节点，生成 C 代码
-    void Visit(const semantic::ASTRoot &ast);
-
-    // 执行抽象语法树的解释
-    int Interpret();
-
-    // 获取生成的 C 代码
-    string GetCCode();
+    CodeGenerator(const shared_ptr<ISymbolTable> &symbol_table = nullptr)
+        : indent_level_(0), type_tool_kit_() {}
+    void Interpret(const shared_ptr<ASTRoot> &node);
+    const string GetCCode() const;
 
   private:
-    // 访问 ASTNode 类型的节点，并生成相应的 C 代码
-    int Visit(const std::shared_ptr<semantic::ASTNode> &node);
+    virtual void Visit(const shared_ptr<ASTNode> &node,
+                       bool indent = false) override;
+    virtual void
+    VisitExitStatement(const shared_ptr<ExitStatement> &node) override;
+    virtual void VisitArgument(const shared_ptr<Argument> &node) override;
+    virtual void VisitProgram(const shared_ptr<Program> &node) override;
+    virtual void VisitSubprogram(const shared_ptr<Subprogram> &node) override;
+    virtual void VisitFunction(const shared_ptr<Function> &node) override;
+    virtual void VisitBlock(const shared_ptr<Block> &node) override;
+    virtual void VisitDeclaration(const shared_ptr<Declaration> &node) override;
+    virtual void VisitVarDecl(const shared_ptr<VarDeclaration> &node) override;
+    virtual void
+    VisitConstDeclaration(const shared_ptr<ConstDeclaration> &node) override;
+    virtual void VisitArrayType(const shared_ptr<ArrayType> &node) override;
+    virtual void VisitArray(const shared_ptr<Array> &node) override;
+    virtual void
+    VisitArrayDeclaration(const shared_ptr<ArrayDeclaration> &node) override;
+    virtual void VisitArrayAccess(const shared_ptr<ArrayAccess> &node) override;
+    virtual void VisitCompound(const shared_ptr<Compound> &node) override;
+    virtual void VisitBinOp(const shared_ptr<BinaryOperation> &node) override;
+    virtual void
+    VisitUnaryOperation(const shared_ptr<UnaryOperation> &node) override;
+    virtual void VisitOper(const shared_ptr<Oper> &node) override;
+    virtual void VisitNum(const shared_ptr<Num> &node) override;
+    virtual void VisitString(const shared_ptr<String> &node) override;
+    virtual void VisitReal(const shared_ptr<Real> &node) override;
+    virtual void VisitChar(const shared_ptr<Char> &node) override;
+    virtual void VisitType(const shared_ptr<Type> &node) override;
+    virtual void VisitConstType(const shared_ptr<ConstType> &node) override;
+    virtual void VisitAssign(const shared_ptr<Assignment> &node) override;
+    virtual void VisitVar(const shared_ptr<Var> &node) override;
+    virtual void VisitNoOp(const shared_ptr<NoOp> &node) override;
+    virtual void VisitStatement(const shared_ptr<Statement> &node) override;
+    virtual void VisitIfStatement(const shared_ptr<IfStatement> &node) override;
+    virtual void
+    VisitForStatement(const shared_ptr<ForStatement> &node) override;
+    virtual void
+    VisitWhileStatement(const shared_ptr<WhileStatement> &node) override;
+    virtual void
+    VisitFunctionCall(const shared_ptr<FunctionCall> &node) override;
 
-    // ... 类似的 Visit 函数，用于访问不同类型的节点 ...
-    
-    // 访问 Program 类型的节点
-    void VisitProgram(const std::shared_ptr<semantic::Program> &node);
+    // Get Symbol Table's current scope name
+    // const string GetCurrentScope() const {
+    // return symbol_table_->GetCurrentScope();
+    // }
 
-    // 访问 Block 类型的节点
-    void VisitBlock(const std::shared_ptr<semantic::Block> &node);
+    // Set symbol table's current scope by name
+    // void SetCurrentScope(const string &scope_name) const {
+    //     symbol_table_->SetCurrentScope(scope_name);
+    // }
 
-    // 访问 VarDecl 类型的节点
-    void VisitVarDecl(const std::shared_ptr<semantic::VarDecl> &node);
+    // Is this var passed-by-reference or passed-by-value in current scope
+    bool IsReferenceArg(const shared_ptr<Var> &node) const;
+    // Is return variable
+    bool IsReturnVar(const shared_ptr<Var> &node) const;
 
-    // 访问 Compound 类型的节点
-    int VisitCompound(const std::shared_ptr<semantic::Compound> &node);
+    void PrintfFormatString(const shared_ptr<FunctionCall> &node,
+                            bool new_line = false);
 
-    // 访问 Assign 类型的节点
-    int VisitAssign(const std::shared_ptr<semantic::Assign> &node);
+    // Get current indent blank string based on current indent level
+    const string Indent() const;
+    // Increase indent level
+    void IncIndent();
+    // Decrease indent level
+    void DecIndent();
+    const string SymbolToC(const string &pascal_type) const;
+    const string eol_ = ";\n";
 
-    // 访问 Var 类型的节点
-    int VisitVar(const std::shared_ptr<semantic::Var> &node);
-
-    // 访问 NoOp 类型的节点
-    int VisitNoOp(const std::shared_ptr<semantic::NoOp> &node);
-
-    // Parser，用于解析源代码
-    std::shared_ptr<parser::Parser> parser_;
-
-    // 抽象语法树的根节点
-    semantic::ASTRoot ast_;
-
-    // 全局作用域中的符号
-    vector<semantic::ASTNode> global_scope_;
-
-    // 输出流，用于保存生成的 C 代码
+    // Symbol table
+    // shared_ptr<ISymbolTable> symbol_table_;
+    // ostream
     std::stringstream ostream_;
-
-    // 当前缩进级别，用于生成格式化的 C 代码
+    // Current indent level
     int indent_level_;
+
+    // TypeToolKit for type conversion
+    const TypeToolKit type_tool_kit_;
 };
 ```
+
+#### 代码生成过程
+
+借助Visitor Pattern, 将CodeGenerator和ASTNode的实现分离解耦开来. 每个ASTNode只需设计一个Accept函数, 即可接受不同Visitor的操作, 方便且易于扩展. 如下为Program节点的Accept函数示例.
+
+`Program::Accept` 函数用于接受一个访问者对象并将其引导到当前 Program 节点。
+```cpp
+// Program
+void Program::Accept(Visitor &visitor) {
+    visitor.VisitProgram(dynamic_pointer_cast<Program>(shared_from_this()));
+}
+```
+
+**参数**
+- `visitor`：一个实现了 `Visitor` 接口的对象，用于遍历和处理抽象语法树（AST）中的节点。
+
+**示例**
+以下代码演示了如何创建一个 Visitor 实例并使用 Program::Accept 函数让访问者访问 Program 节点。
+
+```cpp
+ // 创建一个 Program 节点
+    shared_ptr<Program> program_node = std::make_shared<Program>(...);
+
+    // 创建一个访问者实例
+    MyVisitor visitor;
+
+    // 让访问者访问 Program 节点
+    program_node->Accept(visitor);
+```
+
+##### Interpret 方法
+`Interpret` 函数用于将传入的 AST 节点转换为 C 语言代码。它通过调用 `Visit` 函数遍历 AST 中的节点并生成相应的 C 代码。
+
+
+```cpp
+void CodeGenerator::Interpret(const shared_ptr<ASTNode> &node) { Visit(node); }
+```
+
+**参数**
+- `node`：一个指向 AST 节点的智能指针，通常是一个 `Program` 节点。
+
+
+##### GetCCode 方法
+`GetCCode` 函数用于获取由 `CodeGenerator` 生成的 C 语言代码。
+```cpp
+const string CodeGenerator::GetCCode() const;
+```
+
+**返回值**
+- 返回一个字符串，表示生成的 C 语言代码。
+
+##### Visit 方法
+`Visit` 函数用于访问传入的 AST 节点并根据其类型生成相应的 C 代码。当 `indent` 参数为 `true` 时，会在生成的 C 代码前添加适当的缩进。
+```cpp
+void CodeGenerator::Visit(const shared_ptr<code_generation::ASTNode> &node,
+                          bool indent) {
+    if (indent)
+        ostream_ << Indent();
+    node->Accept(*this);
+}
+```
+**参数**
+- `node`：一个指向 AST 节点的智能指针。
+- `indent`：一个布尔值，表示是否在生成的 C 代码前添加缩进。默认值为 false。
+
+##### VisitExitStatement 方法
+`VisitExitStatement` 函数用于访问传入的 `ExitStatement` 节点并生成相应的 C 代码。
+```cpp
+void CodeGenerator::VisitExitStatement(const shared_ptr<ExitStatement> &node) {
+    ostream_ << Indent() << "return";
+    if (node->GetFunctionName().length()) {
+        ostream_ << " ret_" << node->GetFunctionName();
+    }
+    ostream_ << eol_;
+}
+```
+
+**参数**
+- `node`：一个指向 `ExitStatement` 节点的智能指针。
+
+##### VisitArgument 方法
+`VisitArgument` 函数用于访问传入的 `Argument` 节点并生成相应的 `C` 代码。
+```cpp
+void CodeGenerator::VisitArgument(const shared_ptr<Argument> &node) {
+    if (node->IsReference()) {
+        ostream_ << "/* Is Reference */";
+    }
+    Visit(node->GetType());
+
+    // Generate array bounds code if type is ArrayType
+    auto array_type = dynamic_pointer_cast<ArrayType>(node->GetType());
+    if (array_type) {
+        // Array bounds
+        auto bounds = array_type->GetBounds();
+        auto dims = bounds.size();
+        for (auto i = 0; i < dims; i++) {
+            auto b = bounds.at(i);
+            ostream_ << '[' << (b.second - b.first + 1) << ']';
+        }
+    }
+
+    ostream_ << (node->IsReference() ? " *" : " ");
+    // When visiting variable, will lookup variable in Symbol table, and add '*'
+    // if variable is passed-by-reference or is a pointer
+    Visit(node->GetVariable());
+}
+```
+
+**参数**
+`node`：一个指向 `Argument` 节点的智能指针。
+
+##### VisitProgram 方法
+`VisitProgram` 函数用于访问传入的 `Program` 节点并生成相应的 `C` 代码。
+```cpp
+void CodeGenerator::VisitProgram(
+    const shared_ptr<code_generation::Program> &node) {
+    ostream_ << "#include <stdio.h>" << endl
+             << "#include <stdlib.h>" << endl
+             << endl;
+
+    auto program_block = node->GetBlock();
+    Visit(program_block->GetDeclaration());
+
+    ostream_ << "// " << node->GetName() << endl;
+    ostream_ << "int main(int argc, char* argv[]) {" << endl;
+
+    IncIndent();
+    Visit(program_block->GetCompoundStatement());
+    ostream_ << Indent() << "return 0;" << endl;
+    DecIndent();
+    ostream_ << "}\n";
+}
+```
+
+**参数**
+`node`：一个指向 `Subprogram` 节点的智能指针。
+
+##### VisitSubprogram 方法
+`VisitSubprogram` 函数用于访问传入的 `Subprogram` 节点并生成相应的 `C` 代码。
+```cpp
+void CodeGenerator::VisitSubprogram(const shared_ptr<Subprogram> &node) {
+    // Store parent scope name, return to this scope after visiting
+    // subprogram.
+    // string parent_scope_name = GetCurrentScope();
+    // SetCurrentScope(node->GetName());
+
+    ostream_ << Indent() << "void " << node->GetName() << "(";
+    for (auto i = 0; i < node->GetArgs().size(); i++) {
+        const auto &arg = node->GetArgs().at(i);
+        Visit(arg);
+        if (i < node->GetArgs().size() - 1) {
+            ostream_ << ", ";
+        }
+    }
+    ostream_ << ") {\n";
+    IncIndent();
+    Visit(node->GetBlock());
+    DecIndent();
+    ostream_ << Indent() << "}\n";
+    // Return to parent symbol scope
+    // SetCurrentScope(parent_scope_name);
+}
+```
+
+**参数**
+`node`：一个指向 `Subprogram` 节点的智能指针。
+
+##### VisitFunction 方法
+`VisitFunction` 函数用于访问传入的 `Function` 节点并生成对应的C代码.
+
+```cpp
+void CodeGenerator::VisitFunction(const shared_ptr<Function> &node) {
+    // Get parent symbol scope name for returning after visiting function
+    // string parent_scope_name = GetCurrentScope();
+    // SetCurrentScope(node->GetName());
+
+    ostream_ << node->GetReturnType() << ' ' << node->GetName() << '(';
+    for (int i = 0; i < node->GetArgs().size(); i++) {
+        const auto &arg = node->GetArgs().at(i);
+        Visit(arg);
+        if (i < node->GetArgs().size() - 1) {
+            ostream_ << ", ";
+        }
+    }
+    ostream_ << ") {\n";
+    IncIndent();
+    // Declare return variable
+    ostream_ << Indent() << node->GetReturnType() << ' ';
+    Visit(node->GetReturnVar());
+    ostream_ << ";/* Auto Generated */\n";
+    Visit(node->GetBlock());
+    // Return statement
+    ostream_ << Indent() << "return ";
+    Visit(node->GetReturnVar());
+    ostream_ << ";/* Auto Generated */\n";
+    DecIndent();
+    ostream_ << Indent() << "}\n";
+    // Return to parent scope
+    // SetCurrentScope(parent_scope_name);
+}
+```
+
+**参数**
+- node: 一个指向`Function`节点的智能指针
+
+##### VisitBlock 方法
+`VisitBlock` 函数用于访问传入的`Block`节点并生成对应的C代码.
+```cpp
+void CodeGenerator::VisitBlock(const shared_ptr<code_generation::Block> &node) {
+    Visit(node->GetDeclaration());
+    Visit(node->GetCompoundStatement());
+}
+```
+
+**参数**
+- node: 一个指向 `Block` 节点的智能指针
+
+##### VisitDeclaration 方法
+`VisitDeclaration` 函数用于访问传入的 `Declaration` 节点并生成相应的 `C` 代码。
+
+```cpp
+void CodeGenerator::VisitDeclaration(const shared_ptr<Declaration> &node) {
+    for (const auto &it : node->GetDeclarations()) {
+        // auto var_decl = dynamic_pointer_cast<VarDeclaration>(it);
+        // if (var_decl == nullptr) {
+        //     throw runtime_error(
+        //         "Failed to cast Declaration ASTNode into VarDecl");
+        // }
+        Visit(it, true);
+    }
+}
+```
+
+**参数**
+`node`：一个指向 `Declaration` 节点的智能指针。
+
+##### VisitVarDecl 方法
+`VisitVarDecl` 函数用于访问传入的 `VarDeclaration` 节点并生成相应的 `C` 代码。
+```cpp
+void CodeGenerator::VisitVarDecl(
+    const shared_ptr<code_generation::VarDeclaration> &node) {
+    Visit(node->GetTypeNode());
+    ostream_ << ' ';
+    Visit(node->GetLeftNode());
+    if (node->GetRightNode()) {
+        ostream_ << " = ";
+        Visit(node->GetRightNode());
+    }
+    ostream_ << eol_;
+}
+```
+
+**参数**
+`node`：一个指向 `VarDeclaration` 节点的智能指针。
+
+##### VisitConstDeclaration 方法
+`VisitConstDeclaration` 函数用于访问传入的 `ConstDeclaration` 节点并生成相应的 `C` 代码。
+```cpp
+void CodeGenerator::VisitConstDeclaration(
+    const shared_ptr<ConstDeclaration> &node) {
+    Visit(node->GetTypeNode());
+    ostream_ << ' ';
+    Visit(node->GetLeftNode());
+    if (node->GetRightNode()) {
+        ostream_ << " = ";
+        Visit(node->GetRightNode());
+    }
+    ostream_ << eol_;
+}
+```
+
+**参数**
+`node`：一个指向 `ConstDeclaration` 节点的智能指针。
+
+##### VisitArrayType 方法
+`VisitArrayType` 函数用于访问传入的 `ArrayType` 节点并生成相应的 `C` 代码。
+```cpp
+void CodeGenerator::VisitArrayType(const shared_ptr<ArrayType> &node) {
+    ostream_ << SymbolToC(node->GetType());
+}
+```
+
+**参数**
+node：一个指向 ArrayType 节点的智能指针。
+
+##### VisitArray 方法
+VisitArray 函数用于访问传入的 Array 节点并生成相应的 C 代码。
+```cpp
+void CodeGenerator::VisitArray(const shared_ptr<Array> &node) {
+    Visit(node->GetVarNode());
+}
+```
+
+**参数**
+`node`：一个指向 `Array` 节点的智能指针。
+
+##### VisitArrayDeclaration 方法
+`VisitArrayDeclaration` 函数用于访问传入的 `ArrayDeclaration` 节点并生成相应的 `C` 代码。
+```cpp
+void CodeGenerator::VisitArrayDeclaration(
+    const shared_ptr<ArrayDeclaration> &node) {
+    Visit(node->GetTypeNode());
+    ostream_ << ' ';
+    Visit(node->GetArrayNode());
+    auto bounds = node->GetTypeNode()->GetBounds();
+    for (auto &b : bounds) {
+        ostream_ << '[' << b.second - b.first + 1 << ']';
+    }
+    ostream_ << eol_;
+}
+```
+
+**参数**
+`node`：一个指向 `ArrayDeclaration` 节点的智能指针。
+
+##### VisitArrayAccess 方法
+`VisitArrayAccess` 函数用于访问传入的 `ArrayAccess` 节点并生成相应的 `C` 代码。
+```cpp
+void CodeGenerator::VisitArrayAccess(const shared_ptr<ArrayAccess> &node) {
+    Visit(node->GetArray());
+    auto bounds = node->GetBounds();
+    auto indices = node->GetIndices();
+    for (int i = 0; i < node->GetIndices().size(); i++) {
+        auto b = bounds.at(i);
+        auto index = indices.at(i);
+        ostream_ << '[';
+        Visit(index);
+        ostream_ << " - ";
+        ostream_ << b.first;
+        ostream_ << ']';
+    }
+}
+```
+
+**参数**
+`node`：一个指向 `ArrayAccess` 节点的智能指针。
+
+##### VisitCompound 方法
+`VisitCompound` 函数用于访问传入的 `Compound` 节点并生成相应的 `C` 代码。
+```cpp
+void CodeGenerator::VisitCompound(
+    const shared_ptr<code_generation::Compound> &node) {
+    for (const auto &child : node->GetChildren()) {
+        Visit(child);
+    }
+}
+```
+
+**参数**
+`node`：一个指向 `Compound` 节点的智能指针。
+
+##### VisitAssign 方法
+`VisitAssign` 函数用于访问传入的 `Assignment` 节点并生成相应的 `C` 代码。具体来说，它会访问左侧变量并将其赋值为右侧表达式的值。
+```cpp
+void CodeGenerator::VisitAssign(
+    const shared_ptr<code_generation::Assignment> &node) {
+    Visit(node->GetLeft(), true);
+    ostream_ << " = ";
+    Visit(node->GetRight());
+    ostream_ << eol_;
+}
+```
+
+**参数**
+`node`：一个指向 `Assignment` 节点的智能指针。
+
+
+##### VisitVar 方法
+`VisitVar` 函数用于访问传入的 `Var` 节点并生成相应的 `C` 代码。在访问变量时，它会查找符号表，根据变量是否是引用或指针来添加相应的前缀。
+```cpp
+void CodeGenerator::VisitVar(const shared_ptr<code_generation::Var> &node) {
+    if (IsReferenceArg(node)) {
+        ostream_ << "*";
+    }
+    if (IsReturnVar(node)) {
+        ostream_ << "ret_";
+    }
+    ostream_ << node->GetName();
+}
+```
+
+**参数**
+`node`：一个指向 `Var` 节点的智能指针。
+
+
+##### VisitType 方法
+`VisitType` 函数用于访问传入的 `Type` 节点并生成相应的 `C` 代码。它将 `Pascal` 类型转换为 `C` 类型并输出。
+```cpp
+void CodeGenerator::VisitType(const shared_ptr<code_generation::Type> &node) {
+    ostream_ << SymbolToC(node->GetType());
+}
+```
+
+**参数**
+`node`：一个指向 `Type` 节点的智能指针。
+
+##### VisitConstType 方法
+`VisitConstType` 函数用于访问传入的 `ConstType` 节点并生成相应的 `C` 代码。它将输出 `const` 修饰符，然后将 `Pascal` 类型转换为 `C` 类型并输出。
+```cpp
+void CodeGenerator::VisitConstType(const shared_ptr<ConstType> &node) {
+    ostream_ << "const " << SymbolToC(node->GetType());
+}
+```
+
+**参数**
+`node`：一个指向 `ConstType` 节点的智能指针。
+
+##### VisitNoOp 方法
+`VisitNoOp` 函数用于访问传入的 `NoOp` 节点并生成相应的 `C` 代码。它输出一个分号和换行符，表示空操作。
+
+```cpp
+void CodeGenerator::VisitNoOp(const shared_ptr<code_generation::NoOp> &node) {
+    ostream_ << ";" << endl;
+}
+```
+
+**参数**
+`node`：一个指向 `NoOp` 节点的智能指针。
+
+##### VisitUnaryOperation 方法
+`VisitUnaryOperation` 函数用于访问传入的 `UnaryOperation` 节点并生成相应的 `C` 代码。具体来说，它会访问运算符节点，然后访问变量节点。
+```cpp
+void CodeGenerator::VisitUnaryOperation(
+    const shared_ptr<UnaryOperation> &node) {
+    Visit(node->GetOper());
+    Visit(node->GetVarNode());
+}
+```
+
+**参数**
+`node`：一个指向 `UnaryOperation` 节点的智能指针。
+
+##### VisitBinOp 方法
+`VisitBinOp` 函数用于访问传入的 `BinaryOperation` 节点并生成相应的 `C` 代码。具体来说，它会访问左侧表达式节点，运算符节点，然后访问右侧表达式节点。
+```cpp
+void CodeGenerator::VisitBinOp(
+    const shared_ptr<code_generation::BinaryOperation> &node) {
+    ostream_ << '(';
+    if (node->TestCastToFloat()) {
+        ostream_ << "(float) ";
+    }
+    Visit(node->GetLeft());
+    ostream_ << ' ';
+    Visit(node->GetOper());
+    ostream_ << ' ';
+    Visit(node->GetRight());
+    ostream_ << ')';
+}
+```
+
+**参数**
+`node`: 一个指向`BinaryOperation`节点的智能指针.
+
+##### VisitOper方法
+`VisitOper` 函数用于访问传入的 `Oper` 节点并生成相应的 `C` 代码。它将 `Pascal` 运算符转换为 `C` 运算符并输出。
+
+```cpp
+void CodeGenerator::VisitOper(const shared_ptr<Oper> &node) {
+    ostream_ << SymbolToC(node->GetOper());
+}
+```
+
+**参数**
+`node`：一个指向 `Oper` 节点的智能指针。
+
+
+##### VisitNum 方法
+`VisitNum` 函数用于访问传入的 `Num` 节点并生成相应的 `C` 代码。它将输出节点中的数值。
+
+```cpp
+void CodeGenerator::VisitNum(const shared_ptr<Num> &node) {
+    ostream_ << node->GetValue();
+}
+```
+**参数**
+`node`：一个指向 `Num` 节点的智能指针。
+
+##### VisitString 方法
+`VisitString` 函数用于访问传入的 `String` 节点并生成相应的 `C` 代码。它将输出节点中的字符串值，包含在双引号中。
+
+```cpp
+void CodeGenerator::VisitString(const shared_ptr<String> &node) {
+    ostream_ << "\"" << node->GetValue() << "\"";
+}
+```
+**参数**
+`node`：一个指向 `String` 节点的智能指针。
+
+##### VisitReal 方法
+`VisitReal` 函数用于访问传入的 `Real` 节点并生成相应的 `C` 代码。它将输出节点中的浮点数值。
+
+```cpp
+void CodeGenerator::VisitReal(const shared_ptr<Real> &node) {
+    ostream_ << node->GetValue();
+}
+```
+**参数**
+`node`：一个指向 `Real` 节点的智能指针。
+
+##### VisitChar 方法
+`VisitChar` 函数用于访问传入的 `Char` 节点并生成相应的 `C` 代码。它将输出节点中的字符值。
+
+```cpp
+void CodeGenerator::VisitChar(const shared_ptr<Char> &node) {
+    ostream_ << node->GetValue();
+}
+```
+**参数**
+`node`：一个指向 `Char` 节点的智能指针。
+
+##### VisitStatement 方法
+`VisitStatement` 函数用于访问传入的 `Statement` 节点并生成相应的 `C` 代码。它将访问节点中的子节点，然后输出一个分号和换行符。
+
+```cpp
+void CodeGenerator::VisitStatement(const shared_ptr<Statement> &node) {
+    Visit(node->GetNode(), true);
+    ostream_ << ";\n";
+}
+```
+
+**参数**
+`node`：一个指向 `Statement` 节点的智能指针。
+
+##### VisitIfStatement 方法
+`VisitIfStatement` 函数用于访问传入的 `IfStatement` 节点并生成相应的 `C` 代码。它将生成 `if` 语句的条件、`then` 分支和可选的 `else` 分支。
+
+```cpp
+void CodeGenerator::VisitIfStatement(const shared_ptr<IfStatement> &node) {
+    ostream_ << Indent() << "if (";
+    Visit(node->GetCondition());
+    ostream_ << ") {\n";
+    IncIndent();
+    Visit(node->GetThenBranch());
+    DecIndent();
+    ostream_ << Indent() << "}";
+    if (node->GetElseBranch()) {
+        IncIndent();
+        ostream_ << " else {\n";
+        Visit(node->GetElseBranch());
+        DecIndent();
+        ostream_ << Indent() << "}";
+    }
+    ostream_ << "\n";
+}
+```
+**参数**
+`node`：一个指向 `IfStatement` 节点的智能指针。
+
+##### VisitForStatement 方法
+`VisitForStatement` 函数用于访问传入的 `ForStatement` 节点并生成相应的 `C` 代码。它将生成 `for` 循环的初始化，条件和递增部分，然后访问循环体。
+
+```cpp
+void CodeGenerator::VisitForStatement(const shared_ptr<ForStatement> &node) {
+    ostream_ << Indent() << "for (";
+    Visit(node->GetVariable());
+    ostream_ << " = ";
+    Visit(node->GetStart());
+    ostream_ << "; ";
+    Visit(node->GetVariable());
+    ostream_ << " <= ";
+    Visit(node->GetEnd());
+    ostream_ << "; ";
+    Visit(node->GetVariable());
+    ostream_ << "++) {\n";
+    IncIndent();
+    Visit(node->GetBody());
+    DecIndent();
+    ostream_ << Indent() << "}\n";
+}
+```
+**参数**
+`node`：一个指向 `ForStatement` 节点的智能指针。
+
+##### VisitWhileStatement 方法
+`VisitWhileStatement` 函数用于访问传入的 `WhileStatement` 节点并生成相应的 `C` 代码。它将生成 `while` 语句的条件部分，然后访问循环体。
+
+```cpp
+void CodeGenerator::VisitWhileStatement(
+    const shared_ptr<WhileStatement> &node) {
+    ostream_ << Indent() << "while (";
+    Visit(node->GetCondition());
+    ostream_ << ") {\n";
+    IncIndent();
+    Visit(node->GetBody());
+    DecIndent();
+    ostream_ << Indent() << "}\n";
+}
+```
+
+**参数**
+`node`：一个指向 `WhileStatement` 节点的智能指针。
+
+##### VisitFunctionCall 方法
+`VisitFunctionCall` 函数用于遍历抽象语法树中的 `FunctionCall` 节点，并将其转换为 `C` 语言代码。函数会根据传入的函数名对其进行重命名，例如将 `writeln` 和 `write` 函数名更改为 `printf`，将 `read` 函数名更改为 `scanf`。此外，函数还会为特定函数生成格式化字符串，并正确处理参数是否为引用。
+```cpp
+void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
+    // Rename function when meet writeln or write
+    auto func_name = node->GetName();
+    if (func_name == "writeln" || func_name == "write")
+        func_name = "printf";
+    else if (func_name == "read")
+        func_name = "scanf";
+
+    ostream_ << func_name << "(";
+    // print Format string
+    if (func_name != node->GetName()) {
+        PrintfFormatString(node, (node->GetName() == "writeln"));
+    }
+
+    // Print parameters
+    for (int i = 0; i < node->GetParameters().size(); i++) {
+        // Is reference or not
+        auto r = node->GetIsReference(i);
+        if (r || func_name == "scanf")
+            ostream_ << "&";
+
+        // Visit parameter
+        auto p = node->GetParameters().at(i);
+        Visit(p);
+        if (i < node->GetParameters().size() - 1) {
+            ostream_ << ", ";
+        }
+    }
+
+    ostream_ << ")";
+}
+```
+
+**参数**
+`node`：一个指向 `FunctionCall` 节点的智能指针。
+
+**功能**
+1. 对特定的函数名进行重命名，例如将 `writeln` 和 `write` 函数名更改为 `printf`，将 `read` 函数名更改为 `scanf`。
+1. 将重命名后的函数名写入输出流 `ostream_`。
+1. 如果函数名已更改，调用 `PrintfFormatString` 函数为其生成格式化字符串。
+1. 遍历 `FunctionCall` 节点的参数列表。对于每个参数：
+1. 如果参数为引用或函数名为 `scanf`，则在输出流 `ostream_` 中添加 & 符号。
+1. 调用 `Visit` 函数访问参数节点。
+1. 如果当前参数不是最后一个参数，向输出流 `ostream_` 中添加逗号和空格。
+1. 将右括号 ) 写入输出流 `ostream_` 以结束函数调用。
+
+##### 对Visitor访问者函数的总结
+这些函数都是访问者模式下的访问者函数，它们的功能是遍历抽象语法树（AST）的各种节点，并生成对应的 C 代码。在遍历过程中，函数根据节点类型调用相应的访问者函数。这种设计模式使得代码生成器能够轻松扩展，以支持新的节点类型和语言构造。
+
+##### PrintFormatString 方法
+`PrintfFormatString` 函数用于为传入的 `FunctionCall` 节点生成 `printf` 格式字符串。该格式字符串根据节点的参数类型生成相应的格式化占位符（如 `%d`、`%f`、`%s` 和 `%c`）。可选参数 `new_line` 控制是否在格式字符串的末尾添加换行符。
+
+```cpp
+// Print "%d%c%s%d..."
+void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node,
+                                       bool new_line) {
+    vector<string> specifiers;
+    auto BaseCast = [&](const shared_ptr<ASTNode> &p) -> void {
+        if (auto dp = dynamic_pointer_cast<Num>(p)) {
+            specifiers.push_back("%d ");
+        } else if (auto dp = dynamic_pointer_cast<Real>(p)) {
+            specifiers.push_back("%f ");
+        } else if (auto dp = dynamic_pointer_cast<String>(p)) {
+            specifiers.push_back("%s ");
+        } else if (auto dp = dynamic_pointer_cast<Char>(p)) {
+            specifiers.push_back("%c ");
+        } else {
+            specifiers.push_back("%s ");
+        }
+    };
+
+    auto CastByVarType = [&](const VarType vt) -> void {
+        if (vt == VarType::INT)
+            specifiers.push_back("%d ");
+        else if (vt == VarType::REAL)
+            specifiers.push_back("%f ");
+        else if (vt == VarType::STRING)
+            specifiers.push_back("%s ");
+        else if (vt == VarType::CHAR)
+            specifiers.push_back("%c ");
+        else
+            specifiers.push_back("%s ");
+    };
+
+    auto IVarCast = [&](const shared_ptr<IVar> &p) -> void {
+        CastByVarType(p->GetVarType());
+    };
+
+    auto FuncCallCast = [&](const shared_ptr<FunctionCall> &p) -> void {
+        CastByVarType(p->GetReturnType());
+    };
+
+    auto params = node->GetParameters();
+    for (auto &p : params) {
+        if (auto dp = dynamic_pointer_cast<IVar>(p))
+            IVarCast(dp);
+        else if (auto dp = dynamic_pointer_cast<FunctionCall>(p))
+            FuncCallCast(dp);
+        else
+            BaseCast(p);
+    }
+    ostream_ << '"';
+    for (auto &s : specifiers) {
+        ostream_ << s;
+    }
+    ostream_ << (new_line ? "\\n\", " : "\", ");
+}
+```
+**参数**
+- `node`：一个指向 `FunctionCall` 节点的智能指针。
+- `new_line`：布尔值，表示是否在格式字符串末尾添加换行符。默认值为 `false`。
+
+**功能**
+- 定义各种类型节点的类型转换函数，如 `BaseCast`、`CastByVarType`、`IVarCast` 和 `FuncCallCast`。这些函数根据节点类型生成相应的格式化占位符。
+- 遍历 `FunctionCall` 节点的参数列表，对每个参数调用相应的类型转换函数，并将结果存储在 `specifiers` 向量中。
+- 将 `specifiers` 中的格式化占位符写入输出流 `ostream_`。如果 `new_line` 参数为 `true`，则在格式字符串末尾添加换行符。
+
+##### IsReferenceArg 方法
+`IsReferenceArg` 函数用于判断抽象语法树中的 `Var` 节点是否为引用参数。
+
+```cpp
+bool CodeGenerator::IsReferenceArg(const shared_ptr<Var> &node) const {
+    return node->IsReference();
+}
+```
+**参数**
+`node`：一个指向 `Var` 节点的智能指针。
+
+**返回**
+如果 `Var` 节点为引用参数，则返回 `true`；否则返回 `false`。
+
+##### IsReturnVar 方法
+`IsReturnVar` 函数用于判断抽象语法树中的 `Var` 节点是否为返回值变量。
+
+```cpp
+bool CodeGenerator::IsReturnVar(const shared_ptr<Var> &node) const {
+    return node->IsReturnVar();
+}
+```
+
+**参数**
+`node`：一个指向 `Var` 节点的智能指针。
+
+**返回**
+如果 `Var` 节点为返回值变量，则返回 `true`；否则返回 `false`。
+
+##### Indent 方法
+`Indent` 函数用于生成当前缩进级别下的缩进字符串。
+
+```cpp
+const string CodeGenerator::Indent() const {
+    return string(indent_level_ * 4, ' ');
+}
+```
+**返回**
+返回一个表示缩进的字符串，每个缩进级别包含 4 个空格字符。
+
+##### IncIndent 方法
+`IncIndent` 函数用于增加缩进级别。
+```cpp
+void CodeGenerator::IncIndent() { indent_level_++; }
+```
+
+##### DecIndent 方法
+`DecIndent` 函数用于减少缩进级别。
+
+```cpp
+void CodeGenerator::DecIndent() { indent_level_--; }
+```
+
+##### SymbolToC 方法
+`SymbolToC` 函数用于将 `Pascal` 类型符号转换为 `C` 类型符号。
+
+**参数**
+`pascal_type`：一个表示 `Pascal` 类型的字符串。
+
+**返回**
+返回一个表示 C 类型的字符串。
 
 ### 算法说明
 
