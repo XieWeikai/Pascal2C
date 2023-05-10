@@ -260,13 +260,13 @@ var Identifier, identifier, IDENTIFIER, IdEnTiFiEr: integer;
 |b=2.0|ConstDeclaration: b<br>-2.0000|无|
 |c=-1|ConstDeclaration: c<br>-unary_op:'-'<br>-expr :<br>--1|无|
 |d='a'|ConstDeclaration: d<br>-'a'|无|
-|空|ConstDeclaration: <br>-unknown value|syntax err:expected 'id' before end of file<br>syntax err:expected '=' before end of file<br>syntax error: parse expression error: no expected token|
+|空|ConstDeclaration: <br>-0|syntax err:expected 'id' before end of file<br>syntax err:expected '=' before end of file<br>syntax error: parse expression error: no expected token|
 |=1|ConstDeclaration: <br>-1|syntax err:expected 'id' before '='|
 |a -1|ConstDeclaration: a<br>-unary_op:'-'<br>-expr :<br>--1|syntax err:expected '=' before '-'|
 |a 1.1|ConstDeclaration: a<br>-1.1000|syntax err:expected '=' before 'real'|
 |a 'a'|ConstDeclaration: a<br>-'a'|syntax err:expected '=' before 'string'|
 |a 1|ConstDeclaration: a<br>-1|syntax err:expected '=' before 'integer'|
-|a |ConstDeclaration: a<br>-unknown value|syntax err:expected '=' before end of file<br>syntax error: parse expression error: no expected token|
+|a |ConstDeclaration: a<br>-0|syntax err:expected '=' before end of file<br>syntax error: parse expression error: no expected token|
 
 ##### 变量声明分析测试（TestParseVarDecl）
 
