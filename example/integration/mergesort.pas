@@ -1,8 +1,7 @@
 program merge_sort;
 
-var n : integer;
-
 var
+    n : integer;
     mas: array [1..1000] of integer;
     i: integer;
 
