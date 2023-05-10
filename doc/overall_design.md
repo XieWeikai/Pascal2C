@@ -69,54 +69,62 @@ AST 树是一种树状的数据结构，用于表示源代码的结构。AST 树
 |:---:|:---:|:---:|
 |程序 Program||程序头 ProgramHead<br>程序体 ProgramBody|
 |程序头 ProgramHead|程序名 id|参数标志符列表 IdList|
-|程序体 ProgramBody||常量声明 ConstDeclaration<br>变量声明 VarDeclaration<br>子程序声明 Subprogram<br>复合语句 Statement|
+|程序体 ProgramBody||常量声明 ConstDeclaration1, ConstDeclaration2, ...<br>变量声明 VarDeclaration1, VarDeclaration2, ...<br>子程序声明 Subprogram1, Subprogram2, ...<br>复合语句 Statement|
 |常量声明 ConstDeclaration|常量名 id|常量值 Expression|
 |变量声明 VarDeclaration||标志符列表 IdList<br>类型 Type|
 |子程序声明 Subprogram||子程序头 SubprogramHead<br>子程序体 SubprogramBody|
-|子程序头 SubprogramHead|子程序名 id<br>返回类型 return_type<br>是否为函数 is_function|参数 Parameter|
-|子程序体 SubprogramBody||常量声明 ConstDeclaration<br>变量声明 VarDeclaration<br>复合语句 Statement|
+|子程序头 SubprogramHead|子程序名 id<br>返回类型 return_type<br>是否为函数 is_function|参数 Parameter1, Parameter2, ...|
+|子程序体 SubprogramBody||常量声明 ConstDeclaration1, ConstDeclaration2, ...<br>变量声明 VarDeclaration1, VarDeclaration2, ...<br>复合语句 Statement|
 |参数 Parameter|类型 type<br>是否为引用 is_var|标志符列表 IdList|
-|类型 Type|基础类型 base_type<br>是否为数组 is_array|下标范围 Period|
-|下标范围 Period|下界 lower_bound<br>上界 upper_bound||
+|类型 Type|基础类型 base_type<br>是否为数组 is_array<br>下标范围 period1(下界 lower_bound, 上界 upper_bound), period2, ...||
 |标志符列表 IdList|标志符 id1, id2, ...||
 
+其中，属性使用非指针的方式存储，子语法单元使用智能指针 `std::shared_ptr` 存储。
 
-##### 4.2.2.2 语法分析器 Parser
 
-语法分析器 Parser 是一个递归下降的语法分析器，其输入为词法分析器输出的 token，输出为 AST 树。其内部包含分析各类 AST 节点的成员函数，同时还包含一些辅助函数，用于处理错误和调试。
+##### 4.2.1.2 语法分析器 Parser
+
+语法分析器 Parser 是一个递归下降的语法分析器，其输入为一个 Pascal 程序文件指针，通过不断调用词法分析器，对其输出的 token 进行分析，最终输出一颗 AST 树。其内部包含分析各类 AST 节点的成员函数，同时还包含一些辅助函数，用于处理错误和调试。
 
 #### 4.2.2 接口说明
 
-- **输入**:在语法分析阶段，语法分析器将以词法分析器处理pascal源代码得到的`token`作为输入，如
+- **输入**:在语法分析阶段，语法分析器 Parser 的输入是一个 pascal 程序文件，可以通过构造函数将文件指针传入 Parser 内部，并调用 Parse 成员函数对其进行分析，返回包含整个 AST 树的根节点指针。	
+  	Parser 函数将不断调用词法分析器获取文件内容处理后的 `token`，用于语法分析生成 AST 树。例如对于以下 Pascal 程序源代码：
 
-```pascal
+	```pascal
 
-program foo(foo1, foo2);
-const a=10;
-var var1, var2: array[1..5, 10..15] of real;
-procedure proc(var para: boolean);
-const a=-5;
-begin
-end;
-function func() : integer;
-var var1: char;
-begin
-end;
-begin
-end.
+	program foo(foo1, foo2);
+	const a=10;
+	var var1, var2: array[1..5, 10..15] of real;
+	procedure proc(var para: boolean);
+	const a=-5;
+	begin
+	end;
+	function func() : integer;
+	var var1: char;
+	begin
+	end;
+	begin
+	end.
 
-```
+	```
 
-对于上面这段源代码，语法分析器的输入将形如如下的`token`作为语法分析器的输入
+	对于上面这段源代码，词法分析器将依次输出以下 token 序列：
 
-  ```
-  PROGRAM  ID(foo)  '('  ID(foo1)  ','  ID(foo2)  ')' ';' CONST ID(a) '=' INTEGER(10) ';' VAR ID(var1) ',' ID(var2) ':' ARRAY '[' INTEGER(1) DOTDOT INTEGER(5) ',' INTEGER(10) DOTDOT INTEGER(15) ']' OF REAL_TYPE ';' PROCEDURE ID(proc) '(' VAR ID(para) ':' BOOLEAN_TYPE ')' ';' CONST ID(a) '=' '-' INTEGER(5) ';' BEGIN END ';' FUNCTION ID(func) '(' ')' ':' INTEGER_TYPE ';' VAR ID(var1) ':' CHAR_TYPE ';' BEGIN END ';' BEGIN END '.'
-  ```
+	```
+	PROGRAM  ID(foo)  '('  ID(foo1)  ','  ID(foo2)  ')' ';' CONST ID(a) '=' INTEGER(10) ';' VAR ID(var1) ',' ID(var2) ':' ARRAY '[' INTEGER(1) DOTDOT INTEGER(5) ',' INTEGER(10) DOTDOT INTEGER(15) ']' OF REAL_TYPE ';' PROCEDURE ID(proc) '(' VAR ID(para) ':' BOOLEAN_TYPE ')' ';' CONST ID(a) '=' '-' INTEGER(5) ';' BEGIN END ';' FUNCTION ID(func) '(' ')' ':' INTEGER_TYPE ';' VAR ID(var1) ':' CHAR_TYPE ';' BEGIN END ';' BEGIN END '.'
+	```
 
 
-- **输出**:若输入满足pascal-S语法，则语法分析器将产生一颗能表示源程序结构的抽象语法树，如对于上面的输入，可能产生一颗形如下图的语法树
+- **输出**:若输入满足pascal-S语法，则语法分析器将产生一颗能表示源程序结构的抽象语法树，如对于上面的输入，可能产生一颗形如下图的 AST 树
 
-![ast](assets/AST.png)
+	![ast](assets/AST.png)
+
+	每一个 AST 节点的属性与子节点指针都可以通过相应的 Getter 函数获取。
+
+- **错误处理**:语法分析器在遇到错误时，将会抛出异常，异常的类型为自定义`SyntaxError`，其包含了错误的类型和错误的位置信息。语法分析抛出的异常将会在内部自己处理，并继续进行语法分析生成 AST 树。
+  
+	但语法分析器会保留所有遇到的错误信息 `SyntaxError`，并存储在在一个顺序容器中，所有语法错误同样可以通过相应的 Getter 函数获取。
 
 
 ---
