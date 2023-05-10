@@ -472,8 +472,7 @@ Transformer::passExpr(shared_ptr<ast::Expression> cur) {
 		auto [_1 , _2 , is_ref , is_ret , _5 , _type] = checkIdType(var->id());
 
 		if (var->expr_list().size() == 0) { // basic type
-			auto var_type  = type_kit->StringToVarType(
-				ToCString(type_kit->StringToVarType(ToCString(_type))));
+			auto var_type  = type_kit->StringToVarType(ToCString(_type));
 
 			return {
 				make_shared<Var>( 
