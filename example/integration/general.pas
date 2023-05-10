@@ -25,8 +25,8 @@ begin
     y := scalar * PI * x;
     y :=  (3 div 2) / 6;
     expression := (1 + 2 * 3) * (4 + 5) - 7 * 8 - 9 * 10;
-    {flag := (true and false) or (true and true) or (4 < y) and (y < 5) or (y = 6) or (y <> 7) or (y >= 8) or (y <= 9);
-    writeln(flag)}
+    flag := (true and false) or (true and true) or (4 < y) and (y < 5) or (y = 6) or (y <> 7) or (y >= 8) or (y <= 9);
+    writeln(flag)
 end;
 
 function greater (x,y:real):boolean;

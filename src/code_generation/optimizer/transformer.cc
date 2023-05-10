@@ -529,6 +529,9 @@ Transformer::passExpr(shared_ptr<ast::Expression> cur) {
 		auto expr_type = type_kit->MergeType(l_expr.second , r_expr.second , 
 							ToCString(bin_expr->op()));
 
+		// std::cerr << bin_expr->line() << " : " << bin_expr->column() << " -> " 
+					// << type_kit->VarTypeToString(expr_type) << "\n";
+
 		return {
 			make_shared<BinaryOperation>(
 				l_expr.first ,
