@@ -467,6 +467,9 @@ class BinaryOperation : public IVar {
     const shared_ptr<ASTNode> &GetRight() { return right_; }
     const VarType GetVarType() const override { return var_type_; }
     const string GetName() const override { return "binary_operation"; }
+    bool TestCastToFloat() {
+        return (GetVarType() == VarType::REAL && GetOper()->GetOper() == "/");
+    }
 
   private:
     shared_ptr<ASTNode> left_;

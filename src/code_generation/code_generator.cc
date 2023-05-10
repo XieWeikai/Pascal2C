@@ -251,6 +251,9 @@ void CodeGenerator::VisitUnaryOperation(
 
 void CodeGenerator::VisitBinOp(
     const shared_ptr<code_generation::BinaryOperation> &node) {
+    if (node->TestCastToFloat()) {
+        ostream_ << "(float) ";
+    }
     ostream_ << '(';
     Visit(node->GetLeft());
     ostream_ << ' ';
