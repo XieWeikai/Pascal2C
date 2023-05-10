@@ -13,6 +13,7 @@ enum VarType {
     STRING,
     INT,
     REAL,
+    BOOL,
     UNDEFINED,
 };
 
@@ -32,9 +33,10 @@ class TypeToolKit {
         {"string", "char"}, {"boolean", "int"}, {"record", "struct"},
         {":=", "="},        {"=", "=="},        {"mod", "%"}};
     const hashmap<VarType, string> VarTypeToStringMap = {
-        {VarType::VOID, "void"},     {VarType::CHAR, "char"},
-        {VarType::STRING, "string"}, {VarType::INT, "int"},
-        {VarType::REAL, "real"},     {VarType::UNDEFINED, "undefined"}};
+        {VarType::VOID, "void"},          {VarType::CHAR, "char"},
+        {VarType::STRING, "string"},      {VarType::INT, "int"},
+        {VarType::REAL, "real"},          {VarType::BOOL, "bool"},
+        {VarType::UNDEFINED, "undefined"}};
     const hashmap<string, VarType> StringToVarTypeMap = {
         {"void", VarType::VOID},
         {"char", VarType::CHAR},
@@ -42,6 +44,8 @@ class TypeToolKit {
         {"int", VarType::INT},
         {"real", VarType::REAL},
         {"double", VarType::REAL},
+        {"bool", VarType::BOOL},
+        {"boolean", VarType::BOOL},
         {"undefined", VarType ::UNDEFINED},
     };
 };
