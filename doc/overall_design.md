@@ -9,9 +9,9 @@
 - **语义分析**：该模块以AST为输入，通过AST检查输入源码中是否存在语义错误，如类型错误、函数参数不匹配等。该模块将检查处理过后的AST交给代码生成模块。
 - **代码生成**：该模块以语义分析输出的AST作为输入，通过遍历AST生成对应的C语言代码。
 
-编译器模块架构图如下所示
+编译器整体模块架构图如下所示
 
-![modules](assets/modules.png)
+![5E322E3F9DCC156F28C8C3793578819D](assets/5E322E3F9DCC156F28C8C3793578819D.jpg)
 
 ### 4.1 词法分析
 
@@ -78,6 +78,25 @@ AST 树是一种树状的数据结构，用于表示源代码的结构。AST 树
 |参数 Parameter|类型 type<br>是否为引用 is_var|标志符列表 IdList|
 |类型 Type|基础类型 base_type<br>是否为数组 is_array<br>下标范围 period1(下界 lower_bound, 上界 upper_bound), period2, ...||
 |标志符列表 IdList|标志符 id1, id2, ...||
+|语句 Statement|具体属性由子类决定|子语法单元由子类决定|
+|赋值语句 AssignStatement||左值var,右值expr|
+|子程序调用语句 CallStatement|子程序名 id|实参列表 expr_list|
+|复合语句 CompoundStatement||语句列表 statements|
+|条件语句 IfStatement||条件判断表达式condition <br>分支成功语句 then <br>分支失败语句else|
+|循环语句 WhileStatement||循环条件表达式condition <br>循环体语句statement|
+|循环语句 ForStatement|循环变量名 id|循环开始表达式 from<br>循环结束表达式 to<br>循环体语句statement|
+|退出语句 ExitStatement|||
+|表达式 Expression|具体属性由子类决定|子语法单元由子类决定|
+|二元运算表达式 BinaryExpression|运算符 op|左操作数 lhs<br>右操作数 rhs|
+|一元运算表达式 UnaryExpression|运算符 op|操作数 factor|
+|调用或变量 CallOrVar|标识符id||
+|变量 Variable|变量名 id|下标列表 expr_list|
+|调用 CallValue|子程序名 id|实参列表 params|
+|整数 IntegerValue|整数值 value||
+|实数 RealValue|实数值 value||
+|布尔值 BooleanValue|布尔值 value||
+|字符串 StringValue|字符串值 value||
+|字符 CharValue|字符值 value||
 
 其中，属性使用非指针的方式存储，子语法单元使用智能指针 `std::shared_ptr` 存储。
 
@@ -92,25 +111,30 @@ AST 树是一种树状的数据结构，用于表示源代码的结构。AST 树
   	Parser 函数将不断调用词法分析器获取文件内容处理后的 `token`，用于语法分析生成 AST 树。例如对于以下 Pascal 程序源代码：
 
 	```pascal
-
 	program foo(foo1, foo2);
 	const a=10;
+	
 	var var1, var2: array[1..5, 10..15] of real;
+	
 	procedure proc(var para: boolean);
 	const a=-5;
 	begin
 	end;
+	
 	function func() : integer;
 	var var1: char;
 	begin
 	end;
+	
 	begin
+		...
+		if r < max then ...
+		tmp := 3.14 + r / r
 	end.
-
 	```
-
+	
 	对于上面这段源代码，词法分析器将依次输出以下 token 序列：
-
+	
 	```
 	PROGRAM  ID(foo)  '('  ID(foo1)  ','  ID(foo2)  ')' ';' CONST ID(a) '=' INTEGER(10) ';' VAR ID(var1) ',' ID(var2) ':' ARRAY '[' INTEGER(1) DOTDOT INTEGER(5) ',' INTEGER(10) DOTDOT INTEGER(15) ']' OF REAL_TYPE ';' PROCEDURE ID(proc) '(' VAR ID(para) ':' BOOLEAN_TYPE ')' ';' CONST ID(a) '=' '-' INTEGER(5) ';' BEGIN END ';' FUNCTION ID(func) '(' ')' ':' INTEGER_TYPE ';' VAR ID(var1) ':' CHAR_TYPE ';' BEGIN END ';' BEGIN END '.'
 	```
@@ -118,9 +142,9 @@ AST 树是一种树状的数据结构，用于表示源代码的结构。AST 树
 
 - **输出**:若输入满足pascal-S语法，则语法分析器将产生一颗能表示源程序结构的抽象语法树，如对于上面的输入，可能产生一颗形如下图的 AST 树
 
-	![ast](assets/AST.png)
+  ![image-20230510162626284](assets/image-20230510162626284.png)
 
-	每一个 AST 节点的属性与子节点指针都可以通过相应的 Getter 函数获取。
+  每一个 AST 节点的属性与子节点指针都可以通过相应的 Getter 函数获取。
 
 - **错误处理**:语法分析器在遇到错误时，将会抛出异常，异常的类型为自定义`SyntaxError`，其包含了错误的类型和错误的位置信息。语法分析抛出的异常将会在内部自己处理，并继续进行语法分析生成 AST 树。
   
@@ -144,18 +168,36 @@ AST 树是一种树状的数据结构，用于表示源代码的结构。AST 树
 符号表逻辑结构依附于AST的实现。每个作用域拥有自己的符号表，在当前符号表中查询不到的符号将递归向父亲查询。
 
 参考结构如下：
-![image](https://user-images.githubusercontent.com/106591984/224709741-190e7971-ad54-4f29-a088-376f454a6b90.png)
+
+![draw1](assets/analysiser_symbol_table.png)
+
 
 ##### 4.3.1.2 符号表物理结构设计
 
-计划采用哈希表实现符号表。具体表示变量/函数的数据结构需要与语法分析对接。
+计划采用哈希表实现符号表。具体表示变量/函数的数据结构如下：
+
+```cpp
+ class SymbolTableItem{
+    MegaType type_;
+    std::string name_;
+    bool is_var_;
+    bool is_func_;
+    std::vector<SymbolTablePara> para_;
+};
+class MegaType{
+    std::vector<std::string> pointer_;
+    symbol_table::ItemType type_;
+};
+```
+
+主要由SymbolTableItem类中的is_var和is_func属性判断是函数还是变量。
 
 #### 4.3.2 符号表管理
 
-- 查询操作：在哈希表中查询；未查询到则递归向上查询。若查询不到则调用错误处理部分。
-- 插入操作：在哈希表中插入。
+- 查询操作：在哈希表中查询；未查询到则递归向上查询。若查询不到则返回对应的错误信息。
+- 插入操作：在哈希表中插入对应的值。
 - 定位操作：在进入当前作用域时执行，新建一个哈希表代表当前作用域。
-- 重定位操作：在退出当前作用域时执行，删除哈希表中所有记录并释放内存使用。
+- 重定位操作：在退出当前作用域时执行，返回到上一个作用域中。
 
 ---
 

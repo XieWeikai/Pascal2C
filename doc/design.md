@@ -89,7 +89,6 @@
       - [算法描述](#算法描述-1)
         - [语法分析](#语法分析-1)
         - [错误处理](#错误处理)
-  - [如`ParseExpr`和`ParseStatement`在碰到语法错误时直接抛出异常，`ParseCompoundStatement`调用`ParseStatement`来解析一系列语句，若捕获异常，则记录下异常，并不断跳过`token`直到遇到`;`或者可能的语句开头的`token`再接着进行析。`ParseCompoundStatement`在碰到缺少`begin`的错误时，记录错误并忽略`begin`直接进行statement的解析操作。](#如parseexpr和parsestatement在碰到语法错误时直接抛出异常parsecompoundstatement调用parsestatement来解析一系列语句若捕获异常则记录下异常并不断跳过token直到遇到或者可能的语句开头的token再接着进行析parsecompoundstatement在碰到缺少begin的错误时记录错误并忽略begin直接进行statement的解析操作)
   - [语义分析](#语义分析)
     - [符号表设计](#符号表设计)
       - [数据结构说明](#数据结构说明-1)
@@ -2040,7 +2039,8 @@ parse_expression_1(lhs, min_precedence)
 - 继续解析的两种处理策略:
   - 碰到异常后，跳过若干`token`直到碰到想要的`token` 或分隔符（如';', 'TOK_EOF'等）或后一部分可能的语法开头的`token`
   - 碰到异常后，忽略一些`token`接着解析
-  如`ParseExpr`和`ParseStatement`在碰到语法错误时直接抛出异常，`ParseCompoundStatement`调用`ParseStatement`来解析一系列语句，若捕获异常，则记录下异常，并不断跳过`token`直到遇到`;`或者可能的语句开头的`token`再接着进行析。`ParseCompoundStatement`在碰到缺少`begin`的错误时，记录错误并忽略`begin`直接进行statement的解析操作。
+  
+    如`ParseExpr`和`ParseStatement`在碰到语法错误时直接抛出异常，`ParseCompoundStatement`调用`ParseStatement`来解析一系列语句，若捕获异常，则记录下异常，并不断跳过`token`直到遇到`;`或者可能的语句开头的`token`再接着进行析。`ParseCompoundStatement`在碰到缺少`begin`的错误时，记录错误并忽略`begin`直接进行statement的解析操作。
 ---
 
 ## 语义分析
@@ -2110,17 +2110,21 @@ nameTable中使用map容器存储程序块名称和符号表Block的对应关系
 
 #### 函数、方法说明
 
-|        方法         |                            描述                             |
-| :-----------------: | :---------------------------------------------------------: |
-|  nameTable::Add();  |                    向name添加对应的block                    |
-| nameTable::Query(); |                     查询name对应的block                     |
-|       init();       |                       初始化语义分析                        |
-|    BlockExit();     |                       退出当前程序块                        |
-|     BlockIn();      |                  进入新程序块并命名为name                   |
-|     XToItem();      | 转换pascal2c::ast中的X类为symbol_table中的SymbolTableItem类 |
-|       DoX();        |                  处理pascal2c::ast中的X类                   |
-
-
+|        方法         |                             描述                             |
+| :-----------------: | :----------------------------------------------------------: |
+|  nameTable::Add();  |                    向name添加对应的block                     |
+| nameTable::Query(); |                     查询name对应的block                      |
+|       init();       |                        初始化语义分析                        |
+|       Find();       |      给定数据模板，从当前作用域开始查找，返回查找结果。      |
+|      Insert();      |       给定Item数据并插入当前的作用域中，返回插入结果。       |
+|    BlockExit();     |                        退出当前作用域                        |
+|     BlockIn();      |          进入新作用域，将其与上一个作用域连接并命名          |
+|     XToItem();      | 转换pascal2c::ast中的X类为symbol_table中的SymbolTableItem类  |
+|       DoX();        |                   处理pascal2c::ast中的X类                   |
+|     MaxType();      | 判断两类型是否可以进行运算，如果可以返回运算结果，如果不行返回symbol_table::ERROR |
+|    ExprIsVar();     |                判断ast::Expression是否为变量                 |
+|   GetExprType();    |    给定ast::Expression返回其对应的symbol_table::MetaType     |
+| ParameterToPara();  | 处理函数参数列表的函数，将其参数列表整合为vector<Para>并将其参数插入当前作用域。 |
 
 ### ast 处理
 
@@ -2129,19 +2133,20 @@ nameTable中使用map容器存储程序块名称和符号表Block的对应关系
 ```mermaid
 graph LR;
 	A["开始，初始化当前标志为‘main’"] -->A'["开始搜索ast"]--> B{"ast节点类型"};
-	D{"是否退出一个程序块"}--是--> I["从已保存的标志中取最新标志"] -->F;
-	D --否--> F["下一个ast节点"]--返回-->B;
-	B --声明常量--> C["将定义的常量加入当前标志的Block"] --> D;
-	B --声明变量_非函数--> E["将定义的常量加入当前标志的Block"] --> D;
-	B --声明函数或子程序--> L["将定义的函数加入当前标志的Block，保存当前标志，更改当前标志名为函数（程序）名"] --> D;
+	D ----> I["从已保存的标志中取最新标志"] -->F;
+	D ----> F["下一个ast节点"]---->B;
+	D ----> N["退出当前作用域，返回上一个作用域"] -->F;
+	B --声明常量--> C["将定义的常量加入当前作用域"] --> D;
+	B --声明变量_非函数--> E["将定义的变量加入当前作用域"] --> D;
+	B --声明函数或子程序--> L1["将定义的函数加入当前作用域"] --> L2["以声明行号为新作用域名创建新作用域并切换到此作用域"]-->L3["将返回值插入作用域"] --> D;
 	B --赋值语句--> J["检查赋值语句是否合法"] --> D;
+	B --if语句--> M["检查if语句是否合法"] --> D;
+	B --循环语句--> K["检查循环语句是否合法"] --> D;
 	B --函数/子程序调用--> G["检查函数/子程序是否在当前标志快内"] -->D;
 	B --引用变量--> H["检查变量是否在标志快内"] --> D;
 ```
 
-目前支持的四个基本类型real,boolean,char,integer中，在赋值语句和调用传参是要求类型严格相等。其中，仅有real和integer可以进行四则运算，运算后结果为real。
-
-其中分析完一个函数体则退出一个程序块。
+支持的四个基本类型real,boolean,char,integer中，在赋值语句和调用传参是要求类型严格相等。其中，仅有real和integer可以进行四则运算，运算后结果为real。
 
 ---
 
@@ -2158,9 +2163,9 @@ graph LR;
     a. 与语法分析和语义分析的 AST 接口
 
     为了方便各部分的并行开发, 设计一套AST接口(ast_adapter), 将代码生成部分的内部设计与前面模块的接口隔离开来, 方便并行开发的同时, 避免了依赖模块的接口变动带来的影响。
-    
+   
     b. 将语法分析得到的AST结合语义分析的符号表信息, 转换到本模块的AST接口. 在转换规则中, 需要添加以下信息:
-    
+   
     * 函数调用中变量的引用/返回值信息;
     * 函数声明中变量的引用/返回值信息;
     以及其他的需要注意的转换规则.
@@ -2168,9 +2173,9 @@ graph LR;
     c. 代码生成：根据转换规则先序遍历 AST，并将每个节点转换为等价的 C 语言结构。在这个过
     程中，需要确保生成的代码具有良好的可读性, 例如合理的缩进、注释和变量命名, 并且能
     够产生与源Pascal代码相同的行为。
-    
+   
     为了将 Pascal 代码转换为等价的 C 代码，需要定义一系列的转换规则，这些规则将在 AST 上执行。例如：
-    
+   
     * 将 Pascal 的 `begin` 和 `end` 转换为 C 语言中的 `{` 和 `}`；
     * 将Pascal的Declaration部分转为全局变量;
     * 正确处理生成C代码的缩进;
@@ -2256,7 +2261,7 @@ class Compound : public ASTNode {
   private:
     vector<shared_ptr<ASTNode>> children_;
 };
-```   
+```
 
 ##### Declaration 类
 Declaration 类表示一个声明语句，继承自 ASTNode。它包含一个表示声明的 std::vector<std::shared_ptr<ASTNode>> 类型的私有成员 declaration_。Declaration 类有两个构造函数，一个默认构造函数和一个接受声明向量作为参数的构造函数。Accept 方法用于接受访问者对象。GetDeclarations 方法返回一个包含声明的常量引用。
