@@ -136,6 +136,7 @@ namespace pascal2c::parser
                 }
                 if (tokens.find(token_) == tokens.end())
                 {
+                    const_value = MAKE_AND_MOVE_SHARED(ast::IntegerValue, 0);
                     break;
                 }
             }
