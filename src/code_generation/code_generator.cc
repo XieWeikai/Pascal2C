@@ -385,7 +385,7 @@ void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node,
     }
     ostream_ << '"';
     for (auto &s : specifiers) {
-        ostream_ << ((function_name == "read") ? s : (s + " "));
+        ostream_ << s;
     }
     ostream_ << ((function_name == "writeln") ? "\\n\", " : "\", ");
 }
@@ -400,7 +400,7 @@ void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
 
     ostream_ << func_name << "(";
     // print Format string
-    if (func_name != node->GetName()) {
+    if (func_name != node->GetName() && node->GetParameters().size()) {
         PrintfFormatString(node, node->GetName());
     }
 
