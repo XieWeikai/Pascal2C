@@ -27,6 +27,11 @@ void CodeGenerator::Visit(const shared_ptr<code_generation::ASTNode> &node,
     node->Accept(*this);
 }
 
+void CodeGenerator::VisitTerminateStatement(
+    const shared_ptr<TerminateStatement> &node) {
+    ostream_ << "exit(" << node->GetTerminateParameter() << ")" << eol_;
+}
+
 void CodeGenerator::VisitExitStatement(const shared_ptr<ExitStatement> &node) {
     ostream_ << Indent() << "return";
     if (node->GetFunctionName().length()) {

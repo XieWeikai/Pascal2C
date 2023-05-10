@@ -337,6 +337,18 @@ class Argument : public ASTNode {
     bool is_reference_;
 };
 
+class TerminateStatement : public ASTNode {
+  public:
+    TerminateStatement(const string &terminate_parameter = "EXIT_SUCCESS")
+        : terminate_parameter_(terminate_parameter) {}
+    virtual ~TerminateStatement() = default;
+    void Accept(Visitor &visitor) override;
+    const string GetTerminateParameter() const { return terminate_parameter_; }
+
+  private:
+    string terminate_parameter_;
+};
+
 /**
  * @brief If function_name is empty, generate a return;
  * Example: return;
