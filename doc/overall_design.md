@@ -80,6 +80,30 @@ AST 树是一种树状的数据结构，用于表示源代码的结构。AST 树
 |下标范围 Period|下界 lower_bound<br>上界 upper_bound||
 |标志符列表 IdList|标志符 id1, id2, ...||
 
+例如对于如下的源代码：
+
+```pascal
+
+program foo(foo1, foo2);
+const a=10;
+var var1, var2: array[1..5, 10..15] of real;
+procedure proc(var para: boolean);
+const a=-5;
+begin
+end;
+function func() : integer;
+var var1: char;
+begin
+end;
+begin
+end.
+
+```
+
+其对应的 AST 树如下：
+
+![ast](assets/AST.png)
+
 
 
 
