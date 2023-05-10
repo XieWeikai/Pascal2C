@@ -2162,7 +2162,7 @@ class Num : public ASTNode {
 ```
 
 ##### String 类
-String 类表示一个字符串字面量，继承自 ASTNode。它包含一个私有成员 value_，表示该字符串的值。String 类有一个构造函数，接受一个表示字符串的 Token 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetValue 方法返回该字符串的值。
+`String` 类表示一个字符串字面量，继承自 `ASTNode`。它包含一个私有成员 `value_`，表示该字符串的值。`String` 类有一个构造函数，接受一个表示字符串的 `Token` 类型的智能指针作为参数。`Accept` 方法用于接受访问者对象。`GetValue` 方法返回该字符串的值。
 
 ```cpp
 class String : public ASTNode {
@@ -2179,7 +2179,7 @@ class String : public ASTNode {
 ```
 
 ##### Real 类
-Real 类表示一个实数字面量，继承自 ASTNode。它包含一个私有成员 value_，表示该实数的值。Real 类有一个构造函数，接受一个表示实数的 Token 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetValue 方法返回该实数的值。
+`Real` 类表示一个实数字面量，继承自 `ASTNode`。它包含一个私有成员 `value_`，表示该实数的值。`Real` 类有一个构造函数，接受一个表示实数的 `Token` 类型的智能指针作为参数。`Accept` 方法用于接受访问者对象。`GetValue` 方法返回该实数的值。
 ```cpp
 class Real : public ASTNode {
   public:
@@ -2195,7 +2195,7 @@ class Real : public ASTNode {
 ```
 
 ##### Char 类
-Char 类表示一个字符字面量，继承自 ASTNode。它包含一个私有成员 value_，表示该字符的值。Char 类有一个构造函数，接受一个表示字符的 Token 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetValue 方法返回该字符的值。
+`Char` 类表示一个字符字面量，继承自 `ASTNode`。它包含一个私有成员 `value_`，表示该字符的值。`Char` 类有一个构造函数，接受一个表示字符的 `Token` 类型的智能指针作为参数。`Accept` 方法用于接受访问者对象。`GetValue` 方法返回该字符的值。
 ```cpp
 class Char : public ASTNode {
   public:
@@ -2211,7 +2211,7 @@ class Char : public ASTNode {
 ```
 
 ##### IVar 类
-IVar 类是一个抽象基类，表示一个标识符（变量），继承自 ASTNode。它包含一个纯虚函数 Accept，用于接受访问者对象。还包含两个纯虚函数 GetName 和 GetVarType，分别用于获取标识符的名称和变量类型。
+`IVar` 类是一个抽象基类，表示一个标识符（变量），继承自 `ASTNode`。它包含一个纯虚函数 `Accept`，用于接受访问者对象。还包含两个纯虚函数 `GetName` 和 `GetVarType`，分别用于获取标识符的名称和变量类型。
 ```cpp
 class IVar : public ASTNode {
   public:
@@ -2223,7 +2223,7 @@ class IVar : public ASTNode {
 ```
 
 ##### Var 类
-Var 类表示一个变量，继承自 IVar。它包含四个私有成员：name_（表示变量名），is_reference_（表示是否为引用类型），is_return_var_（表示是否为返回变量），和 var_type_（表示变量类型）。Var 类有两个构造函数，分别接受一个表示变量名的 Token 类型的智能指针和一个表示变量名的字符串作为参数。Accept 方法用于接受访问者对象。GetName 方法返回该变量的名称。IsReference 方法返回该变量是否为引用类型。IsReturnVar 方法返回该变量是否为返回变量。GetVarType 方法返回该变量的类型。
+`Var` 类表示一个变量，继承自 `IVar`。它包含四个私有成员：`name_`（表示变量名），`is_reference_`（表示是否为引用类型），`is_return_var_`（表示是否为返回变量），和 `var_type_`（表示变量类型）。`Var` 类有两个构造函数，分别接受一个表示变量名的 `Token` 类型的智能指针和一个表示变量名的字符串作为参数。`Accept` 方法用于接受访问者对象。`GetName` 方法返回该变量的名称。`IsReference` 方法返回该变量是否为引用类型。`IsReturnVar` 方法返回该变量是否为返回变量。`GetVarType` 方法返回该变量的类型。
 ```cpp
 class Var : public IVar {
   public:
@@ -2253,7 +2253,7 @@ class Var : public IVar {
 ```
 
 ##### IType 类
-IType 类是一个抽象基类，表示一个类型节点，继承自 ASTNode。它包含一个纯虚函数 Accept，用于接受访问者对象。还包含一个纯虚函数 GetType，用于获取类型节点的类型。
+`IType` 类是一个抽象基类，表示一个类型节点，继承自 `ASTNode`。它包含一个纯虚函数 `Accept`，用于接受访问者对象。还包含一个纯虚函数 `GetType`，用于获取类型节点的类型。
 ```cpp
 class IType : public ASTNode {
   public:
@@ -2264,7 +2264,7 @@ class IType : public ASTNode {
 ```
 
 ##### Type 类
-Type 类表示一个类型节点，继承自 IType。它包含一个私有成员 type_，表示类型的字符串。Type 类有一个构造函数，接受一个表示类型的 Token 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetType 方法返回该类型节点的类型。
+`Type` 类表示一个类型节点，继承自 `IType`。它包含一个私有成员 `type_`，表示类型的字符串。`Type` 类有一个构造函数，接受一个表示类型的 `Token` 类型的智能指针作为参数。`Accept` 方法用于接受访问者对象。`GetType` 方法返回该类型节点的类型。
 ```cpp
 class Type : public IType {
   public:
@@ -2280,7 +2280,7 @@ class Type : public IType {
 ```
 
 ##### ConstType 类
-ConstType 类表示一个常量类型节点，继承自 IType。它包含一个私有成员 type_，表示常量类型的字符串。ConstType 类有一个构造函数，接受一个表示常量类型的 Token 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetType 方法返回该常量类型节点的类型。
+`ConstType` 类表示一个常量类型节点，继承自 `IType`。它包含一个私有成员 `type_`，表示常量类型的字符串。`ConstType` 类有一个构造函数，接受一个表示常量类型的 `Token` 类型的智能指针作为参数。`Accept` 方法用于接受访问者对象。`GetType` 方法返回该常量类型节点的类型。
 ```cpp
 class ConstType : public IType {
   public:
@@ -2295,7 +2295,7 @@ class ConstType : public IType {
 ```
 
 ##### VarDeclaration 类
-VarDeclaration 类表示一个变量声明节点，继承自 ASTNode。它包含三个私有成员：left_node_（表示变量名的节点），type_node_（表示类型节点），和 right_node_（表示变量初始值的节点）。VarDeclaration 类有一个构造函数，接受两个 ASTNode 类型的智能指针和一个 Type 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetLeftNode、GetRightNode 和 GetTypeNode 方法分别返回变量名节点、初始值节点和类型节点。
+`VarDeclaration` 类表示一个变量声明节点，继承自 `ASTNode`。它包含三个私有成员：`left_node_`（表示变量名的节点），`type_node_`（表示类型节点），和 `right_node_`（表示变量初始值的节点）。`VarDeclaration` 类有一个构造函数，接受两个 `ASTNode` 类型的智能指针和一个 `Type` 类型的智能指针作为参数。`Accept` 方法用于接受访问者对象。`GetLeftNode`、`GetRightNode` 和 `GetTypeNode` 方法分别返回变量名节点、初始值节点和类型节点。
 ```cpp
 class VarDeclaration : public ASTNode {
   public:
@@ -2318,7 +2318,7 @@ class VarDeclaration : public ASTNode {
 ```
 
 ##### ConstDeclaration 类
-ConstDeclaration 类表示一个常量声明节点，继承自 ASTNode。它包含三个私有成员：left_node_（表示常量名的节点），type_node_（表示常量类型节点），和 right_node_（表示常量初始值的节点）。ConstDeclaration 类有一个构造函数，接受两个 ASTNode 类型的智能指针和一个 ConstType 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetLeftNode、GetRightNode 和 GetTypeNode 方法分别返回常量名节点、初始值节点和常量类型节点。
+`ConstDeclaration` 类表示一个常量声明节点，继承自 `ASTNode`。它包含三个私有成员：`left_node_`（表示常量名的节点），`type_node_`（表示常量类型节点），和 `right_node_`（表示常量初始值的节点）。`ConstDeclaration` 类有一个构造函数，接受两个 `ASTNode` 类型的智能指针和一个 `ConstType` 类型的智能指针作为参数。`Accept` 方法用于接受访问者对象。`GetLeftNode`、`GetRightNode` 和 `GetTypeNode` 方法分别返回常量名节点、初始值节点和常量类型节点。
 ```cpp
 class ConstDeclaration : public ASTNode {
   public:
@@ -2341,7 +2341,7 @@ class ConstDeclaration : public ASTNode {
 ```
 
 ##### ArrayType 类
-ArrayType 类表示一个数组类型节点，继承自 IType。它包含两个私有成员：type_（表示元素类型的 Type 类型智能指针）和 bounds_（表示数组的边界，由一系列整数对组成）。ArrayType 类有一个构造函数，接受一个 Type 类型的智能指针和一个整数对向量作为参数。Accept 方法用于接受访问者对象。GetType 方法返回数组元素的类型。GetBounds 方法返回数组边界。
+`ArrayType` 类表示一个数组类型节点，继承自 `IType`。它包含两个私有成员：`type_`（表示元素类型的 `Type` 类型智能指针）和 `bounds_`（表示数组的边界，由一系列整数对组成）。`ArrayType` 类有一个构造函数，接受一个 `Type` 类型的智能指针和一个整数对向量作为参数。`Accept` 方法用于接受访问者对象。`GetType` 方法返回数组元素的类型。`GetBounds` 方法返回数组边界。
 ```cpp
 class ArrayType : public IType {
   public:
@@ -2362,7 +2362,7 @@ class ArrayType : public IType {
 ```
 
 ##### Array 类
-Array 类表示一个数组变量节点，继承自 IVar。它包含三个私有成员：var_（表示变量名的 Var 类型智能指针），bounds_（表示数组的边界，由一系列整数对组成）和 var_type_（表示变量类型的枚举值）。Array 类有一个构造函数，接受一个 Var 类型的智能指针、一个整数对向量和一个变量类型枚举值作为参数。Accept 方法用于接受访问者对象。GetName 方法返回数组变量的名称。GetVarNode、GetVarType 和 GetBounds 方法分别返回变量名节点、变量类型和数组边界。
+`Array` 类表示一个数组变量节点，继承自 `IVar`。它包含三个私有成员：`var_`（表示变量名的 `Var` 类型智能指针），`bounds_`（表示数组的边界，由一系列整数对组成）和 `var_type_`（表示变量类型的枚举值）。`Array` 类有一个构造函数，接受一个 `Var` 类型的智能指针、一个整数对向量和一个变量类型枚举值作为参数。`Accept` 方法用于接受访问者对象。`GetName` 方法返回数组变量的名称。`GetVarNode`、`GetVarType` 和 `GetBounds` 方法分别返回变量名节点、变量类型和数组边界。
 ```cpp
 class Array : public IVar {
   public:
@@ -2384,7 +2384,7 @@ class Array : public IVar {
 ```
 
 ##### ArrayDeclaration 类
-ArrayDeclaration 类表示一个数组声明节点，继承自 ASTNode。它包含两个私有成员：array_node_（表示数组变量节点）和 type_node_（表示数组类型节点）。ArrayDeclaration 类有一个构造函数，接受一个 Array 类型的智能指针和一个 ArrayType 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetArrayNode 和 GetTypeNode 方法分别返回数组变量节点和数组类型节点。
+`ArrayDeclaration` 类表示一个数组声明节点，继承自 `ASTNode`。它包含两个私有成员：`array_node_`（表示数组变量节点）和 `type_node_`（表示数组类型节点）。`ArrayDeclaration` 类有一个构造函数，接受一个 `Array` 类型的智能指针和一个 `ArrayType` 类型的智能指针作为参数。`Accept` 方法用于接受访问者对象。`GetArrayNode` 和 `GetTypeNode` 方法分别返回数组变量节点和数组类型节点。
 ```cpp
 class ArrayDeclaration : public ASTNode {
   public:
@@ -2403,7 +2403,7 @@ class ArrayDeclaration : public ASTNode {
 ```
 
 ##### ArrayAccess 类
-ArrayAccess 类表示一个数组访问节点，继承自 IVar。它包含三个私有成员：array_（表示数组变量的 Array 类型智能指针），indices_（表示访问数组元素的索引节点向量）和 var_type_（表示变量类型的枚举值）。ArrayAccess 类有一个构造函数，接受一个 Array 类型的智能指针、一个 ASTNode 类型的智能指针向量和一个变量类型枚举值作为参数。Accept 方法用于接受访问者对象。GetArray、GetIndices、GetName、GetVarType 和 GetBounds 方法分别返回数组变量节点、索引节点向量、数组变量名、变量类型和数组边界。
+`ArrayAccess` 类表示一个数组访问节点，继承自 `IVar`。它包含三个私有成员：`array_`（表示数组变量的 `Array` 类型智能指针），`indices_`（表示访问数组元素的索引节点向量）和 `var_type_`（表示变量类型的枚举值）。`ArrayAccess` 类有一个构造函数，接受一个 `Array` 类型的智能指针、一个 `ASTNode` 类型的智能指针向量和一个变量类型枚举值作为参数。`Accept` 方法用于接受访问者对象。`GetArray`、`GetIndices`、`GetName`、`GetVarType` 和 `GetBounds` 方法分别返回数组变量节点、索引节点向量、数组变量名、变量类型和数组边界。
 ```cpp
 class ArrayAccess : public IVar {
   public:
@@ -2429,7 +2429,7 @@ class ArrayAccess : public IVar {
 ```
 
 ##### Argument 类
-Argument 类表示一个函数参数节点，继承自 ASTNode。它包含三个私有成员：variable_（表示参数变量的 IVar 类型智能指针），type_（表示参数类型的 IType 类型智能指针）和 is_reference_（表示参数是否是引用类型的布尔值）。Argument 类有一个构造函数，接受一个 IVar 类型的智能指针、一个 IType 类型的智能指针和一个布尔值作为参数。Accept 方法用于接受访问者对象。GetVariable 方法返回参数变量节点。GetType 方法返回参数类型节点。IsReference 方法返回参数是否为引用类型的布尔值。
+`Argument` 类表示一个函数参数节点，继承自 `ASTNode`。它包含三个私有成员：`variable_`（表示参数变量的 `IVar` 类型智能指针），`type_`（表示参数类型的 `IType` 类型智能指针）和 `is_reference_`（表示参数是否是引用类型的布尔值）。`Argument` 类有一个构造函数，接受一个 `IVar` 类型的智能指针、一个 `IType` 类型的智能指针和一个布尔值作为参数。`Accept` 方法用于接受访问者对象。`GetVariable` 方法返回参数变量节点。`GetType` 方法返回参数类型节点。`IsReference` 方法返回参数是否为引用类型的布尔值。
 ```cpp
 class Argument : public ASTNode {
   public:
@@ -2450,7 +2450,7 @@ class Argument : public ASTNode {
 ```
 
 ##### Subprogram 类
-Subprogram 类表示子程序（例如过程或函数）的抽象语法树节点。它有三个私有成员：name_（表示子程序名称的字符串），args_（表示子程序参数的 Argument 类型智能指针向量）和 block_（表示子程序代码块的 Block 类型智能指针）。Subprogram 类有一个构造函数，接受一个字符串、一个 Argument 类型智能指针向量和一个 Block 类型智能指针作为参数。Accept 方法用于接受访问者对象。GetName 方法返回子程序名称。GetArgs 方法返回子程序参数列表。GetBlock 方法返回子程序代码块。
+`Subprogram` 类表示子程序（例如过程或函数）的抽象语法树节点。它有三个私有成员：`name_`（表示子程序名称的字符串），`args_`（表示子程序参数的 `Argument` 类型智能指针向量）和 `block_`（表示子程序代码块的 `Block` 类型智能指针）。`Subprogram` 类有一个构造函数，接受一个字符串、一个 `Argument` 类型智能指针向量和一个 `Block` 类型智能指针作为参数。`Accept` 方法用于接受访问者对象。`GetName` 方法返回子程序名称。`GetArgs` 方法返回子程序参数列表。`GetBlock` 方法返回子程序代码块。
 ```cpp
 class Subprogram : public ASTNode {
   public:
@@ -2471,7 +2471,7 @@ class Subprogram : public ASTNode {
 ```
 
 ##### Function 类
-Function 类表示抽象语法树中的函数节点。它有五个私有成员：name_（表示函数名称的字符串），return_var_（表示返回变量的 Var 类型智能指针），return_type_（表示返回类型的 Type 类型智能指针），args_（表示函数参数的 Argument 类型智能指针向量）和 block_（表示函数代码块的 Block 类型智能指针）。Function 类有一个构造函数，接受一个字符串、一个 Type 类型智能指针、一个 Argument 类型智能指针向量和一个 Block 类型智能指针作为参数。Accept 方法用于接受访问者对象。GetName 方法返回函数名称。GetReturnVar 方法返回返回变量。GetReturnType 方法返回返回类型。GetArgs 方法返回函数参数列表。GetBlock 方法返回函数代码块。
+`Function` 类表示抽象语法树中的函数节点。它有五个私有成员：`name_`（表示函数名称的字符串），`return_var_`（表示返回变量的 `Var` 类型智能指针），`return_type_`（表示返回类型的 `Type` 类型智能指针），`args_`（表示函数参数的 `Argument` 类型智能指针向量）和 `block_`（表示函数代码块的 `Block` 类型智能指针）。`Function` 类有一个构造函数，接受一个字符串、一个 `Type` 类型智能指针、一个 `Argument` 类型智能指针向量和一个 `Block` 类型智能指针作为参数。`Accept` 方法用于接受访问者对象。`GetName` 方法返回函数名称。`GetReturnVar` 方法返回返回变量。`GetReturnType` 方法返回返回类型。`GetArgs` 方法返回函数参数列表。`GetBlock` 方法返回函数代码块。
 ```cpp
 class Function : public ASTNode {
   public:
@@ -2500,7 +2500,7 @@ class Function : public ASTNode {
 ```
 
 ##### Program 类
-Program 类表示抽象语法树中的程序节点。它有三个私有成员：name_（表示程序名称的字符串），global_declarations_（表示全局声明的 ASTNode 类型智能指针向量）和 block_（表示程序代码块的 Block 类型智能指针）。Program 类有两个构造函数，分别接受一个字符串和一个 Block 类型智能指针，以及一个字符串、一个 Block 类型智能指针和一个 ASTNode 类型智能指针向量作为参数。Accept 方法用于接受访问者对象。GetName 方法返回程序名称。GetBlock 方法返回程序代码块。GetGlobalDeclarations 方法返回全局声明列表。
+`Program` 类表示抽象语法树中的程序节点。它有三个私有成员：`name_`（表示程序名称的字符串），`global_declarations_`（表示全局声明的 `ASTNode` 类型智能指针向量）和 `block_`（表示程序代码块的 `Block` 类型智能指针）。`Program` 类有两个构造函数，分别接受一个字符串和一个 `Block` 类型智能指针，以及一个字符串、一个 `Block` 类型智能指针和一个 `ASTNode` 类型智能指针向量作为参数。`Accept` 方法用于接受访问者对象。`GetName` 方法返回程序名称。`GetBlock` 方法返回程序代码块。`GetGlobalDeclarations` 方法返回全局声明列表。
 ```cpp
 class Program : public ASTNode {
   public:
@@ -2526,7 +2526,7 @@ class Program : public ASTNode {
 ```
 
 ##### Assignment 类
-Assignment 类表示抽象语法树中的赋值节点。它有两个私有成员：left_（表示左侧 ASTNode 类型智能指针）和 right_（表示右侧 ASTNode 类型智能指针）。Assignment 类有一个构造函数，接受两个 ASTNode 类型智能指针作为参数, Accept 方法用于接受访问者对象。GetLeft 方法返回赋值左侧的节点。GetRight 方法返回赋值右侧的节点。
+`Assignment` 类表示抽象语法树中的赋值节点。它有两个私有成员：`left_`（表示左侧 `ASTNode` 类型智能指针）和 `right_`（表示右侧 `ASTNode` 类型智能指针）。`Assignment` 类有一个构造函数，接受两个 `ASTNode` 类型智能指针作为参数, `Accept` 方法用于接受访问者对象。`GetLeft` 方法返回赋值左侧的节点。`GetRight` 方法返回赋值右侧的节点。
 ```cpp
 class Assignment : public ASTNode {
   public:
@@ -2545,7 +2545,7 @@ class Assignment : public ASTNode {
 ```
 
 ##### Oper 类
-Oper 类表示抽象语法树中的操作符节点（如 '+', '-', 等）。它有一个私有成员：oper_（表示操作符的字符串）。Oper 类有一个构造函数，接受一个 Token 类型智能指针作为参数。Accept 方法用于接受访问者对象。GetOper 方法返回操作符字符串。
+`Oper` 类表示抽象语法树中的操作符节点（如 '+', '-', 等）。它有一个私有成员：`oper_`（表示操作符的字符串）。`Oper` 类有一个构造函数，接受一个 `Token` 类型智能指针作为参数。`Accept` 方法用于接受访问者对象。`GetOper` 方法返回操作符字符串。
 ```cpp
 // Operators, like '+', '-', etc.
 class Oper : public ASTNode {
@@ -2561,7 +2561,7 @@ class Oper : public ASTNode {
 ```
 
 ##### UnaryOperation 类
-UnaryOperation 类表示抽象语法树中的一元操作节点。它有三个私有成员：oper_（表示操作符的 Oper 类型智能指针），var_node_（表示操作数的 ASTNode 类型智能指针）和 var_type_（表示操作结果类型的 VarType 枚举值）。UnaryOperation 类有一个构造函数，接受一个 Oper 类型智能指针、一个 ASTNode 类型智能指针和一个 VarType 枚举值作为参数。Accept 方法用于接受访问者对象。GetOper 方法返回操作符。GetVarNode 方法返回操作数节点。GetVarType 方法返回操作结果类型。
+`UnaryOperation` 类表示抽象语法树中的一元操作节点。它有三个私有成员：`oper_`（表示操作符的 `Oper` 类型智能指针），`var_node_`（表示操作数的 `ASTNode` 类型智能指针）和 `var_type_`（表示操作结果类型的 `VarType` 枚举值）。`UnaryOperation` 类有一个构造函数，接受一个 `Oper` 类型智能指针、一个 `ASTNode` 类型智能指针和一个 `VarType` 枚举值作为参数。`Accept` 方法用于接受访问者对象。`GetOper` 方法返回操作符。`GetVarNode` 方法返回操作数节点。`GetVarType` 方法返回操作结果类型。
 ```cpp
 class UnaryOperation : public IVar {
   public:
@@ -2582,7 +2582,7 @@ class UnaryOperation : public IVar {
 ```
 
 ##### BinaryOperation 类
-BinaryOperation 类表示抽象语法树中的二元操作节点。它有四个私有成员：left_（表示左操作数的 ASTNode 类型智能指针），oper_（表示操作符的 Oper 类型智能指针），right_（表示右操作数的 ASTNode 类型智能指针）和 var_type_（表示操作结果类型的 VarType 枚举值）。BinaryOperation 类有一个构造函数，接受一个 ASTNode 类型智能指针、一个 Oper 类型智能指针、一个 ASTNode 类型智能指针和一个 VarType 枚举值作为参数。Accept 方法用于接受访问者对象。GetLeft 方法返回左操作数节点。GetOper 方法返回操作符。GetRight 方法返回右操作数节点。GetVarType 方法返回操作结果类型。GetName 方法返回 "binary_operation" 字符串。
+`BinaryOperation` 类表示抽象语法树中的二元操作节点。它有四个私有成员：`left_`（表示左操作数的 `ASTNode` 类型智能指针），`oper_`（表示操作符的 `Oper` 类型智能指针），`right_`（表示右操作数的 `ASTNode` 类型智能指针）和 `var_type_`（表示操作结果类型的 `VarType` 枚举值）。`BinaryOperation` 类有一个构造函数，接受一个 `ASTNode` 类型智能指针、一个 `Oper` 类型智能指针、一个 `ASTNode` 类型智能指针和一个 `VarType` 枚举值作为参数。`Accept` 方法用于接受访问者对象。`GetLeft` 方法返回左操作数节点。`GetOper` 方法返回操作符。`GetRight` 方法返回右操作数节点。`GetVarType` 方法返回操作结果类型。`GetName` 方法返回 "`binary_operation`" 字符串。
 ```cpp
 class BinaryOperation : public IVar {
   public:
@@ -2608,7 +2608,7 @@ class BinaryOperation : public IVar {
 ```
 
 ##### NoOp 类
-NoOp 类表示抽象语法树中的一个空操作节点，它不执行任何操作。这个类只有一个构造函数和一个 Accept 方法，用于接受访问者对象。
+`NoOp` 类表示抽象语法树中的一个空操作节点，它不执行任何操作。这个类只有一个构造函数和一个 `Accept` 方法，用于接受访问者对象。
 ```cpp
 class NoOp : public ASTNode {
   public:
@@ -2619,7 +2619,7 @@ class NoOp : public ASTNode {
 ```
 
 ##### Statement 类
-Statement 类表示抽象语法树中的一个带有分号的语句节点。它有一个私有成员：node_（表示 ASTNode 类型的智能指针）。Statement 类有一个构造函数，接受一个 ASTNode 类型智能指针作为参数。Accept 方法用于接受访问者对象。GetNode 方法返回语句节点。
+`Statement` 类表示抽象语法树中的一个带有分号的语句节点。它有一个私有成员：`node_`（表示 `ASTNode` 类型的智能指针）。`Statement` 类有一个构造函数，接受一个 `ASTNode` 类型智能指针作为参数。`Accept` 方法用于接受访问者对象。`GetNode` 方法返回语句节点。
 ```cpp
 /**
  * @brief Statement with a ';'
@@ -2640,7 +2640,7 @@ class Statement : public ASTNode {
 ```
 
 ##### IfStatement 类
-IfStatement 类表示抽象语法树中的一个条件语句节点。它有三个私有成员：condition_（表示条件的 ASTNode 类型智能指针），then_branch_（表示条件为真时执行的代码块的 Compound 类型智能指针）和 else_branch_（表示条件为假时执行的代码块的 Compound 类型智能指针，如果没有 else 分支，则为 nullptr）。IfStatement 类有一个构造函数，接受一个 ASTNode 类型智能指针、一个 Compound 类型智能指针和一个 Compound 类型智能指针作为参数。Accept 方法用于接受访问者对象。GetCondition 方法返回条件节点。GetThenBranch 方法返回 then 分支代码块。GetElseBranch 方法返回 else 分支代码块。`
+`IfStatement` 类表示抽象语法树中的一个条件语句节点。它有三个私有成员：`condition_`（表示条件的 `ASTNode` 类型智能指针），`then_branch_`（表示条件为真时执行的代码块的 `Compound` 类型智能指针）和 `else_branch_`（表示条件为假时执行的代码块的 `Compound` 类型智能指针，如果没有 `else` 分支，则为 `nullptr`）。`IfStatement` 类有一个构造函数，接受一个 `ASTNode` 类型智能指针、一个 `Compound` 类型智能指针和一个 `Compound` 类型智能指针作为参数。`Accept` 方法用于接受访问者对象。`GetCondition` 方法返回条件节点。`GetThenBranch` 方法返回 `then` 分支代码块。`GetElseBranch` 方法返回 `else` 分支代码块。
 ```cpp
 class IfStatement : public ASTNode {
   public:
@@ -2663,7 +2663,7 @@ class IfStatement : public ASTNode {
 ```
 
 ##### ForStatement 类
-ForStatement 类表示抽象语法树中的一个循环语句节点。它有四个私有成员：variable_（表示循环变量的 Var 类型智能指针），start_（表示循环起始值的 ASTNode 类型智能指针），end_（表示循环终止值的 ASTNode 类型智能指针）和 body_（表示循环体的 Compound 类型智能指针）。ForStatement 类有一个构造函数，接受一个 Var 类型智能指针、一个 ASTNode 类型智能指针、一个 ASTNode 类型智能指针和一个 Compound 类型智能指针作为参数。Accept 方法用于接受访问者对象。GetVariable 方法返回循环变量。GetStart 方法返回循环起始值。GetEnd 方法返回循环终止值。GetBody 方法返回循环体。
+`ForStatement` 类表示抽象语法树中的一个循环语句节点。它有四个私有成员：`variable_`（表示循环变量的 `Var` 类型智能指针），`start_`（表示循环起始值的 `ASTNode` 类型智能指针），`end_`（表示循环终止值的 `ASTNode` 类型智能指针）和 `body_`（表示循环体的 `Compound` 类型智能指针）。`ForStatement` 类有一个构造函数，接受一个 `Var` 类型智能指针、一个 `ASTNode` 类型智能指针、一个 `ASTNode` 类型智能指针和一个 `Compound` 类型智能指针作为参数。`Accept` 方法用于接受访问者对象。`GetVariable` 方法返回循环变量。`GetStart` 方法返回循环起始值。`GetEnd` 方法返回循环终止值。`GetBody` 方法返回循环体。
 ```cpp
 class ForStatement : public ASTNode {
   public:
@@ -2688,7 +2688,7 @@ class ForStatement : public ASTNode {
 ```
 
 ##### FunctionCall 类
-FunctionCall 类表示抽象语法树中的一个函数调用节点。它有四个私有成员：name_（表示函数名的字符串），parameters_（表示函数参数的 ASTNode 类型智能指针向量），is_reference_（表示参数是否为引用的位集合）和 return_type_（表示函数返回类型的 VarType 枚举值）。`Function Call` 类有两个构造函数，一个接受函数名、参数向量、引用位集和返回类型作为参数，另一个仅接受函数名。Accept 方法用于接受访问者对象。GetName 方法返回函数名。GetParameters 方法返回参数向量。SetIsReference方法接受一个整数pos，将位集合中相应位置的标志设置为 true，表示该位置的参数是引用。GetIsReference方法接受一个整数pos，返回位集合中相应位置的标志（如果为 true，表示该位置的参数是引用）。GetReturnType` 方法返回函数返回类型。
+`FunctionCall` 类表示抽象语法树中的一个函数调用节点。它有四个私有成员：`name_`（表示函数名的字符串），`parameters_`（表示函数参数的 `ASTNode` 类型智能指针向量），`is_reference_`（表示参数是否为引用的位集合）和 `return_type_`（表示函数返回类型的 `VarType` 枚举值）。`Function Call` 类有两个构造函数，一个接受函数名、参数向量、引用位集和返回类型作为参数，另一个仅接受函数名。`Accept` 方法用于接受访问者对象。`GetName` 方法返回函数名。`GetParameters` 方法返回参数向量。`SetIsReference`方法接受一个整数`pos`，将位集合中相应位置的标志设置为 `true`，表示该位置的参数是引用。`GetIsReference`方法接受一个整数`pos`，返回位集合中相应位置的标志（如果为 `true`，表示该位置的参数是引用）。`GetReturnType`` 方法返回函数返回类型。
 ```cpp
 class FunctionCall : public ASTNode {
   public:
@@ -2721,18 +2721,18 @@ class FunctionCall : public ASTNode {
 
 ##### 总结
 
-Call 类有两个构造函数，一个接受函数名、参数向量、引用位集和返回类型作为参数，另一个仅接受函数名。Accept 方法用于接受访问者对象。GetName 方法返回函数名。GetParameters 方法返回参数向量。SetIsReference方法接受一个整数pos，将位集合中相应位置的标志设置为 true，表示该位置的参数是引用。GetIsReference方法接受一个整数pos，返回位集合中相应位置的标志（如果为 true，表示该位置的参数是引用）。GetReturnType` 方法返回函数返回类型。
+`Call` 类有两个构造函数，一个接受函数名、参数向量、引用位集和返回类型作为参数，另一个仅接受函数名。`Accept` 方法用于接受访问者对象。`GetName` 方法返回函数名。`GetParameters` 方法返回参数向量。`SetIsReference`方法接受一个整数`pos`，将位集合中相应位置的标志设置为 `true`，表示该位置的参数是引用。`GetIsReference`方法接受一个整数`pos`，返回位集合中相应位置的标志（如果为 `true`，表示该位置的参数是引用）。`GetReturnType` 方法返回函数返回类型。
 
 ### 函数、方法说明
 
 #### 设计模式说明
-Code Generator使用了访问者模式(Visitor Pattern)来设计和遍历AST树，以便在不修改AST节点类的情况下，可以方便地添加新的操作，例如优化、代码生成等。以下是关于AST设计和遍历方法的详细文档。
+`Code` `Generator`使用了访问者模式(`Visitor` `Pattern`)来设计和遍历`AST`树，以便在不修改`AST`节点类的情况下，可以方便地添加新的操作，例如优化、代码生成等。以下是关于`AST`设计和遍历方法的详细文档。
 
 ##### AST的访问者模式设计
-访问者模式是一种将算法与其所操作的对象结构分离的设计模式。在本例中，访问者模式用于遍历AST。每个节点类都实现了一个Accept方法，该方法接受一个访问者对象作为参数, 可以根据需要执行例如优化、代码生成、错误检查等。要遍历AST，只需调用根节点（通常为Program节点）的Accept方法，并将访问者对象作为参数传递, 而不需要频繁的对AST进行修改.
+访问者模式是一种将算法与其所操作的对象结构分离的设计模式。在本例中，访问者模式用于遍历`AST`。每个节点类都实现了一个`Accept`方法，该方法接受一个访问者对象作为参数, 可以根据需要执行例如优化、代码生成、错误检查等。要遍历`AST`，只需调用根节点（通常为`Program`节点）的`Accept`方法，并将访问者对象作为参数传递, 而不需要频繁的对`AST`进行修改.
 
 ##### 遍历方法
-首先编写Visitor虚基类, 所有的使用访问者模式的类都需要继承并实现该虚基类中的所有方法. Visitor 类是一个抽象基类，用于遍历和处理抽象语法树（AST）的节点。它定义了用于访问各种类型节点的虚拟方法。通过实现这些方法，可以对 AST 节点执行各种操作，例如语法检查、优化或代码生成。
+首先编写`Visitor`虚基类, 所有的使用访问者模式的类都需要继承并实现该虚基类中的所有方法. `Visitor` 类是一个抽象基类，用于遍历和处理抽象语法树（`AST`）的节点。它定义了用于访问各种类型节点的虚拟方法。通过实现这些方法，可以对 `AST` 节点执行各种操作，例如语法检查、优化或代码生成。
 
 以下是对Visit抽象类中的各个访问方法的简要说明:
 `Visit(const shared_ptr<ASTNode> &node, bool indent = false)`：访问 ASTNode 类型的节点，indent 参数表示是否应缩进打印输出。
@@ -2809,9 +2809,9 @@ class Visitor {
 ```
 
 ##### 访问者模式如何使用
-要使用 Visitor 模式，首先需要创建一个具体的 Visitor 类(在本部分中为CodeGenerator)，该类继承自 Visitor 基类并实现所有的访问方法。然后，可以通过将具体的 Visitor 对象传递给 AST 节点的 Accept() 方法来遍历和处理 AST。在具体的 Visitor 类中实现的访问方法将根据节点类型自动调用。
+要使用 `Visitor` 模式，首先需要创建一个具体的 `Visitor` 类(在本部分中为`CodeGenerator`)，该类继承自 `Visitor` 基类并实现所有的访问方法。然后，可以通过将具体的 `Visitor` 对象传递给 `AST` 节点的 `Accept`() 方法来遍历和处理 `AST`。在具体的 `Visitor` 类中实现的访问方法将根据节点类型自动调用。
 
-Visitor 模式允许在不修改 AST 节点类的情况下添加新的操作。这使得 AST 节点类和操作它们的算法之间保持解耦，从而提高了代码的可扩展性和可维护性。
+`Visitor` 模式允许在不修改 `AST` 节点类的情况下添加新的操作。这使得 `AST` 节点类和操作它们的算法之间保持解耦，从而提高了代码的可扩展性和可维护性。
 
 #### 代码生成CodeGenerator
 
@@ -3060,7 +3060,7 @@ void Program::Accept(Visitor &visitor) {
 - `visitor`：一个实现了 `Visitor` 接口的对象，用于遍历和处理抽象语法树（AST）中的节点。
 
 **示例**
-以下代码演示了如何创建一个 Visitor 实例并使用 Program::Accept 函数让访问者访问 Program 节点。
+以下代码演示了如何创建一个 `Visitor` 实例并使用 `Program::Accept` 函数让访问者访问 `Program` 节点。
 
 ```cpp
  // 创建一个 Program 节点
@@ -3714,7 +3714,7 @@ void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node,
         if (auto dp = dynamic_pointer_cast<Num>(p)) {
             specifiers.push_back("%d");
         } else if (auto dp = dynamic_pointer_cast<Real>(p)) {
-            specifiers.push_back("%f");
+            specifiers.push_back("%lf");
         } else if (auto dp = dynamic_pointer_cast<String>(p)) {
             specifiers.push_back("%s");
         } else if (auto dp = dynamic_pointer_cast<Char>(p)) {
@@ -3728,7 +3728,7 @@ void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node,
         if (vt == VarType::INT)
             specifiers.push_back("%d");
         else if (vt == VarType::REAL)
-            specifiers.push_back("%f");
+            specifiers.push_back("%lf");
         else if (vt == VarType::STRING)
             specifiers.push_back("%s");
         else if (vt == VarType::CHAR)
@@ -3756,19 +3756,19 @@ void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node,
     }
     ostream_ << '"';
     for (auto &s : specifiers) {
-        ostream_ << ((function_name == "read") ? s : (s + " "));
+        ostream_ << s;
     }
     ostream_ << ((function_name == "writeln") ? "\\n\", " : "\", ");
 }
 ```
 **参数**
 - `node`：一个指向 `FunctionCall` 节点的智能指针。
-- `new_line`：布尔值，表示是否在格式字符串末尾添加换行符。默认值为 `false`。
 
 **功能**
 - 定义各种类型节点的类型转换函数，如 `BaseCast`、`CastByVarType`、`IVarCast` 和 `FuncCallCast`。这些函数根据节点类型生成相应的格式化占位符。
 - 遍历 `FunctionCall` 节点的参数列表，对每个参数调用相应的类型转换函数，并将结果存储在 `specifiers` 向量中。
-- 将 `specifiers` 中的格式化占位符写入输出流 `ostream_`。如果 `new_line` 参数为 `true`，则在格式字符串末尾添加换行符。
+- 将 `specifiers` 中的格式化占位符写入输出流 `ostream_`。如果 `node->GetName()` 为 `writeln`，则在格式字符串末尾添加换行符。
+- 没有参数的`writeln`翻译为仅输出`\n`的`printf`语句.
 
 ##### IsReferenceArg 方法
 `IsReferenceArg` 函数用于判断抽象语法树中的 `Var` 节点是否为引用参数。
