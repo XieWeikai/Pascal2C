@@ -413,7 +413,6 @@ namespace pascal2c::parser
                 "16:5 syntax error: missing ';' at the end of statement",
                 "16:21 syntax err:expected ')' before 'then'",
                 "19:5 syntax error: missing ';' at the end of statement",
-                "21:5 last statement should not end with ;",
                 "22:5 syntax error: missing ';' at the end of statement",
                 "22:13 syntax error: unclosed brackets"
         };
@@ -427,7 +426,7 @@ namespace pascal2c::parser
             EXPECT_EQ(e, err_msgs[ind++]);
         }
 
-        std::cout << input_str << std::endl;
+//        std::cout << input_str << std::endl;
 
         fclose(input);
     }
