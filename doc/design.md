@@ -3830,64 +3830,253 @@ void CodeGenerator::DecIndent() { indent_level_--; }
 `pascal_type`：一个表示 `Pascal` 类型的字符串。
 
 **返回**
-返回一个表示 C 类型的字符串。
+返回一个表示 C  
 
-### 算法说明
 
-将抽象语法树（AST）转换为C代码的算法设计如下：
+### AST树转换类 Transformer
+在**Pascal2C**编译系统中，前端（词法、语法）和后端（代码生成）均维护了一棵AST树，前端部分维护的AST树更贴近Pascal语言的风格，后端部分维护的AST的树更贴近C语言的风格。这有利于化简开发流程，也使得两部分工作可以同步进行。也因此需要引入一个AST树转换类对两种风格的树进行对应的转换。
 
-1. 遍历AST：从根节点开始，使用深度优先搜索（DFS）遍历AST。在遍历过程中，访问并处理每个节点。
 
-1. 节点类型处理：根据不同的节点类型，实现相应的代码生成方法。例如：
+```c++
+#pragma once
+#include "opti_common.h"
 
-   - 对于声明节点，生成相应的变量或函数声明代码。
-   - 对于赋值语句节点，生成赋值操作的C代码。
-   - 对于表达式节点，生成相应的算术或逻辑运算代码。
-   - 对于控制流节点（如if、while等），生成相应的条件和循环代码。
-   - 对于函数调用节点，生成函数调用语句。
 
-1. 代码生成：根据节点类型处理的结果，逐步构建目标C代码。每次访问一个节点时，将生成的代码片段连接到输出代码中。
+#include <unordered_map>
+#include <optional>
+#include <regex>
 
-1. 优化：对生成的C代码进行优化，以提高生成代码的质量和性能。这需要做出一些tradeoff，因为Pascal2C的生成语言是另一种高级语言，这需要在优化程度和可读性中进行取舍。因此考虑以编译器参数的方式对部分优化方式进行选择性实施。
-* 常量分析
-* inline 内联：如果函数体只返回一个表达式，即对应的AST return 中只含有一个expression子节点，可以将函数调用替换为表达式
-```c
-void mul(int x , int y) {return x * y * y;}
+namespace pascal2c::code_generation {
+
+class Transformer {
+public : 
+    /**
+     * @attention It need analysis::init() has been executed.
+    */
+	explicit Transformer(std::shared_ptr<ast::Ast> root);
+    Transformer() = delete;
+    auto GetASTRoot() const {return ast_root;}
+
+private :
+	std::shared_ptr<ASTRoot> ast_root;
+    analysiser::nameTable* table; // TODO : singleton
+    std::shared_ptr<symbol_table::SymbolTableBlock> sym_block;
+    std::shared_ptr<TypeToolKit> type_kit;
+
+    shared_ptr<Program> transProgram(shared_ptr<ast::Program> cur);
+    shared_ptr<ASTNode>
+        transSubprogram(shared_ptr<ast::Subprogram> cur);
+
+    /**
+     * @brief Handle Program
+    */
+    template<typename T>
+    shared_ptr<Block> transBody(shared_ptr<T> cur);
+    template<typename T>
+    shared_ptr<Declaration> transDeclaration(shared_ptr<T> body);
+    shared_ptr<ConstDeclaration>
+        transConstDeclaration(shared_ptr<ast::ConstDeclaration> cur);
+    vector<shared_ptr<ASTNode>> 
+        transVarDeclaration(shared_ptr<ast::VarDeclaration> cur);
+
+    /**
+     * @brief Handle Expressions
+    */
+    shared_ptr<ASTNode>
+        transExpression(shared_ptr<ast::Expression> cur);
+    std::pair<shared_ptr<ASTNode> , VarType>
+        passExpr(shared_ptr<ast::Expression> cur);
+    /**
+     * @brief Handle Statements
+    */
+    shared_ptr<ASTNode>
+        transStatement(shared_ptr<ast::Statement> cur);
+    shared_ptr<Compound>
+        transCompoundStatement(shared_ptr<ast::CompoundStatement> cur);
+    shared_ptr<Assignment> 
+        transAssignStatement(shared_ptr<ast::AssignStatement> cur);
+    shared_ptr<Statement>
+        transCallStatement(shared_ptr<ast::CallStatement> cur);
+    shared_ptr<IfStatement>
+        transIfStatement(shared_ptr<ast::IfStatement> cur);
+    shared_ptr<ForStatement>
+        transForStatement(shared_ptr<ast::ForStatement> cur);
+    shared_ptr<ExitStatement>
+        transExitStatement(shared_ptr<ast::ExitStatement> cur);
+    shared_ptr<WhileStatement>
+        transWhileStatement(shared_ptr<ast::WhileStatement> cur);
+
+
+    std::tuple<bool ,bool , bool , bool , bool , symbol_table::ItemType>
+        checkIdType(const string& id);
+    std::optional<std::pair<symbol_table::ItemType , std::vector<std::pair<int , int>>>>
+        checkArrayType(const string& id);
+    string checkExprType(shared_ptr<ast::Expression> cur);
+
+    bool checkIdTypeIfVar(const string& id);
+    bool checkIdTypeIfConst(const string& id);   
+    bool checkIdTypeIfFunc(const string& id);
+    bool checkIdTypeIfRetVar(const string& id);
+    bool checkIdTypeIfRef(const string& id);
+};
+
+} // End namespace 
 ```
-* 去除冗余操作 ：
-  
+#### Transformer 成员变量
+1. 存储生成的的支持Ast Adapter的AST树的根节点
+```cpp
+	std::shared_ptr<ASTRoot> ast_root;
+```
 
-去除未使用的代码段或变量声明；
-```c
-bool flag = false;
-for (int i = 0; i < b; i++) {
-    /* .. */
-    if (flag) {...}
-}
+2. 来自语义分析阶段的符号表
+```cpp
+analysiser::nameTable* table; // TODO : singleton
 ```
-循环体中重复出现的表达式求值;
-```c
-for (int i = 0; i < n; i++) {
-    a[i]+= x * x;
-}
+
+3. 用于查询语义分析阶段的符号表。记录当前函数域对应的表。
+```cpp
+std::shared_ptr<symbol_table::SymbolTableBlock> sym_block;
 ```
-可归纳的数学运算(编译期运算)；
-```c
-for (int i = 0; i < n ;i++) {
-    sum += i;
-}
+4. 用于语义分析、语法分析阶段类型转换至代码生成支持类型的工具
+```cpp
+std::shared_ptr<TypeToolKit> type_kit;
 ```
-数组循环行列交换；
-```c
-for (int i = 1; i < n; i++) {
-    for (int j = 0; j < n; j++) {
-        b[j][i] = a[j][i] - a[j - 1][i];
-    }
-}
+
+#### Transformer 成员函数
+
+##### 翻译`Program`和`SubProgram`
+```cpp
+shared_ptr<Program> transProgram(shared_ptr<ast::Program> cur);
+
+shared_ptr<ASTNode>
+    transSubprogram(shared_ptr<ast::Subprogram> cur);
 ```
-* 复写传播 ：对于非volatile但是值为常数的变量直接替换成常量；考虑到可读性，可以替换成宏定义或者常量定义
-* 优化表达式计算：如操作数为2的倍数的乘除法运算
-* 合并连续的条件判断和循环语句。
+
+* 翻译程序体。因为`Program`和`SubProgram`相似，使用模板做泛型统一处理。
+```cpp
+template<typename T>
+shared_ptr<Block> transBody(shared_ptr<T> cur);
+```
+函数功能为先处理声明语句，再处理语句。
+
+* 翻译声明语句。包括常量声明和变量声明和函数声明
+```cpp
+template<typename T>
+shared_ptr<Declaration> transDeclaration(shared_ptr<T> body);
+```
+因为`Program`和`SubProgram`相似，该函数同样采用模板统一处理。对于`Program`类型额外处理函数声明。
+三种声明的处理顺序为`const -> var -> function`
+
+* 翻译常量声明。将`ast::ConstDeclaration`翻译为`ConstDeclaration`
+```cpp
+shared_ptr<ConstDeclaration>
+    transConstDeclaration(shared_ptr<ast::ConstDeclaration> cur);
+```
+
+* 翻译变量声明。包括基本类型和数组类型的翻译。
+```cpp
+vector<shared_ptr<ASTNode>> 
+    transVarDeclaration(shared_ptr<ast::VarDeclaration> cur);
+```
+由于AST树的差异，这里将`id_list`拆分成多个单独的声明，因此返回值为一个vector
+
+
+##### 翻译表达式`Expression`
+
+* 表达式的翻译主要通过`passExpr()`函数递归遍历AST树，返回值为转换后的节点指针和表达式的类型信息。
+```cpp
+shared_ptr<ASTNode>
+    transExpression(shared_ptr<ast::Expression> cur);
+std::pair<shared_ptr<ASTNode> , VarType>
+    passExpr(shared_ptr<ast::Expression> cur);
+```
+具体的处理时，`INT` `REAL` `CHAR` `BOOLEAN` `STRING`基本类型将直接翻译。
+`VALUE` 变量类型 将进行符号表的查询工作，检查是否为引用类型、是否时函数返回标识符；数组类型将查询每一维度的范围。
+`CALL_OR_VAL`无法区分的调用和变量标识符 将进行符号表的查询进行判断。
+`UNARY` `BINARY` 一元/二元运算 将进行类型的合并工作。
+`CALL`函数调用 将检查返回值类型和参数的引用情况
+
+##### 翻译语句`Statement`
+
+对于具体语句的翻译，支持如下几种语句。
+```cpp
+shared_ptr<ASTNode>
+    transStatement(shared_ptr<ast::Statement> cur);
+shared_ptr<Compound>
+    transCompoundStatement(shared_ptr<ast::CompoundStatement> cur);
+shared_ptr<Assignment> 
+    transAssignStatement(shared_ptr<ast::AssignStatement> cur);
+shared_ptr<Statement>
+    transCallStatement(shared_ptr<ast::CallStatement> cur);
+shared_ptr<IfStatement>
+    transIfStatement(shared_ptr<ast::IfStatement> cur);
+shared_ptr<ForStatement>
+    transForStatement(shared_ptr<ast::ForStatement> cur);
+shared_ptr<ExitStatement>
+    transExitStatement(shared_ptr<ast::ExitStatement> cur);
+shared_ptr<WhileStatement>
+    transWhileStatement(shared_ptr<ast::WhileStatement> cur);
+```
+
+##### 符号表增强与适配
+
+* 为了适配符号表的查询和支持查询参数的引用情况，这里记录节点遍历栈的情况，并使用哈希表的方式记录当前函数域的名称
+、节点和符号表索引值。
+```cpp
+static struct {
+	string func_line;
+	string func_name;
+	shared_ptr<ast::Subprogram> func_node;
+} las , now;
+
+static std::unordered_map <string , // Scope Line Number, Name
+		shared_ptr<ast::SubprogramHead>> func_name_table;
+
+```
+当处理到SubprogramHead的时候会进行更新
+```cpp
+	las = now;
+	now = {
+		std::to_string(cur->subprogram_head()->line()) ,
+		cur->subprogram_head()->id() ,
+		cur
+	};
+```
+处理Body部分结束后进行返回
+```cpp
+	now = las;
+```
+在声明阶段会将函数节点插入到哈希表种
+```cpp
+	func_name_table[now.func_name] = (cur->subprogram_head());
+```
+
+* 查询函数调用时，参数的引用类型，使得可以生成取地址符，返回bitet
+```cpp
+    static auto getParamRefs(const string& func_name);
+```
+实现方式为查询哈希表`func_name_table`
+
+* 获取参数在函数声明列表中的位置，便于函数体内引用信息查询
+```cpp
+bool Transformer::checkIdTypeIfRef(const string& id)
+static size_t getParamIndex(shared_ptr<ast::SubprogramHead> node ,const string& id)
+```
+
+* 查询返回标识符的类型信息，对符号表的查询封装
+```cpp
+/**
+ * @return is_val | is_func | is_ref | is_ret | is_const
+*/
+std::tuple<bool , bool , bool , bool , bool , symbol_table::ItemType>
+Transformer::checkIdType(const string& id)
+```
+
+* 查询数组的类型信息，，对符号表的查询封装
+```cpp
+std::optional<std::pair<symbol_table::ItemType , std::vector<std::pair<int , int>>>>
+    checkArrayType(const string& id);
+```
 
 5.  格式化：为生成的C代码添加适当的缩进和换行，以提高代码的可读性。
 
