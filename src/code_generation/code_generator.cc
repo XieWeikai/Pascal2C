@@ -337,33 +337,33 @@ void CodeGenerator::VisitWhileStatement(
 
 // Print "%d%c%s%d..."
 void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node,
-                                       bool new_line) {
+                                       const string &function_name) {
     vector<string> specifiers;
     auto BaseCast = [&](const shared_ptr<ASTNode> &p) -> void {
         if (auto dp = dynamic_pointer_cast<Num>(p)) {
-            specifiers.push_back("%d ");
+            specifiers.push_back("%d");
         } else if (auto dp = dynamic_pointer_cast<Real>(p)) {
-            specifiers.push_back("%f ");
+            specifiers.push_back("%f");
         } else if (auto dp = dynamic_pointer_cast<String>(p)) {
-            specifiers.push_back("%s ");
+            specifiers.push_back("%s");
         } else if (auto dp = dynamic_pointer_cast<Char>(p)) {
-            specifiers.push_back("%c ");
+            specifiers.push_back("%c");
         } else {
-            specifiers.push_back("%s ");
+            specifiers.push_back("%s");
         }
     };
 
     auto CastByVarType = [&](const VarType vt) -> void {
         if (vt == VarType::INT)
-            specifiers.push_back("%d ");
+            specifiers.push_back("%d");
         else if (vt == VarType::REAL)
-            specifiers.push_back("%f ");
+            specifiers.push_back("%f");
         else if (vt == VarType::STRING)
-            specifiers.push_back("%s ");
+            specifiers.push_back("%s");
         else if (vt == VarType::CHAR)
-            specifiers.push_back("%c ");
+            specifiers.push_back("%c");
         else
-            specifiers.push_back("%s ");
+            specifiers.push_back("%s");
     };
 
     auto IVarCast = [&](const shared_ptr<IVar> &p) -> void {
@@ -385,9 +385,9 @@ void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node,
     }
     ostream_ << '"';
     for (auto &s : specifiers) {
-        ostream_ << s;
+        ostream_ << ((function_name == "read") ? s : (s + " "));
     }
-    ostream_ << (new_line ? "\\n\", " : "\", ");
+    ostream_ << ((function_name == "writeln") ? "\\n\", " : "\", ");
 }
 
 void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
@@ -401,7 +401,7 @@ void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
     ostream_ << func_name << "(";
     // print Format string
     if (func_name != node->GetName()) {
-        PrintfFormatString(node, (node->GetName() == "writeln"));
+        PrintfFormatString(node, node->GetName());
     }
 
     // Print parameters
