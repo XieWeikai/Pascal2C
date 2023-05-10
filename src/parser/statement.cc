@@ -107,9 +107,9 @@ namespace pascal2c::parser {
                 statements.push_back(std::move(statement));
                 if(token_ != TOK_END) {
                     Match(';', "syntax error: missing ';' at the end of statement");
-                    if(token_ == TOK_END) {
-                        throw SyntaxErr("last statement should not end with ;", line_, column_);
-                    }
+//                    if(token_ == TOK_END) {
+//                        throw SyntaxErr("last statement should not end with ;", line_, column_);
+//                    }
                 }
             }catch (SyntaxErr &e){
                 AddSyntaxErr(e);
