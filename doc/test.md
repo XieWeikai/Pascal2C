@@ -563,44 +563,10 @@ end.
 - "16:5 syntax error: missing ';' at the end of statement",
 - "16:21 syntax err:expected ')' before 'then'",
 - "19:5 syntax error: missing ';' at the end of statement",
-- "21:5 last statement should not end with ;",
 - "22:5 syntax error: missing ';' at the end of statement",
 - "22:13 syntax error: unclosed brackets"
 
 经过测试后发现`Parser`可以正确提示上面的错误信息，因此测试通过。
-
-
-##### procedure
-
-procedure包括过程原型声明、常量声明、变量声明、过程体这几部分，其中常量声明、变量声明、过程体解析的测试在前面部分已经设计过，在这部分专注于过程原型声明的解析上，设计测试样例如下
-
-```pascal
-procedure go(a,b : integer);
-
-procedure hello;
-
-procedure abc(var a,b : integer; var c,d : real);
-
-procedure cde(a : integer; var d : real);
-
-procedure efg(var d : real; a,b :integer);
-```
-
-##### function
-
-function和procedure类似，同样我们设计的测试样例专注于原型声明上，设计测试用例如下
-
-```pascal
-function go(a,b : integer) : integer;
-
-function hello : real;
-
-function abc(var a,b : integer; var c,d : real) : real;
-
-function cde(a : integer; var d : real) boolean ;
-
-function efg(var d : real; a,b :integer) real;
-```
 
 
 #### 5.2.3 综合分析测试（TotalParserTest）
