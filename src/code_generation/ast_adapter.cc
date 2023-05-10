@@ -112,6 +112,11 @@ void Num::Accept(Visitor &visitor) {
     visitor.VisitNum(dynamic_pointer_cast<Num>(shared_from_this()));
 }
 
+// Bool
+void Bool::Accept(Visitor &visitor) {
+    visitor.VisitBool(dynamic_pointer_cast<Bool>(shared_from_this()));
+}
+
 // String
 void String::Accept(Visitor &visitor) {
     visitor.VisitString(dynamic_pointer_cast<String>(shared_from_this()));

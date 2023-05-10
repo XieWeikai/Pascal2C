@@ -63,6 +63,7 @@ void CodeGenerator::VisitProgram(
     const shared_ptr<code_generation::Program> &node) {
     ostream_ << "#include <stdio.h>" << endl
              << "#include <stdlib.h>" << endl
+             << "#include <stdbool.h>" << endl
              << endl;
 
     auto program_block = node->GetBlock();
@@ -265,6 +266,10 @@ void CodeGenerator::VisitBinOp(
 
 void CodeGenerator::VisitOper(const shared_ptr<Oper> &node) {
     ostream_ << SymbolToC(node->GetOper());
+}
+
+void CodeGenerator::VisitBool(const shared_ptr<Bool> &node) {
+    ostream_ << (node->GetValue() ? "true" : "false");
 }
 
 void CodeGenerator::VisitNum(const shared_ptr<Num> &node) {

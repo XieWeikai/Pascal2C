@@ -30,6 +30,7 @@ class Visitor {
     virtual void
     VisitUnaryOperation(const shared_ptr<UnaryOperation> &node) = 0;
     virtual void VisitOper(const shared_ptr<Oper> &node) = 0;
+    virtual void VisitBool(const shared_ptr<Bool> &node) = 0;
     virtual void VisitNum(const shared_ptr<Num> &node) = 0;
     virtual void VisitString(const shared_ptr<String> &node) = 0;
     virtual void VisitReal(const shared_ptr<Real> &node) = 0;

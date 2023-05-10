@@ -47,6 +47,7 @@ class CodeGenerator : Visitor {
     virtual void
     VisitUnaryOperation(const shared_ptr<UnaryOperation> &node) override;
     virtual void VisitOper(const shared_ptr<Oper> &node) override;
+    virtual void VisitBool(const shared_ptr<Bool> &node) override;
     virtual void VisitNum(const shared_ptr<Num> &node) override;
     virtual void VisitString(const shared_ptr<String> &node) override;
     virtual void VisitReal(const shared_ptr<Real> &node) override;

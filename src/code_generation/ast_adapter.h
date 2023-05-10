@@ -90,7 +90,20 @@ class Num : public ASTNode {
         : value_(std::stoi(token->GetValue())) {}
     virtual ~Num() = default;
     void Accept(Visitor &visitor) override;
-    int GetValue() const { return (value_); }
+    int GetValue() const { return value_; }
+
+  private:
+    int value_;
+};
+
+class Bool : public ASTNode {
+  public:
+    Bool(const shared_ptr<Token> &token)
+        : value_(std::stoi(token->GetValue())) {}
+    Bool(const int value = 0) : value_(value) {}
+    virtual ~Bool() = default;
+    void Accept(Visitor &visitor) override;
+    int GetValue() const { return value_; }
 
   private:
     int value_;
