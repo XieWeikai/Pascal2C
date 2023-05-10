@@ -259,7 +259,7 @@ void CodeGenerator::VisitBinOp(
     const shared_ptr<code_generation::BinaryOperation> &node) {
     ostream_ << '(';
     if (node->TestCastRequired()) {
-        ostream_ << (node->GetVarType() == VarType::REAL ? "(float) "
+        ostream_ << (node->GetVarType() == VarType::REAL ? "(double) "
                                                          : "(int) ");
     }
     Visit(node->GetLeft());
@@ -362,7 +362,7 @@ void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node) {
         if (auto dp = dynamic_pointer_cast<Num>(p)) {
             specifiers.push_back("%d");
         } else if (auto dp = dynamic_pointer_cast<Real>(p)) {
-            specifiers.push_back("%f");
+            specifiers.push_back("%lf");
         } else if (auto dp = dynamic_pointer_cast<String>(p)) {
             specifiers.push_back("%s");
         } else if (auto dp = dynamic_pointer_cast<Char>(p)) {
@@ -378,7 +378,7 @@ void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node) {
         if (vt == VarType::INT)
             specifiers.push_back("%d");
         else if (vt == VarType::REAL)
-            specifiers.push_back("%f");
+            specifiers.push_back("%lf");
         else if (vt == VarType::STRING)
             specifiers.push_back("%s");
         else if (vt == VarType::CHAR)
