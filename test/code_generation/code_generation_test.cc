@@ -101,6 +101,7 @@ end.
 
     string expected_c_code = "#include <stdio.h>\n"
                              "#include <stdlib.h>\n"
+                             "#include <stdbool.h>\n"
                              "\n"
                              "int x;\n"
                              "int y;\n"
