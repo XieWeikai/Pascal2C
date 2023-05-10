@@ -271,7 +271,7 @@ namespace analysiser{
                         ret.settype(symbol_table::BOOL);
                         break;
                     }
-                    case '+':case '-':case '*':case 267:
+                    case '+':case '-':case '*':
                     {
                         symbol_table::MegaType ty=MaxType(GetExprType(now->lhs()),GetExprType(now->rhs()));
                         if(ty.pointer().size()!=0)
@@ -302,6 +302,23 @@ namespace analysiser{
                                 mes=ss.str();
                             }
                             LOG("illegal type between compute expression"+mes);
+                        }
+                        break;
+                    }
+                    case 267:
+                    {
+                        symbol_table::MegaType lty=GetExprType(now->lhs()),rty=GetExprType(now->rhs());
+                        if(lty!=rty||lty!=symbol_table::INT||rty!=symbol_table::INT)
+                        {
+                            pascal2c::ast::Ast x=(*now);
+                            std::stringstream ss;
+                            ss<<":got ";
+                            ss<<lty<<" "<<rty;
+                            LOG("illegal type between compute expression"+ss.str());
+                        }
+                        else 
+                        {
+                            ret=symbol_table::INT;
                         }
                         break;
                     }
