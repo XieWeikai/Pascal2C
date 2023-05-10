@@ -169,10 +169,9 @@ var Identifier, identifier, IDENTIFIER, IdEnTiFiEr: integer;
 
 ### 5.2 语法分析
 
-#### 5.2.1 测试环境
 
-语法分析模块的测试环境是在 Linux 下使用 Google Test 进行单元测试，测试用例位于`test/parser`目录下。
-#### 5.2.2 测试功能
+语法分析模块的测试用例位于`test/parser`目录下。
+#### 5.2.1 测试功能
 
 语法分析模块的测试目标是保证语法分析器能够正确的将输入的 token 序列解析成 AST 并且能够正确的处理各种语法错误。具体包括以下几个部分：
 
@@ -203,7 +202,7 @@ var Identifier, identifier, IDENTIFIER, IdEnTiFiEr: integer;
 
 各个部分的解析采用手写递归下降的方式来实现，每种语言结构的解析都有对应的方法/函数来完成解析成AST的操作。为了保证代码的正确性，需要对上面提到的各个部分均进行充分的测试。
 
-#### 5.2.3 单元测试用例
+#### 5.2.2 单元测试用例
 
 对于parser的各个小功能需要分别进行测试以保证整体功能的正确性，在做测试时需要尽可能的保证覆盖率。
 
@@ -604,7 +603,7 @@ function efg(var d : real; a,b :integer) real;
 ```
 
 
-#### 5.2.4 综合分析测试（TotalParserTest）
+#### 5.2.3 综合分析测试（TotalParserTest）
 
 做完各个部分的单元测试后，需要将各个部分整合为一个完整的parser，然后做集成测试，生成完整的AST，设计一个综合测试用例如下
 
