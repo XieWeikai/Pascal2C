@@ -107,8 +107,9 @@
         - [ASTNode 类](#astnode-类)
         - [Compound 类](#compound-类)
         - [Declaration 类](#declaration-类)
-        - [Block类](#block类)
-        - [Num类](#num类)
+        - [Block 类](#block-类)
+        - [Num 类](#num-类)
+        - [Bool类](#bool类)
         - [String 类](#string-类)
         - [Real 类](#real-类)
         - [Char 类](#char-类)
@@ -148,6 +149,7 @@
           - [成员函数](#成员函数)
           - [示例](#示例)
       - [代码生成过程](#代码生成过程)
+        - [算法说明](#算法说明)
         - [Interpret 方法](#interpret-方法)
         - [GetCCode 方法](#getccode-方法)
         - [Visit 方法](#visit-方法)
@@ -174,6 +176,7 @@
         - [VisitBinOp 方法](#visitbinop-方法)
         - [VisitOper方法](#visitoper方法)
         - [VisitNum 方法](#visitnum-方法)
+        - [VisitBool 方法](#visitbool-方法)
         - [VisitString 方法](#visitstring-方法)
         - [VisitReal 方法](#visitreal-方法)
         - [VisitChar 方法](#visitchar-方法)
@@ -190,7 +193,7 @@
         - [IncIndent 方法](#incindent-方法)
         - [DecIndent 方法](#decindent-方法)
         - [SymbolToC 方法](#symboltoc-方法)
-    - [算法说明](#算法说明)
+    - [算法说明](#算法说明-1)
 
 ## 词法分析
 
@@ -2274,7 +2277,7 @@ class Declaration : public ASTNode {
 };
 ```
 
-##### Block类
+##### Block 类
 Block 类表示一个程序块，继承自 ASTNode。它包含两个私有成员，declarations_（表示声明）和 compound_statement_（表示复合语句），它们都是 std::shared_ptr 类型。Block 类有两个构造函数，一个接受一个复合语句作为参数，另一个接受声明和复合语句作为参数。Accept 方法用于接受访问者对象。GetDeclaration 和 GetCompoundStatement 分别用于获取声明和复合语句的常量引用。
 
 ```cpp
@@ -2302,7 +2305,7 @@ class Block : public ASTNode {
 };
 ```
 
-##### Num类
+##### Num 类
 Num 类表示一个数字字面量，继承自 ASTNode。它包含一个私有成员 value_，表示该数字的值。Num 类有一个构造函数，接受一个表示数字的 Token 类型的智能指针作为参数。Accept 方法用于接受访问者对象。GetValue 方法返回该数字的值。
 ```cpp
 class Num : public ASTNode {
@@ -2316,6 +2319,35 @@ class Num : public ASTNode {
   private:
     int value_;
 };
+```
+##### Bool类
+`Bool` 类继承自 `ASTNode`，表示布尔值的抽象语法树节点。它用于存储布尔值 (`true` 或 `false`) 作为其值。`Bool` 类还提供了一个接受访问者对象的方法，以便在访问者模式下遍历抽象语法树。
+
+公共成员函数
+- `Bool(const shared_ptr<Token> &token)`: 构造函数，使用指向 Token 类的共享指针初始化 Bool 对象。Token 的值将被转换为整数，用于表示布尔值。
+- `Bool(const int value = 0)`: 构造函数，使用整数值初始化 Bool 对象。整数值 0 表示 false，非零值表示 true。
+- `virtual ~Bool() = default;`: 虚析构函数，允许子类正确地析构。
+- `void Accept(Visitor &visitor) override;`: 接受访问者方法，允许访问者对象访问此 Bool 节点。这是实现访问者模式的关键组成部分。
+- `int GetValue() const;`: 返回 Bool 对象的整数值。整数值 0 表示 false，非零值表示 true。
+
+私有成员变量
+`int` `value_`;: 存储布尔值的整数。整数值 0 表示 `false`，非零值表示 `true`。
+
+使用示例
+```cpp
+// 使用 Token 构造 Bool 对象
+    auto token = std::make_shared<Token>(TokenType::INTEGER, "1");
+    Bool bool_node(token);
+
+    // 使用整数值构造 Bool 对象
+    Bool bool_node2(1);
+
+    // 获取 Bool 对象的值
+    int value = bool_node.GetValue(); // value = 1 (true)
+
+    // 接受访问者
+    MyVisitor visitor;
+    bool_node.Accept(visitor);
 ```
 
 ##### String 类
@@ -3185,7 +3217,25 @@ class CodeGenerator : Visitor {
 
 #### 代码生成过程
 
-借助Visitor Pattern, 将CodeGenerator和ASTNode的实现分离解耦开来. 每个ASTNode只需设计一个Accept函数, 即可接受不同Visitor的操作, 方便且易于扩展. 如下为Program节点的Accept函数示例.
+##### 算法说明
+
+`CodeGenerator` 是一个从 `Pascal` 的抽象语法树 (`AST`) 生成 `C` 代码的代码生成器。它基于访问者设计模式，对抽象语法树中的每个节点进行逐个访问和处理，最终将 `Pascal` 代码转换为等效的 `C` 代码。以下是算法设计的概述：
+
+1. `CodeGenerator` 类包含一个输出流对象 `ostream_`，用于将生成的 `C` 代码写入输出流。同时，还有一些辅助函数和变量，例如缩进级别（`indent_level_`），用于管理生成代码的格式。
+
+1. 对于每个节点类型，例如 `Assignment`、`Var`、`Type` 等，`CodeGenerator` 类都有相应的 `Visit` 函数。这些函数在访问 `AST` 时被调用，并负责生成相应的 `C` 代码。
+
+1. 在访问 `AST` 的过程中，`CodeGenerator` 会根据节点的类型和结构来生成 `C` 代码。例如，对于 `Assignment` 节点，它首先访问左侧变量，生成变量名，然后生成等号，接着访问右侧表达式，生成表达式的 `C` 代码，最后生成一个分号和换行符。
+
+1. 某些特殊的节点类型，如 `FunctionCall`，可能需要进行特殊处理。例如，`Pascal` 中的 `writeln` 和 `write` 函数在 `C` 中对应于 `printf` 函数。因此，当 `CodeGenerator` 遇到这些节点时，它会根据情况生成适当的 `C` 函数名称和参数。
+
+1. 对于一些需要类型转换的情况，`CodeGenerator` 会使用辅助函数（如 `SymbolToC`）将 `Pascal` 类型转换为等效的 `C` 类型。
+
+1. 在生成 `C` 代码的过程中，`CodeGenerator` 还会使用一些辅助函数，如 `IncIndent` 和 `DecIndent`，来增加和减少缩进级别，以确保生成的代码具有良好的格式。
+
+总之，`CodeGenerator` 的设计目标是通过访问 `Pascal` `AST` 中的每个节点，生成相应的 `C` 代码，并利用辅助函数和变量来管理生成过程中的代码格式和类型转换。这种基于访问者模式的设计使得代码生成器易于扩展和维护，能够适应各种不同的 `Pascal` 语言特性和结构。
+
+借助`Visitor` `Pattern`, 将`CodeGenerator`和`ASTNode`的实现分离解耦开来. 每个`ASTNode`只需设计一个`Accept`函数, 即可接受不同`Visitor`的操作, 方便且易于扩展. 如下为`Program`节点的`Accept`函数示例.
 
 `Program::Accept` 函数用于接受一个访问者对象并将其引导到当前 Program 节点。
 ```cpp
@@ -3659,6 +3709,21 @@ void CodeGenerator::VisitNum(const shared_ptr<Num> &node) {
 **参数**
 `node`：一个指向 `Num` 节点的智能指针。
 
+##### VisitBool 方法
+`VisitBool` 是 `CodeGenerator` 类的成员函数，用于处理 `Bool` 类型的抽象语法树节点。此函数是访问者模式的一部分，用于遍历抽象语法树并将其转换为 `C` 代码。
+
+```cpp
+void CodeGenerator::VisitBool(const shared_ptr<Bool> &node) {
+    ostream_ << (node->GetValue() ? "true" : "false");
+}
+```
+
+**参数**
+- `const shared_ptr<Bool> &node`: 指向 Bool 类的共享指针，表示布尔值节点。
+
+**功能**
+`VisitBool` 函数根据传入的 `Bool` 节点的值在输出流 (`ostream_`) 中写入 "`true`" 或 "`false`"。这样，当生成 `C` 代码时，`Pascal` 语言中的布尔值将被正确地转换为 `C` 语言中的布尔值。
+
 ##### VisitString 方法
 `VisitString` 函数用于访问传入的 `String` 节点并生成相应的 `C` 代码。它将输出节点中的字符串值，包含在双引号中。
 
@@ -3788,7 +3853,7 @@ void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
     ostream_ << func_name << "(";
     // print Format string
     if (func_name != node->GetName()) {
-        PrintfFormatString(node, (node->GetName() == "writeln"));
+        PrintfFormatString(node, node->GetName());
     }
 
     // Print parameters
@@ -3832,33 +3897,33 @@ void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
 ```cpp
 // Print "%d%c%s%d..."
 void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node,
-                                       bool new_line) {
+                                       const string &function_name) {
     vector<string> specifiers;
     auto BaseCast = [&](const shared_ptr<ASTNode> &p) -> void {
         if (auto dp = dynamic_pointer_cast<Num>(p)) {
-            specifiers.push_back("%d ");
+            specifiers.push_back("%d");
         } else if (auto dp = dynamic_pointer_cast<Real>(p)) {
-            specifiers.push_back("%f ");
+            specifiers.push_back("%f");
         } else if (auto dp = dynamic_pointer_cast<String>(p)) {
-            specifiers.push_back("%s ");
+            specifiers.push_back("%s");
         } else if (auto dp = dynamic_pointer_cast<Char>(p)) {
-            specifiers.push_back("%c ");
+            specifiers.push_back("%c");
         } else {
-            specifiers.push_back("%s ");
+            specifiers.push_back("%s");
         }
     };
 
     auto CastByVarType = [&](const VarType vt) -> void {
         if (vt == VarType::INT)
-            specifiers.push_back("%d ");
+            specifiers.push_back("%d");
         else if (vt == VarType::REAL)
-            specifiers.push_back("%f ");
+            specifiers.push_back("%f");
         else if (vt == VarType::STRING)
-            specifiers.push_back("%s ");
+            specifiers.push_back("%s");
         else if (vt == VarType::CHAR)
-            specifiers.push_back("%c ");
+            specifiers.push_back("%c");
         else
-            specifiers.push_back("%s ");
+            specifiers.push_back("%s");
     };
 
     auto IVarCast = [&](const shared_ptr<IVar> &p) -> void {
@@ -3880,9 +3945,9 @@ void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node,
     }
     ostream_ << '"';
     for (auto &s : specifiers) {
-        ostream_ << s;
+        ostream_ << ((function_name == "read") ? s : (s + " "));
     }
-    ostream_ << (new_line ? "\\n\", " : "\", ");
+    ostream_ << ((function_name == "writeln") ? "\\n\", " : "\", ");
 }
 ```
 **参数**
