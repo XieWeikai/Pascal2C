@@ -130,10 +130,12 @@ namespace pascal2c::parser
                 std::set<int> tokens({TOK_INTEGER, TOK_REAL, '-', '+', TOK_STRING});
                 int delimiter = ';';
 
+                // Skip token until finding the expected tokens or the delimiter or EOF
                 while (tokens.find(token_) == tokens.end() && delimiter != token_ && token_ != TOK_EOF)
                 {
                     NextToken();
                 }
+                // If the delimiter or EOF is found, break the loop and return a const declaration with default value 0
                 if (tokens.find(token_) == tokens.end())
                 {
                     const_value = MAKE_AND_MOVE_SHARED(ast::IntegerValue, 0);

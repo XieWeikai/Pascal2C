@@ -425,7 +425,7 @@ namespace pascal2c::parser
             "1:1 ConstDeclaration: d\n"
             "    1:3 'a'",
             "1:1 ConstDeclaration: \n"
-            "    unknown value",
+            "    1:1 0",
             "1:1 ConstDeclaration: \n"
             "    1:2 1",
             "1:1 ConstDeclaration: a\n"
@@ -439,7 +439,7 @@ namespace pascal2c::parser
             "1:1 ConstDeclaration: a\n"
             "    1:3 1",
             "1:1 ConstDeclaration: a\n"
-            "    unknown value",
+            "    1:1 0",
         };
         const vector<vector<string>> errs = {
             {},
