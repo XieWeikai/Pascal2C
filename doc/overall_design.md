@@ -61,7 +61,7 @@ User Subroutines
 * AST 树部分：存储 AST 树，作为语法分析的输出，交给语义分析进一步处理
 * 语法分析器 Parser 部分：使用递归下降法，根据语法规则，将词法分析器输出的 token 序列转换为 AST 树
 
-##### AST 树
+##### 4.2.1.1 AST 树
 
 AST 树是一种树状的数据结构，用于表示源代码的结构。AST 树的每个节点都是一个语法单元，包含了该语法单元的类型和属性。具体语法单元结构如下：
 
@@ -80,7 +80,14 @@ AST 树是一种树状的数据结构，用于表示源代码的结构。AST 树
 |下标范围 Period|下界 lower_bound<br>上界 upper_bound||
 |标志符列表 IdList|标志符 id1, id2, ...||
 
-例如对于如下的源代码：
+
+##### 4.2.2.2 语法分析器 Parser
+
+语法分析器 Parser 是一个递归下降的语法分析器，其输入为词法分析器输出的 token，输出为 AST 树。其内部包含分析各类 AST 节点的成员函数，同时还包含一些辅助函数，用于处理错误和调试。
+
+#### 4.2.2 接口说明
+
+- **输入**:在语法分析阶段，语法分析器将以词法分析器处理pascal源代码得到的`token`作为输入，如
 
 ```pascal
 
@@ -100,39 +107,16 @@ end.
 
 ```
 
-其对应的 AST 树如下：
-
-![ast](assets/AST.png)
-
-
-
-
-#### 4.2.1 输入和输出
-
-- **输入**:在语法分析阶段，语法分析器将以词法分析器处理pascal源代码得到的`token`作为输入，如
-
-  ```pascal
-  program greater;
-  var a,b: integer;
-  begin
-  	read(a,b)
-  	if a > b then write(a)
-  	else write(b)
-  end.
-  ```
-
-  对于上面这段源代码，语法分析器的输入将形如如下的`token`作为语法分析器的输入
+对于上面这段源代码，语法分析器的输入将形如如下的`token`作为语法分析器的输入
 
   ```
-  PROGRAM  ID(greater)  VAR  ID(a)  ID(b)  ':'  INTEGER
-  BEGIN  READ   '('  ID(a)  ','   ID(b)   ')'
-  IF   ID(a)   '>'   THEN   ID(write)  '('  ID(a)   ')'
-  ELSE  ID(write)   ID(b)
+  PROGRAM  ID(foo)  '('  ID(foo1)  ','  ID(foo2)  ')' ';' CONST ID(a) '=' INTEGER(10) ';' VAR ID(var1) ',' ID(var2) ':' ARRAY '[' INTEGER(1) DOTDOT INTEGER(5) ',' INTEGER(10) DOTDOT INTEGER(15) ']' OF REAL_TYPE ';' PROCEDURE ID(proc) '(' VAR ID(para) ':' BOOLEAN_TYPE ')' ';' CONST ID(a) '=' '-' INTEGER(5) ';' BEGIN END ';' FUNCTION ID(func) '(' ')' ':' INTEGER_TYPE ';' VAR ID(var1) ':' CHAR_TYPE ';' BEGIN END ';' BEGIN END '.'
   ```
+
 
 - **输出**:若输入满足pascal-S语法，则语法分析器将产生一颗能表示源程序结构的抽象语法树，如对于上面的输入，可能产生一颗形如下图的语法树
 
-  ![语法分析输出](assets/语法分析输出 AST.jpeg)
+![ast](assets/AST.png)
 
 
 ---
