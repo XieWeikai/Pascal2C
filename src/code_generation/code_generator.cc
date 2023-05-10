@@ -341,8 +341,16 @@ void CodeGenerator::VisitWhileStatement(
 }
 
 // Print "%d%c%s%d..."
-void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node,
-                                       const string &function_name) {
+void CodeGenerator::PrintfFormatString(const shared_ptr<FunctionCall> &node) {
+    auto function_name = node->GetName();
+    if (!node->GetParameters().size()) {
+        if (function_name == "writeln")
+            ostream_ << "\"\\n\"";
+        else
+            ostream_ << "\"\"";
+        return;
+    }
+
     vector<string> specifiers;
     auto BaseCast = [&](const shared_ptr<ASTNode> &p) -> void {
         if (auto dp = dynamic_pointer_cast<Num>(p)) {
@@ -405,8 +413,8 @@ void CodeGenerator::VisitFunctionCall(const shared_ptr<FunctionCall> &node) {
 
     ostream_ << func_name << "(";
     // print Format string
-    if (func_name != node->GetName() && node->GetParameters().size()) {
-        PrintfFormatString(node, node->GetName());
+    if (func_name != node->GetName()) {
+        PrintfFormatString(node);
     }
 
     // Print parameters
