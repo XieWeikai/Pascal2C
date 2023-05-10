@@ -134,7 +134,6 @@ namespace pascal2c::parser {
         Match(TOK_ID);
         vector<std::shared_ptr<ast::Expression> > expr_list;
         auto var = std::make_shared<ast::Variable>(id);
-        bool is_var = false;
 
         switch (token_) {
             case '(':
@@ -151,11 +150,11 @@ namespace pascal2c::parser {
                 expr_list = ParseExprList();
                 Match(']',"syntax error: unclosed brackets");
                 var = std::make_shared<ast::Variable>(id,expr_list);
-                is_var = true;
+                break;
+            case TOK_END: // a subprogram call without parameters
+            case ';':
+                return std::make_shared<ast::CallStatement>(id);
         }
-
-        if(!is_var && token_ == ';')
-            return std::make_shared<ast::CallStatement>(id);
 
         Match(TOK_ASSIGNOP,"syntax error: lost ':=' when parsing assign statement");
         auto expr = ParseExpr();
