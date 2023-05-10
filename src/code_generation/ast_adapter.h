@@ -468,7 +468,13 @@ class BinaryOperation : public IVar {
     const VarType GetVarType() const override { return var_type_; }
     const string GetName() const override { return "binary_operation"; }
     bool TestCastToFloat() {
-        return (GetVarType() == VarType::REAL && GetOper()->GetOper() == "/");
+        if (GetOper()->GetOper() == "/") {
+            var_type_ = VarType::REAL;
+            return true;
+        } else if (GetOper()->GetOper() == "mod") {
+            var_type_ = VarType::INT;
+        }
+        return false;
     }
 
   private:
