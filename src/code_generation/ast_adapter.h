@@ -492,13 +492,14 @@ class BinaryOperation : public IVar {
     const shared_ptr<ASTNode> &GetRight() { return right_; }
     const VarType GetVarType() const override { return var_type_; }
     const string GetName() const override { return "binary_operation"; }
-    bool TestCastToFloat() {
+    bool TestCastRequired() {
         if (GetOper()->GetOper() == "/") {
             var_type_ = VarType::REAL;
             return true;
         } else if (GetOper()->GetOper() == "mod" ||
                    GetOper()->GetOper() == "div") {
             var_type_ = VarType::INT;
+            return true;
         }
         return false;
     }

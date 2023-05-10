@@ -258,8 +258,9 @@ void CodeGenerator::VisitUnaryOperation(
 void CodeGenerator::VisitBinOp(
     const shared_ptr<code_generation::BinaryOperation> &node) {
     ostream_ << '(';
-    if (node->TestCastToFloat()) {
-        ostream_ << "(float) ";
+    if (node->TestCastRequired()) {
+        ostream_ << (node->GetVarType() == VarType::REAL ? "(float) "
+                                                         : "(int) ");
     }
     Visit(node->GetLeft());
     ostream_ << ' ';
