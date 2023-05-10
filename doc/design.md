@@ -89,7 +89,6 @@
       - [算法描述](#算法描述-1)
         - [语法分析](#语法分析-1)
         - [错误处理](#错误处理)
-  - [如`ParseExpr`和`ParseStatement`在碰到语法错误时直接抛出异常，`ParseCompoundStatement`调用`ParseStatement`来解析一系列语句，若捕获异常，则记录下异常，并不断跳过`token`直到遇到`;`或者可能的语句开头的`token`再接着进行析。`ParseCompoundStatement`在碰到缺少`begin`的错误时，记录错误并忽略`begin`直接进行statement的解析操作。](#如parseexpr和parsestatement在碰到语法错误时直接抛出异常parsecompoundstatement调用parsestatement来解析一系列语句若捕获异常则记录下异常并不断跳过token直到遇到或者可能的语句开头的token再接着进行析parsecompoundstatement在碰到缺少begin的错误时记录错误并忽略begin直接进行statement的解析操作)
   - [语义分析](#语义分析)
     - [符号表设计](#符号表设计)
       - [数据结构说明](#数据结构说明-1)
@@ -2040,7 +2039,8 @@ parse_expression_1(lhs, min_precedence)
 - 继续解析的两种处理策略:
   - 碰到异常后，跳过若干`token`直到碰到想要的`token` 或分隔符（如';', 'TOK_EOF'等）或后一部分可能的语法开头的`token`
   - 碰到异常后，忽略一些`token`接着解析
-  如`ParseExpr`和`ParseStatement`在碰到语法错误时直接抛出异常，`ParseCompoundStatement`调用`ParseStatement`来解析一系列语句，若捕获异常，则记录下异常，并不断跳过`token`直到遇到`;`或者可能的语句开头的`token`再接着进行析。`ParseCompoundStatement`在碰到缺少`begin`的错误时，记录错误并忽略`begin`直接进行statement的解析操作。
+  
+    如`ParseExpr`和`ParseStatement`在碰到语法错误时直接抛出异常，`ParseCompoundStatement`调用`ParseStatement`来解析一系列语句，若捕获异常，则记录下异常，并不断跳过`token`直到遇到`;`或者可能的语句开头的`token`再接着进行析。`ParseCompoundStatement`在碰到缺少`begin`的错误时，记录错误并忽略`begin`直接进行statement的解析操作。
 ---
 
 ## 语义分析
@@ -2158,9 +2158,9 @@ graph LR;
     a. 与语法分析和语义分析的 AST 接口
 
     为了方便各部分的并行开发, 设计一套AST接口(ast_adapter), 将代码生成部分的内部设计与前面模块的接口隔离开来, 方便并行开发的同时, 避免了依赖模块的接口变动带来的影响。
-    
+   
     b. 将语法分析得到的AST结合语义分析的符号表信息, 转换到本模块的AST接口. 在转换规则中, 需要添加以下信息:
-    
+   
     * 函数调用中变量的引用/返回值信息;
     * 函数声明中变量的引用/返回值信息;
     以及其他的需要注意的转换规则.
@@ -2168,9 +2168,9 @@ graph LR;
     c. 代码生成：根据转换规则先序遍历 AST，并将每个节点转换为等价的 C 语言结构。在这个过
     程中，需要确保生成的代码具有良好的可读性, 例如合理的缩进、注释和变量命名, 并且能
     够产生与源Pascal代码相同的行为。
-    
+   
     为了将 Pascal 代码转换为等价的 C 代码，需要定义一系列的转换规则，这些规则将在 AST 上执行。例如：
-    
+   
     * 将 Pascal 的 `begin` 和 `end` 转换为 C 语言中的 `{` 和 `}`；
     * 将Pascal的Declaration部分转为全局变量;
     * 正确处理生成C代码的缩进;
@@ -2256,7 +2256,7 @@ class Compound : public ASTNode {
   private:
     vector<shared_ptr<ASTNode>> children_;
 };
-```   
+```
 
 ##### Declaration 类
 Declaration 类表示一个声明语句，继承自 ASTNode。它包含一个表示声明的 std::vector<std::shared_ptr<ASTNode>> 类型的私有成员 declaration_。Declaration 类有两个构造函数，一个默认构造函数和一个接受声明向量作为参数的构造函数。Accept 方法用于接受访问者对象。GetDeclarations 方法返回一个包含声明的常量引用。
