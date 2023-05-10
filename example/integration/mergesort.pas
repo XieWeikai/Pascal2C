@@ -1,6 +1,6 @@
 program merge_sort;
 
-const n = 10;
+var n : integer;
 
 var
     mas: array [1..1000] of integer;
@@ -44,6 +44,7 @@ begin
 end;
 
 begin
+    read(n);
     for i := 1 to n do
         read(mas[i]);
 
