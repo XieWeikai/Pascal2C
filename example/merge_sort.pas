@@ -22,9 +22,10 @@ begin
     else 
     begin
         mid := (l + r) div 2;
+        writeln(((l + r) / 2) + 2);
         MergeSort(l, mid);
         MergeSort(mid + 1, r);
-        // Merging
+        { Merging }
         ptr_1 := l;
         ptr_2 := mid + 1;
         for i := l to r do 

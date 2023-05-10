@@ -12,5 +12,17 @@ const string TypeToolKit::SymbolToC(const string &pascal_symbol) const {
         return pascal_symbol;
     }
 }
+
+
+VarType TypeToolKit::MergeType(VarType a , VarType b , const string& op) const {
+    if (a >= VarType::STRING || b >= VarType::STRING)
+        return VarType::UNDEFINED;
+    
+    if (a <= VarType::INT && b <= VarType::INT && op == "/")
+        return VarType::REAL;
+    
+    return std::max(a , b);
+}
+
 } // namespace code_generation
 } // namespace pascal2c

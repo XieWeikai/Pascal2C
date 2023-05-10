@@ -44,7 +44,7 @@ private :
     */
     shared_ptr<ASTNode>
         transExpression(shared_ptr<ast::Expression> cur);
-    shared_ptr<ASTNode> 
+    std::pair<shared_ptr<ASTNode> , VarType>
         passExpr(shared_ptr<ast::Expression> cur);
     /**
      * @brief Handle Statements

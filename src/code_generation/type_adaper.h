@@ -7,13 +7,17 @@ namespace code_generation {
 template <typename Key, typename Tp>
 using hashmap = ::std::unordered_map<Key, Tp>;
 using string = ::std::string;
+/**
+ * @brief Sort by type priority
+ * boolean < char < integer < real
+*/
 enum VarType {
-    VOID,
-    CHAR,
-    STRING,
-    INT,
-    REAL,
-    BOOL,
+    BOOL    ,
+    CHAR    ,
+    INT     ,
+    REAL    ,
+    STRING  ,
+    VOID    ,
     UNDEFINED,
 };
 
@@ -26,6 +30,7 @@ class TypeToolKit {
     VarType StringToVarType(const string &s) const {
         return StringToVarTypeMap.at(s);
     }
+    VarType MergeType(VarType a , VarType b , const string& op) const;
 
   private:
     const hashmap<string, string> PascalToCTypeMap = {
