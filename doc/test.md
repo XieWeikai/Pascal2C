@@ -1112,4 +1112,397 @@ end.
 
 ### 5.6 集成测试
 
-在分别完成各个模块的测试后，将各个模块组合起来，直接测试能否将Pascal转化为C语言，若该部分测试通过，则本项目基本完成。
+在分别完成各个模块的测试后，将各个模块组合起来，直接测试能否将Pascal转化为C语言并在讲C语言编译为可执行文件后表现出和pascal一样的结果。测试样例如下：
+
+**归并排序**
+```pascal
+{ mergesort.pas }
+program merge_sort;
+
+var
+    n : integer;
+    mas: array [1..1000] of integer;
+    i: integer;
+
+procedure inc(var a: integer);
+begin
+    a := a + 1;
+end;
+
+procedure My_MergeSort(a, c: integer);
+var
+    x, j, i, n1, n2: integer;
+    rez: array[1..1000] of integer;
+begin
+    if c <= a then
+        exit
+    else
+    begin
+        x := (a + c) div 2;
+        My_MergeSort(a, x);
+        My_MergeSort(x + 1, c);
+        n1 := a;
+        n2 := x + 1;
+        for i := a to c do
+        begin
+            if (n1 < x + 1) and ((n2 > c) or (mas[n1] < mas[n2])) then
+            begin
+                rez[i] := mas[n1];
+                inc(n1);
+            end
+            else
+            begin
+                rez[i] := mas[n2];
+                inc(n2);
+            end;
+        end;
+        for j := a to c do
+            mas[j] := rez[j];
+    end;
+end;
+
+begin
+    read(n);
+    for i := 1 to n do
+        read(mas[i]);
+
+    My_MergeSort(1, n);
+    for i := 1 to n do
+        write(mas[i], ' ');
+    writeln;
+end.
+```
+
+**快速排序**
+```pascal
+{ quicksort.pas }
+program QuickSort;
+var
+  arr : array[1..100] of integer;
+  len, i : integer;
+
+procedure swap(var a, b: integer);
+var
+  temp: integer;
+begin
+  temp := a;
+  a := b;
+  b := temp;
+end;
+
+procedure QuickSort(l, r: integer);
+var
+  i, j, p: integer;
+begin
+  if l < r then
+  begin
+    i := l;
+    j := r;
+    p := arr[(l + r) div 2];
+
+    while i <= j do
+    begin
+      while arr[i] < p do
+        i := i + 1;
+      while arr[j] > p do
+        j := j - 1;
+
+      if i <= j then
+      begin
+        swap(arr[i], arr[j]);
+        i := i + 1;
+        j := j - 1;
+      end;
+    end;
+
+    if l < j then
+      QuickSort(l, j);
+    if i < r then
+      QuickSort(i, r);
+  end;
+end;
+
+begin
+  read(len);
+  for i := 1 to len do
+    read(arr[i]);
+
+  QuickSort(1, len);
+
+  for i := 1 to len do
+    write(arr[i], ' ');
+  writeln;
+end.
+
+```
+
+**求最大公因数**
+```pascal
+{ gcd.pas }
+program gcd;
+
+var x,y : integer;
+
+function gcd(a,b : integer) : integer;
+begin
+    if b = 0 then gcd := a
+    else gcd := gcd(b, a mod b)
+end;
+
+begin
+    read(x,y);
+    write('gcd(',x,',',y,') = ');
+    writeln(gcd(x,y))
+end.
+```
+
+**求阶乘**
+```pascal
+{ factorial.pas }
+program fac;
+
+var n: integer;
+
+function factorial(n: integer): integer;
+begin
+  if n = 0 then
+    factorial := 1
+  else
+    factorial := n * factorial(n - 1)
+end;
+
+function factorial2(n: integer): integer;
+var
+  i: integer;
+begin
+    factorial2 := 1;
+    for i := 1 to n do
+        factorial2 := factorial2 * i
+end;
+
+function factorial3(n: integer): integer;
+begin
+  if n = 0 then
+  begin
+    factorial3 := 1;
+    exit
+  end;
+  factorial3 := n * factorial3(n - 1)
+end;
+
+begin
+    read(n);
+    writeln(factorial(n));
+    writeln(factorial2(n));
+    writeln(factorial3(n))
+end.
+```
+
+**特性测试**
+```pascal
+{ features.pas }
+program TestPascal;
+
+const
+    PI = 3.14159;
+
+var
+    i, j: integer;
+    r: real;
+    a: array [1..5] of integer;
+
+procedure printArray(hi: integer);
+var
+    i: integer;
+begin
+    for i := 1 to hi do
+        write(a[i], ' ');
+    writeln;
+end;
+
+function add(x, y: integer): integer;
+begin
+    add := x + y;
+end;
+
+procedure swap(var x, y: integer);
+var
+    temp: integer;
+begin
+    temp := x;
+    x := y;
+    y := temp;
+end;
+
+begin
+    writeln('Hello, \'', PI, '\'!');
+
+    i := 5;
+    j := 10;
+    r := i / j;
+    writeln('Real division: ', r);
+
+    r := i div j;
+    writeln('Integer division: ', r);
+
+    writeln('Complex expression: ', ((i + j) * i - j) mod i);
+
+    for i := 1 to 5 do
+        a[i] := i * i;
+
+    printArray(3);
+
+    writeln('Function add: ', add(i, j));
+
+    writeln('Before swap: ', i, ' ', j);
+    swap(i, j);
+    writeln('After swap: ', i, ' ', j);
+
+    while i > 0 do begin
+        writeln('Countdown: ', i);
+        i := i - 1;
+    end;
+end.
+```
+
+**复杂表达式测试**
+```pascal
+{ complex_exprssion.pas }
+program ComplexExpressionTest;
+
+var
+    i: integer;
+    r, s, t: real;
+
+function add(x: real; y: integer): real;
+begin
+    add := x + y;
+end;
+
+function square(x: real): real;
+begin
+    square := x * x;
+end;
+
+function increment: integer;
+begin
+    increment := 1 + 1;
+end;
+
+begin
+    i := 5;
+    r := 2.5;
+
+    s := i + square(r) * add(r, increment) - (i mod increment) / square(r);
+
+    writeln('Result: ', s);
+end.
+```
+
+**总体测试**
+```pascal
+{ general.pas }
+program test;
+
+const PI = 3.14;
+var tmp : integer;
+
+function value() : integer;
+begin
+    value := 1;
+end;
+
+procedure expression;
+const scalar = 2;
+var
+    a : real;
+    b : real;
+    c : integer;
+    flag : boolean;
+begin
+    c := 9 div 2 * 3 mod 4;
+    a := (PI + value * 2 - (4 - 2)) * 2;
+    flag := (a > 0) and (a < 10) or (a = 0) or (a = 10) or (a <= 0) and (a >= 10) or (a <> 8) and true and not false;
+    b := scalar * 3 / 4 + 2 * (1.6 - 2.5);
+    writeln('a = ', a);
+    writeln('b = ', b);
+    writeln('c = ', c);
+    writeln('flag = ', flag);
+end;
+
+function var_test(var a : integer; b : integer) : integer;
+begin
+    a := b;
+end;
+
+function exit_test(a : integer) : boolean;
+begin
+    if a > 0 then
+    begin
+        writeln('a > 0');
+        exit_test := true;
+        exit;
+    end
+    else writeln('a <= 0');
+
+    exit_test := false;
+end;
+
+procedure while_test(n : integer);
+var i : integer;
+begin
+    writeln('while_test');
+    i := 0;
+    while i <= n do
+    begin
+        writeln('i = ', i);
+        i := i + 1;
+    end;
+end;
+
+function for_test(n : integer) : integer;
+var sum : integer;
+    i : integer;
+begin
+    sum := 0;
+    for i := 1 to n do
+        sum := sum + i;
+    for_test := sum;
+end;
+
+begin
+    expression;
+    writeln('expression done.');
+    var_test(tmp, 20 + value);
+    writeln('var_tmp done. tmp = ', tmp);
+    writeln('exit_test exit_test(tmp) = ', exit_test(tmp));
+    writeln('exit_test exit_test(-tmp) = ', exit_test(-tmp));
+    writeln('exit_test done.');
+    while_test(10);
+    writeln('while_test done.');
+    writeln('for_test for_test(10) = ', for_test(10));
+    writeln('for_test done.');
+end.
+```
+**错误检测**
+```pascal
+{ error.pas }
+program error;
+
+const b;
+
+var a : integer;
+
+procedure test(var a : integer);
+begin
+	a := a + 1
+end;
+
+begin
+	a := 3 + 4
+	a := 3.5 + 3.2 * 3;
+	test(a);
+	test(3);
+end.
+```
+经过测试，`error.pas`在经过`passcal2c`后能报出存在的语法错误和语义错误，其余各个pascal程序在转化为C后，编译出来的可执行文件均能正常运行并得到正确的结果。
