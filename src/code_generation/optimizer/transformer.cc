@@ -12,6 +12,7 @@ using ::std::pair;
  * 	TOK_AND				262
  *  TOK_DIV				267
  * 	TOK_MOD				279
+ * 	TOK_NOT 			281
  * 	TOK_OR 				283
  *  TOK_INTEGER_TYPE 	297
  *  TOK_REAL_TYPE 		298
@@ -38,6 +39,7 @@ static const string ToCString(int tk) {
 	case '/' : return "/";
 
 	case 279 : return "%";
+	case 281 : return "!";
 	case 283 : return "||";
 
 	case symbol_table::ItemType::INT :
@@ -509,13 +511,14 @@ Transformer::passExpr(shared_ptr<ast::Expression> cur) {
 	case ast::ExprType::UNARY : {
 		auto expr = std::static_pointer_cast<ast::UnaryExpr>(cur);
 		auto factor = passExpr( expr->factor() );
+		auto type_info = type_kit->MergeType(VarType::CHAR , factor.second , ToCString(expr->op()));
 		return {
 			make_shared<UnaryOperation>(
 				make_shared_token<Oper> (TokenType::OPERATOR , ToCString(expr->op())) ,
 				factor.first ,
-				VarType::UNDEFINED
+				type_info
 			) ,
-			factor.second
+			type_info
 		};
 	}
 

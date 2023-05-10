@@ -21,7 +21,7 @@ VarType TypeToolKit::MergeType(VarType a , VarType b , const string& op) const {
     if (op == "=="|| op == "!=" ||
         op == ">" || op == ">=" ||
         op == "<" || op == "<=" || 
-        op == "&&"|| op == "||" )
+        op == "&&"|| op == "||" || op == "!")
         return VarType::BOOL;
 
     if (a <= VarType::INT && b <= VarType::INT && op == "/")
