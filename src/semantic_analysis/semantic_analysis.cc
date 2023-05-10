@@ -308,17 +308,17 @@ namespace analysiser{
                     case 267:
                     {
                         symbol_table::MegaType lty=GetExprType(now->lhs()),rty=GetExprType(now->rhs());
-                        if(lty!=rty||lty!=symbol_table::INT||rty!=symbol_table::INT)
+                        if(lty.type()==symbol_table::INT&&rty.type()==symbol_table::INT)
+                        {
+                            ret.settype(symbol_table::INT);
+                        }
+                        else 
                         {
                             pascal2c::ast::Ast x=(*now);
                             std::stringstream ss;
                             ss<<":got ";
                             ss<<lty<<" "<<rty;
                             LOG("illegal type between compute expression"+ss.str());
-                        }
-                        else 
-                        {
-                            ret=symbol_table::INT;
                         }
                         break;
                     }
@@ -358,7 +358,8 @@ namespace analysiser{
                         else 
                         {
                             pascal2c::ast::Ast x=(*now);
-                            LOG("illegal type in '/' expression");
+                            std::stringstream ss;ss<<GetExprType(now->lhs());
+                            LOG("illegal type in '/' expression"+ss.str());
                         }
                         break;
                     }
