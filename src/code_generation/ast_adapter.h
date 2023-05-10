@@ -324,12 +324,24 @@ class Argument : public ASTNode {
     bool is_reference_;
 };
 
-// Nothing but a break; is required
+/**
+ * @brief If function_name is empty, generate a return;
+ * Example: return;
+ * else generate a return function_name;
+ * Example: return ret_test_function;
+ *
+ */
 class ExitStatement : public ASTNode {
   public:
-    ExitStatement() {}
+    ExitStatement() : function_name_("") {}
+    explicit ExitStatement(const string &function_name)
+        : function_name_(function_name) {}
     virtual ~ExitStatement() = default;
     void Accept(Visitor &visitor) override;
+    const string GetFunctionName() const { return function_name_; }
+
+  private:
+    string function_name_;
 };
 
 class Subprogram : public ASTNode {

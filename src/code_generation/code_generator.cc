@@ -28,7 +28,11 @@ void CodeGenerator::Visit(const shared_ptr<code_generation::ASTNode> &node,
 }
 
 void CodeGenerator::VisitExitStatement(const shared_ptr<ExitStatement> &node) {
-    ostream_ << Indent() << "break" << eol_;
+    ostream_ << Indent() << "return";
+    if (node->GetFunctionName().length()) {
+        ostream_ << " ret_" << node->GetFunctionName();
+    }
+    ostream_ << eol_;
 }
 
 void CodeGenerator::VisitArgument(const shared_ptr<Argument> &node) {
