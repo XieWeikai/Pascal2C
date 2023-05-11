@@ -102,6 +102,7 @@ add_library(parser STATIC
 add_executable(
         parser_test
         ${PARSER_TEST}
+        ${OUTPUT_HEADER}
 )
 target_include_directories(parser PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -126,6 +127,7 @@ file(GLOB GENERATOR_TEST "test/code_generation/*.cc")
 add_executable(
         generator_test
         ${GENERATOR_TEST}
+        ${OUTPUT_HEADER}
 )
 
 add_library(LibGenerator ${GENERATOR})
@@ -174,6 +176,7 @@ add_subdirectory("src/code_generation/optimizer")
 
 add_executable(transformer_test
         test/code_generation/transformer_test.cc
+        ${OUTPUT_HEADER}
 )
 target_include_directories(transformer_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
