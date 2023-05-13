@@ -14,7 +14,7 @@ namespace pascal2c::parser {
     template<typename Tp> using vector = ::std::vector<Tp>;
 
     static bool isStatementStartTok(int tok){
-        static std::set<int> tokens = {TOK_IF,TOK_ID,TOK_BEGIN,TOK_FOR};
+        static std::set<int> tokens = {TOK_IF,TOK_ID,TOK_BEGIN,TOK_FOR,TOK_EXIT,TOK_WHILE};
         auto it = tokens.find(tok);
         if(it != tokens.end())
             return true;
