@@ -1,7 +1,5 @@
 ## 4 总体设计
 
-### 4.0 模块划分
-
 本项目实现的编译器包含如下几个模块:
 
 - **词法分析器**(`lexer`)：用于将输入的字符序列转换为一个个的词法单元（token）。在编译器中，词法分析器是编译器的第一步，用于将源代码转换为一个个的词法单元，供后续的语法分析器使用。
@@ -9,9 +7,9 @@
 - **语义分析**：该模块以AST为输入，通过AST检查输入源码中是否存在语义错误，如类型错误、函数参数不匹配等。该模块将检查处理过后的AST交给代码生成模块。
 - **代码生成**：该模块以语义分析输出的AST作为输入，通过遍历AST生成对应的C语言代码。
 
-编译器模块架构图如下所示
+编译器整体模块架构图如下所示
 
-![modules](assets/modules.png)
+![5E322E3F9DCC156F28C8C3793578819D](assets/5E322E3F9DCC156F28C8C3793578819D.jpg)
 
 ### 4.1 词法分析
 
@@ -41,59 +39,115 @@ User Subroutines
 #### 4.1.2 接口概览
 
 - `yylex()`: 词法分析器的主函数, 用于从 stdin 中读取一个 token, 返回 token 的类型.
-- `yyval`: 用于保存 token 的属性, 例如整型数的值, 实数的值.
+- `TokenToString(int token)`: 将 token 的类型转换为对应的字符串.
+- `yyreset(FILE *in)`: 重置词法分析器, 使其从 `in` 中读取 token.
 - `yylineno`: 用于保存当前 token 的行数.
 - `yycolno`: 用于保存当前 token 的列数.
 - `yyerrno`: 用于保存错误类型.
-- `yytext`: 用于保存当前 token 的文本.
 - `YYERRMSG`: 用于保存错误类型对应的错误信息.
+- `yytext`: 用于保存当前 token 的文本.
+- `yylval`: 用于保存当前 token 的值, 例如数字的值.
 
 ---
 
 ### 4.2 语法分析
 
-#### 4.2.1 输入和输出
+#### 4.2.1 数据结构
 
-- **输入**:在语法分析阶段，语法分析器将以词法分析器处理pascal源代码得到的`token`作为输入，如
+语法分析包含两个部分，分别是 AST 树部分和语法分析器 Parser 部分。
 
-  ```pascal
-  program greater;
-  var a,b: integer;
-  begin
-  	read(a,b)
-  	if a > b then write(a)
-  	else write(b)
-  end.
-  ```
+* AST 树部分：存储 AST 树，作为语法分析的输出，交给语义分析进一步处理
+* 语法分析器 Parser 部分：使用递归下降法，根据语法规则，将词法分析器输出的 token 序列转换为 AST 树
 
-  对于上面这段源代码，语法分析器的输入将形如如下的`token`作为语法分析器的输入
+##### 4.2.1.1 AST 树
 
-  ```
-  PROGRAM  ID(greater)  VAR  ID(a)  ID(b)  ':'  INTEGER
-  BEGIN  READ   '('  ID(a)  ','   ID(b)   ')'
-  IF   ID(a)   '>'   THEN   ID(write)  '('  ID(a)   ')'
-  ELSE  ID(write)   ID(b)
-  ```
+AST 树是一种树状的数据结构，用于表示源代码的结构。AST 树的每个节点都是一个语法单元，包含了该语法单元的类型和属性。具体语法单元结构如下：
 
-- **输出**:若输入满足pascal-S语法，则语法分析器将产生一颗能表示源程序结构的抽象语法树，如对于上面的输入，可能产生一颗形如下图的语法树
+|语法单元|属性|子语法单元|
+|:---:|:---:|:---:|
+|程序 Program||程序头 ProgramHead<br>程序体 ProgramBody|
+|程序头 ProgramHead|程序名 id|参数标志符列表 IdList|
+|程序体 ProgramBody||常量声明 ConstDeclaration1, ConstDeclaration2, ...<br>变量声明 VarDeclaration1, VarDeclaration2, ...<br>子程序声明 Subprogram1, Subprogram2, ...<br>复合语句 Statement|
+|常量声明 ConstDeclaration|常量名 id|常量值 Expression|
+|变量声明 VarDeclaration||标志符列表 IdList<br>类型 Type|
+|子程序声明 Subprogram||子程序头 SubprogramHead<br>子程序体 SubprogramBody|
+|子程序头 SubprogramHead|子程序名 id<br>返回类型 return_type<br>是否为函数 is_function|参数 Parameter1, Parameter2, ...|
+|子程序体 SubprogramBody||常量声明 ConstDeclaration1, ConstDeclaration2, ...<br>变量声明 VarDeclaration1, VarDeclaration2, ...<br>复合语句 Statement|
+|参数 Parameter|类型 type<br>是否为引用 is_var|标志符列表 IdList|
+|类型 Type|基础类型 base_type<br>是否为数组 is_array<br>下标范围 period1(下界 lower_bound, 上界 upper_bound), period2, ...||
+|标志符列表 IdList|标志符 id1, id2, ...||
+|语句 Statement|具体属性由子类决定|子语法单元由子类决定|
+|赋值语句 AssignStatement||左值var,右值expr|
+|子程序调用语句 CallStatement|子程序名 id|实参列表 expr_list|
+|复合语句 CompoundStatement||语句列表 statements|
+|条件语句 IfStatement||条件判断表达式condition <br>分支成功语句 then <br>分支失败语句else|
+|循环语句 WhileStatement||循环条件表达式condition <br>循环体语句statement|
+|循环语句 ForStatement|循环变量名 id|循环开始表达式 from<br>循环结束表达式 to<br>循环体语句statement|
+|退出语句 ExitStatement|||
+|表达式 Expression|具体属性由子类决定|子语法单元由子类决定|
+|二元运算表达式 BinaryExpression|运算符 op|左操作数 lhs<br>右操作数 rhs|
+|一元运算表达式 UnaryExpression|运算符 op|操作数 factor|
+|调用或变量 CallOrVar|标识符id||
+|变量 Variable|变量名 id|下标列表 expr_list|
+|调用 CallValue|子程序名 id|实参列表 params|
+|整数 IntegerValue|整数值 value||
+|实数 RealValue|实数值 value||
+|布尔值 BooleanValue|布尔值 value||
+|字符串 StringValue|字符串值 value||
+|字符 CharValue|字符值 value||
 
-  ![语法分析输出](assets/语法分析输出 AST.jpeg)
+其中，属性使用非指针的方式存储，子语法单元使用智能指针 `std::shared_ptr` 存储。
 
-#### 4.2.2 处理流程
 
-| 系统事件名称                             | 用例           | 参数说明                              |
-| ---------------------------------------- | -------------- | ------------------------------------- |
-| SyntaxAnalysis(tokens)                   | 语法分析       | 1. tokens:vector\<Token>              |
-| ParseProgramHead(tokens, pos)            | 分析程序头     | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseProgramBody(tokens, pos)()          | 分析程序主体   | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseConstDeclarations(tokens, pos)      | 分析常量声明   | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseVarDeclarations(tokens, pos)        | 分析变量声明   | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseSubprogramDeclarations(tokens, pos) | 分析子程序     | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseSubprogramHead(tokens, pos)         | 分析子程序头   | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseSubprogramBody(tokens, pos)         | 分析子程序主体 | 1. tokens:vector\<Token>; 2. pos:int; |
-| ParseCompoundStatements(tokens, pos)     | 分析复合语句   | 1. tokens:vector\<Token>; 2. pos:int; |
+##### 4.2.1.2 语法分析器 Parser
 
-![语法分析流程图](assets/parser_flowchart.jpg)
+语法分析器 Parser 是一个递归下降的语法分析器，其输入为一个 Pascal 程序文件指针，通过不断调用词法分析器，对其输出的 token 进行分析，最终输出一颗 AST 树。其内部包含分析各类 AST 节点的成员函数，同时还包含一些辅助函数，用于处理错误和调试。
+
+#### 4.2.2 接口说明
+
+- **输入**:在语法分析阶段，语法分析器 Parser 的输入是一个 pascal 程序文件，可以通过构造函数将文件指针传入 Parser 内部，并调用 Parse 成员函数对其进行分析，返回包含整个 AST 树的根节点指针。	
+  	Parser 函数将不断调用词法分析器获取文件内容处理后的 `token`，用于语法分析生成 AST 树。例如对于以下 Pascal 程序源代码：
+
+	```pascal
+	program foo(foo1, foo2);
+	const a=10;
+	
+	var var1, var2: array[1..5, 10..15] of real;
+	
+	procedure proc(var para: boolean);
+	const a=-5;
+	begin
+	end;
+	
+	function func() : integer;
+	var var1: char;
+	begin
+	end;
+	
+	begin
+		...
+		if r < max then ...
+		tmp := 3.14 + r / r
+	end.
+	```
+	
+	对于上面这段源代码，词法分析器将依次输出以下 token 序列：
+	
+	```
+	PROGRAM  ID(foo)  '('  ID(foo1)  ','  ID(foo2)  ')' ';' CONST ID(a) '=' INTEGER(10) ';' VAR ID(var1) ',' ID(var2) ':' ARRAY '[' INTEGER(1) DOTDOT INTEGER(5) ',' INTEGER(10) DOTDOT INTEGER(15) ']' OF REAL_TYPE ';' PROCEDURE ID(proc) '(' VAR ID(para) ':' BOOLEAN_TYPE ')' ';' CONST ID(a) '=' '-' INTEGER(5) ';' BEGIN END ';' FUNCTION ID(func) '(' ')' ':' INTEGER_TYPE ';' VAR ID(var1) ':' CHAR_TYPE ';' BEGIN END ';' BEGIN END '.'
+	```
+
+
+- **输出**:若输入满足pascal-S语法，则语法分析器将产生一颗能表示源程序结构的抽象语法树，如对于上面的输入，可能产生一颗形如下图的 AST 树
+
+  ![image-20230510162626284](assets/image-20230510162626284.png)
+
+  每一个 AST 节点的属性与子节点指针都可以通过相应的 Getter 函数获取。
+
+- **错误处理**:语法分析器在遇到错误时，将会抛出异常，异常的类型为自定义`SyntaxError`，其包含了错误的类型和错误的位置信息。语法分析抛出的异常将会在内部自己处理，并继续进行语法分析生成 AST 树。
+  
+	但语法分析器会保留所有遇到的错误信息 `SyntaxError`，并存储在在一个顺序容器中，所有语法错误同样可以通过相应的 Getter 函数获取。
+
 
 ---
 
@@ -112,18 +166,36 @@ User Subroutines
 符号表逻辑结构依附于AST的实现。每个作用域拥有自己的符号表，在当前符号表中查询不到的符号将递归向父亲查询。
 
 参考结构如下：
-![image](https://user-images.githubusercontent.com/106591984/224709741-190e7971-ad54-4f29-a088-376f454a6b90.png)
+
+![draw1](assets/analysiser_symbol_table.png)
+
 
 ##### 4.3.1.2 符号表物理结构设计
 
-计划采用哈希表实现符号表。具体表示变量/函数的数据结构需要与语法分析对接。
+计划采用哈希表实现符号表。具体表示变量/函数的数据结构如下：
+
+```cpp
+ class SymbolTableItem{
+    MegaType type_;
+    std::string name_;
+    bool is_var_;
+    bool is_func_;
+    std::vector<SymbolTablePara> para_;
+};
+class MegaType{
+    std::vector<std::string> pointer_;
+    symbol_table::ItemType type_;
+};
+```
+
+主要由SymbolTableItem类中的is_var和is_func属性判断是函数还是变量。
 
 #### 4.3.2 符号表管理
 
-- 查询操作：在哈希表中查询；未查询到则递归向上查询。若查询不到则调用错误处理部分。
-- 插入操作：在哈希表中插入。
+- 查询操作：在哈希表中查询；未查询到则递归向上查询。若查询不到则返回对应的错误信息。
+- 插入操作：在哈希表中插入对应的值。
 - 定位操作：在进入当前作用域时执行，新建一个哈希表代表当前作用域。
-- 重定位操作：在退出当前作用域时执行，删除哈希表中所有记录并释放内存使用。
+- 重定位操作：在退出当前作用域时执行，返回到上一个作用域中。
 
 ---
 
@@ -273,3 +345,15 @@ min3(_x , _y , _z , &_m); // Call
 ```
 
 这是比较棘手的一部分，涉及到输入输出有关的函数调用，`Pascal`与C语言的库函数有较大差别，这里无法确定一个标准的形式，需要结合实际情况分析。
+
+---
+
+### 4.5 用户接口设计
+
+本项目最终产生一个可执行文件`pascal2c`，作为一个命令行工具以供用户使用。程序接口设计如下
+
+```bash
+pascal2c <input_file> [output_file]
+```
+
+其中第一个命令行参数为输入的`pascal-s`源文件，第二个参数可选，指定程序输出文件，若不指定输出文件，默认输出文件为`a.c`。若源文件存在错误，`pascal2c`会输出详细错误信息并终止代码生成过程，若源文件代码正常，则将生成代码写入输出文件中，`pascal2c`不会有任何提示输出。

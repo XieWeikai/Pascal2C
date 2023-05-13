@@ -31,18 +31,14 @@
 *.out
 *.app
 
-ast_test*
-CMakeCache.txt
-cmake_install.cmake
-Makefile
-_deps/
-CMakeFiles/
 # Clangd cache
 .cache/
 compile_commands.json
 
 # build
 build/
+
+**/.DS_Store
 build/**/*
 .cache/clangd/index
 compile_commands.json
